@@ -5,6 +5,7 @@ import pdb
 import sys
 import os
 g = Graph()
+
 # Parsing DBPedia dumps
 # g.parse(os.path.join('DBPedia Data',"dbpedia_2016-10.nt"), format="nt")
 # g.parse(os.path.join('DBPedia Data',"instance_types_en.ttl"), format="turtle")
