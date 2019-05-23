@@ -6,22 +6,13 @@ import sys
 import os
 g = Graph()
 # Parsing DBPedia dumps
-# g.parse("dbpedia_2016-10.nt", format="nt")
-# g.parse("instance_types_en.ttl", format="turtle")
-# g.parse("mappingbased_objects_en.ttl", format="turtle")
+# g.parse(os.path.join('DBPedia Data',"dbpedia_2016-10.nt"), format="nt")
+# g.parse(os.path.join('DBPedia Data',"instance_types_en.ttl"), format="turtle")
+# g.parse(os.path.join('DBPedia Data',"mappingbased_objects_en.ttl"), format="turtle")
 #Saving the parsed graph
-# g.serialize(destination='dbpedia_graph.nt', format='nt')
-# g.parse('test.ttl',format='turtle')
-#$$$$$$$$$$$$$$$$$CSV Mode
-#Loading the list of entities from FCG
-# import csv
-# a=[]
-# with open("dbpedia_entities_FCG.csv",encoding='utf-8') as csvfile:
-# 	read=csv.reader(csvfile)
-# 	for row in read:
-# 		a+=row
-# FCG_entities=set(a)
-g.parse('dbpedia_graph.nt',format='nt')
+# g.serialize(destination=os.path.join('DBPedia Data','dbpedia_graph.nt'), format='nt')
+
+g.parse(os.path.join('DBPedia Data','dbpedia_graph.nt'),format='nt')
 for mode in ["FFCG","TFCG"]:
 	FCG_entities=set(np.load(os.path.join(mode,mode+"_dbpedia_uris.npy")))
 	triple_list=[]
@@ -51,4 +42,3 @@ for mode in ["FFCG","TFCG"]:
 	print(len(triple_list))
 	print(len(entity_hitlist))
 	np.save(os.path.join(mode,mode+"_entity_triples_dbpedia.npy"),triple_list)
-	# np.save("FCG_entities_after.npy",list(FCG_entities))
