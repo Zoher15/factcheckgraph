@@ -1,0 +1,88 @@
+
+2019-05-23 17:43:58.799312:
+    metric: ultrametric
+    edges:  undirected
+    weight: degree
+    nodes:  TFCG_uris.txt
+    graph:  TFCG_edgelist.npy
+    input:  TFCG_dbpedia_triples.txt
+    output: TFCG_degree_u.json
+2019-05-23 17:43:58.799957: reading nodes from text file..
+Traceback (most recent call last):
+  File "/N/u/zkachwal/Carbonate/miniconda3/envs/env-kl/bin/klinker", line 11, in <module>
+    load_entry_point('knowledge-linker==0.1rc0', 'console_scripts', 'klinker')()
+  File "/N/u/zkachwal/Carbonate/miniconda3/envs/env-kl/lib/python2.7/site-packages/knowledge_linker/frontend/cmdline.py", line 39, in main
+    args.func(args)
+  File "/N/u/zkachwal/Carbonate/miniconda3/envs/env-kl/lib/python2.7/site-packages/knowledge_linker/frontend/linkpred.py", line 178, in main
+    with closing(open(ns.nodespath)) as f:
+IOError: [Errno 2] No such file or directory: 'TFCG_uris.txt'
+
+real	0m39.474s
+user	0m1.159s
+sys	0m2.109s
+
+2019-05-23 17:43:59.719991:
+    metric: ultrametric
+    edges:  undirected
+    weight: logdegree
+    nodes:  TFCG_uris.txt
+    graph:  TFCG_edgelist.npy
+    input:  TFCG_dbpedia_triples.txt
+    output: TFCG_logdegree_u.json
+2019-05-23 17:43:59.720202: reading nodes from text file..
+Traceback (most recent call last):
+  File "/N/u/zkachwal/Carbonate/miniconda3/envs/env-kl/bin/klinker", line 11, in <module>
+    load_entry_point('knowledge-linker==0.1rc0', 'console_scripts', 'klinker')()
+  File "/N/u/zkachwal/Carbonate/miniconda3/envs/env-kl/lib/python2.7/site-packages/knowledge_linker/frontend/cmdline.py", line 39, in main
+    args.func(args)
+  File "/N/u/zkachwal/Carbonate/miniconda3/envs/env-kl/lib/python2.7/site-packages/knowledge_linker/frontend/linkpred.py", line 178, in main
+    with closing(open(ns.nodespath)) as f:
+IOError: [Errno 2] No such file or directory: 'TFCG_uris.txt'
+
+real	0m0.890s
+user	0m0.715s
+sys	0m1.358s
+
+2019-05-23 17:44:00.532784:
+    metric: ultrametric
+    edges:  undirected
+    weight: degree
+    nodes:  TFCG_uris.txt
+    graph:  TFCG_edgelist.npy
+    input:  TFCG_negative_dbpedia_triples.txt
+    output: TFCG_negative_degree_u.json
+2019-05-23 17:44:00.533002: reading nodes from text file..
+Traceback (most recent call last):
+  File "/N/u/zkachwal/Carbonate/miniconda3/envs/env-kl/bin/klinker", line 11, in <module>
+    load_entry_point('knowledge-linker==0.1rc0', 'console_scripts', 'klinker')()
+  File "/N/u/zkachwal/Carbonate/miniconda3/envs/env-kl/lib/python2.7/site-packages/knowledge_linker/frontend/cmdline.py", line 39, in main
+    args.func(args)
+  File "/N/u/zkachwal/Carbonate/miniconda3/envs/env-kl/lib/python2.7/site-packages/knowledge_linker/frontend/linkpred.py", line 178, in main
+    with closing(open(ns.nodespath)) as f:
+IOError: [Errno 2] No such file or directory: 'TFCG_uris.txt'
+
+real	0m0.812s
+user	0m0.666s
+sys	0m1.336s
+
+2019-05-23 17:44:01.403992:
+    metric: ultrametric
+    edges:  undirected
+    weight: logdegree
+    nodes:  TFCG_uris.txt
+    graph:  TFCG_edgelist.npy
+    input:  TFCG_negative_dbpedia_triples.txt
+    output: TFCG_negative_logdegree_u.json
+2019-05-23 17:44:01.404267: reading nodes from text file..
+Traceback (most recent call last):
+  File "/N/u/zkachwal/Carbonate/miniconda3/envs/env-kl/bin/klinker", line 11, in <module>
+    load_entry_point('knowledge-linker==0.1rc0', 'console_scripts', 'klinker')()
+  File "/N/u/zkachwal/Carbonate/miniconda3/envs/env-kl/lib/python2.7/site-packages/knowledge_linker/frontend/cmdline.py", line 39, in main
+    args.func(args)
+  File "/N/u/zkachwal/Carbonate/miniconda3/envs/env-kl/lib/python2.7/site-packages/knowledge_linker/frontend/linkpred.py", line 178, in main
+    with closing(open(ns.nodespath)) as f:
+IOError: [Errno 2] No such file or directory: 'TFCG_uris.txt'
+
+real	0m0.871s
+user	0m0.695s
+sys	0m1.360s

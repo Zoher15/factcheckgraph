@@ -1,0 +1,78 @@
+
+2019-05-23 23:17:53.039196:
+    metric: ultrametric
+    edges:  undirected
+    weight: degree
+    nodes:  TFCG_uris.txt
+    graph:  TFCG_edgelist.npy
+    input:  TFCG_dbpedia_triples.txt
+    output: TFCG_degree_u.json
+2019-05-23 23:17:53.039724: reading nodes from text file..
+2019-05-23 23:17:53.077241: reading graph from text file..
+2019-05-23 23:17:53.274740: reading input..
+2019-05-23 23:17:53.331340: launching pool of 12 workers.
+2019-05-23 23:18:00.402038: done
+
+real	0m43.897s
+user	1m17.131s
+sys	0m2.449s
+
+2019-05-23 23:18:01.347361:
+    metric: ultrametric
+    edges:  undirected
+    weight: logdegree
+    nodes:  TFCG_uris.txt
+    graph:  TFCG_edgelist.npy
+    input:  TFCG_dbpedia_triples.txt
+    output: TFCG_logdegree_u.json
+2019-05-23 23:18:01.347536: reading nodes from text file..
+2019-05-23 23:18:01.348724: reading graph from text file..
+
+>> RuntimeWarning: divide by zero encountered in log
+
+2019-05-23 23:18:01.524543: reading input..
+2019-05-23 23:18:01.546252: launching pool of 12 workers.
+2019-05-23 23:18:08.635879: done
+
+real	0m8.216s
+user	1m17.641s
+sys	0m1.913s
+
+2019-05-23 23:18:09.566344:
+    metric: ultrametric
+    edges:  undirected
+    weight: degree
+    nodes:  TFCG_uris.txt
+    graph:  TFCG_edgelist.npy
+    input:  TFCG_negative_dbpedia_triples.txt
+    output: TFCG_negative_degree_u.json
+2019-05-23 23:18:09.566519: reading nodes from text file..
+2019-05-23 23:18:09.567709: reading graph from text file..
+2019-05-23 23:18:09.589666: reading input..
+2019-05-23 23:18:09.635953: launching pool of 12 workers.
+2019-05-23 23:18:16.626775: done
+
+real	0m8.003s
+user	1m17.411s
+sys	0m1.899s
+
+2019-05-23 23:18:17.563906:
+    metric: ultrametric
+    edges:  undirected
+    weight: logdegree
+    nodes:  TFCG_uris.txt
+    graph:  TFCG_edgelist.npy
+    input:  TFCG_negative_dbpedia_triples.txt
+    output: TFCG_negative_logdegree_u.json
+2019-05-23 23:18:17.564080: reading nodes from text file..
+2019-05-23 23:18:17.565266: reading graph from text file..
+
+>> RuntimeWarning: divide by zero encountered in log
+
+2019-05-23 23:18:17.588253: reading input..
+2019-05-23 23:18:17.608952: launching pool of 12 workers.
+2019-05-23 23:18:24.494974: done
+
+real	0m8.287s
+user	1m17.342s
+sys	0m1.898s

@@ -148,9 +148,9 @@ def create_negative_samples(triples_tocheck_ID,dbpedia_uris):
 #It uses the output from Knowledge Linker and plots an ROC 
 def plot():
 	#klinker outputs json
-	positive=pd.read_json(mode+"_degree_u.json")
+	positive=pd.read_json(os.path.join(mode,mode+"_degree_u.json"))
 	positive['label']=1
-	negative=pd.read_json(mode+"_negative_degree_u.json")
+	negative=pd.read_json(os.path.join(mode,mode+"_negative_degree_u.json"))
 	negative['label']=0
 	positive.filter(["simil","paths"]).sort_values(by='simil').to_csv(mode+"_paths_u_degree_+ve.csv",index=False)
 	negative.filter(["simil","paths"]).sort_values(by='simil').to_csv(mode+"_paths_u_degree_-ve.csv",index=False)
@@ -171,9 +171,9 @@ def plot():
 #It uses the output from Knowledge Linker (uses log degree as weights) and plots an ROC 
 def plot_log():
 	#klinker outputs json
-	logpositive=pd.read_json(mode+"_logdegree_u.json")
+	logpositive=pd.read_json(os.path.join(mode,mode+"_logdegree_u.json"))
 	logpositive['label']=1
-	lognegative=pd.read_json(mode+"_negative_logdegree_u.json")
+	lognegative=pd.read_json(os.path.join(mode,mode+"_negative_logdegree_u.json"))
 	lognegative['label']=0
 	logpositive.filter(["simil","paths"]).sort_values(by='simil').to_csv(mode+"_paths_u_logdegree_+ve.csv",index=False)
 	lognegative.filter(["simil","paths"]).sort_values(by='simil').to_csv(mode+"_paths_u_logdegree_-ve.csv",index=False)
