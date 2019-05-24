@@ -2,7 +2,9 @@
 import rdflib
 import os
 import numpy as np
-
+import json
+#Function to parse dbpedia, get uris create an ID dictionary and save it in the form of edgelist
+#This format is to enable use of Knowledge Linker. Hence a uris.txt file is created for index 
 def parse_dbpedia():
 	g = rdflib.Graph()
 	g.parse('/gpfs/home/z/k/zkachwal/Carbonate/DBPedia Data/dbpedia_graph.nt',format='nt')
@@ -53,8 +55,10 @@ def parse_dbpedia():
 	edgelist=np.asarray([list(i) for i in edgelist])
 	np.save("dbpedia_uris.npy",uris)
 	np.save("dbpedia_edgelist.npy",edgelist)
+	with open("uris_dict.json","w") as f:
+		f.write(json.dumps(uris_dict))
 	with codecs.open("dbpedia_uris.txt","w","utf-8") as f:
-		for uri in uris:
+		for uri in uris_dict.keys():
 			try:
 				f.write(str(uri)+"\n")
 			except:
@@ -64,4 +68,5 @@ def parse_dbpedia():
 			f.write("{} {} {}\n".format(str(line[0]),str(int(line[1])),str(line[2])))
 	return uris_dict,edgelist
 
+# def parse_claims():
 uris_dict,edgelist=parse_dbpedia()
