@@ -12,7 +12,7 @@ g = Graph()
 #Saving the parsed graph
 # g.serialize(destination=os.path.join('DBPedia Data','dbpedia_graph.nt'), format='nt')
 
-g.parse(os.path.join('DBPedia Data','dbpedia_graph.nt'),format='nt')
+g.parse('/gpfs/home/z/k/zkachwal/Carbonate/DBPedia Data/dbpedia_graph.nt',format='nt')
 for mode in ["FFCG","TFCG"]:
 	FCG_entities=set(np.load(os.path.join(mode,mode+"_dbpedia_uris.npy")))
 	triple_list=[]

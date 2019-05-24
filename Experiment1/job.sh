@@ -6,6 +6,6 @@
 #PBS -j oe
 source /N/u/zkachwal/Carbonate/miniconda3/etc/profile.d/conda.sh
 conda activate
-cd /gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph
-time python dbpedia_neo4jscript.py TFCG 1
-time python dbpedia_neo4jscript.py FFCG 1
+cd /gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph/Experiment1
+time python experiment1.py TFCG 1
+time python experiment1.py FFCG 1

@@ -6,7 +6,7 @@
 #PBS -j oe
 source /N/u/zkachwal/Carbonate/miniconda3/etc/profile.d/conda.sh
 conda activate env-kl
-cd /gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph/TFCG
+cd /gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph/Experiment1/TFCG
 time klinker linkpred TFCG_uris.txt TFCG_edgelist.npy TFCG_dbpedia_triples.txt TFCG_degree_u.json -u -n 12
 time klinker linkpred TFCG_uris.txt TFCG_edgelist.npy TFCG_dbpedia_triples.txt TFCG_logdegree_u.json -u -n 12 -w logdegree
 time klinker linkpred TFCG_uris.txt TFCG_edgelist.npy TFCG_negative_dbpedia_triples.txt TFCG_negative_degree_u.json -u -n 12

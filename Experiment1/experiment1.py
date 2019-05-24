@@ -193,8 +193,8 @@ def plot_log():
 	plt.show()
 #This function parses the dbpedia and tries to find the triples where the subject and object, both are in the dbpedia uris subset, i.e. they are neighbors
 def parse_dbpedia_triples():
-	g = Graph()
-	g.parse(os.path.join('DBPedia Data','dbpedia_graph.nt'),format='nt')
+	g = rdflib.Graph()
+	g.parse('/gpfs/home/z/k/zkachwal/Carbonate/DBPedia Data/dbpedia_graph.nt',format='nt')
 	FCG_entities=set(np.load(os.path.join(mode,mode+"_dbpedia_uris.npy")))
 	triple_list=[]
 	entity_hitlist=[]

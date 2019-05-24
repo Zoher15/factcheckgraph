@@ -1,0 +1,15 @@
+file:///gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph/Experiment2/gpfs/home/z/k/zkachwal/Carbonate/DBPedia Data/dbpedia_graph.nt does not look like a valid URI, trying to serialize this will break.
+Traceback (most recent call last):
+  File "experiment2.py", line 67, in <module>
+    uris_dict,edgelist=parse_dbpedia()
+  File "experiment2.py", line 8, in parse_dbpedia
+    g.parse(os.path.join('gpfs','home','z','k','zkachwal','Carbonate','DBPedia Data','dbpedia_graph.nt'),format='nt')
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/rdflib/graph.py", line 1034, in parse
+    data=data, format=format)
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/rdflib/parser.py", line 184, in create_input_source
+    file = open(filename, "rb")
+FileNotFoundError: [Errno 2] No such file or directory: '/gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph/Experiment2/gpfs/home/z/k/zkachwal/Carbonate/DBPedia Data/dbpedia_graph.nt'
+
+real	0m6.864s
+user	0m0.315s
+sys	0m0.183s
