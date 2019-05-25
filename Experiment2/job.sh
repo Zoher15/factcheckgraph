@@ -1,5 +1,5 @@
 #PBS -k o
-#PBS -l nodes=1:ppn=1,vmem=32gb,walltime=0:45:00
+#PBS -l nodes=1:ppn=1,vmem=64gb,walltime=2:00:00
 #PBS -M zoher.kachwala@gmail.com
 #PBS -m abe
 #PBS -N Experiment2
