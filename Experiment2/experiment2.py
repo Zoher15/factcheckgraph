@@ -128,9 +128,9 @@ def parse_claims(uris_dict):
 			except KeyError:
 				continue
 		falseclaim_uris[f]=list(claim_uris)
-	with codecs.open("/gpfs/home/z/k/zkachwal/Carbonate/DBPedia Data/trueclaim_uris.json","w","utf-8") as f:
+	with codecs.open("trueclaim_uris.json","w","utf-8") as f:
 		f.write(json.dumps(trueclaim_uris,ensure_ascii=False))
-	with codecs.open("/gpfs/home/z/k/zkachwal/Carbonate/DBPedia Data/falseclaim_uris.json","w","utf-8") as f:
+	with codecs.open("falseclaim_uris.json","w","utf-8") as f:
 		f.write(json.dumps(falseclaim_uris,ensure_ascii=False))
 
 def load_stuff():
