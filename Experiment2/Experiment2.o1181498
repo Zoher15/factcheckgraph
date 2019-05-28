@@ -1,0 +1,13 @@
+
+2019-05-27 21:40:54.820524:
+    metric: ultrametric
+    edges:  undirected
+    weight: degree
+    nodes:  /gpfs/home/z/k/zkachwal/Carbonate/DBPedia Data/dbpedia_uris.txt
+    graph:  /gpfs/home/z/k/zkachwal/Carbonate/DBPedia Data/dbpedia_edgelist.npy
+    input:  trueclaim_triples.txt
+    output: trueclaim_degree_u.json
+2019-05-27 21:40:54.822702: reading nodes from text file..
+2019-05-27 21:40:59.055831: reading graph from text file..
+2019-05-27 21:41:20.625126: reading input..
+2019-05-27 21:41:26.851467: launching pool of 1 workers.

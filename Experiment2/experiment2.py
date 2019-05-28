@@ -7,6 +7,7 @@ import pandas as pd
 import re
 import pdb
 import codecs
+from itertools import combinations
 #Function to parse dbpedia, get uris create an ID dictionary and save it in the form of edgelist
 #This format is to enable use of Knowledge Linker. Hence a uris.txt file is created for index 
 def parse_dbpedia():
@@ -60,7 +61,7 @@ def parse_dbpedia():
 	np.save("/gpfs/home/z/k/zkachwal/Carbonate/DBPedia Data/dbpedia_uris.npy",uris)
 	np.save("/gpfs/home/z/k/zkachwal/Carbonate/DBPedia Data/dbpedia_edgelist.npy",edgelist)
 	with codecs.open("/gpfs/home/z/k/zkachwal/Carbonate/DBPedia Data/dbpedia_uris_dict.json","w","utf-8") as f:
-		f.write(json.dumps(uris_dict))
+		f.write(json.dumps(uris_dict,ensure_ascii=False))
 	with codecs.open("/gpfs/home/z/k/zkachwal/Carbonate/DBPedia Data/dbpedia_uris.txt","w","utf-8") as f:
 		for uri in uris_dict.keys():
 			try:
@@ -71,14 +72,6 @@ def parse_dbpedia():
 		for line in edgelist:
 			f.write("{} {} {}\n".format(str(line[0]),str(int(line[1])),str(line[2])))
 	return uris,uris_dict,edgelist
-
-def load_stuff():
-	uris=np.load("/gpfs/home/z/k/zkachwal/Carbonate/DBPedia Data/dbpedia_uris.npy")
-	with codecs.open("/gpfs/home/z/k/zkachwal/Carbonate/DBPedia Data/dbpedia_uris_dict.json","r","utf-8") as f:
-		uris_dict=json.loads(f.read())
-	# edgelist=np.load("/gpfs/home/z/k/zkachwal/Carbonate/DBPedia Data/dbpedia_edgelist.npy")
-	return uris,uris_dict#,edgelist
-
 
 def parse_claims(uris_dict):
 	data=pd.read_csv("/gpfs/home/z/k/zkachwal/Carbonate/RDF Files/claimreviews_db2.csv",index_col=0)
@@ -92,12 +85,12 @@ def parse_claims(uris_dict):
 	trueclaims=list(data.loc[trueind]['claimID'])
 	falseind=data['rating_name'].apply(lambda x:falseregex.match(x)!=None)
 	falseclaims=list(data.loc[falseind]['claimID'])
-	trueclaim_uris=[]
-	falseclaim_uris=[]
+	trueclaim_uris={}
+	falseclaim_uris={}
 	dbpediaregex=re.compile(r'http:\/\/dbpedia\.org\/resource\/')
 	np.save("true_claimID_list.npy",trueclaims)
 	np.save("false_claimID_list.npy",falseclaims)
-	for t in trueclaims[:20]:
+	for t in trueclaims:
 		claim_uris=set([])
 		g=rdflib.Graph()
 		filename="claim"+str(t)+".rdf"
@@ -115,8 +108,8 @@ def parse_claims(uris_dict):
 					claim_uris.add(uris_dict[obj])
 			except KeyError:
 				continue
-		trueclaim_uris.append(list(claim_uris))
-	for f in falseclaims[:20]:
+		trueclaim_uris[t]=list(claim_uris)
+	for f in falseclaims:
 		claim_uris=set([])
 		g=rdflib.Graph()
 		filename="claim"+str(f)+".rdf"
@@ -134,10 +127,61 @@ def parse_claims(uris_dict):
 					claim_uris.add(uris_dict[obj])
 			except KeyError:
 				continue
-		falseclaim_uris.append(list(claim_uris))
-	np.save("trueclaim_uris.npy",trueclaim_uris)
-	np.save("falseclaim_uris.npy",falseclaim_uris)
+		falseclaim_uris[f]=list(claim_uris)
+	with codecs.open("/gpfs/home/z/k/zkachwal/Carbonate/DBPedia Data/trueclaim_uris.json","w","utf-8") as f:
+		f.write(json.dumps(trueclaim_uris,ensure_ascii=False))
+	with codecs.open("/gpfs/home/z/k/zkachwal/Carbonate/DBPedia Data/falseclaim_uris.json","w","utf-8") as f:
+		f.write(json.dumps(falseclaim_uris,ensure_ascii=False))
 
+def load_stuff():
+	uris=np.load("/gpfs/home/z/k/zkachwal/Carbonate/DBPedia Data/dbpedia_uris.npy")
+	with codecs.open("/gpfs/home/z/k/zkachwal/Carbonate/DBPedia Data/dbpedia_uris_dict.json","r","utf-8") as f:
+		uris_dict=json.loads(f.read())
+	with codecs.open("/gpfs/home/z/k/zkachwal/Carbonate/DBPedia Data/trueclaim_uris.json","r","utf-8") as f:
+		trueclaim_uris=json.loads(f.read())
+	with codecs.open("/gpfs/home/z/k/zkachwal/Carbonate/DBPedia Data/falseclaim_uris.json","r","utf-8") as f:
+		falseclaim_uris=json.loads(f.read())
+	with codecs.open("falseclaim_map.json","r","utf-8") as f:
+		falseclaim_map=json.loads(f.read())	
+	with codecs.open("trueclaim_map.json","r","utf-8") as f:
+		trueclaim_map=json.loads(f.read())	
+	# edgelist=np.load("/gpfs/home/z/k/zkachwal/Carbonate/DBPedia Data/dbpedia_edgelist.npy")
+	return uris,uris_dict,trueclaim_uris,falseclaim_uris,trueclaim_map,falseclaim_map#,edgelist
+
+def create_input_file(trueclaim_uris,falseclaim_uris):
+	trueclaim_map={}
+	falseclaim_map={}
+	trueclaim_inputlist=[]
+	falseclaim_inputlist=[]
+	i=0
+	with codecs.open('trueclaim_triples.txt',"w","utf-8") as f:
+		for key in trueclaim_uris.keys():
+			comb=list(combinations(trueclaim_uris[key],2))
+			new_i=i+len(comb)
+			trueclaim_map[key]=tuple([i,new_i])
+			i=new_i
+			for c in comb:
+				line=[np.nan,int(c[0]),np.nan,np.nan,int(c[1]),np.nan,np.nan]
+				trueclaim_inputlist.append(line)
+				f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(line[1])),str(line[2]),str(line[3]),str(int(line[4])),str(line[5]),str(line[6])))
+	np.save("trueclaim_inputlist.npy",trueclaim_inputlist)
+	with codecs.open("trueclaim_map.json","w","utf-8") as f:
+		f.write(json.dumps(trueclaim_map,ensure_ascii=False))
+	i=0
+	with codecs.open('falseclaim_triples.txt',"w","utf-8") as f:
+		for key in falseclaim_uris.keys():
+			comb=list(combinations(falseclaim_uris[key],2))
+			new_i=i+len(comb)
+			falseclaim_map[key]=tuple([i,new_i])
+			i=new_i
+			for c in comb:
+				line=[np.nan,int(c[0]),np.nan,np.nan,int(c[1]),np.nan,np.nan]
+				falseclaim_inputlist.append(line)
+				f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(line[1])),str(line[2]),str(line[3]),str(int(line[4])),str(line[5]),str(line[6])))
+	np.save("falseclaim_inputlist.npy",falseclaim_inputlist)
+	with codecs.open("falseclaim_map.json","w","utf-8") as f:
+		f.write(json.dumps(falseclaim_map,ensure_ascii=False))
 # uris,uris_dict,edgelist=parse_dbpedia()
-uris,uris_dict=load_stuff()
-parse_claims(uris_dict)
+uris,uris_dict,trueclaim_uris,falseclaim_uris,trueclaim_map,falseclaim_map=load_stuff()
+# parse_claims(uris_dict)
+# create_input_file(trueclaim_uris,falseclaim_uris)
