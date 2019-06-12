@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "dbpedia_script.py", line 16, in <module>
+    FCG_entities=set(np.load("intersect_dbpedia_uris.npy"))
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/numpy/lib/npyio.py", line 415, in load
+    fid = open(os_fspath(file), "rb")
+FileNotFoundError: [Errno 2] No such file or directory: 'intersect_dbpedia_uris.npy'
+
+real	23m5.543s
+user	21m59.585s
+sys	0m34.790s

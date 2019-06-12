@@ -294,6 +294,45 @@ def plot_overlap():
 	plt.xlabel("TFCG Simil Score - FFCG Simil Score")
 	plt.ylabel("Number of times")
 	plt.savefig("Intersect_hist.png")
+	#######For random triples
+	title2="Negative Common Triples TFCG vs FFCG"
+	positive2=pd.read_json("Negative_intersect_TFCG_logdegree_u.json")
+	positive2['label']=1
+	negative2=pd.read_json("Negative_intersect_FFCG_logdegree_u.json")
+	negative2['label']=0
+	positive2.filter(["simil","paths"]).sort_values(by='simil').to_csv(mode+"_paths_u_degree_+ve.csv",index=False)
+	negative2.filter(["simil","paths"]).sort_values(by='simil').to_csv(mode+"_paths_u_degree_-ve.csv",index=False)
+	pos_neg2=pd.concat([positive2,negative2],ignore_index=True)
+	y2=list(pos_neg['label'])
+	scores2=list(pos_neg['simil'])
+	fpr2, tpr2, thresholds2 = metrics.roc_curve(y2, scores2, pos_label=1)
+	print(metrics.auc(fpr2,tpr2))
+	plt.figure()
+	lw = 2
+	plt.plot(fpr2, tpr2, color='darkorange',lw=lw, label='ROC curve (area = %0.2f)' % metrics.auc(fpr2,tpr2))
+	plt.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
+	plt.xlabel('False Positive Rate')
+	plt.ylabel('True Positive Rate')
+	plt.legend(loc="lower right")
+	plt.title(title2)
+	plt.savefig(title2.replace(" ","_")+".png")
+	# intersect=pd.DataFrame(columns=['TFCG_Simil','FFCG_Simil'])
+	# intersect['TFCG_Simil']=positive['simil']
+	# intersect['FFCG_Simil']=negative['simil']
+	intersect2=positive2['simil']-negative2['simil']
+	intersect2=intersect2.reset_index(drop=True)
+	plt.figure()
+	plt.plot(intersect2)
+	plt.title("Difference between Random Simil scores from TFCG vs FFCG")
+	plt.ylabel("TFCG Simil Score - FFCG Simil Score")
+	plt.xlabel("Index of common triples")
+	plt.savefig("Negative_intersect_plot.png")
+	plt.figure()
+	plt.hist(intersect2)
+	plt.title("Distribution of difference between Random Simil Scores in TFCG vs FFCG")
+	plt.xlabel("TFCG Simil Score - FFCG Simil Score")
+	plt.ylabel("Number of times")
+	plt.savefig("Negative_intersect_hist.png")
 
 def overlap_triples():
 	TFCG_triples_tocheck=np.load(os.path.join("TFCG","TFCG"+"_entity_triples_dbpedia.npy"))
@@ -302,33 +341,59 @@ def overlap_triples():
 	FFCG_triples_tocheck=set(map(str,list(map(list,FFCG_triples_tocheck))))
 	#intersection needs to be done on string triple and not id triples
 	intersect=TFCG_triples_tocheck.intersection(FFCG_triples_tocheck)
-	intersect=pd.DataFrame(map(eval,list(intersect)))
+	intersect=pd.DataFrame(map(eval,list(intersect))).drop(columns=[1])#dropping the predicate i.e. middle column 
+	# intersect=list(map(np.asarray,intersect))
+	intersect=intersect.values
+	#Uris common from the triples from DBPedia common to both
+	intersect_uris_triples=np.asarray(list(set(intersect.flatten())))
+	#transforming it into triples accepted by KLinker code
+	intersect=np.asarray([[np.nan,i[0],np.nan,np.nan,i[1],np.nan,np.nan] for i in intersect])
+	np.save("Intersect_entity_triples_dbpedia.npy",intersect)	
+	#loading FCG Uris
 	TFCG_uris=np.load(os.path.join("TFCG","TFCG"+"_uris.npy"))
 	TFCG_uris_dict={TFCG_uris[i]:i for i in range(len(TFCG_uris))}
 	FFCG_uris=np.load(os.path.join("FFCG","FFCG"+"_uris.npy"))
 	FFCG_uris_dict={FFCG_uris[i]:i for i in range(len(FFCG_uris))}
-	intersect_uris=set(TFCG_uris).intersection(set(FFCG_uris))
+	#Uris common to both uri sets
+	intersect_uris=np.asarray(list(set(TFCG_uris).intersection(set(FFCG_uris))))
+	np.save("intersect_uris.npy",intersect_uris)
+	np.save("intersect_uris_triples.npy",intersect_uris_triples)
 	print("No. of uris common to both TFCG and FFCG:",len(intersect_uris))
 	print("No. of triples common to both TFCG and FFCG:",len(intersect))
-	print("No. of uris present in triples common to both TFCG and FFCG:",len(intersect.drop(columns=[2]).values.flatten()))
+	print("No. of uris present in triples common to both TFCG and FFCG:",len(intersect_uris_triples))
 	with codecs.open("TFCG/TFCG_uris_dict.json","w","utf-8") as f:
 		f.write(json.dumps(TFCG_uris_dict,ensure_ascii=False))
 	with codecs.open("FFCG/FFCG_uris_dict.json","w","utf-8") as f:
 		f.write(json.dumps(FFCG_uris_dict,ensure_ascii=False))
 	with codecs.open('Intersect_triples_TFCG_IDs.txt',"w","utf-8") as f:
-		for i in range(len(intersect)):
-			triple=np.asarray(intersect.iloc[i])
-			line=[np.nan,triple[0],np.nan,np.nan,triple[2],np.nan,np.nan,np.nan]
+		for line in intersect:
 			f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(TFCG_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(TFCG_uris_dict[line[4]])),str(line[5]),str(line[6])))
 	with codecs.open('Intersect_triples_FFCG_IDs.txt',"w","utf-8") as f:
-		for i in range(len(intersect)):
-			triple=np.asarray(intersect.iloc[i])
-			line=[np.nan,triple[0],np.nan,np.nan,triple[2],np.nan,np.nan,np.nan]
+		for line in intersect:
 			f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(FFCG_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(FFCG_uris_dict[line[4]])),str(line[5]),str(line[6])))
-	np.save("Intersect_entity_triples_dbpedia.npy",intersect)	
-
+	#############################################################################################################################
+	#Negative samples
+	perm=permutations(intersect_uris_triples,2)
+	perms=np.asarray([[np.nan,i[0],np.nan,np.nan,i[1],np.nan,np.nan] for i in perm])
+	z=0
+	randomlist=np.random.choice(range(len(perms)),size=len(intersect)*2,replace=False)
+	negative_intersect=[]
+	emptylist=[]
+	for i in randomlist:
+		if z<len(intersect):
+			if str(list(perms[i])) in set(map(str,list(map(list,intersect)))):#eliminating random triple if it exists in the intersect set (converted individiual triples to str to make a set)
+				emptylist.append(i)
+			else:
+				z+=1
+				negative_intersect.append(perms[i])
+	negative_intersect=np.asarray(negative_intersect)
+	with codecs.open('Negative_intersect_triples_TFCG_IDs.txt',"w","utf-8") as f:
+		for line in negative_intersect:
+			f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(TFCG_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(TFCG_uris_dict[line[4]])),str(line[5]),str(line[6])))
+	with codecs.open('Negative_intersect_triples_FFCG_IDs.txt',"w","utf-8") as f:
+		for line in negative_intersect:
+			f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(FFCG_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(FFCG_uris_dict[line[4]])),str(line[5]),str(line[6])))
 	
-
 ##DRIVER CODE
 # # Try to load stuff if files already exist
 # try:

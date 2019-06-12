@@ -7,5 +7,5 @@
 #PBS -j oe
 source /N/u/zkachwal/Carbonate/miniconda3/etc/profile.d/conda.sh
 conda activate
-cd /gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph
+cd /gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph/Experiment1/
 time python dbpedia_script.py

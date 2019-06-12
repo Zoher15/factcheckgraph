@@ -1,0 +1,42 @@
+
+2019-06-12 18:06:10.916432:
+    metric: ultrametric
+    edges:  undirected
+    weight: logdegree
+    nodes:  TFCG/TFCG_uris.txt
+    graph:  TFCG/TFCG_edgelist.npy
+    input:  Negative_intersect_triples_TFCG_IDs.txt
+    output: Intersect_TFCG_logdegree_u.json
+2019-06-12 18:06:10.917025: reading nodes from text file..
+2019-06-12 18:06:11.094909: reading graph from text file..
+
+>> RuntimeWarning: divide by zero encountered in log
+
+2019-06-12 18:06:11.705795: reading input..
+2019-06-12 18:06:11.773942: launching pool of 12 workers.
+2019-06-12 18:06:16.756188: done
+
+real	0m53.034s
+user	0m47.145s
+sys	0m2.483s
+
+2019-06-12 18:06:20.451775:
+    metric: ultrametric
+    edges:  undirected
+    weight: logdegree
+    nodes:  FFCG/FFCG_uris.txt
+    graph:  FFCG/FFCG_edgelist.npy
+    input:  Negative_intersect_triples_FFCG_IDs.txt
+    output: Intersect_FFCG_logdegree_u.json
+2019-06-12 18:06:20.452014: reading nodes from text file..
+2019-06-12 18:06:20.493728: reading graph from text file..
+
+>> RuntimeWarning: divide by zero encountered in log
+
+2019-06-12 18:06:20.691786: reading input..
+2019-06-12 18:06:20.737439: launching pool of 12 workers.
+2019-06-12 18:06:30.629914: done
+
+real	0m13.792s
+user	1m53.514s
+sys	0m2.673s

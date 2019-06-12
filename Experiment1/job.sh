@@ -9,7 +9,8 @@ conda activate env-kl
 cd /gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph/Experiment1/
 time klinker linkpred TFCG/TFCG_uris.txt TFCG/TFCG_edgelist.npy Intersect_triples_TFCG_IDs.txt Intersect_TFCG_logdegree_u.json -u -n 12 -w logdegree
 time klinker linkpred FFCG/FFCG_uris.txt FFCG/FFCG_edgelist.npy Intersect_triples_FFCG_IDs.txt Intersect_FFCG_logdegree_u.json -u -n 12 -w logdegree
-
+time klinker linkpred TFCG/TFCG_uris.txt TFCG/TFCG_edgelist.npy Negative_intersect_triples_TFCG_IDs.txt Negative_intersect_TFCG_logdegree_u.json -u -n 12 -w logdegree
+time klinker linkpred FFCG/FFCG_uris.txt FFCG/FFCG_edgelist.npy Negative_intersect_triples_FFCG_IDs.txt Negative_intersect_FFCG_logdegree_u.json -u -n 12 -w logdegree
 # #PBS -k o
 # #PBS -l nodes=1:ppn=1,vmem=16gb,walltime=2:00:00
 # #PBS -M zoher.kachwala@gmail.com
