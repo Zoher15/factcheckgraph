@@ -7,19 +7,3 @@ Average Clustering Coefficient: 0.14077269747263366
 Density: 0.00027563384100306163 
 Number of Edges: 75260 
 Number of Nodes: 23369 
-Average Shortest Path Length: 3.766166504866804 
-
-Length #Paths 
-0 23369 
-1 150520 
-2 31863094 
-3 191314426 
-4 215861750 
-5 84266514 
-6 17530194 
-7 2581122 
-8 296340 
-9 26578 
-10 1776 
-11 102 
-12 4 

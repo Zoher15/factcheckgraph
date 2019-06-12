@@ -1,0 +1,14 @@
+
+2019-05-28 16:14:37.493835:
+    metric: ultrametric
+    edges:  undirected
+    weight: degree
+    nodes:  /gpfs/home/z/k/zkachwal/Carbonate/DBPedia Data/dbpedia_uris.txt
+    graph:  /gpfs/home/z/k/zkachwal/Carbonate/DBPedia Data/dbpedia_edgelist.npy
+    input:  trueclaim_triples.txt
+    output: trueclaim_degree_u.json
+2019-05-28 16:14:37.494399: reading nodes from text file..
+2019-05-28 16:14:40.846153: reading graph from text file..
+2019-05-28 16:14:55.889691: reading input..
+2019-05-28 16:14:59.745753: launching pool of 12 workers.
+=>> PBS: job killed: walltime 14418 exceeded limit 14400

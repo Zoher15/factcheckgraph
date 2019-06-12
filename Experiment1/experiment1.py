@@ -13,11 +13,13 @@ import csv
 import re
 import networkx as nx 
 import matplotlib
-matplotlib.use('TkAgg')
+# matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import pdb
 import sys
 import os 
+import json
+from IPython.core.debugger import set_trace
 '''
 The goal of this script is the following:
 1. Read uris (save_uris) and triples (save_edgelist) from the Neo4j Database
@@ -25,7 +27,9 @@ The goal of this script is the following:
 3. Calculate Graph Statistics
 3. Plot and Calculate ROC for the given triples versus randomly generated triples
 '''
+#Mode can be TFCG or FFCG
 mode=sys.argv[1]
+#PC can be 0 local, or 1 Carbonate
 pc=int(sys.argv[2])
 port={"FFCG":"7687","TFCG":"11007"}
 g=rdflib.Graph()
@@ -43,11 +47,17 @@ def save_degree():
 def calculate_stats(degreelist,dbpedia_uris,triples_tocheck_ID):
 	with open(os.path.join(mode,mode+"_stats.txt"),"w") as f:
 		f.write("Number of DBpedia Uris: %s \n" % (len(dbpedia_uris)))
-		f.write("Number of Triple to Check: %s \n" % (len(triples_tocheck_ID)))
+		f.write("Number of Triples to Check: %s \n" % (len(triples_tocheck_ID)))
 		degreefreq=np.asarray([float(0) for i in range(max(degreelist)+1)])
 		for degree in degreelist:
 			degreefreq[degree]+=1
 		degreeprob=degreefreq/sum(degreefreq)
+		plt.figure()	
+		plt.loglog(range(0,max(degreelist)+1),degreeprob)
+		plt.xlabel('Degree')
+		plt.ylabel('Probability')
+		plt.title('Degree Distribution')
+		plt.savefig(os.path.join(mode,mode+"_degreedist.png"))
 		degree_square_list=np.asarray(list(map(np.square,degreelist)))
 		f.write("Average Degree: %s \n" % (np.average(degreelist)))
 		f.write("Average Squared Degree: %s \n" % (np.average(degree_square_list)))
@@ -76,8 +86,12 @@ def calculate_stats(degreelist,dbpedia_uris,triples_tocheck_ID):
 				dist[p] = 1
 		f.write("Length #Paths \n")
 		verts = dist.keys()
+		pathlen=[]
 		for d in sorted(verts):
 			f.write('%s %d \n' % (d, dist[d]))
+			pathlen.append([d,dist[d]])
+		pathlen=np.asarray(pathlen)
+		np.save(os.path.join(mode,mode+"_pathlen.npy"),pathlen)
 #Fetches the uris of all nodes in the give FactCheckGraph
 #Do note: It creates a dictionary assigning each uri an integer ID. This is to conform to the way Knowledge Linker accepts data 
 #It also finds dbpedia specific uris
@@ -146,8 +160,33 @@ def create_negative_samples(triples_tocheck_ID,dbpedia_uris):
 		for line in negative_triples_tocheck_ID:
 			f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(line[1])),str(line[2]),str(line[3]),str(int(line[4])),str(line[5]),str(line[6])))
 #It uses the output from Knowledge Linker and plots an ROC 
+def plot_len():
+	tfcg_pathlen=np.load(os.path.join("TFCG/TFCG_pathlen.npy"))
+	ffcg_pathlen=np.load(os.path.join("FFCG/FFCG_pathlen.npy"))
+	x1=tfcg_pathlen[:,0]
+	y1=tfcg_pathlen[:,1]
+	x2=ffcg_pathlen[:,0]
+	y2=ffcg_pathlen[:,1]
+	plt.figure()
+	plt.bar(x1,y1,label="TFCG")
+	plt.bar(x2,y2,label="FFCG")
+	plt.title("Distribution of Path Lengths")
+	plt.xlabel('Path Length')
+	plt.ylabel('Number of Times')
+	plt.legend(loc="upper right")
+	plt.savefig("PathLengths_times.png")
+	plt.figure()
+	plt.bar(x1,y1/np.sum(y1),label="TFCG")
+	plt.bar(x2,y2/np.sum(y2),label="FFCG")
+	plt.title("Distribution of Path Lengths")
+	plt.xlabel('Path Length')
+	plt.ylabel('Percentage of Times')
+	plt.legend(loc="upper right")
+	plt.savefig("PathLengths_percent.png")
+	
 def plot():
 	#klinker outputs json
+	title='ROC '+mode+' using Degree'
 	positive=pd.read_json(os.path.join(mode,mode+"_degree_u.json"))
 	positive['label']=1
 	negative=pd.read_json(os.path.join(mode,mode+"_negative_degree_u.json"))
@@ -166,8 +205,9 @@ def plot():
 	plt.xlabel('False Positive Rate')
 	plt.ylabel('True Positive Rate')
 	plt.legend(loc="lower right")
-	plt.title('ROC '+mode+' using Degree')
-	plt.show()
+	plt.title(title)
+	plt.savefig(title.replace(" ","_")+".png")
+
 #It uses the output from Knowledge Linker (uses log degree as weights) and plots an ROC 
 def plot_log():
 	#klinker outputs json
@@ -213,31 +253,109 @@ def parse_dbpedia_triples():
 	print(len(entity_hitlist))
 	np.save(os.path.join(mode,mode+"_entity_triples_dbpedia.npy"),triple_list)
 	return triplelist
-###DRIVER CODE
-#Try to load stuff if files already exist
-try:
-	uris_dict,dbpedia_uris,edgelist,degreelist=load_stuff()
-#Else process and save them
-except:
-	uris_dict,dbpedia_uris=save_uris()
-	edgelist=save_edgelist(uris_dict)
-	degreelist=save_degree()
-#If 1(Carbonate) dbpedia can be parsed and triples of interest can be found
-if pc==1:
-	try:
-		triples_tocheck=np.load(os.path.join(mode,mode+"_entity_triples_dbpedia.npy"))
-	except:
-		triples_tocheck=parse_dbpedia_triples()
-	triples_tocheck_ID=np.array([[np.nan,int(uris_dict[t[0]]),np.nan,np.nan,int(uris_dict[t[2]]),np.nan,np.nan] for t in triples_tocheck])
-	create_negative_samples(triples_tocheck_ID,dbpedia_uris)
-	calculate_stats(degreelist,dbpedia_uris,triples_tocheck_ID)
-#Else do not try parsing dbpedia
-else:
-	try:
-		triples_tocheck=np.load(os.path.join(mode,mode+"_entity_triples_dbpedia.npy"))
-		triples_tocheck_ID=np.array([[np.nan,int(uris_dict[t[0]]),np.nan,np.nan,int(uris_dict[t[2]]),np.nan,np.nan] for t in triples_tocheck])
-	except:
-		pass
+
+def plot_overlap():
+	#klinker outputs json
+	title="Common Triples TFCG vs FFCG"
+	positive=pd.read_json("Intersect_TFCG_logdegree_u.json")
+	positive['label']=1
+	negative=pd.read_json("Intersect_FFCG_logdegree_u.json")
+	negative['label']=0
+	positive.filter(["simil","paths"]).sort_values(by='simil').to_csv(mode+"_paths_u_degree_+ve.csv",index=False)
+	negative.filter(["simil","paths"]).sort_values(by='simil').to_csv(mode+"_paths_u_degree_-ve.csv",index=False)
+	pos_neg=pd.concat([positive,negative],ignore_index=True)
+	y=list(pos_neg['label'])
+	scores=list(pos_neg['simil'])
+	fpr, tpr, thresholds = metrics.roc_curve(y, scores, pos_label=1)
+	print(metrics.auc(fpr,tpr))
+	plt.figure()
+	lw = 2
+	plt.plot(fpr, tpr, color='darkorange',lw=lw, label='ROC curve (area = %0.2f)' % metrics.auc(fpr,tpr))
+	plt.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
+	plt.xlabel('False Positive Rate')
+	plt.ylabel('True Positive Rate')
+	plt.legend(loc="lower right")
+	plt.title(title)
+	plt.savefig(title.replace(" ","_")+".png")
+	# intersect=pd.DataFrame(columns=['TFCG_Simil','FFCG_Simil'])
+	# intersect['TFCG_Simil']=positive['simil']
+	# intersect['FFCG_Simil']=negative['simil']
+	intersect=positive['simil']-negative['simil']
+	intersect=intersect.reset_index(drop=True)
+	plt.figure()
+	plt.plot(intersect)
+	plt.title("Difference between Simil scores from TFCG vs FFCG")
+	plt.ylabel("TFCG Simil Score - FFCG Simil Score")
+	plt.xlabel("Index of common triples")
+	plt.savefig("Intersect_plot.png")
+	plt.figure()
+	plt.hist(intersect)
+	plt.title("Distribution of difference between Simil Scores in TFCG vs FFCG")
+	plt.xlabel("TFCG Simil Score - FFCG Simil Score")
+	plt.ylabel("Number of times")
+	plt.savefig("Intersect_hist.png")
+
+def overlap_triples():
+	TFCG_triples_tocheck=np.load(os.path.join("TFCG","TFCG"+"_entity_triples_dbpedia.npy"))
+	FFCG_triples_tocheck=np.load(os.path.join("FFCG","FFCG"+"_entity_triples_dbpedia.npy"))
+	TFCG_triples_tocheck=set(map(str,list(map(list,TFCG_triples_tocheck))))
+	FFCG_triples_tocheck=set(map(str,list(map(list,FFCG_triples_tocheck))))
+	#intersection needs to be done on string triple and not id triples
+	intersect=TFCG_triples_tocheck.intersection(FFCG_triples_tocheck)
+	intersect=pd.DataFrame(map(eval,list(intersect)))
+	TFCG_uris=np.load(os.path.join("TFCG","TFCG"+"_uris.npy"))
+	TFCG_uris_dict={TFCG_uris[i]:i for i in range(len(TFCG_uris))}
+	FFCG_uris=np.load(os.path.join("FFCG","FFCG"+"_uris.npy"))
+	FFCG_uris_dict={FFCG_uris[i]:i for i in range(len(FFCG_uris))}
+	intersect_uris=set(TFCG_uris).intersection(set(FFCG_uris))
+	print("No. of uris common to both TFCG and FFCG:",len(intersect_uris))
+	print("No. of triples common to both TFCG and FFCG:",len(intersect))
+	print("No. of uris present in triples common to both TFCG and FFCG:",len(intersect.drop(columns=[2]).values.flatten()))
+	with codecs.open("TFCG/TFCG_uris_dict.json","w","utf-8") as f:
+		f.write(json.dumps(TFCG_uris_dict,ensure_ascii=False))
+	with codecs.open("FFCG/FFCG_uris_dict.json","w","utf-8") as f:
+		f.write(json.dumps(FFCG_uris_dict,ensure_ascii=False))
+	with codecs.open('Intersect_triples_TFCG_IDs.txt',"w","utf-8") as f:
+		for i in range(len(intersect)):
+			triple=np.asarray(intersect.iloc[i])
+			line=[np.nan,triple[0],np.nan,np.nan,triple[2],np.nan,np.nan,np.nan]
+			f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(TFCG_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(TFCG_uris_dict[line[4]])),str(line[5]),str(line[6])))
+	with codecs.open('Intersect_triples_FFCG_IDs.txt',"w","utf-8") as f:
+		for i in range(len(intersect)):
+			triple=np.asarray(intersect.iloc[i])
+			line=[np.nan,triple[0],np.nan,np.nan,triple[2],np.nan,np.nan,np.nan]
+			f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(FFCG_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(FFCG_uris_dict[line[4]])),str(line[5]),str(line[6])))
+	np.save("Intersect_entity_triples_dbpedia.npy",intersect)	
+
+	
+
+##DRIVER CODE
+# # Try to load stuff if files already exist
+# try:
+# 	uris_dict,dbpedia_uris,edgelist,degreelist=load_stuff()
+# #Else process and save them
+# except:
+# 	uris_dict,dbpedia_uris=save_uris()
+# 	edgelist=save_edgelist(uris_dict)
+# 	degreelist=save_degree()
+# #If 1(Carbonate) dbpedia can be parsed and triples of interest can be found
+# if pc==1:
+# 	try:
+# 		triples_tocheck=np.load(os.path.join(mode,mode+"_entity_triples_dbpedia.npy"))
+# 	except:
+# 		triples_tocheck=parse_dbpedia_triples()
+# 	triples_tocheck_ID=np.array([[np.nan,int(uris_dict[t[0]]),np.nan,np.nan,int(uris_dict[t[2]]),np.nan,np.nan] for t in triples_tocheck])
+# 	# create_negative_samples(triples_tocheck_ID,dbpedia_uris)
+# 	calculate_stats(degreelist,dbpedia_uris,triples_tocheck_ID)
+# #Else do not try parsing dbpedia
+# else:
+# 	try:
+# 		triples_tocheck=np.load(os.path.join(mode,mode+"_entity_triples_dbpedia.npy"))
+# 		triples_tocheck_ID=np.array([[np.nan,int(uris_dict[t[0]]),np.nan,np.nan,int(uris_dict[t[2]]),np.nan,np.nan] for t in triples_tocheck])
+# 	except:
+# 		pass
+
+
 
 #qsub -I -q interactive -l nodes=1:ppn=8,walltime=6:00:00,vmem=128gb
 #klinker linkpred uris.txt edgelist.npy dbpedia_triples.txt tfcg_degree_u.txt -u -n 1

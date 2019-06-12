@@ -1,0 +1,50 @@
+
+2019-06-10 02:28:47.094322:
+    metric: ultrametric
+    edges:  undirected
+    weight: degree
+    nodes:  /gpfs/home/z/k/zkachwal/Carbonate/DBPedia Data/dbpedia_uris.txt
+    graph:  /gpfs/home/z/k/zkachwal/Carbonate/DBPedia Data/dbpedia_edgelist.npy
+    input:  trueclaim_triples_no.txt
+    output: trueclaim_degree_u_no.json
+2019-06-10 02:28:47.096830: reading nodes from text file..
+2019-06-10 02:28:49.851796: reading graph from text file..
+2019-06-10 02:29:04.886843: reading input..
+2019-06-10 02:29:08.949033: launching pool of 12 workers.
+2019-06-10 06:45:42.324488: done
+
+real	258m13.349s
+user	2891m40.866s
+sys	81m24.620s
+
+2019-06-10 06:45:51.603838:
+    metric: ultrametric
+    edges:  undirected
+    weight: logdegree
+    nodes:  /gpfs/home/z/k/zkachwal/Carbonate/DBPedia Data/dbpedia_uris.txt
+    graph:  /gpfs/home/z/k/zkachwal/Carbonate/DBPedia Data/dbpedia_edgelist.npy
+    input:  trueclaim_triples_no.txt
+    output: trueclaim_logdegree_u_no.json
+2019-06-10 06:45:51.604085: reading nodes from text file..
+2019-06-10 06:45:56.979854: reading graph from text file..
+2019-06-10 06:46:12.177342: reading input..
+2019-06-10 06:46:16.601366: launching pool of 12 workers.
+2019-06-10 10:56:22.339346: done
+
+real	250m39.989s
+user	2833m39.459s
+sys	82m11.707s
+
+2019-06-10 10:56:25.206459:
+    metric: ultrametric
+    edges:  undirected
+    weight: degree
+    nodes:  /gpfs/home/z/k/zkachwal/Carbonate/DBPedia Data/dbpedia_uris.txt
+    graph:  /gpfs/home/z/k/zkachwal/Carbonate/DBPedia Data/dbpedia_edgelist.npy
+    input:  falseclaim_triples_no.txt
+    output: falseclaim_degree_u_no.json
+2019-06-10 10:56:25.206711: reading nodes from text file..
+2019-06-10 10:56:26.582040: reading graph from text file..
+2019-06-10 10:56:40.446516: reading input..
+2019-06-10 10:56:45.020202: launching pool of 12 workers.
+=>> PBS: job killed: vmem 172102160384 exceeded limit 171798691840

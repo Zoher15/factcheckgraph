@@ -2,7 +2,7 @@
 #PBS -l nodes=1:ppn=12,vmem=128gb,walltime=0:30:00
 #PBS -M zoher.kachwala@gmail.com
 #PBS -m abe
-#PBS -N FFCG
+#PBS -N IntersectFCG
 #PBS -j oe
 source /N/u/zkachwal/Carbonate/miniconda3/etc/profile.d/conda.sh
 conda activate env-kl

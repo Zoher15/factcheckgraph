@@ -1,0 +1,3 @@
+Number of False Claims containing DBPedia Uris: 5996 
+Total number of DBPedia Uris across all False claims: 14594 
+Total number of Triples across all False claims: 15548 
