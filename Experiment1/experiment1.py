@@ -261,8 +261,8 @@ def plot_overlap():
 	positive['label']=1
 	negative=pd.read_json("Intersect_FFCG_logdegree_u.json")
 	negative['label']=0
-	positive.filter(["simil","paths"]).sort_values(by='simil').to_csv(mode+"_paths_u_degree_+ve.csv",index=False)
-	negative.filter(["simil","paths"]).sort_values(by='simil').to_csv(mode+"_paths_u_degree_-ve.csv",index=False)
+	positive.filter(["simil","paths"]).sort_values(by='simil').to_csv("Intersect_paths_u_degree_TFCG.csv",index=False)
+	negative.filter(["simil","paths"]).sort_values(by='simil').to_csv("Intersect_paths_u_degree_FFCG.csv",index=False)
 	pos_neg=pd.concat([positive,negative],ignore_index=True)
 	y=list(pos_neg['label'])
 	scores=list(pos_neg['simil'])
@@ -300,8 +300,8 @@ def plot_overlap():
 	positive2['label']=1
 	negative2=pd.read_json("Negative_intersect_FFCG_logdegree_u.json")
 	negative2['label']=0
-	positive2.filter(["simil","paths"]).sort_values(by='simil').to_csv(mode+"_paths_u_degree_+ve.csv",index=False)
-	negative2.filter(["simil","paths"]).sort_values(by='simil').to_csv(mode+"_paths_u_degree_-ve.csv",index=False)
+	positive2.filter(["simil","paths"]).sort_values(by='simil').to_csv("Negative_intersect_paths_u_degree_TFCG.csv",index=False)
+	negative2.filter(["simil","paths"]).sort_values(by='simil').to_csv("Negative_intersect_paths_u_degree_FFCG.csv",index=False)
 	pos_neg2=pd.concat([positive2,negative2],ignore_index=True)
 	y2=list(pos_neg['label'])
 	scores2=list(pos_neg['simil'])
