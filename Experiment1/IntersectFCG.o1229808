@@ -1,0 +1,84 @@
+
+2019-06-12 18:33:15.431148:
+    metric: ultrametric
+    edges:  undirected
+    weight: logdegree
+    nodes:  TFCG/TFCG_uris.txt
+    graph:  TFCG/TFCG_edgelist.npy
+    input:  Intersect_triples_TFCG_IDs.txt
+    output: Intersect_TFCG_logdegree_u.json
+2019-06-12 18:33:15.431733: reading nodes from text file..
+2019-06-12 18:33:15.471272: reading graph from text file..
+
+>> RuntimeWarning: divide by zero encountered in log
+
+2019-06-12 18:33:15.821604: reading input..
+2019-06-12 18:33:15.904298: launching pool of 12 workers.
+2019-06-12 18:33:20.369744: done
+
+real	0m31.465s
+user	0m48.081s
+sys	0m2.486s
+
+2019-06-12 18:33:21.661004:
+    metric: ultrametric
+    edges:  undirected
+    weight: logdegree
+    nodes:  FFCG/FFCG_uris.txt
+    graph:  FFCG/FFCG_edgelist.npy
+    input:  Intersect_triples_FFCG_IDs.txt
+    output: Intersect_FFCG_logdegree_u.json
+2019-06-12 18:33:21.661239: reading nodes from text file..
+2019-06-12 18:33:21.711406: reading graph from text file..
+
+>> RuntimeWarning: divide by zero encountered in log
+
+2019-06-12 18:33:21.896212: reading input..
+2019-06-12 18:33:21.948852: launching pool of 12 workers.
+2019-06-12 18:33:31.851682: done
+
+real	0m11.558s
+user	1m54.591s
+sys	0m2.323s
+
+2019-06-12 18:33:32.832695:
+    metric: ultrametric
+    edges:  undirected
+    weight: logdegree
+    nodes:  TFCG/TFCG_uris.txt
+    graph:  TFCG/TFCG_edgelist.npy
+    input:  Negative_intersect_triples_TFCG_IDs.txt
+    output: Negative_intersect_TFCG_logdegree_u.json
+2019-06-12 18:33:32.832873: reading nodes from text file..
+2019-06-12 18:33:32.834201: reading graph from text file..
+
+>> RuntimeWarning: divide by zero encountered in log
+
+2019-06-12 18:33:32.856828: reading input..
+2019-06-12 18:33:32.941481: launching pool of 12 workers.
+2019-06-12 18:33:37.218378: done
+
+real	0m5.260s
+user	0m47.745s
+sys	0m1.777s
+
+2019-06-12 18:33:38.573200:
+    metric: ultrametric
+    edges:  undirected
+    weight: logdegree
+    nodes:  FFCG/FFCG_uris.txt
+    graph:  FFCG/FFCG_edgelist.npy
+    input:  Negative_intersect_triples_FFCG_IDs.txt
+    output: Negative_intersect_FFCG_logdegree_u.json
+2019-06-12 18:33:38.573433: reading nodes from text file..
+2019-06-12 18:33:38.577302: reading graph from text file..
+
+>> RuntimeWarning: divide by zero encountered in log
+
+2019-06-12 18:33:38.652319: reading input..
+2019-06-12 18:33:38.685135: launching pool of 12 workers.
+2019-06-12 18:33:48.382690: done
+
+real	0m11.205s
+user	1m52.389s
+sys	0m2.266s

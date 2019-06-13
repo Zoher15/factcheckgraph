@@ -147,7 +147,7 @@ def parse_claims(uris_dict):
 		f.write(json.dumps(falseclaim_uris,ensure_ascii=False))
 
 def calculate_DBPedia_stats():
-	with open("/gpfs/home/z/k/zkachwal/Carbonate/DBPedia Data/DBPedia_stats.txt","w") as f:
+	with open("/gpfs/home/z/k/zkachwal/Carbonate/DBPedia Data/DBPedia_stats2.txt","w") as f:
 		try:
 			G=nx.read_weighted_edgelist("/gpfs/home/z/k/zkachwal/Carbonate/DBPedia Data/dbpedia_edgelist.txt")
 		except:
@@ -378,6 +378,30 @@ def plot_log(trueclaim_map,falseclaim_map):
 	plt.title('ROC using Log Degree and Claim Microaverage')
 	plt.savefig("Exp2 ROC Using Log Degree and Claim Microaverage")
 
+def plot_no():
+	#klinker outputs json
+	positive=pd.read_json("trueclaim_logdegree_u_no.json")
+	positive['label']=1
+	negative=pd.read_json("falseclaim_logdegree_u_no.json")
+	negative['label']=0
+	positive.filter(["simil","paths"]).sort_values(by='simil').to_csv("TrueClaims_paths_log_no.csv",index=False)
+	negative.filter(["simil","paths"]).sort_values(by='simil').to_csv("FalseClaims_paths_log_no.csv",index=False)
+	pos_neg=pd.concat([positive,negative],ignore_index=True)
+	y=list(pos_neg['label'])
+	scores=list(pos_neg['simil'])
+	offset=len(positive)
+	fpr, tpr, thresholds = metrics.roc_curve(y, scores, pos_label=1)
+	print(metrics.auc(fpr,tpr))
+	plt.figure()
+	lw = 2
+	plt.plot(fpr, tpr, color='darkorange',lw=lw, label='ROC curve (area = %0.2f)' % metrics.auc(fpr,tpr))
+	plt.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
+	plt.xlabel('False Positive Rate')
+	plt.ylabel('True Positive Rate')
+	plt.legend(loc="lower right")
+	plt.title('ROC using Log Degree No Overlap')
+	plt.savefig("Exp2 ROC Using Log Degree")
+
 def overlap_triples(trueclaim_inputlist,falseclaim_inputlist):
 	t1=len(trueclaim_inputlist)
 	trueclaim_inputlist=set(map(str,list(map(list,trueclaim_inputlist.astype(int)))))
@@ -408,8 +432,8 @@ def overlap_triples(trueclaim_inputlist,falseclaim_inputlist):
 	
 # uris,uris_dict,edgelist=parse_dbpedia()
 # uris,uris_dict,trueclaim_uris,falseclaim_uris,trueclaim_map,falseclaim_map,trueclaim_inputlist,falseclaim_inputlist=load_stuff()
-trueclaim_inputlist,falseclaim_inputlist=load_stuff()
-overlap_triples(trueclaim_inputlist,falseclaim_inputlist)
+# trueclaim_inputlist,falseclaim_inputlist=load_stuff()
+# overlap_triples(trueclaim_inputlist,falseclaim_inputlist)
 # parse_claims(uris_dict)
 # create_input_file(trueclaim_uris,falseclaim_uris)
-# calculate_DBPedia_stats()
+calculate_DBPedia_stats()

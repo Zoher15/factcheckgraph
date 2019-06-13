@@ -13,7 +13,7 @@ g = Graph()
 # g.serialize(destination=os.path.join('DBPedia Data','dbpedia_graph.nt'), format='nt')
 g.parse('/gpfs/home/z/k/zkachwal/Carbonate/DBPedia Data/dbpedia_graph.nt',format='nt')
 
-FCG_entities=set(np.load("intersect_dbpedia_uris.npy"))
+FCG_entities=set(np.load("intersect_uris.npy"))
 triple_list=[]
 entity_hitlist=[]
 i=0
