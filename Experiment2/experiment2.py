@@ -380,6 +380,7 @@ def plot_log(trueclaim_map,falseclaim_map):
 
 def plot_no():
 	#klinker outputs json
+	title='ROC using Log Degree No Overlap'
 	positive=pd.read_json("trueclaim_logdegree_u_no.json")
 	positive['label']=1
 	negative=pd.read_json("falseclaim_logdegree_u_no.json")
@@ -399,8 +400,8 @@ def plot_no():
 	plt.xlabel('False Positive Rate')
 	plt.ylabel('True Positive Rate')
 	plt.legend(loc="lower right")
-	plt.title('ROC using Log Degree No Overlap')
-	plt.savefig("Exp2 ROC Using Log Degree")
+	plt.title(title)
+	plt.savefig(title.replace(" ","_")+".png")
 
 def overlap_triples(trueclaim_inputlist,falseclaim_inputlist):
 	t1=len(trueclaim_inputlist)

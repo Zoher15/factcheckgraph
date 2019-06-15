@@ -14,7 +14,11 @@ import re
 import networkx as nx 
 import matplotlib
 # matplotlib.use('TkAgg')
+font = {'family' : 'Arial',
+        'size'   : 12}
+matplotlib.rc('font', **font)
 import matplotlib.pyplot as plt
+from matplotlib.pyplot import figure
 import pdb
 import sys
 import os 
@@ -44,54 +48,56 @@ def save_degree():
 	return degreelist
 
 #Calculate Graph statistics of interest and saves them to a file called stats.txt
-def calculate_stats(degreelist,dbpedia_uris,triples_tocheck_ID):
-	with open(os.path.join(mode,mode+"_stats.txt"),"w") as f:
-		f.write("Number of DBpedia Uris: %s \n" % (len(dbpedia_uris)))
-		f.write("Number of Triples to Check: %s \n" % (len(triples_tocheck_ID)))
-		degreefreq=np.asarray([float(0) for i in range(max(degreelist)+1)])
-		for degree in degreelist:
-			degreefreq[degree]+=1
-		degreeprob=degreefreq/sum(degreefreq)
-		plt.figure()	
-		plt.loglog(range(0,max(degreelist)+1),degreeprob)
-		plt.xlabel('Degree')
-		plt.ylabel('Probability')
-		plt.title('Degree Distribution')
-		plt.savefig(os.path.join(mode,mode+"_degreedist.png"))
-		degree_square_list=np.asarray(list(map(np.square,degreelist)))
-		f.write("Average Degree: %s \n" % (np.average(degreelist)))
-		f.write("Average Squared Degree: %s \n" % (np.average(degree_square_list)))
-		kappa=np.average(degree_square_list)/(np.square(np.average(degreelist)))
-		f.write("Kappa/Heterogenity Coefficient (average of squared degree/square of average degree): %s \n" % (kappa))
-		try:
-			G=nx.read_weighted_edgelist(os.path.join(mode,mode+"_edgelist.txt"))
-		except:
-			pdb.set_trace()
-		f.write("Average Clustering Coefficient: %s \n" % (nx.average_clustering(G)))
-		f.write("Density: %s \n" %(nx.density(G)))
-		f.write("Number of Edges: %s \n" %(G.number_of_edges()))
-		f.write("Number of Nodes: %s \n" %(G.number_of_nodes()))
-		#average path length calculation
-		pathlengths = []
-		for v in G.nodes():
-			spl = dict(nx.single_source_shortest_path_length(G, v))
-			for p in spl:
-				pathlengths.append(spl[p])
-		f.write("Average Shortest Path Length: %s \n\n" % (sum(pathlengths) / len(pathlengths)))
-		dist = {}
-		for p in pathlengths:
-			if p in dist:
-				dist[p] += 1
-			else:
-				dist[p] = 1
-		f.write("Length #Paths \n")
-		verts = dist.keys()
-		pathlen=[]
-		for d in sorted(verts):
-			f.write('%s %d \n' % (d, dist[d]))
-			pathlen.append([d,dist[d]])
-		pathlen=np.asarray(pathlen)
-		np.save(os.path.join(mode,mode+"_pathlen.npy"),pathlen)
+def calculate_stats():
+	degreelist={}
+	pathlengths={}
+	for mode in ['TFCG','FFCG']:
+		dbpedia_uris=np.load(os.path.join(mode,mode+"_dbpedia_uris.npy"))
+		triples_tocheck=np.load(os.path.join(mode,mode+"_entity_triples_dbpedia.npy"))
+		degreelist[mode]=np.load(os.path.join(mode,mode+"_degreelist.npy"))
+		with open(os.path.join(mode,mode+"_stats.txt"),"w") as f:
+			f.write("Number of DBpedia Uris: %s \n" % (len(dbpedia_uris)))
+			f.write("Number of Triples to Check: %s \n" % (len(triples_tocheck)))
+			degreefreq=np.asarray([float(0) for i in range(max(degreelist[mode])+1)])
+			for degree in degreelist[mode]:
+				degreefreq[degree]+=1
+			degreeprob=degreefreq/sum(degreefreq)
+			degree_square_list=np.asarray(list(map(np.square,degreelist[mode])))
+			f.write("Average Degree: %s \n" % (np.average(degreelist[mode])))
+			f.write("Average Squared Degree: %s \n" % (np.average(degree_square_list)))
+			kappa=np.average(degree_square_list)/(np.square(np.average(degreelist[mode])))
+			f.write("Kappa/Heterogenity Coefficient (average of squared degree/square of average degree): %s \n" % (kappa))
+			try:
+				G=nx.read_weighted_edgelist(os.path.join(mode,mode+"_edgelist.txt"))
+			except:
+				pdb.set_trace()
+			f.write("Average Clustering Coefficient: %s \n" % (nx.average_clustering(G)))
+			f.write("Density: %s \n" %(nx.density(G)))
+			f.write("Number of Edges: %s \n" %(G.number_of_edges()))
+			f.write("Number of Nodes: %s \n" %(G.number_of_nodes()))
+			#average path length calculation
+			pathlengths[mode]= []
+			for v in G.nodes():
+				spl = dict(nx.single_source_shortest_path_length(G, v))
+				for p in spl:
+					pathlengths[mode].append(spl[p])
+			f.write("Average Shortest Path Length: %s \n\n" % (sum(pathlengths[mode]) / len(pathlengths[mode])))
+			dist = {}
+			for p in pathlengths[mode]:
+				if p in dist:
+					dist[p] += 1
+				else:
+					dist[p] = 1
+			f.write("Length #Paths \n")
+			verts = dist.keys()
+			pathlen=[]
+			for d in sorted(verts):
+				f.write('%s %d \n' % (d, dist[d]))
+				pathlen.append([d,dist[d]])
+			pathlen=np.asarray(pathlen)
+			np.save(os.path.join(mode,mode+"_pathlen.npy"),pathlen)
+			np.save(os.path.join(mode,mode+"_pathlengths.npy"),pathlengths[mode])
+
 #Fetches the uris of all nodes in the give FactCheckGraph
 #Do note: It creates a dictionary assigning each uri an integer ID. This is to conform to the way Knowledge Linker accepts data 
 #It also finds dbpedia specific uris
@@ -163,21 +169,23 @@ def create_negative_samples(triples_tocheck_ID,dbpedia_uris):
 def plot_len():
 	tfcg_pathlen=np.load(os.path.join("TFCG/TFCG_pathlen.npy"))
 	ffcg_pathlen=np.load(os.path.join("FFCG/FFCG_pathlen.npy"))
+	maxN=max(len(tfcg_pathlen,ffcg_pathlen))
+	width=0.35
 	x1=tfcg_pathlen[:,0]
 	y1=tfcg_pathlen[:,1]
 	x2=ffcg_pathlen[:,0]
 	y2=ffcg_pathlen[:,1]
 	plt.figure()
-	plt.bar(x1,y1,label="TFCG")
-	plt.bar(x2,y2,label="FFCG")
+	plt.scatter(x1,y1,label="TFCG")
+	plt.scatter(x2,y2,label="FFCG")
 	plt.title("Distribution of Path Lengths")
 	plt.xlabel('Path Length')
 	plt.ylabel('Number of Times')
 	plt.legend(loc="upper right")
 	plt.savefig("PathLengths_times.png")
 	plt.figure()
-	plt.bar(x1,y1/np.sum(y1),label="TFCG")
-	plt.bar(x2,y2/np.sum(y2),label="FFCG")
+	plt.bar(maxN,y1/np.sum(y1),label="TFCG")
+	plt.bar(maxN+width,y2/np.sum(y2),label="FFCG")
 	plt.title("Distribution of Path Lengths")
 	plt.xlabel('Path Length')
 	plt.ylabel('Percentage of Times')
@@ -211,26 +219,31 @@ def plot():
 #It uses the output from Knowledge Linker (uses log degree as weights) and plots an ROC 
 def plot_log():
 	#klinker outputs json
-	logpositive=pd.read_json(os.path.join(mode,mode+"_logdegree_u.json"))
-	logpositive['label']=1
-	lognegative=pd.read_json(os.path.join(mode,mode+"_negative_logdegree_u.json"))
-	lognegative['label']=0
-	logpositive.filter(["simil","paths"]).sort_values(by='simil').to_csv(mode+"_paths_u_logdegree_+ve.csv",index=False)
-	lognegative.filter(["simil","paths"]).sort_values(by='simil').to_csv(mode+"_paths_u_logdegree_-ve.csv",index=False)
-	logpos_neg=pd.concat([logpositive,lognegative],ignore_index=True)
-	logy=list(logpos_neg['label'])
-	logscores=list(logpos_neg['simil'])
-	logfpr, logtpr, logthresholds = metrics.roc_curve(logy, logscores, pos_label=1)
-	print(metrics.auc(logfpr,logtpr))
-	plt.figure()
-	lw = 2
-	plt.plot(logfpr, logtpr, color='darkorange',lw=lw, label='ROC curve (area = %0.2f)' % metrics.auc(logfpr,logtpr))
-	plt.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
-	plt.xlabel('False Positive Rate')
-	plt.ylabel('True Positive Rate')
-	plt.legend(loc="lower right")
-	plt.title('ROC '+mode+' using Log Degree')
-	plt.show()
+	modes=['TFCG','FFCG']
+	figure(figsize=(9.5,4))
+	for i in range(2):
+		plt.subplot(1,2,i+1)
+		mode=modes[i]
+		logpositive=pd.read_json(os.path.join(mode,mode+"_logdegree_u.json"))
+		logpositive['label']=1
+		lognegative=pd.read_json(os.path.join(mode,mode+"_negative_logdegree_u.json"))
+		lognegative['label']=0
+		logpositive.filter(["simil","paths"]).sort_values(by='simil').to_csv(mode+"_paths_u_logdegree_+ve.csv",index=False)
+		lognegative.filter(["simil","paths"]).sort_values(by='simil').to_csv(mode+"_paths_u_logdegree_-ve.csv",index=False)
+		logpos_neg=pd.concat([logpositive,lognegative],ignore_index=True)
+		logy=list(logpos_neg['label'])
+		logscores=list(logpos_neg['simil'])
+		logfpr, logtpr, logthresholds = metrics.roc_curve(logy, logscores, pos_label=1)
+		print(metrics.auc(logfpr,logtpr))
+		lw = 2
+		plt.plot(logfpr, logtpr, color='darkorange',lw=lw, label='ROC '+mode+' (area:%0.2f)' % metrics.auc(logfpr,logtpr))
+		plt.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
+		plt.xlabel('False Positive Rate')
+		plt.ylabel('True Positive Rate')
+		plt.legend(loc="lower right")
+		# plt.title('ROC '+mode+' using Log Degree')
+		# plt.show()
+	plt.savefig("TFCG_FFCG_Logdegree_ROC.png")
 #This function parses the dbpedia and tries to find the triples where the subject and object, both are in the dbpedia uris subset, i.e. they are neighbors
 def parse_dbpedia_triples():
 	g = rdflib.Graph()
@@ -336,10 +349,14 @@ def plot_overlap():
 def overlap_triples():
 	TFCG_triples_tocheck=np.load(os.path.join("TFCG","TFCG"+"_entity_triples_dbpedia.npy"))
 	FFCG_triples_tocheck=np.load(os.path.join("FFCG","FFCG"+"_entity_triples_dbpedia.npy"))
+	set_trace()
 	TFCG_triples_tocheck=set(map(str,list(map(list,TFCG_triples_tocheck))))
 	FFCG_triples_tocheck=set(map(str,list(map(list,FFCG_triples_tocheck))))
-	#intersection needs to be done on string triple and not id triples
-	intersect=TFCG_triples_tocheck.intersection(FFCG_triples_tocheck)
+	set_trace()
+	# #intersection needs to be done on string triple and not id triples
+	# intersect=TFCG_triples_tocheck.intersection(FFCG_triples_tocheck)
+	intersect=np.load("intersect_entity_triples_dbpedia.npy")
+	intersect=set(map(str,list(map(list,intersect))))
 	intersect=pd.DataFrame(map(eval,list(intersect))).drop(columns=[1])#dropping the predicate i.e. middle column 
 	# intersect=list(map(np.asarray,intersect))
 	intersect=intersect.values
@@ -347,7 +364,7 @@ def overlap_triples():
 	intersect_uris_triples=np.asarray(list(set(intersect.flatten())))
 	#transforming it into triples accepted by KLinker code
 	intersect=np.asarray([[np.nan,i[0],np.nan,np.nan,i[1],np.nan,np.nan] for i in intersect])
-	np.save("Intersect_entity_triples_dbpedia.npy",intersect)	
+	# np.save("Intersect_entity_triples_dbpedia.npy",intersect)	
 	#loading FCG Uris
 	TFCG_uris=np.load(os.path.join("TFCG","TFCG"+"_uris.npy"))
 	TFCG_uris_dict={TFCG_uris[i]:i for i in range(len(TFCG_uris))}
@@ -430,3 +447,4 @@ def overlap_triples():
 #klinker linkpred TFCG_uris.txt TFCG_edgelist.npy TFCG_dbpedia_triples.txt TFCG_u_degree_+ve.json -u -n 1
 #klinker linkpred TFCG_uris.txt TFCG_edgelist.npy TFCG_dbpedia_triples.txt TFCG_u_logdegree_+ve.json -u -n 1 -w logdegree
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+calculate_stats()
