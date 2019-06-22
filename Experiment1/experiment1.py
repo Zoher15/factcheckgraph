@@ -11,8 +11,10 @@ from sklearn import metrics
 import codecs
 import csv
 import re
+from decimal import Decimal
 import networkx as nx 
 import matplotlib
+import scipy.stats as stats
 matplotlib.use('TkAgg')
 # font = {'family' : 'Normal',
 #         'size'   : 12}
@@ -182,7 +184,6 @@ def plot_stats():
 	title="CCDF of Degree"
 	tfcg_degreelist=np.sort(np.load(os.path.join("TFCG","TFCG"+"_degreelist.npy")))
 	ffcg_degreelist=np.sort(np.load(os.path.join("FFCG","FFCG"+"_degreelist.npy")))
-	set_trace()
 	y1=np.flip(np.arange(len(tfcg_degreelist)))/float(len(tfcg_degreelist)-1)
 	y2=np.flip(np.arange(len(ffcg_degreelist)))/float(len(ffcg_degreelist)-1)
 	plt.figure()
@@ -289,96 +290,149 @@ def parse_dbpedia_triples():
 	return triplelist
 
 def plot_overlap():
+	Intersect_TFCG=pd.read_json("Intersect_TFCG_logdegree_u.json")
+	Intersect_FFCG=pd.read_json("Intersect_FFCG_logdegree_u.json")
+	Random_TFCG=pd.read_json("Random_intersect_TFCG_logdegree_u.json")
+	Random_FFCG=pd.read_json("Random_intersect_FFCG_logdegree_u.json")
+	# Random2_TFCG=pd.read_json("Random2_intersect_TFCG_logdegree_u.json")
+	# Random2_FFCG=pd.read_json("Random2_intersect_FFCG_logdegree_u.json")
+	lw = 2
 	#klinker outputs json
-	title="Common Triples TFCG vs FFCG"
-	positive=pd.read_json("Intersect_TFCG_logdegree_u.json")
-	positive['label']=1
-	negative=pd.read_json("Intersect_FFCG_logdegree_u.json")
-	negative['label']=0
-	positive.filter(["simil","paths"]).sort_values(by='simil').to_csv("Intersect_paths_u_degree_TFCG.csv",index=False)
-	negative.filter(["simil","paths"]).sort_values(by='simil').to_csv("Intersect_paths_u_degree_FFCG.csv",index=False)
-	pos_neg=pd.concat([positive,negative],ignore_index=True)
+	#########################################################################################################################
+	#Plot 1
+	title="Common Triples TFCG vs FFCG + Random + Random2"
+	plt.figure()
+	#first overlap plot TFCG vs FFCG
+	Intersect_TFCG['label']=1
+	Intersect_FFCG['label']=0
+	Intersect_TFCG.filter(["simil","paths"]).sort_values(by='simil').to_csv("Intersect_paths_u_degree_TFCG.csv",index=False)
+	Intersect_FFCG.filter(["simil","paths"]).sort_values(by='simil').to_csv("Intersect_paths_u_degree_FFCG.csv",index=False)
+	pos_neg=pd.concat([Intersect_TFCG,Intersect_FFCG],ignore_index=True)
 	y=list(pos_neg['label'])
 	scores=list(pos_neg['simil'])
 	fpr, tpr, thresholds = metrics.roc_curve(y, scores, pos_label=1)
 	print(metrics.auc(fpr,tpr))
-	plt.figure()
-	lw = 2
-	plt.plot(fpr, tpr, color='darkorange',lw=lw, label='ROC curve (area = %0.2f)' % metrics.auc(fpr,tpr))
-	plt.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
+	print("P-Value %.2E" %Decimal(stats.ttest_rel(Intersect_TFCG['simil'],Intersect_FFCG['simil']).pvalue))
+	plt.plot(fpr, tpr,lw=lw, label='TFCG vs FFCG (AUC = %0.2f)' % metrics.auc(fpr,tpr))
+	#second overlap plot Random
+	Random_TFCG['label']=1
+	Random_FFCG['label']=0
+	Random_TFCG.filter(["simil","paths"]).sort_values(by='simil').to_csv("Random_intersect_paths_u_degree_TFCG.csv",index=False)
+	Random_FFCG.filter(["simil","paths"]).sort_values(by='simil').to_csv("Random_intersect_paths_u_degree_FFCG.csv",index=False)
+	pos_neg=pd.concat([Random_TFCG,Random_FFCG],ignore_index=True)
+	y=list(pos_neg['label'])
+	scores=list(pos_neg['simil'])
+	fpr, tpr, thresholds = metrics.roc_curve(y, scores, pos_label=1)
+	print(metrics.auc(fpr,tpr))
+	plt.plot(fpr, tpr,lw=lw, label='Random (AUC = %0.2f)' % metrics.auc(fpr,tpr))
+	#third overlap plot Random
+	# Random2_TFCG['label']=1
+	# Random2_FFCG['label']=0
+	# Random2_TFCG.filter(["simil","paths"]).sort_values(by='simil').to_csv("Random_intersect_paths_u_degree_TFCG.csv",index=False)
+	# Random2_FFCG.filter(["simil","paths"]).sort_values(by='simil').to_csv("Random_intersect_paths_u_degree_FFCG.csv",index=False)
+	# pos_neg=pd.concat([Random2_TFCG,Random2_FFCG],ignore_index=True)
+	# y=list(pos_neg['label'])
+	# scores=list(pos_neg['simil'])
+	# fpr, tpr, thresholds = metrics.roc_curve(y, scores, pos_label=1)
+	# print(metrics.auc(fpr,tpr))
+	# plt.plot(fpr, tpr,lw=lw, label='Random2 (AUC = %0.2f)' % metrics.auc(fpr,tpr))
+
+	#Basic plot stuff
+	plt.plot([0, 1], [0, 1], color='navy', lw=lw, label='Baseline',linestyle='--')
 	plt.xlabel('False Positive Rate')
 	plt.ylabel('True Positive Rate')
 	plt.legend(loc="lower right")
 	plt.title(title)
+	plt.show()
 	plt.savefig(title.replace(" ","_")+".png")
-	# intersect=pd.DataFrame(columns=['TFCG_Simil','FFCG_Simil'])
-	# intersect['TFCG_Simil']=positive['simil']
-	# intersect['FFCG_Simil']=negative['simil']
-	intersect=positive['simil']-negative['simil']
+	#########################################################################################################################
+	# #Plot 2
+	# # intersect=pd.DataFrame(columns=['TFCG_Simil','FFCG_Simil'])
+	# # intersect['TFCG_Simil']=positive['simil']
+	# # intersect['FFCG_Simil']=negative['simil']
+	# title="Difference between Simil scores from TFCG vs FFCG"
+	# plt.figure()
+	# #first overlap plot TFCG vs FFCG
+	# intersect=Intersect_TFCG['simil']-Intersect_FFCG['simil']
+	# intersect=intersect.reset_index(drop=True)
+	# plt.plot(intersect,label='TFCG vs FFCG')
+	# #second overlap plot Random
+	# intersect=Random_TFCG['simil']-Random_FFCG['simil']
+	# intersect=intersect.reset_index(drop=True)
+	# plt.plot(intersect,label='Random')
+	# #third overlap plot Random
+	# intersect=Random2_TFCG['simil']-Random2_FFCG['simil']
+	# intersect=intersect.reset_index(drop=True)
+	# plt.plot(intersect,label='Random2')
+	# #Basic plot stuff
+	# plt.legend(loc="upper right")
+	# plt.title(title)
+	# plt.ylabel("TFCG Simil Score - FFCG Simil Score")
+	# plt.xlabel("Index of common triples")
+	# plt.show()
+	# plt.savefig(title.replace(" ","_")+".png")
+	#########################################################################################################################
+	#Plot 3
+	title="Distribution of difference between Simil Scores in TFCG vs FFCG"
+	plt.figure()
+	#first overlap plot TFCG vs FFCG
+	intersect=Intersect_TFCG['simil']-Intersect_FFCG['simil']
 	intersect=intersect.reset_index(drop=True)
-	plt.figure()
-	plt.plot(intersect)
-	plt.title("Difference between Simil scores from TFCG vs FFCG")
-	plt.ylabel("TFCG Simil Score - FFCG Simil Score")
-	plt.xlabel("Index of common triples")
-	plt.savefig("Intersect_plot.png")
-	plt.figure()
-	plt.hist(intersect)
-	plt.title("Distribution of difference between Simil Scores in TFCG vs FFCG")
+	plt.hist(intersect,density=True,histtype='step',label='TFCG vs FFCG')
+	#second overlap plot Random
+	intersect=Random_TFCG['simil']-Random_FFCG['simil']
+	intersect=intersect.reset_index(drop=True)
+	plt.hist(intersect,density=True,histtype='step',label='Random')
+	#third overlap plot Random
+	# intersect=Random2_TFCG['simil']-Random2_FFCG['simil']
+	# intersect=intersect.reset_index(drop=True)
+	# plt.hist(intersect,density=True,histtype='step',label='Random2')
+	#Basic plot stuff
+	plt.legend(loc="upper right")
+	plt.title(title)
 	plt.xlabel("TFCG Simil Score - FFCG Simil Score")
-	plt.ylabel("Number of times")
-	plt.savefig("Intersect_hist.png")
-	#######For random triples
-	title2="Random Common Triples TFCG vs FFCG"
-	positive2=pd.read_json("Random_intersect_TFCG_logdegree_u.json")
-	positive2['label']=1
-	negative2=pd.read_json("Random_intersect_FFCG_logdegree_u.json")
-	negative2['label']=0
-	positive2.filter(["simil","paths"]).sort_values(by='simil').to_csv("Random_intersect_paths_u_degree_TFCG.csv",index=False)
-	negative2.filter(["simil","paths"]).sort_values(by='simil').to_csv("Random_intersect_paths_u_degree_FFCG.csv",index=False)
-	pos_neg2=pd.concat([positive2,negative2],ignore_index=True)
-	y2=list(pos_neg2['label'])
-	scores2=list(pos_neg2['simil'])
-	fpr2, tpr2, thresholds2 = metrics.roc_curve(y2, scores2, pos_label=1)
-	print(metrics.auc(fpr2,tpr2))
+	plt.ylabel("Density")
+	plt.show()
+	plt.savefig(title.replace(" ","_")+".png")
+	#########################################################################################################################
+	#Plot 4
+	title="TFCG+FFCG DBpedia-Neighbor-Triples vs TFCG Random Triples"
 	plt.figure()
-	plt.plot(fpr2, tpr2, color='darkorange',lw=lw, label='ROC curve (area = %0.2f)' % metrics.auc(fpr2,tpr2))
-	plt.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
+	#First overlap TFCG
+	Intersect_TFCG['label']=1
+	Random_TFCG['label']=0
+	pos_neg=pd.concat([Intersect_TFCG,Random_TFCG],ignore_index=True)
+	y=list(pos_neg['label'])
+	scores=list(pos_neg['simil'])
+	fpr, tpr, thresholds = metrics.roc_curve(y, scores, pos_label=1)
+	print(metrics.auc(fpr,tpr))
+	plt.plot(fpr, tpr,lw=lw, label='TFCG DBPedia vs Random (AUC = %0.2f)' % metrics.auc(fpr,tpr))
+	#second overlap FFCG
+	Intersect_FFCG['label']=1
+	Random_FFCG['label']=0
+	pos_neg=pd.concat([Intersect_FFCG,Random_FFCG],ignore_index=True)
+	y=list(pos_neg['label'])
+	scores=list(pos_neg['simil'])
+	fpr, tpr, thresholds = metrics.roc_curve(y, scores, pos_label=1)
+	print(metrics.auc(fpr,tpr))
+	plt.plot(fpr, tpr,lw=lw, label='FFCG DBPedia vs Random (AUC = %0.2f)' % metrics.auc(fpr,tpr))
+	#Basic plot stuff
+	plt.plot([0, 1], [0, 1], color='navy', lw=lw, label='Baseline',linestyle='--')
 	plt.xlabel('False Positive Rate')
 	plt.ylabel('True Positive Rate')
 	plt.legend(loc="lower right")
-	plt.title(title2)
-	plt.savefig(title2.replace(" ","_")+".png")
-	# intersect=pd.DataFrame(columns=['TFCG_Simil','FFCG_Simil'])
-	# intersect['TFCG_Simil']=positive['simil']
-	# intersect['FFCG_Simil']=negative['simil']
-	intersect2=positive2['simil']-negative2['simil']
-	intersect2=intersect2.reset_index(drop=True)
-	plt.figure()
-	plt.plot(intersect2)
-	plt.title("Difference between Random Simil scores from TFCG vs FFCG")
-	plt.ylabel("TFCG Simil Score - FFCG Simil Score")
-	plt.xlabel("Index of common triples")
-	plt.savefig("Random_intersect_plot.png")
-	plt.figure()
-	plt.hist(intersect2)
-	plt.title("Distribution of difference between Random Simil Scores in TFCG vs FFCG")
-	plt.xlabel("TFCG Simil Score - FFCG Simil Score")
-	plt.ylabel("Number of times")
-	plt.savefig("Random_intersect_hist.png")
+	plt.title(title)
+	plt.show()
+	plt.savefig(title.replace(" ","_")+".png")
 
 def overlap_triples():
-	TFCG_triples_tocheck=np.load(os.path.join("TFCG","TFCG"+"_entity_triples_dbpedia.npy"))
-	FFCG_triples_tocheck=np.load(os.path.join("FFCG","FFCG"+"_entity_triples_dbpedia.npy"))
-	TFCG_triples_tocheck=set(map(str,list(map(list,TFCG_triples_tocheck))))
-	FFCG_triples_tocheck=set(map(str,list(map(list,FFCG_triples_tocheck))))
+	# TFCG_triples_tocheck=np.load(os.path.join("TFCG","TFCG"+"_entity_triples_dbpedia.npy"))
+	# FFCG_triples_tocheck=np.load(os.path.join("FFCG","FFCG"+"_entity_triples_dbpedia.npy"))
+	# TFCG_triples_tocheck=set(map(str,list(map(list,TFCG_triples_tocheck))))
+	# FFCG_triples_tocheck=set(map(str,list(map(list,FFCG_triples_tocheck))))
 	# #intersection needs to be done on string triple and not id triples
-	intersect2=TFCG_triples_tocheck.intersection(FFCG_triples_tocheck)
 	intersect=np.load("intersect_entity_triples_dbpedia.npy")
 	intersect=set(map(str,list(map(list,intersect))))
-	diff=intersect-intersect2
-	diff=list(map(eval,list(diff)))
-	set_trace()
 	intersect=pd.DataFrame(map(eval,list(intersect))).drop(columns=[1])#dropping the predicate i.e. middle column 
 	# intersect=list(map(np.asarray,intersect))
 	intersect=intersect.values
@@ -388,13 +442,15 @@ def overlap_triples():
 	intersect=np.asarray([[np.nan,i[0],np.nan,np.nan,i[1],np.nan,np.nan] for i in intersect])
 	# np.save("Intersect_entity_triples_dbpedia.npy",intersect)	
 	#loading FCG Uris
-	TFCG_uris=np.load(os.path.join("TFCG","TFCG"+"_uris.npy"))
-	TFCG_uris_dict={TFCG_uris[i]:i for i in range(len(TFCG_uris))}
-	FFCG_uris=np.load(os.path.join("FFCG","FFCG"+"_uris.npy"))
-	FFCG_uris_dict={FFCG_uris[i]:i for i in range(len(FFCG_uris))}
+	TFCG_uris_all=np.load(os.path.join("TFCG","TFCG"+"_uris.npy"))
+	FFCG_uris_all=np.load(os.path.join("FFCG","FFCG"+"_uris.npy"))
+	TFCG_uris=np.load(os.path.join("TFCG","TFCG"+"_dbpedia_uris.npy"))
+	TFCG_uris_dict={TFCG_uris_all[i]:i for i in range(len(TFCG_uris_all))}
+	FFCG_uris=np.load(os.path.join("FFCG","FFCG"+"_dbpedia_uris.npy"))
+	FFCG_uris_dict={FFCG_uris_all[i]:i for i in range(len(FFCG_uris_all))}
 	#Uris common to both uri sets
 	intersect_uris=np.asarray(list(set(TFCG_uris).intersection(set(FFCG_uris))))
-	np.save("intersect_uris.npy",intersect_uris)
+	np.save("intersect_dbpedia_uris.npy",list(intersect_uris))
 	np.save("intersect_uris_triples.npy",intersect_uris_triples)
 	print("No. of uris common to both TFCG and FFCG:",len(intersect_uris))
 	print("No. of triples common to both TFCG and FFCG:",len(intersect))
@@ -411,12 +467,20 @@ def overlap_triples():
 			f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(FFCG_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(FFCG_uris_dict[line[4]])),str(line[5]),str(line[6])))
 	#############################################################################################################################
 	#Random samples
+	#Limited to the pool of uris from the triples 507
 	perm=permutations(intersect_uris_triples,2)
+	#Pool of dbpedia uris common to both 1136
+	perm2=permutations(intersect_uris,2)
 	perms=np.asarray([[np.nan,i[0],np.nan,np.nan,i[1],np.nan,np.nan] for i in perm])
+	perms2=np.asarray([[np.nan,i[0],np.nan,np.nan,i[1],np.nan,np.nan] for i in perm2])
 	z=0
+	z2=0
 	randomlist=np.random.choice(range(len(perms)),size=len(intersect)*2,replace=False)
+	randomlist2=np.random.choice(range(len(perms2)),size=len(intersect)*2,replace=False)
 	negative_intersect=[]
+	negative_intersect2=[]
 	emptylist=[]
+	emptylist2=[]
 	for i in randomlist:
 		if z<len(intersect):
 			if str(list(perms[i])) in set(map(str,list(map(list,intersect)))):#eliminating random triple if it exists in the intersect set (converted individiual triples to str to make a set)
@@ -424,12 +488,31 @@ def overlap_triples():
 			else:
 				z+=1
 				negative_intersect.append(perms[i])
+		else:
+			break
+	for i in randomlist2:
+		if z2<len(intersect):
+			if str(list(perms2[i])) in set(map(str,list(map(list,intersect)))):#eliminating random triple if it exists in the intersect set (converted individiual triples to str to make a set)
+				emptylist2.append(i)
+			else:
+				z2+=1
+				negative_intersect2.append(perms2[i])
+		else:
+			break	
 	negative_intersect=np.asarray(negative_intersect)
+	negative_intersect2=np.asarray(negative_intersect2)
 	with codecs.open('Random_intersect_triples_TFCG_IDs.txt',"w","utf-8") as f:
 		for line in negative_intersect:
 			f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(TFCG_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(TFCG_uris_dict[line[4]])),str(line[5]),str(line[6])))
 	with codecs.open('Random_intersect_triples_FFCG_IDs.txt',"w","utf-8") as f:
 		for line in negative_intersect:
+			f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(FFCG_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(FFCG_uris_dict[line[4]])),str(line[5]),str(line[6])))
+	#For second pool
+	with codecs.open('Random2_intersect_triples_TFCG_IDs.txt',"w","utf-8") as f:
+		for line in negative_intersect2:
+			f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(TFCG_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(TFCG_uris_dict[line[4]])),str(line[5]),str(line[6])))
+	with codecs.open('Random2_intersect_triples_FFCG_IDs.txt',"w","utf-8") as f:
+		for line in negative_intersect2:
 			f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(FFCG_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(FFCG_uris_dict[line[4]])),str(line[5]),str(line[6])))
 	
 ##DRIVER CODE
