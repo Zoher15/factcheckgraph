@@ -1,5 +1,5 @@
 #PBS -k o
-#PBS -l nodes=1:ppn=12,vmem=180gb,walltime=24:00:00
+#PBS -l nodes=1:ppn=12,vmem=180gb,walltime=200:00:00
 #PBS -M zoher.kachwala@gmail.com
 #PBS -m abe
 #PBS -N 4_KLinker
