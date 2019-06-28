@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "experiment1.py", line 575, in <module>
+    overlap_triples()
+  File "experiment1.py", line 456, in overlap_triples
+    intersect_uris=np.asarray(list(set(TFCG_uris).intersection(set(FFCG_uris))))
+NameError: name 'TFCG_uris' is not defined
+
+real	1m20.746s
+user	0m3.714s
+sys	0m1.320s

@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "experiment1.py", line 575, in <module>
+    overlap_triples()
+  File "experiment1.py", line 536, in overlap_triples
+    f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(DBPedia_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(DBPedia_uris_dict[line[4]])),str(line[5]),str(line[6])))
+KeyError: 'http://dbpedia.org/resource/Violence_Against_Women_Act'
+
+real	1m28.952s
+user	0m32.515s
+sys	0m2.922s

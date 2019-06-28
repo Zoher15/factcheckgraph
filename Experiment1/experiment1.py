@@ -6,7 +6,7 @@ import rdflib
 from rdflib import BNode, Literal
 from rdflib.namespace import RDF
 from py2neo import Graph, NodeMatcher, RelationshipMatcher
-from itertools import permutations
+from itertools import combinations
 from sklearn import metrics
 import codecs
 import csv
@@ -146,19 +146,19 @@ def create_negative_samples(triples_tocheck_ID,dbpedia_uris):
 	with codecs.open(os.path.join(mode,mode+'_dbpedia_triples.txt'),"w","utf-8") as f:
 		for line in triples_tocheck_ID:
 			f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(line[1])),str(line[2]),str(line[3]),str(int(line[4])),str(line[5]),str(line[6])))
-	perm=permutations(dbpedia_uris,2)
-	perms=np.asarray(list(map(lambda x:[np.nan,int(uris_dict[x[0]]),np.nan,np.nan,int(uris_dict[x[1]]),np.nan,np.nan],perm)))
+	comb=combinations(dbpedia_uris,2)
+	combs=np.asarray(list(map(lambda x:[np.nan,int(uris_dict[x[0]]),np.nan,np.nan,int(uris_dict[x[1]]),np.nan,np.nan],comb)))
 	z=0
-	randomlist=np.random.choice(range(len(perms)),size=len(triples_tocheck_ID)*2,replace=False)
+	randomlist=np.random.choice(range(len(combs)),size=len(triples_tocheck_ID)*2,replace=False)
 	negative_triples_tocheck_ID=[]
 	emptylist=[]
 	for i in randomlist:
 		if z<len(triples_tocheck_ID):
-			if perms[i] in triples_tocheck_ID:
+			if combs[i] in triples_tocheck_ID:
 				emptylist.append(i)
 			else:
 				z+=1
-				negative_triples_tocheck_ID.append(perms[i])
+				negative_triples_tocheck_ID.append(combs[i])
 	negative_triples_tocheck_ID=np.asarray(negative_triples_tocheck_ID)
 	with codecs.open(os.path.join(mode,mode+'_negative_dbpedia_triples.txt'),"w","utf-8") as f:
 		for line in negative_triples_tocheck_ID:
@@ -453,7 +453,7 @@ def overlap_triples():
 	# FFCG_uris=np.load(os.path.join("FFCG","FFCG"+"_dbpedia_uris.npy"))
 	# FFCG_uris_dict={FFCG_uris_all[i]:i for i in range(len(FFCG_uris_all))}
 	#Uris common to both uri sets
-	intersect_uris=np.asarray(list(set(TFCG_uris).intersection(set(FFCG_uris))))
+	# intersect_uris=np.asarray(list(set(TFCG_uris).intersection(set(FFCG_uris))))
 	# np.save("intersect_dbpedia_uris.npy",list(intersect_uris))
 	intersect_uris=np.load("intersect_dbpedia_uris.npy")
 	# np.save("intersect_uris_triples.npy",intersect_uris_triples)
@@ -462,14 +462,15 @@ def overlap_triples():
 	# print("No. of uris present in triples common to both TFCG and FFCG:",len(intersect_uris_triples))
 	# with codecs.open("TFCG/TFCG_uris_dict.json","w","utf-8") as f:
 	# 	f.write(json.dumps(TFCG_uris_dict,ensure_ascii=False))
-	with codecs.open("TFCG/TFCG_uris_dict.json","w","utf-8") as f:
+	with codecs.open("TFCG/TFCG_uris_dict.json","r","utf-8") as f:
 		TFCG_uris_dict=json.loads(f.read())
 	# with codecs.open("FFCG/FFCG_uris_dict.json","w","utf-8") as f:
 	# 	f.write(json.dumps(FFCG_uris_dict,ensure_ascii=False))
-	with codecs.open("FFCG/FFCG_uris_dict.json","w","utf-8") as f:
+	with codecs.open("FFCG/FFCG_uris_dict.json","r","utf-8") as f:
 		FFCG_uris_dict=json.loads(f.read())
-	with codecs.open("/gpfs/home/z/k/zkachwal/Carbonate/DBPedia Data/dbpedia_uris_dict.json","w","utf-8") as f:
+	with codecs.open("/gpfs/home/z/k/zkachwal/Carbonate/DBPedia Data/dbpedia_uris_dict.json","r","utf-8") as f:
 		DBPedia_uris_dict=json.loads(f.read())
+	intersect_uris=np.asarray(list(set(intersect_uris).intersection(set(DBPedia_uris_dict.keys()))))
 	# with codecs.open('Intersect_triples_TFCG_IDs.txt',"w","utf-8") as f:
 	# 	for line in intersect:
 	# 		f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(TFCG_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(TFCG_uris_dict[line[4]])),str(line[5]),str(line[6])))
@@ -479,35 +480,35 @@ def overlap_triples():
 	#############################################################################################################################
 	#Random samples
 	#Limited to the pool of uris from the triples 507
-	# perm=permutations(intersect_uris_triples,2)
+	# comb=combinations(intersect_uris_triples,2)
 	#Pool of dbpedia uris common to both 1136
-	perm2=permutations(intersect_uris,2)
-	# perms=np.asarray([[np.nan,i[0],np.nan,np.nan,i[1],np.nan,np.nan] for i in perm])
-	perms2=np.asarray([[np.nan,i[0],np.nan,np.nan,i[1],np.nan,np.nan] for i in perm2])
+	comb2=combinations(intersect_uris,2)
+	# combs=np.asarray([[np.nan,i[0],np.nan,np.nan,i[1],np.nan,np.nan] for i in comb])
+	combs2=np.asarray([[np.nan,i[0],np.nan,np.nan,i[1],np.nan,np.nan] for i in comb2])
 	# z=0
 	# z2=0
-	# randomlist=np.random.choice(range(len(perms)),size=len(intersect)*2,replace=False)
-	# randomlist2=np.random.choice(range(len(perms2)),size=len(intersect)*2,replace=False)
+	# randomlist=np.random.choice(range(len(combs)),size=len(intersect)*2,replace=False)
+	# randomlist2=np.random.choice(range(len(combs2)),size=len(intersect)*2,replace=False)
 	# negative_intersect=[]
 	# negative_intersect2=[]
 	# emptylist=[]
 	# emptylist2=[]
 	# for i in randomlist:
 	# 	if z<len(intersect):
-	# 		if str(list(perms[i])) in set(map(str,list(map(list,intersect)))):#eliminating random triple if it exists in the intersect set (converted individiual triples to str to make a set)
+	# 		if str(list(combs[i])) in set(map(str,list(map(list,intersect)))):#eliminating random triple if it exists in the intersect set (converted individiual triples to str to make a set)
 	# 			emptylist.append(i)
 	# 		else:
 	# 			z+=1
-	# 			negative_intersect.append(perms[i])
+	# 			negative_intersect.append(combs[i])
 	# 	else:
 	# 		break
 	# for i in randomlist2:
 	# 	if z2<len(intersect):
-	# 		if str(list(perms2[i])) in set(map(str,list(map(list,intersect)))):#eliminating random triple if it exists in the intersect set (converted individiual triples to str to make a set)
+	# 		if str(list(combs2[i])) in set(map(str,list(map(list,intersect)))):#eliminating random triple if it exists in the intersect set (converted individiual triples to str to make a set)
 	# 			emptylist2.append(i)
 	# 		else:
 	# 			z2+=1
-	# 			negative_intersect2.append(perms2[i])
+	# 			negative_intersect2.append(combs2[i])
 	# 	else:
 	# 		break	
 	# negative_intersect=np.asarray(negative_intersect)
@@ -525,14 +526,24 @@ def overlap_triples():
 	# with codecs.open('Random2_intersect_triples_FFCG_IDs.txt',"w","utf-8") as f:
 	# 	for line in negative_intersect2:
 	# 		f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(FFCG_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(FFCG_uris_dict[line[4]])),str(line[5]),str(line[6])))
-	with codecs.open('Perm_triples_TFCG_IDs.txt',"w","utf-8") as f:
-		for line in perms2:
+	with codecs.open('Comb_triples_TFCG_IDs.txt',"w","utf-8") as f:
+		for line in combs2:
 			f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(TFCG_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(TFCG_uris_dict[line[4]])),str(line[5]),str(line[6])))
-	with codecs.open('Perm_triples_FFCG_IDs.txt',"w","utf-8") as f:
-		for line in perms2:
+	with codecs.open('Comb_triples_FFCG_IDs.txt',"w","utf-8") as f:
+		for line in combs2:
 			f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(FFCG_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(FFCG_uris_dict[line[4]])),str(line[5]),str(line[6])))
-	with codecs.open('Perm_triples_DBPedia_IDs.txt',"w","utf-8") as f:
-		for line in perms2:
+	partition=int(len(combs2)/4)
+	with codecs.open('1_Comb_triples_DBPedia_IDs.txt',"w","utf-8") as f:
+		for line in combs2[:partition]:
+			f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(DBPedia_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(DBPedia_uris_dict[line[4]])),str(line[5]),str(line[6])))
+	with codecs.open('2_Comb_triples_DBPedia_IDs.txt',"w","utf-8") as f:
+		for line in combs2[partition:2*partition]:
+			f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(DBPedia_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(DBPedia_uris_dict[line[4]])),str(line[5]),str(line[6])))
+	with codecs.open('3_Comb_triples_DBPedia_IDs.txt',"w","utf-8") as f:
+		for line in combs2[2*partition:3*partition]:
+			f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(DBPedia_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(DBPedia_uris_dict[line[4]])),str(line[5]),str(line[6])))
+	with codecs.open('4_Comb_triples_DBPedia_IDs.txt',"w","utf-8") as f:
+		for line in combs2[3*partition:]:
 			f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(DBPedia_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(DBPedia_uris_dict[line[4]])),str(line[5]),str(line[6])))
 ##DRIVER CODE
 # # Try to load stuff if files already exist
