@@ -440,21 +440,21 @@ def overlap_triples():
 	# intersect=intersect.values
 	#Uris common from the triples from DBPedia common to both
 	# intersect_uris_triples=np.asarray(list(set(intersect.flatten())))
-	# intersect_uris_triples=np.load("intersect_entity_triples_dbpedia.npy")
 	#transforming it into triples accepted by KLinker code
 	# intersect=np.asarray([[np.nan,i[0],np.nan,np.nan,i[1],np.nan,np.nan] for i in intersect])
 	# np.save("Intersect_entity_triples_dbpedia.npy",intersect)	
 	#loading FCG Uris
 	# TFCG_uris_all=np.load(os.path.join("TFCG","TFCG"+"_uris.npy"))
 	# FFCG_uris_all=np.load(os.path.join("FFCG","FFCG"+"_uris.npy"))
-	# TFCG_uris=np.load(os.path.join("TFCG","TFCG"+"_dbpedia_uris.npy"))
+	TFCG_uris=np.load(os.path.join("TFCG","TFCG"+"_dbpedia_uris.npy"))
 	# TFCG_uris_dict={TFCG_uris_all[i]:i for i in range(len(TFCG_uris_all))}
-	# FFCG_uris=np.load(os.path.join("FFCG","FFCG"+"_dbpedia_uris.npy"))
+	FFCG_uris=np.load(os.path.join("FFCG","FFCG"+"_dbpedia_uris.npy"))
 	# FFCG_uris_dict={FFCG_uris_all[i]:i for i in range(len(FFCG_uris_all))}
 	#Uris common to both uri sets
-	# intersect_uris=np.asarray(list(set(TFCG_uris).intersection(set(FFCG_uris))))
+	intersect_uris=np.asarray(list(set(TFCG_uris).intersection(set(FFCG_uris))))
 	# np.save("intersect_dbpedia_uris.npy",list(intersect_uris))
 	intersect_uris=np.load("intersect_dbpedia_uris.npy")
+	intersect_uris_triples=np.load("intersect_uris_triples.npy")
 	# np.save("intersect_uris_triples.npy",intersect_uris_triples)
 	# print("No. of uris common to both TFCG and FFCG:",len(intersect_uris))
 	# print("No. of triples common to both TFCG and FFCG:",len(intersect))
@@ -470,14 +470,15 @@ def overlap_triples():
 	# with codecs.open("/gpfs/home/z/k/zkachwal/Carbonate/DBPedia Data/dbpedia_uris_dict.json","r","utf-8") as f:
 	# 	DBPedia_uris_dict=json.loads(f.read())
 	# intersect_uris=np.asarray(list(set(intersect_uris).intersection(set(DBPedia_uris_dict.keys()))))
-	# with codecs.open('Intersect_triples_TFCG_IDs.txt',"w","utf-8") as f:
-	# 	for line in intersect:
-	# 		f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(TFCG_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(TFCG_uris_dict[line[4]])),str(line[5]),str(line[6])))
-	# with codecs.open('Intersect_triples_FFCG_IDs.txt',"w","utf-8") as f:
-	# 	for line in intersect:
-	# 		f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(FFCG_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(FFCG_uris_dict[line[4]])),str(line[5]),str(line[6])))
-	#############################################################################################################################
 	intersect=np.load("intersect_entity_triples_dbpedia.npy")
+	set_trace()
+	with codecs.open('Intersect_triples_TFCG_IDs.txt',"w","utf-8") as f:
+		for line in intersect:
+			f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(TFCG_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(TFCG_uris_dict[line[4]])),str(line[5]),str(line[6])))
+	with codecs.open('Intersect_triples_FFCG_IDs.txt',"w","utf-8") as f:
+		for line in intersect:
+			f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(FFCG_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(FFCG_uris_dict[line[4]])),str(line[5]),str(line[6])))
+	#############################################################################################################################
 	#Random samples
 	#Limited to the pool of uris from the triples 507
 	comb=combinations(intersect_uris_triples,2)
@@ -499,12 +500,7 @@ def overlap_triples():
 		else:
 			break
 	negative_intersect=np.asarray(negative_intersect)
-	with codecs.open('Intersect_triples_TFCG_IDs.txt',"w","utf-8") as f:
-		for line in combs:
-			f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(TFCG_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(TFCG_uris_dict[line[4]])),str(line[5]),str(line[6])))
-	with codecs.open('Intersect_triples_FFCG_IDs.txt',"w","utf-8") as f:
-		for line in combs:
-			f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(FFCG_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(FFCG_uris_dict[line[4]])),str(line[5]),str(line[6])))
+	set_trace()
 	with codecs.open('Random_intersect_triples_TFCG_IDs.txt',"w","utf-8") as f:
 		for line in negative_intersect:
 			f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(TFCG_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(TFCG_uris_dict[line[4]])),str(line[5]),str(line[6])))
