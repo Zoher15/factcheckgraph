@@ -429,29 +429,42 @@ def plot_overlap():
 	plt.close()
 
 def overlap_triples():
+	# '''
+	# TFCG Triples to check are triples with direct neighbor hits from dbpedia with TFCG uris
+	# FFCG Triples to check are triples with direct neighbor hits from dbpedia with FFCG uris
+	# '''
 	# TFCG_triples_tocheck=np.load(os.path.join("TFCG","TFCG"+"_entity_triples_dbpedia.npy"))
 	# FFCG_triples_tocheck=np.load(os.path.join("FFCG","FFCG"+"_entity_triples_dbpedia.npy"))
+	# '''
+	# We convert them into string format to be able to perform intersection of set
+	# '''
 	# TFCG_triples_tocheck=set(map(str,list(map(list,TFCG_triples_tocheck))))
 	# FFCG_triples_tocheck=set(map(str,list(map(list,FFCG_triples_tocheck))))
-	# #intersection needs to be done on string triple and not id triples
+	# intersect=TFCG_triples_tocheck.intersection(FFCG_triples_tocheck)
 	# intersect=set(map(str,list(map(list,intersect))))
-	# intersect=pd.DataFrame(map(eval,list(intersect))).drop(columns=[1])#dropping the predicate i.e. middle column 
+	# '''
+	# Converting from the string format and dropping the middle column i.e predicate
+	# '''
+	# intersect=pd.DataFrame(map(eval,list(intersect))).drop(columns=[1]).values
 	# intersect=list(map(np.asarray,intersect))
-	# intersect=intersect.values
-	#Uris common from the triples from DBPedia common to both
+	# '''
+	# Finding common uris from the triples
+	# '''
 	# intersect_uris_triples=np.asarray(list(set(intersect.flatten())))
-	#transforming it into triples accepted by KLinker code
+	# '''
+	# Knowledge Linker Accepts a particular format so converted them
+	# '''
 	# intersect=np.asarray([[np.nan,i[0],np.nan,np.nan,i[1],np.nan,np.nan] for i in intersect])
 	# np.save("Intersect_entity_triples_dbpedia.npy",intersect)	
 	#loading FCG Uris
 	# TFCG_uris_all=np.load(os.path.join("TFCG","TFCG"+"_uris.npy"))
 	# FFCG_uris_all=np.load(os.path.join("FFCG","FFCG"+"_uris.npy"))
-	TFCG_uris=np.load(os.path.join("TFCG","TFCG"+"_dbpedia_uris.npy"))
+	# TFCG_uris=np.load(os.path.join("TFCG","TFCG"+"_dbpedia_uris.npy"))
 	# TFCG_uris_dict={TFCG_uris_all[i]:i for i in range(len(TFCG_uris_all))}
-	FFCG_uris=np.load(os.path.join("FFCG","FFCG"+"_dbpedia_uris.npy"))
+	# FFCG_uris=np.load(os.path.join("FFCG","FFCG"+"_dbpedia_uris.npy"))
 	# FFCG_uris_dict={FFCG_uris_all[i]:i for i in range(len(FFCG_uris_all))}
 	#Uris common to both uri sets
-	intersect_uris=np.asarray(list(set(TFCG_uris).intersection(set(FFCG_uris))))
+	# intersect_uris=np.asarray(list(set(TFCG_uris).intersection(set(FFCG_uris))))
 	# np.save("intersect_dbpedia_uris.npy",list(intersect_uris))
 	intersect_uris=np.load("intersect_dbpedia_uris.npy")
 	intersect_uris_triples=np.load("intersect_uris_triples.npy")
@@ -471,6 +484,29 @@ def overlap_triples():
 	# 	DBPedia_uris_dict=json.loads(f.read())
 	# intersect_uris=np.asarray(list(set(intersect_uris).intersection(set(DBPedia_uris_dict.keys()))))
 	intersect=np.load("intersect_entity_triples_dbpedia.npy")
+	intersect=np.delete(intersect,1,1)
+	#############################################################################################################################
+	#Random samples
+	#Limited to the pool of uris from the triples 507
+	comb=combinations(intersect_uris_triples,2)
+	comb=np.asarray(list(map(list,comb)))
+	#Pool of dbpedia uris common to both 1136
+	comb2=combinations(intersect_uris,2)
+	z=0
+	randomlist=np.random.choice(range(len(comb)),size=len(intersect)*2,replace=False)
+	negative_intersect=[]
+	emptylist=[]
+	for i in randomlist:
+		if z<len(intersect):
+			if str(list(comb[i])) in set(map(str,list(map(list,intersect)))) or str(list(comb[i]).reverse()) in set(map(str,list(map(list,intersect)))):#eliminating random triple if it exists in the intersect set (converted individiual triples to str to make a set)
+				emptylist.append(i)
+			else:
+				z+=1
+				negative_intersect.append(comb[i])
+		else:
+			break
+	intersect=np.asarray([[np.nan,i[0],np.nan,np.nan,i[1],np.nan,np.nan] for i in intersect])
+	negative_intersect=np.asarray([[np.nan,i[0],np.nan,np.nan,i[1],np.nan,np.nan] for i in negative_intersect])
 	set_trace()
 	with codecs.open('Intersect_triples_TFCG_IDs.txt',"w","utf-8") as f:
 		for line in intersect:
@@ -478,29 +514,6 @@ def overlap_triples():
 	with codecs.open('Intersect_triples_FFCG_IDs.txt',"w","utf-8") as f:
 		for line in intersect:
 			f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(FFCG_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(FFCG_uris_dict[line[4]])),str(line[5]),str(line[6])))
-	#############################################################################################################################
-	#Random samples
-	#Limited to the pool of uris from the triples 507
-	comb=combinations(intersect_uris_triples,2)
-	#Pool of dbpedia uris common to both 1136
-	comb2=combinations(intersect_uris,2)
-	combs=np.asarray([[np.nan,i[0],np.nan,np.nan,i[1],np.nan,np.nan] for i in comb])
-	combs2=np.asarray([[np.nan,i[0],np.nan,np.nan,i[1],np.nan,np.nan] for i in comb2])
-	z=0
-	randomlist=np.random.choice(range(len(combs)),size=len(intersect)*2,replace=False)
-	negative_intersect=[]
-	emptylist=[]
-	for i in randomlist:
-		if z<len(intersect):
-			if str(list(combs[i])) in set(map(str,list(map(list,intersect)))) or str(list(combs[i]).reverse()) in set(map(str,list(map(list,intersect)))):#eliminating random triple if it exists in the intersect set (converted individiual triples to str to make a set)
-				emptylist.append(i)
-			else:
-				z+=1
-				negative_intersect.append(combs[i])
-		else:
-			break
-	negative_intersect=np.asarray(negative_intersect)
-	set_trace()
 	with codecs.open('Random_intersect_triples_TFCG_IDs.txt',"w","utf-8") as f:
 		for line in negative_intersect:
 			f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(TFCG_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(TFCG_uris_dict[line[4]])),str(line[5]),str(line[6])))
