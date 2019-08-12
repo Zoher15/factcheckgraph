@@ -96,10 +96,13 @@ def calculate_stats():
 			np.save(os.path.join(mode,mode+"_pathlen.npy"),pathlen)
 			np.save(os.path.join(mode,mode+"_pathlengths.npy"),pathlengths[mode])
 
-#Fetches the uris of all nodes in the give FactCheckGraph
+#Fetches the uris of all nodes in the given FactCheckGraph
 #Do note: It creates a dictionary assigning each uri an integer ID. This is to conform to the way Knowledge Linker accepts data 
 #It also finds dbpedia specific uris
 def save_uris():
+	G=nx.read_weighted_edgelist(os.path.join(mode,mode+"_edgelist.txt"))
+	Gc = max(nx.connected_component_subgraphs(G), key=len)
+	set_trace()
 	matcher_node = NodeMatcher(graph)
 	matcher_rel = RelationshipMatcher(graph)
 	uris=list(map(lambda x:x['uri'],list(matcher_node.match())))
@@ -279,15 +282,25 @@ def parse_dbpedia_triples():
 		#splitting them into subject,predicate,object
 		triple=list(map(str,triple))
 		subject,predicate,obj=triple
+		pair=list([subject,obj])
 		#Checking if subject and object is in the FCG_entities set
 		if subject in FCG_entities and obj in FCG_entities:
 			triple_list.append(triple)
+			if str(list([subject,obj])) in set(map(str,pair_list)) or str(list([obj,subject])) in set(map(str,pair_list)):
+				empty_list.append(list([subject,obj]))
+			else:
+				pair_list.append(pair)
 		i+=1
 	print(i)
-	print(len(triple_list))
-	print(len(entity_hitlist))
+	print("Triple_list:",len(triple_list))
+	print("Entity_hitlist:",len(entity_hitlist))
+	print("Pair_list:",len(pair_list))
+	print("Empty_list:",len(empty_list))
+	np.save("intersect_entity_triples_dbpedia.npy",triple_list)
+	np.save("intersect_entity_pairs_dbpedia.npy",pair_list)
 	np.save(os.path.join(mode,mode+"_entity_triples_dbpedia.npy"),triple_list)
-	return triplelist
+	return triple_list
+	return pair_list
 
 def plot_overlap():
 	Intersect_TFCG=pd.read_json("Intersect_TFCG_logdegree_u.json")
@@ -428,119 +441,153 @@ def plot_overlap():
 	# plt.show()
 	plt.close()
 
-def overlap_triples():
-	# '''
-	# TFCG Triples to check are triples with direct neighbor hits from dbpedia with TFCG uris
-	# FFCG Triples to check are triples with direct neighbor hits from dbpedia with FFCG uris
-	# '''
-	# TFCG_triples_tocheck=np.load(os.path.join("TFCG","TFCG"+"_entity_triples_dbpedia.npy"))
-	# FFCG_triples_tocheck=np.load(os.path.join("FFCG","FFCG"+"_entity_triples_dbpedia.npy"))
-	# '''
-	# We convert them into string format to be able to perform intersection of set
-	# '''
-	# TFCG_triples_tocheck=set(map(str,list(map(list,TFCG_triples_tocheck))))
-	# FFCG_triples_tocheck=set(map(str,list(map(list,FFCG_triples_tocheck))))
-	# intersect=TFCG_triples_tocheck.intersection(FFCG_triples_tocheck)
-	# intersect=set(map(str,list(map(list,intersect))))
-	# '''
-	# Converting from the string format and dropping the middle column i.e predicate
-	# '''
-	# intersect=pd.DataFrame(map(eval,list(intersect))).drop(columns=[1]).values
-	# intersect=list(map(np.asarray,intersect))
-	# '''
-	# Finding common uris from the triples
-	# '''
-	# intersect_uris_triples=np.asarray(list(set(intersect.flatten())))
-	# '''
-	# Knowledge Linker Accepts a particular format so converted them
-	# '''
-	# intersect=np.asarray([[np.nan,i[0],np.nan,np.nan,i[1],np.nan,np.nan] for i in intersect])
-	# np.save("Intersect_entity_triples_dbpedia.npy",intersect)	
-	#loading FCG Uris
-	# TFCG_uris_all=np.load(os.path.join("TFCG","TFCG"+"_uris.npy"))
-	# FFCG_uris_all=np.load(os.path.join("FFCG","FFCG"+"_uris.npy"))
-	# TFCG_uris=np.load(os.path.join("TFCG","TFCG"+"_dbpedia_uris.npy"))
-	# TFCG_uris_dict={TFCG_uris_all[i]:i for i in range(len(TFCG_uris_all))}
-	# FFCG_uris=np.load(os.path.join("FFCG","FFCG"+"_dbpedia_uris.npy"))
-	# FFCG_uris_dict={FFCG_uris_all[i]:i for i in range(len(FFCG_uris_all))}
-	#Uris common to both uri sets
-	# intersect_uris=np.asarray(list(set(TFCG_uris).intersection(set(FFCG_uris))))
-	# np.save("intersect_dbpedia_uris.npy",list(intersect_uris))
-	intersect_uris=np.load("intersect_dbpedia_uris.npy")
-	intersect_uris_triples=np.load("intersect_uris_triples.npy")
-	# np.save("intersect_uris_triples.npy",intersect_uris_triples)
-	# print("No. of uris common to both TFCG and FFCG:",len(intersect_uris))
-	# print("No. of triples common to both TFCG and FFCG:",len(intersect))
-	# print("No. of uris present in triples common to both TFCG and FFCG:",len(intersect_uris_triples))
-	# with codecs.open("TFCG/TFCG_uris_dict.json","w","utf-8") as f:
-	# 	f.write(json.dumps(TFCG_uris_dict,ensure_ascii=False))
+def TFCGvsFFCG():
+	#We load all uris as we need to assign each a unique int ID to work with knowledge linkers
+	TFCG_uris_all=np.load(os.path.join("TFCG","TFCG"+"_uris.npy"))
+	FFCG_uris_all=np.load(os.path.join("FFCG","FFCG"+"_uris.npy"))
+	#loading DBPedia FCG Uris as they are our focus
+	TFCG_uris=np.load(os.path.join("TFCG","TFCG"+"_dbpedia_uris.npy"))
+	FFCG_uris=np.load(os.path.join("FFCG","FFCG"+"_dbpedia_uris.npy"))
+	#Creating dictionaries to assign unique ids to each uri for knowledge linker to process
+	TFCG_uris_dict={TFCG_uris_all[i]:i for i in range(len(TFCG_uris_all))}
+	FFCG_uris_dict={FFCG_uris_all[i]:i for i in range(len(FFCG_uris_all))}
+	#Saving the dictionaries
+	with codecs.open("TFCG/TFCG_uris_dict.json","w","utf-8") as f:
+		f.write(json.dumps(TFCG_uris_dict,ensure_ascii=False))
+	with codecs.open("FFCG/FFCG_uris_dict.json","w","utf-8") as f:
+		f.write(json.dumps(FFCG_uris_dict,ensure_ascii=False))
+	#Loading the dictionaries
 	with codecs.open("TFCG/TFCG_uris_dict.json","r","utf-8") as f:
 		TFCG_uris_dict=json.loads(f.read())
-	# with codecs.open("FFCG/FFCG_uris_dict.json","w","utf-8") as f:
-	# 	f.write(json.dumps(FFCG_uris_dict,ensure_ascii=False))
 	with codecs.open("FFCG/FFCG_uris_dict.json","r","utf-8") as f:
 		FFCG_uris_dict=json.loads(f.read())
-	# with codecs.open("/gpfs/home/z/k/zkachwal/Carbonate/DBPedia Data/dbpedia_uris_dict.json","r","utf-8") as f:
-	# 	DBPedia_uris_dict=json.loads(f.read())
-	# intersect_uris=np.asarray(list(set(intersect_uris).intersection(set(DBPedia_uris_dict.keys()))))
-	intersect=np.load("intersect_entity_triples_dbpedia.npy")
-	intersect=np.delete(intersect,1,1)
-	#############################################################################################################################
-	#Random samples
-	#Limited to the pool of uris from the triples 507
-	comb=combinations(intersect_uris_triples,2)
+	with codecs.open("/gpfs/home/z/k/zkachwal/Carbonate/DBPedia Data/dbpedia_uris_dict.json","r","utf-8") as f:
+		DBPedia_uris_dict=json.loads(f.read())
+	#Performing intersection betwen TFCG, FFCG and DBPedia
+	intersect_uris=np.asarray(list(set(TFCG_uris).intersection(set(FFCG_uris))))
+	intersect_uris=np.asarray(list(set(intersect_uris).intersection(set(DBPedia_uris_dict.keys()))))
+	#Save the intersection set
+	np.save("intersect_dbpedia_uris.npy",list(intersect_uris))
+	#Load the intersection set
+	intersect_uris=np.load("intersect_dbpedia_uris.npy")
+	#Find all possible combinations of these uris
+	comb=combinations(intersect_uris,2)
 	comb=np.asarray(list(map(list,comb)))
-	#Pool of dbpedia uris common to both 1136
-	comb2=combinations(intersect_uris,2)
-	z=0
-	randomlist=np.random.choice(range(len(comb)),size=len(intersect)*2,replace=False)
-	negative_intersect=[]
-	emptylist=[]
-	for i in randomlist:
-		if z<len(intersect):
-			if str(list(comb[i])) in set(map(str,list(map(list,intersect)))) or str(list(comb[i]).reverse()) in set(map(str,list(map(list,intersect)))):#eliminating random triple if it exists in the intersect set (converted individiual triples to str to make a set)
-				emptylist.append(i)
+	#These are the pairs that are "true" by our definition: They are connected in dbpedia
+	intersect_true_pairs=np.load("intersect_entity_pairs_dbpedia.npy")
+	#Converting to a set to eliminate duplicate pairs
+	intersect_true_pairs_set=set(list(map(str,list(map(set,intersect_true_pairs)))))
+	#Converting it back. Getting rid of pairs where both uris are duplicates, as well as duplicate of each pair
+	intersect_true_pairs=np.asarray([i for i in list(map(list,list(map(eval,list(intersect_true_pairs_set))))) if len(i)==2])
+	#Finding uris that are only part of true pairs
+	intersect_true_pairs_uris=list(set(intersect_true_pairs.flatten()))
+	#Choosing 2n random pairs, where n is the lenght of the total true_pairs 
+	random_pairs=np.random.choice(range(len(comb)),size=len(intersect_true_pairs)*2,replace=False)
+	intersect_false_pairs=[]
+	rejected_pairs=[]
+	set_trace()
+	#Rejecting pairs from random pairs that are already present in true pairs
+	counter=0
+	for i in random_pairs:
+		if counter<len(intersect_true_pairs):
+			if str(set(comb[i])) in intersect_true_pairs_set or str(set(list(comb[i]).reverse())) in intersect_true_pairs_set:#eliminating random triple if it exists in the intersect set (converted individiual triples to str to make a set)
+				rejected_pairs.append(comb[i])
 			else:
-				z+=1
-				negative_intersect.append(comb[i])
+				counter+=1
+				intersect_false_pairs.append(comb[i])
 		else:
 			break
+	#Find all possible combinations of uris that only part of the above true pairs
+	comb2=combinations(intersect_true_pairs_uris,2)
+	comb2=np.asarray(list(map(list,comb2)))
+	#Choosing 2n random pairs of the comb_trueonly, where n is the lenght of the total true_pairs 
+	random_pairs2=np.random.choice(range(len(comb2)),size=len(intersect_true_pairs)*2,replace=False)
+	intersect_false_pairs2=[]
+	rejected_pairs2=[]
+	#Rejecting pairs from random pairs that are already present in true pairs
+	counter=0
+	for i in random_pairs2:
+		if counter<len(intersect_true_pairs):
+			if str(set(comb2[i])) in intersect_true_pairs_set or str(set(list(comb2[i]).reverse())) in intersect_true_pairs_set:#eliminating random triple if it exists in the intersect set (converted individiual triples to str to make a set)
+				rejected_pairs2.append(comb2[i])
+			else:
+				counter+=1
+				intersect_false_pairs2.append(comb2[i])
+		else:
+			break
+
+
+def overlap_triples():
 	intersect=np.asarray([[np.nan,i[0],np.nan,np.nan,i[1],np.nan,np.nan] for i in intersect])
 	negative_intersect=np.asarray([[np.nan,i[0],np.nan,np.nan,i[1],np.nan,np.nan] for i in negative_intersect])
-	set_trace()
-	with codecs.open('Intersect_triples_TFCG_IDs.txt',"w","utf-8") as f:
-		for line in intersect:
-			f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(TFCG_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(TFCG_uris_dict[line[4]])),str(line[5]),str(line[6])))
-	with codecs.open('Intersect_triples_FFCG_IDs.txt',"w","utf-8") as f:
-		for line in intersect:
-			f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(FFCG_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(FFCG_uris_dict[line[4]])),str(line[5]),str(line[6])))
-	with codecs.open('Random_intersect_triples_TFCG_IDs.txt',"w","utf-8") as f:
-		for line in negative_intersect:
-			f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(TFCG_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(TFCG_uris_dict[line[4]])),str(line[5]),str(line[6])))
-	with codecs.open('Random_intersect_triples_FFCG_IDs.txt',"w","utf-8") as f:
-		for line in negative_intersect:
-			f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(FFCG_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(FFCG_uris_dict[line[4]])),str(line[5]),str(line[6])))
-	#For second pool
-
-	# with codecs.open('Comb_triples_TFCG_IDs.txt',"w","utf-8") as f:
-	# 	for line in combs2:
+	# with codecs.open('Intersect_triples_TFCG_IDs.txt',"w","utf-8") as f:
+	# 	for line in intersect:
 	# 		f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(TFCG_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(TFCG_uris_dict[line[4]])),str(line[5]),str(line[6])))
-	# with codecs.open('Comb_triples_FFCG_IDs.txt',"w","utf-8") as f:
-	# 	for line in combs2:
+	# with codecs.open('Intersect_triples_FFCG_IDs.txt',"w","utf-8") as f:
+	# 	for line in intersect:
 	# 		f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(FFCG_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(FFCG_uris_dict[line[4]])),str(line[5]),str(line[6])))
-	# partition=int(len(combs2)/4)
-	# with codecs.open('1_Comb_triples_DBPedia_IDs.txt',"w","utf-8") as f:
-	# 	for line in combs2[:partition]:
-	# 		f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(DBPedia_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(DBPedia_uris_dict[line[4]])),str(line[5]),str(line[6])))
-	# with codecs.open('2_Comb_triples_DBPedia_IDs.txt',"w","utf-8") as f:
-	# 	for line in combs2[partition:2*partition]:
-	# 		f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(DBPedia_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(DBPedia_uris_dict[line[4]])),str(line[5]),str(line[6])))
-	# with codecs.open('3_Comb_triples_DBPedia_IDs.txt',"w","utf-8") as f:
-	# 	for line in combs2[2*partition:3*partition]:
-	# 		f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(DBPedia_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(DBPedia_uris_dict[line[4]])),str(line[5]),str(line[6])))
-	# with codecs.open('4_Comb_triples_DBPedia_IDs.txt',"w","utf-8") as f:
-	# 	for line in combs2[3*partition:]:
-	# 		f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(DBPedia_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(DBPedia_uris_dict[line[4]])),str(line[5]),str(line[6])))
+	with codecs.open('Intersect_triples_DBPedia_IDs.txt',"w","utf-8") as f:
+		for line in intersect:
+			f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(DBPedia_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(DBPedia_uris_dict[line[4]])),str(line[5]),str(line[6])))
+	# with codecs.open('Random_intersect_triples_TFCG_IDs.txt',"w","utf-8") as f:
+	# 	for line in negative_intersect:
+	# 		f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(TFCG_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(TFCG_uris_dict[line[4]])),str(line[5]),str(line[6])))
+	# with codecs.open('Random_intersect_triples_FFCG_IDs.txt',"w","utf-8") as f:
+	# 	for line in negative_intersect:
+	# 		f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(FFCG_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(FFCG_uris_dict[line[4]])),str(line[5]),str(line[6])))
+	with codecs.open('Random_intersect_triples_DBPedia_IDs.txt',"w","utf-8") as f:
+		for line in negative_intersect:
+			f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(DBPedia_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(DBPedia_uris_dict[line[4]])),str(line[5]),str(line[6])))
+	#For second pool
+# 	splits=28
+# 	hours=30
+# 	partition=int(len(intersect)/splits)
+# 	set_trace()
+# 	for i in range(splits-1,splits):	
+# 		with codecs.open(str(i+1)+'_Comb_triples_DBPedia_IDs.txt',"w","utf-8") as f:
+# 			for line in intersect[partition*i:partition*(i+1)]:
+# 				f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(DBPedia_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(DBPedia_uris_dict[line[4]])),str(line[5]),str(line[6])))
+# 		with codecs.open(str(i+1)+'_job.sh',"w","utf-8") as f:
+# 			f.write('''
+# #PBS -k o
+# #PBS -l nodes=1:ppn=12,vmem=180gb,walltime={}:00:00
+# #PBS -M zoher.kachwala@gmail.com
+# #PBS -m abe
+# #PBS -N {}_KLinker
+# #PBS -j oe
+# source /N/u/zkachwal/Carbonate/miniconda3/etc/profile.d/conda.sh
+# conda activate env-kl
+# cd /gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph/Experiment1
+# time klinker linkpred /gpfs/home/z/k/zkachwal/Carbonate/DBPedia\\ Data/dbpedia_uris.txt /gpfs/home/z/k/zkachwal/Carbonate/DBPedia\\ Data/dbpedia_edgelist.npy {}_Comb_triples_DBPedia_IDs.txt {}_Comb_triples_DBPedia_IDs.json -u -n 12
+# 				'''.format(hours,i+1,i+1,i+1))
+# 	with codecs.open(str(splits+1)+'_Comb_triples_DBPedia_IDs.txt',"w","utf-8") as f:
+# 		for line in intersect[splits*partition:]:
+# 			f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(DBPedia_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(DBPedia_uris_dict[line[4]])),str(line[5]),str(line[6])))
+# 	with codecs.open(str(splits+1)+'_job.sh',"w","utf-8") as f:
+# 		f.write('''
+# #PBS -k o
+# #PBS -l nodes=1:ppn=12,vmem=180gb,walltime={}:00:00
+# #PBS -M zoher.kachwala@gmail.com
+# #PBS -m abe
+# #PBS -N {}_KLinker
+# #PBS -j oe
+# source /N/u/zkachwal/Carbonate/miniconda3/etc/profile.d/conda.sh
+# conda activate env-kl
+# cd /gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph/Experiment1
+# time klinker linkpred /gpfs/home/z/k/zkachwal/Carbonate/DBPedia\\ Data/dbpedia_uris.txt /gpfs/home/z/k/zkachwal/Carbonate/DBPedia\\ Data/dbpedia_edgelist.npy {}_Comb_triples_DBPedia_IDs.txt {}_Comb_triples_DBPedia_IDs.json -u -n 12
+# 			'''.format(hours,splits+1,splits+1,splits+1))
+
+# def compile_db_triples():
+# 	splits=28
+# 	combined=pd.DataFrame()
+# 	for i in range(splits+1):
+# 		a=pd.read_json(str(i+1)+"_Comb_triples_DBPedia_IDs.json")
+# 		print((i+1),len(a))
+# 		combined=pd.concat([combined,a],ignore_index=True)
+# 	print(len(combined))
+# 	combined['label']="DBPedia"
+# 	dbpedia_scores=list(combined['simil'])
+# 	np.save("dbpedia_scores.npy",dbpedia_scores)
 ##DRIVER CODE
 # # Try to load stuff if files already exist
 # try:
@@ -579,4 +626,3 @@ def overlap_triples():
 #klinker linkpred TFCG_uris.txt TFCG_edgelist.npy TFCG_dbpedia_triples.txt TFCG_u_logdegree_+ve.json -u -n 1 -w logdegree
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # calculate_stats()
-overlap_triples()

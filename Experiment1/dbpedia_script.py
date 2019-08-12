@@ -15,24 +15,34 @@ g.parse('/gpfs/home/z/k/zkachwal/Carbonate/DBPedia Data/dbpedia_graph.nt',format
 
 FCG_entities=set(list(np.load("intersect_dbpedia_uris.npy")))
 triple_list=[]
+pair_list=[]
 entity_hitlist=[]
+empty_list=[]
 i=0
 #Looping over triples in the graph
 for triple in g:
 	#splitting them into subject,predicate,object
 	triple=list(map(str,triple))
 	subject,predicate,obj=triple
+	pair=list([subject,obj])
 	#Checking if subject and object is in the FCG_entities set
 	if subject in FCG_entities and obj in FCG_entities:
 		triple_list.append(triple)
+		if str(list([subject,obj])) in set(map(str,pair_list)) or str(list([obj,subject])) in set(map(str,pair_list)):
+			empty_list.append(list([subject,obj]))
+		else:
+			pair_list.append(pair)
 	i+=1
 print(i)
 # with open("FCG_entity_triples_dbpedia.csv",'w',encoding='utf-8') as resultFile:
 # 	wr = csv.writer(resultFile)
 # 	wr.writerow(triple_list)
-print(len(triple_list))
-print(len(entity_hitlist))
+print("Triple_list:",len(triple_list))
+print("Entity_hitlist:",len(entity_hitlist))
+print("Pair_list:",len(pair_list))
+print("Empty_list:",len(empty_list))
 np.save("intersect_entity_triples_dbpedia.npy",triple_list)
+np.save("intersect_entity_pairs_dbpedia.npy",pair_list)
 
 # for mode in ["FFCG","TFCG"]:
 # 	# FCG_entities=set(np.load(os.path.join(mode,mode+"_dbpedia_uris.npy")))
