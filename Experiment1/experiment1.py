@@ -515,7 +515,7 @@ def TFCGvsFFCG():
 				intersect_false_pairs2.append(intersect_all_pairs2[i])
 		else:
 			break
-	write_pairs_tofile(intersect_true_pairs,intersect_false_pairs,intersect_false_pairs2)
+	write_pairs_tofile(intersect_true_pairs,intersect_false_pairs,intersect_false_pairs2,TFCG_uris_dict,FFCG_uris_dict,DBpedia_uris_dict)
 
 def write_pairs_tofile(intersect_true_pairs,intersect_false_pairs,intersect_false_pairs2,TFCG_uris_dict,FFCG_uris_dict,DBpedia_uris_dict):
 	# Reformatting according to the input format acccepted by Knowledge Linker
