@@ -471,8 +471,8 @@ def TFCGvsFFCG():
 	#Load the intersection set
 	intersect_uris=np.load("intersect_dbpedia_uris.npy")
 	#Find all possible combinations of these uris
-	comb=combinations(intersect_uris,2)
-	comb=np.asarray(list(map(list,comb)))
+	intersect_all_pairs=combinations(intersect_uris,2)
+	intersect_all_pairs=np.asarray(list(map(list,intersect_all_pairs)))
 	#These are the pairs that are "true" by our definition: They are connected in dbpedia
 	intersect_true_pairs=np.load("intersect_entity_pairs_dbpedia.npy")
 	#Converting to a set to eliminate duplicate pairs
@@ -482,7 +482,7 @@ def TFCGvsFFCG():
 	#Finding uris that are only part of true pairs
 	intersect_true_pairs_uris=list(set(intersect_true_pairs.flatten()))
 	#Choosing 2n random pairs, where n is the lenght of the total true_pairs 
-	random_pairs=np.random.choice(range(len(comb)),size=len(intersect_true_pairs)*2,replace=False)
+	random_pairs=np.random.choice(range(len(intersect_all_pairs)),size=len(intersect_true_pairs)*2,replace=False)
 	intersect_false_pairs=[]
 	rejected_pairs=[]
 	set_trace()
@@ -490,105 +490,132 @@ def TFCGvsFFCG():
 	counter=0
 	for i in random_pairs:
 		if counter<len(intersect_true_pairs):
-			if str(set(comb[i])) in intersect_true_pairs_set or str(set(list(comb[i]).reverse())) in intersect_true_pairs_set:#eliminating random triple if it exists in the intersect set (converted individiual triples to str to make a set)
-				rejected_pairs.append(comb[i])
+			if str(set(intersect_all_pairs[i])) in intersect_true_pairs_set or str(set(list(intersect_all_pairs[i]).reverse())) in intersect_true_pairs_set:#eliminating random triple if it exists in the intersect set (converted individiual triples to str to make a set)
+				rejected_pairs.append(intersect_all_pairs[i])
 			else:
 				counter+=1
-				intersect_false_pairs.append(comb[i])
+				intersect_false_pairs.append(intersect_all_pairs[i])
 		else:
 			break
 	#Find all possible combinations of uris that only part of the above true pairs
-	comb2=combinations(intersect_true_pairs_uris,2)
-	comb2=np.asarray(list(map(list,comb2)))
-	#Choosing 2n random pairs of the comb_trueonly, where n is the lenght of the total true_pairs 
-	random_pairs2=np.random.choice(range(len(comb2)),size=len(intersect_true_pairs)*2,replace=False)
+	intersect_all_pairs2=combinations(intersect_true_pairs_uris,2)
+	intersect_all_pairs2=np.asarray(list(map(list,intersect_all_pairs2)))
+	#Choosing 2n random pairs of the intersect_true_pairs, where n is the lenght of the total true_pairs 
+	random_pairs2=np.random.choice(range(len(intersect_all_pairs2)),size=len(intersect_true_pairs)*2,replace=False)
 	intersect_false_pairs2=[]
 	rejected_pairs2=[]
 	#Rejecting pairs from random pairs that are already present in true pairs
 	counter=0
 	for i in random_pairs2:
 		if counter<len(intersect_true_pairs):
-			if str(set(comb2[i])) in intersect_true_pairs_set or str(set(list(comb2[i]).reverse())) in intersect_true_pairs_set:#eliminating random triple if it exists in the intersect set (converted individiual triples to str to make a set)
-				rejected_pairs2.append(comb2[i])
+			if str(set(intersect_all_pairs2[i])) in intersect_true_pairs_set or str(set(list(intersect_all_pairs2[i]).reverse())) in intersect_true_pairs_set:#eliminating random triple if it exists in the intersect set (converted individiual triples to str to make a set)
+				rejected_pairs2.append(intersect_all_pairs2[i])
 			else:
 				counter+=1
-				intersect_false_pairs2.append(comb2[i])
+				intersect_false_pairs2.append(intersect_all_pairs2[i])
 		else:
 			break
+	write_pairs_tofile(intersect_true_pairs,intersect_false_pairs,intersect_false_pairs2)
 
+def write_pairs_tofile(intersect_true_pairs,intersect_false_pairs,intersect_false_pairs2,TFCG_uris_dict,FFCG_uris_dict,DBpedia_uris_dict):
+	# Reformatting according to the input format acccepted by Knowledge Linker
+	intersect_true_pairs=np.asarray([[np.nan,i[0],np.nan,np.nan,i[1],np.nan,np.nan] for i in intersect_true_pairs])
+	intersect_false_pairs=np.asarray([[np.nan,i[0],np.nan,np.nan,i[1],np.nan,np.nan] for i in intersect_false_pairs])
+	intersect_false_pairs2=np.asarray([[np.nan,i[0],np.nan,np.nan,i[1],np.nan,np.nan] for i in intersect_false_pairs2])
+	######################################################################Writing True Pairs
+	# Writing true pairs to file using TFCG entity IDs
+	with codecs.open('Intersect_true_pairs_TFCG_IDs.txt',"w","utf-8") as f:
+		for line in intersect_true_pairs:
+			f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(TFCG_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(TFCG_uris_dict[line[4]])),str(line[5]),str(line[6])))
+	# Writing true pairs to file using FFCG entity IDs
+	with codecs.open('Intersect_true_pairs_FFCG_IDs.txt',"w","utf-8") as f:
+		for line in intersect_true_pairs:
+			f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(FFCG_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(FFCG_uris_dict[line[4]])),str(line[5]),str(line[6])))
+	# Writing true pairs to file using DBPedia entity IDs
+	with codecs.open('Intersect_true_pairs_DBPedia_IDs.txt',"w","utf-8") as f:
+		for line in intersect_true_pairs:
+			f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(DBPedia_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(DBPedia_uris_dict[line[4]])),str(line[5]),str(line[6])))
+	######################################################################Writing False Pairs
+	# Writing false pairs to file using TFCG entity IDs
+	with codecs.open('Intersect_false_pairs_TFCG_IDs.txt',"w","utf-8") as f:
+		for line in intersect_false_pairs:
+			f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(TFCG_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(TFCG_uris_dict[line[4]])),str(line[5]),str(line[6])))
+	# Writing false pairs to file using FFCG entity IDs
+	with codecs.open('Intersect_false_pairs_FFCG_IDs.txt',"w","utf-8") as f:
+		for line in intersect_false_pairs:
+			f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(FFCG_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(FFCG_uris_dict[line[4]])),str(line[5]),str(line[6])))
+	# Writing false pairs to file using DBPedia entity IDs
+	with codecs.open('Intersect_false_pairs_DBPedia_IDs.txt',"w","utf-8") as f:
+		for line in intersect_false_pairs:
+			f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(DBPedia_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(DBPedia_uris_dict[line[4]])),str(line[5]),str(line[6])))
+	######################################################################Writing False Pairs 2
+	# Writing false pairs 2 to file using TFCG entity IDs
+	with codecs.open('Intersect_false_pairs_TFCG_IDs.txt',"w","utf-8") as f:
+		for line in intersect_false_pairs2:
+			f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(TFCG_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(TFCG_uris_dict[line[4]])),str(line[5]),str(line[6])))
+	# Writing false pairs 2 to file using FFCG entity IDs
+	with codecs.open('Intersect_false_pairs_FFCG_IDs.txt',"w","utf-8") as f:
+		for line in intersect_false_pairs2:
+			f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(FFCG_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(FFCG_uris_dict[line[4]])),str(line[5]),str(line[6])))
+	# Writing false pairs 2 to file using DBPedia entity IDs
+	with codecs.open('Intersect_false_pairs_DBPedia_IDs.txt',"w","utf-8") as f:
+		for line in intersect_false_pairs2:
+			f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(DBPedia_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(DBPedia_uris_dict[line[4]])),str(line[5]),str(line[6])))
 
-def overlap_triples():
-	intersect=np.asarray([[np.nan,i[0],np.nan,np.nan,i[1],np.nan,np.nan] for i in intersect])
-	negative_intersect=np.asarray([[np.nan,i[0],np.nan,np.nan,i[1],np.nan,np.nan] for i in negative_intersect])
-	# with codecs.open('Intersect_triples_TFCG_IDs.txt',"w","utf-8") as f:
-	# 	for line in intersect:
-	# 		f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(TFCG_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(TFCG_uris_dict[line[4]])),str(line[5]),str(line[6])))
-	# with codecs.open('Intersect_triples_FFCG_IDs.txt',"w","utf-8") as f:
-	# 	for line in intersect:
-	# 		f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(FFCG_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(FFCG_uris_dict[line[4]])),str(line[5]),str(line[6])))
-	with codecs.open('Intersect_triples_DBPedia_IDs.txt',"w","utf-8") as f:
-		for line in intersect:
-			f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(DBPedia_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(DBPedia_uris_dict[line[4]])),str(line[5]),str(line[6])))
-	# with codecs.open('Random_intersect_triples_TFCG_IDs.txt',"w","utf-8") as f:
-	# 	for line in negative_intersect:
-	# 		f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(TFCG_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(TFCG_uris_dict[line[4]])),str(line[5]),str(line[6])))
-	# with codecs.open('Random_intersect_triples_FFCG_IDs.txt',"w","utf-8") as f:
-	# 	for line in negative_intersect:
-	# 		f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(FFCG_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(FFCG_uris_dict[line[4]])),str(line[5]),str(line[6])))
-	with codecs.open('Random_intersect_triples_DBPedia_IDs.txt',"w","utf-8") as f:
-		for line in negative_intersect:
-			f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(DBPedia_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(DBPedia_uris_dict[line[4]])),str(line[5]),str(line[6])))
+def write_pairs_tofile_bulk(intersect_all_pairs,TFCG_uris_dict,FFCG_uris_dict,DBpedia_uris_dict):
+	# Reformatting according to the input format acccepted by Knowledge Linker
+	intersect_all_pairs=np.asarray([[np.nan,i[0],np.nan,np.nan,i[1],np.nan,np.nan] for i in intersect_all_pairs])
 	#For second pool
-# 	splits=28
-# 	hours=30
-# 	partition=int(len(intersect)/splits)
-# 	set_trace()
-# 	for i in range(splits-1,splits):	
-# 		with codecs.open(str(i+1)+'_Comb_triples_DBPedia_IDs.txt',"w","utf-8") as f:
-# 			for line in intersect[partition*i:partition*(i+1)]:
-# 				f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(DBPedia_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(DBPedia_uris_dict[line[4]])),str(line[5]),str(line[6])))
-# 		with codecs.open(str(i+1)+'_job.sh',"w","utf-8") as f:
-# 			f.write('''
-# #PBS -k o
-# #PBS -l nodes=1:ppn=12,vmem=180gb,walltime={}:00:00
-# #PBS -M zoher.kachwala@gmail.com
-# #PBS -m abe
-# #PBS -N {}_KLinker
-# #PBS -j oe
-# source /N/u/zkachwal/Carbonate/miniconda3/etc/profile.d/conda.sh
-# conda activate env-kl
-# cd /gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph/Experiment1
-# time klinker linkpred /gpfs/home/z/k/zkachwal/Carbonate/DBPedia\\ Data/dbpedia_uris.txt /gpfs/home/z/k/zkachwal/Carbonate/DBPedia\\ Data/dbpedia_edgelist.npy {}_Comb_triples_DBPedia_IDs.txt {}_Comb_triples_DBPedia_IDs.json -u -n 12
-# 				'''.format(hours,i+1,i+1,i+1))
-# 	with codecs.open(str(splits+1)+'_Comb_triples_DBPedia_IDs.txt',"w","utf-8") as f:
-# 		for line in intersect[splits*partition:]:
-# 			f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(DBPedia_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(DBPedia_uris_dict[line[4]])),str(line[5]),str(line[6])))
-# 	with codecs.open(str(splits+1)+'_job.sh',"w","utf-8") as f:
-# 		f.write('''
-# #PBS -k o
-# #PBS -l nodes=1:ppn=12,vmem=180gb,walltime={}:00:00
-# #PBS -M zoher.kachwala@gmail.com
-# #PBS -m abe
-# #PBS -N {}_KLinker
-# #PBS -j oe
-# source /N/u/zkachwal/Carbonate/miniconda3/etc/profile.d/conda.sh
-# conda activate env-kl
-# cd /gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph/Experiment1
-# time klinker linkpred /gpfs/home/z/k/zkachwal/Carbonate/DBPedia\\ Data/dbpedia_uris.txt /gpfs/home/z/k/zkachwal/Carbonate/DBPedia\\ Data/dbpedia_edgelist.npy {}_Comb_triples_DBPedia_IDs.txt {}_Comb_triples_DBPedia_IDs.json -u -n 12
-# 			'''.format(hours,splits+1,splits+1,splits+1))
+	splits=28
+	hours=30
+	partition=int(len(intersect_all_pairs)/splits)
+	for i in range(splits-1,splits):	
+		with codecs.open(str(i+1)+'_part_intersect_all_pairs_DBPedia_IDs.txt',"w","utf-8") as f:
+			for line in intersect_all_pairs[partition*i:partition*(i+1)]:
+				f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(DBPedia_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(DBPedia_uris_dict[line[4]])),str(line[5]),str(line[6])))
+		with codecs.open(str(i+1)+'_job.sh',"w","utf-8") as f:
+			f.write('''
+#PBS -k o
+#PBS -l nodes=1:ppn=12,vmem=180gb,walltime={}:00:00
+#PBS -M zoher.kachwala@gmail.com
+#PBS -m abe
+#PBS -N {}_KLinker
+#PBS -j oe
+source /N/u/zkachwal/Carbonate/miniconda3/etc/profile.d/conda.sh
+conda activate env-kl
+cd /gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph/Experiment1
+time klinker linkpred /gpfs/home/z/k/zkachwal/Carbonate/DBPedia\\ Data/dbpedia_uris.txt /gpfs/home/z/k/zkachwal/Carbonate/DBPedia\\ Data/dbpedia_edgelist.npy {}_part_intersect_all_pairs_DBPedia_IDs.txt {}_part_intersect_all_pairs_DBPedia_IDs.json -u -n 12
+				'''.format(hours,i+1,i+1,i+1))
+	with codecs.open(str(splits+1)+'_part_intersect_all_pairs_DBPedia_IDs.txt',"w","utf-8") as f:
+		for line in intersect_all_pairs[splits*partition:]:
+			f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(DBPedia_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(DBPedia_uris_dict[line[4]])),str(line[5]),str(line[6])))
+	with codecs.open(str(splits+1)+'_job.sh',"w","utf-8") as f:
+		f.write('''
+#PBS -k o
+#PBS -l nodes=1:ppn=12,vmem=180gb,walltime={}:00:00
+#PBS -M zoher.kachwala@gmail.com
+#PBS -m abe
+#PBS -N {}_KLinker
+#PBS -j oe
+source /N/u/zkachwal/Carbonate/miniconda3/etc/profile.d/conda.sh
+conda activate env-kl
+cd /gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph/Experiment1
+time klinker linkpred /gpfs/home/z/k/zkachwal/Carbonate/DBPedia\\ Data/dbpedia_uris.txt /gpfs/home/z/k/zkachwal/Carbonate/DBPedia\\ Data/dbpedia_edgelist.npy {}_part_intersect_all_pairs_DBPedia_IDs.txt {}_part_intersect_all_pairs_DBPedia_IDs.json -u -n 12
+			'''.format(hours,splits+1,splits+1,splits+1))
 
-# def compile_db_triples():
-# 	splits=28
-# 	combined=pd.DataFrame()
-# 	for i in range(splits+1):
-# 		a=pd.read_json(str(i+1)+"_Comb_triples_DBPedia_IDs.json")
-# 		print((i+1),len(a))
-# 		combined=pd.concat([combined,a],ignore_index=True)
-# 	print(len(combined))
-# 	combined['label']="DBPedia"
-# 	dbpedia_scores=list(combined['simil'])
-# 	np.save("dbpedia_scores.npy",dbpedia_scores)
-##DRIVER CODE
+def read_pairs_fromfile_bulk():
+	splits=28
+	combined=pd.DataFrame()
+	for i in range(splits+1):
+		a=pd.read_json(str(i+1)+"_part_intersect_all_pairs_DBPedia_IDs.json")
+		print((i+1),len(a))
+		combined=pd.concat([combined,a],ignore_index=True)
+	print(len(combined))
+	combined['label']="DBPedia"
+	dbpedia_scores=list(combined['simil'])
+	np.save("dbpedia_scores.npy",dbpedia_scores)
+
+# #DRIVER CODE
 # # Try to load stuff if files already exist
 # try:
 # 	uris_dict,dbpedia_uris,edgelist,degreelist=load_stuff()
