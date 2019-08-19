@@ -15,12 +15,12 @@ from decimal import Decimal
 import networkx as nx 
 import matplotlib
 import scipy.stats as stats
-matplotlib.use('TkAgg')
+matplotlib.use('Agg')
 # font = {'family' : 'Normal',
 #         'size'   : 12}
 # matplotlib.rc('font', **font)
 import matplotlib.pyplot as plt
-from matplotlib.pyplot import figure
+# from matplotlib.pyplot import figure
 import pdb
 import sys
 import os 
@@ -302,144 +302,6 @@ def parse_dbpedia_triples():
 	return triple_list
 	return pair_list
 
-def plot_overlap():
-	Intersect_TFCG=pd.read_json("Intersect_TFCG_logdegree_u.json")
-	Intersect_FFCG=pd.read_json("Intersect_FFCG_logdegree_u.json")
-	Random_TFCG=pd.read_json("Random_intersect_TFCG_logdegree_u.json")
-	Random_FFCG=pd.read_json("Random_intersect_FFCG_logdegree_u.json")
-	# Random2_TFCG=pd.read_json("Random2_intersect_TFCG_logdegree_u.json")
-	# Random2_FFCG=pd.read_json("Random2_intersect_FFCG_logdegree_u.json")
-	lw = 2
-	#klinker outputs json
-	#########################################################################################################################
-	#Plot 1
-	title="Common DBPedia Triples + Random TFCG vs FFCG"
-	plt.figure(1)
-	#first overlap plot TFCG vs FFCG
-	Intersect_TFCG['label']=1
-	Intersect_FFCG['label']=0
-	Intersect_TFCG.filter(["simil","paths"]).sort_values(by='simil').to_csv("Intersect_paths_u_degree_TFCG.csv",index=False)
-	Intersect_FFCG.filter(["simil","paths"]).sort_values(by='simil').to_csv("Intersect_paths_u_degree_FFCG.csv",index=False)
-	pos_neg=pd.concat([Intersect_TFCG,Intersect_FFCG],ignore_index=True)
-	y=list(pos_neg['label'])
-	scores=list(pos_neg['simil'])
-	fpr, tpr, thresholds = metrics.roc_curve(y, scores, pos_label=1)
-	print(metrics.auc(fpr,tpr))
-	print("P-Value %.2E" %Decimal(stats.ttest_rel(Intersect_TFCG['simil'],Intersect_FFCG['simil']).pvalue))
-	plt.plot(fpr, tpr,lw=lw, label='DBpedia TFCG vs FFCG (AUC = %0.2f)' % metrics.auc(fpr,tpr))
-	#second overlap plot Random
-	Random_TFCG['label']=1
-	Random_FFCG['label']=0
-	Random_TFCG.filter(["simil","paths"]).sort_values(by='simil').to_csv("Random_intersect_paths_u_degree_TFCG.csv",index=False)
-	Random_FFCG.filter(["simil","paths"]).sort_values(by='simil').to_csv("Random_intersect_paths_u_degree_FFCG.csv",index=False)
-	pos_neg=pd.concat([Random_TFCG,Random_FFCG],ignore_index=True)
-	y=list(pos_neg['label'])
-	scores=list(pos_neg['simil'])
-	fpr, tpr, thresholds = metrics.roc_curve(y, scores, pos_label=1)
-	print(metrics.auc(fpr,tpr))
-	plt.plot(fpr, tpr,lw=lw, label='Random TFCG vs FFCG (AUC = %0.2f)' % metrics.auc(fpr,tpr))
-	#third overlap plot Random
-	# Random2_TFCG['label']=1
-	# Random2_FFCG['label']=0
-	# Random2_TFCG.filter(["simil","paths"]).sort_values(by='simil').to_csv("Random_intersect_paths_u_degree_TFCG.csv",index=False)
-	# Random2_FFCG.filter(["simil","paths"]).sort_values(by='simil').to_csv("Random_intersect_paths_u_degree_FFCG.csv",index=False)
-	# pos_neg=pd.concat([Random2_TFCG,Random2_FFCG],ignore_index=True)
-	# y=list(pos_neg['label'])
-	# scores=list(pos_neg['simil'])
-	# fpr, tpr, thresholds = metrics.roc_curve(y, scores, pos_label=1)
-	# print(metrics.auc(fpr,tpr))
-	# plt.plot(fpr, tpr,lw=lw, label='Random2 (AUC = %0.2f)' % metrics.auc(fpr,tpr))
-
-	#Basic plot stuff
-	plt.plot([0, 1], [0, 1], color='navy', lw=lw, label='Baseline',linestyle='--')
-	plt.xlabel('False Positive Rate')
-	plt.ylabel('True Positive Rate')
-	plt.legend(loc="lower right")
-	plt.title(title)
-	plt.savefig(title.replace(" ","_")+".png")
-	# plt.show()
-	plt.close()
-	#########################################################################################################################
-	# #Plot 2
-	# # intersect=pd.DataFrame(columns=['TFCG_Simil','FFCG_Simil'])
-	# # intersect['TFCG_Simil']=positive['simil']
-	# # intersect['FFCG_Simil']=negative['simil']
-	# title="Difference between Simil scores from TFCG vs FFCG"
-	# plt.figure()
-	# #first overlap plot TFCG vs FFCG
-	# intersect=Intersect_TFCG['simil']-Intersect_FFCG['simil']
-	# intersect=intersect.reset_index(drop=True)
-	# plt.plot(intersect,label='TFCG vs FFCG')
-	# #second overlap plot Random
-	# intersect=Random_TFCG['simil']-Random_FFCG['simil']
-	# intersect=intersect.reset_index(drop=True)
-	# plt.plot(intersect,label='Random')
-	# #third overlap plot Random
-	# intersect=Random2_TFCG['simil']-Random2_FFCG['simil']
-	# intersect=intersect.reset_index(drop=True)
-	# plt.plot(intersect,label='Random2')
-	# #Basic plot stuff
-	# plt.legend(loc="upper right")
-	# plt.title(title)
-	# plt.ylabel("TFCG Simil Score - FFCG Simil Score")
-	# plt.xlabel("Index of common triples")
-	# plt.show()
-	# plt.savefig(title.replace(" ","_")+".png")
-	#########################################################################################################################
-	#Plot 3
-	title="Distribution of difference between Simil Scores in TFCG vs FFCG"
-	plt.figure(2)
-	#first overlap plot TFCG vs FFCG
-	intersect=Intersect_TFCG['simil']-Intersect_FFCG['simil']
-	intersect=intersect.reset_index(drop=True)
-	plt.hist(intersect,density=True,histtype='step',label='DBPedia TFCG vs FFCG')
-	#second overlap plot Random
-	intersect=Random_TFCG['simil']-Random_FFCG['simil']
-	intersect=intersect.reset_index(drop=True)
-	plt.hist(intersect,density=True,histtype='step',label='Random TFCG vs FFCG')
-	#third overlap plot Random
-	# intersect=Random2_TFCG['simil']-Random2_FFCG['simil']
-	# intersect=intersect.reset_index(drop=True)
-	# plt.hist(intersect,density=True,histtype='step',label='Random2')
-	#Basic plot stuff
-	plt.legend(loc="upper right")
-	plt.title(title)
-	plt.xlabel("TFCG Simil Score - FFCG Simil Score")
-	plt.ylabel("Density")
-	plt.savefig(title.replace(" ","_")+".png")
-	# plt.show()
-	plt.close()
-	#########################################################################################################################
-	#Plot 4
-	title="TFCG+FFCG DBpedia-Neighbor-Triples vs Random Triples"
-	plt.figure(3)
-	#First overlap TFCG
-	Intersect_TFCG['label']=1
-	Random_TFCG['label']=0
-	pos_neg=pd.concat([Intersect_TFCG,Random_TFCG],ignore_index=True)
-	y=list(pos_neg['label'])
-	scores=list(pos_neg['simil'])
-	fpr, tpr, thresholds = metrics.roc_curve(y, scores, pos_label=1)
-	print(metrics.auc(fpr,tpr))
-	plt.plot(fpr, tpr,lw=lw, label='TFCG DBPedia vs Random (AUC = %0.2f)' % metrics.auc(fpr,tpr))
-	#second overlap FFCG
-	Intersect_FFCG['label']=1
-	Random_FFCG['label']=0
-	pos_neg=pd.concat([Intersect_FFCG,Random_FFCG],ignore_index=True)
-	y=list(pos_neg['label'])
-	scores=list(pos_neg['simil'])
-	fpr, tpr, thresholds = metrics.roc_curve(y, scores, pos_label=1)
-	print(metrics.auc(fpr,tpr))
-	plt.plot(fpr, tpr,lw=lw, label='FFCG DBPedia vs Random (AUC = %0.2f)' % metrics.auc(fpr,tpr))
-	#Basic plot stuff
-	plt.plot([0, 1], [0, 1], color='navy', lw=lw, label='Baseline',linestyle='--')
-	plt.xlabel('False Positive Rate')
-	plt.ylabel('True Positive Rate')
-	plt.legend(loc="lower right")
-	plt.title(title)
-	plt.savefig(title.replace(" ","_")+".png")
-	# plt.show()
-	plt.close()
 
 def TFCGvsFFCG():
 	#We load all uris as we need to assign each a unique int ID to work with knowledge linkers
@@ -461,7 +323,7 @@ def TFCGvsFFCG():
 		TFCG_uris_dict=json.loads(f.read())
 	with codecs.open("FFCG/FFCG_uris_dict.json","r","utf-8") as f:
 		FFCG_uris_dict=json.loads(f.read())
-	with codecs.open("/gpfs/home/z/k/zkachwal/Carbonate/DBPedia Data/dbpedia_uris_dict.json","r","utf-8") as f:
+	with codecs.open("/gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph Data/DBPedia Data/dbpedia_uris_dict.json","r","utf-8") as f:
 		DBPedia_uris_dict=json.loads(f.read())
 	#Performing intersection betwen TFCG, FFCG and DBPedia
 	intersect_uris=np.asarray(list(set(TFCG_uris).intersection(set(FFCG_uris))))
@@ -490,7 +352,7 @@ def TFCGvsFFCG():
 	counter=0
 	for i in random_pairs:
 		if counter<len(intersect_true_pairs):
-			if str(set(intersect_all_pairs[i])) in intersect_true_pairs_set or str(set(list(intersect_all_pairs[i]).reverse())) in intersect_true_pairs_set:#eliminating random triple if it exists in the intersect set (converted individiual triples to str to make a set)
+			if str(set(intersect_all_pairs[i])) in intersect_true_pairs_set or str(set(list(reversed(intersect_all_pairs[i])))) in intersect_true_pairs_set:#eliminating random triple if it exists in the intersect set (converted individiual triples to str to make a set)
 				rejected_pairs.append(intersect_all_pairs[i])
 			else:
 				counter+=1
@@ -508,16 +370,20 @@ def TFCGvsFFCG():
 	counter=0
 	for i in random_pairs2:
 		if counter<len(intersect_true_pairs):
-			if str(set(intersect_all_pairs2[i])) in intersect_true_pairs_set or str(set(list(intersect_all_pairs2[i]).reverse())) in intersect_true_pairs_set:#eliminating random triple if it exists in the intersect set (converted individiual triples to str to make a set)
+			if str(set(intersect_all_pairs2[i])) in intersect_true_pairs_set or str(set(list(reversed(intersect_all_pairs2[i])))) in intersect_true_pairs_set:#eliminating random triple if it exists in the intersect set (converted individiual triples to str to make a set)
 				rejected_pairs2.append(intersect_all_pairs2[i])
 			else:
 				counter+=1
 				intersect_false_pairs2.append(intersect_all_pairs2[i])
 		else:
 			break
-	write_pairs_tofile(intersect_true_pairs,intersect_false_pairs,intersect_false_pairs2,TFCG_uris_dict,FFCG_uris_dict,DBpedia_uris_dict)
+	intersect_false_pairs=np.asarray(intersect_false_pairs)
+	intersect_false_pairs2=np.asarray(intersect_false_pairs2)
+	set_trace()
+	# write_pairs_tofile(intersect_true_pairs,intersect_false_pairs,intersect_false_pairs2,TFCG_uris_dict,FFCG_uris_dict,DBPedia_uris_dict)
+	write_pairs_tofile_bulk(intersect_true_pairs,intersect_false_pairs,intersect_false_pairs2,DBPedia_uris_dict)
 
-def write_pairs_tofile(intersect_true_pairs,intersect_false_pairs,intersect_false_pairs2,TFCG_uris_dict,FFCG_uris_dict,DBpedia_uris_dict):
+def write_pairs_tofile(intersect_true_pairs,intersect_false_pairs,intersect_false_pairs2,TFCG_uris_dict,FFCG_uris_dict,DBPedia_uris_dict):
 	# Reformatting according to the input format acccepted by Knowledge Linker
 	intersect_true_pairs=np.asarray([[np.nan,i[0],np.nan,np.nan,i[1],np.nan,np.nan] for i in intersect_true_pairs])
 	intersect_false_pairs=np.asarray([[np.nan,i[0],np.nan,np.nan,i[1],np.nan,np.nan] for i in intersect_false_pairs])
@@ -550,19 +416,77 @@ def write_pairs_tofile(intersect_true_pairs,intersect_false_pairs,intersect_fals
 			f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(DBPedia_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(DBPedia_uris_dict[line[4]])),str(line[5]),str(line[6])))
 	######################################################################Writing False Pairs 2
 	# Writing false pairs 2 to file using TFCG entity IDs
-	with codecs.open('Intersect_false_pairs_TFCG_IDs.txt',"w","utf-8") as f:
+	with codecs.open('Intersect_false_pairs2_TFCG_IDs.txt',"w","utf-8") as f:
 		for line in intersect_false_pairs2:
 			f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(TFCG_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(TFCG_uris_dict[line[4]])),str(line[5]),str(line[6])))
 	# Writing false pairs 2 to file using FFCG entity IDs
-	with codecs.open('Intersect_false_pairs_FFCG_IDs.txt',"w","utf-8") as f:
+	with codecs.open('Intersect_false_pairs2_FFCG_IDs.txt',"w","utf-8") as f:
 		for line in intersect_false_pairs2:
 			f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(FFCG_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(FFCG_uris_dict[line[4]])),str(line[5]),str(line[6])))
 	# Writing false pairs 2 to file using DBPedia entity IDs
-	with codecs.open('Intersect_false_pairs_DBPedia_IDs.txt',"w","utf-8") as f:
+	with codecs.open('Intersect_false_pairs2_DBPedia_IDs.txt',"w","utf-8") as f:
 		for line in intersect_false_pairs2:
 			f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(DBPedia_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(DBPedia_uris_dict[line[4]])),str(line[5]),str(line[6])))
 
-def write_pairs_tofile_bulk(intersect_all_pairs,TFCG_uris_dict,FFCG_uris_dict,DBpedia_uris_dict):
+def write_pairs_tofile_bulk(intersect_true_pairs,intersect_false_pairs,intersect_false_pairs2,DBPedia_uris_dict):
+	# Reformatting according to the input format acccepted by Knowledge Linker
+	intersect_true_pairs=np.asarray([[np.nan,i[0],np.nan,np.nan,i[1],np.nan,np.nan] for i in intersect_true_pairs])
+	intersect_false_pairs=np.asarray([[np.nan,i[0],np.nan,np.nan,i[1],np.nan,np.nan] for i in intersect_false_pairs])
+	intersect_false_pairs2=np.asarray([[np.nan,i[0],np.nan,np.nan,i[1],np.nan,np.nan] for i in intersect_false_pairs2])
+	splits=20
+	hours=1
+	partition=int(len(intersect_true_pairs)/splits)
+	for i in range(0,splits):
+		with codecs.open(str(i+1)+'_part_intersect_true_pairs_DBPedia_IDs.txt',"w","utf-8") as f:
+			for line in intersect_true_pairs[partition*i:partition*(i+1)]:
+				f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(DBPedia_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(DBPedia_uris_dict[line[4]])),str(line[5]),str(line[6])))
+		with codecs.open(str(i+1)+'_part_intersect_false_pairs_DBPedia_IDs.txt',"w","utf-8") as f:
+			for line in intersect_false_pairs[partition*i:partition*(i+1)]:
+				f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(DBPedia_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(DBPedia_uris_dict[line[4]])),str(line[5]),str(line[6])))
+		with codecs.open(str(i+1)+'_part_intersect_false_pairs2_DBPedia_IDs.txt',"w","utf-8") as f:
+			for line in intersect_false_pairs2[partition*i:partition*(i+1)]:
+				f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(DBPedia_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(DBPedia_uris_dict[line[4]])),str(line[5]),str(line[6])))				
+		with codecs.open(str(i+1)+'_job.sh',"w","utf-8") as f:
+			f.write('''
+#PBS -k o
+#PBS -l nodes=1:ppn=12,vmem=180gb,walltime={}:00:00
+#PBS -M zoher.kachwala@gmail.com
+#PBS -m abe
+#PBS -N {}_KLinker
+#PBS -j oe
+source /N/u/zkachwal/Carbonate/miniconda3/etc/profile.d/conda.sh
+conda activate env-kl
+cd /gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph/Experiment1
+time klinker linkpred /gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph\\ Data/DBPedia\\ Data/dbpedia_uris.txt /gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph\\ Data/DBPedia\\ Data/dbpedia_edgelist.npy {}_part_intersect_true_pairs_DBPedia_IDs.txt {}_part_intersect_true_pairs_DBPedia_IDs.json -u -n 12
+time klinker linkpred /gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph\\ Data/DBPedia\\ Data/dbpedia_uris.txt /gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph\\ Data/DBPedia\\ Data/dbpedia_edgelist.npy {}_part_intersect_false_pairs_DBPedia_IDs.txt {}_part_intersect_false_pairs_DBPedia_IDs.json -u -n 12
+time klinker linkpred /gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph\\ Data/DBPedia\\ Data/dbpedia_uris.txt /gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph\\ Data/DBPedia\\ Data/dbpedia_edgelist.npy {}_part_intersect_false_pairs2_DBPedia_IDs.txt {}_part_intersect_false_pairs2_DBPedia_IDs.json -u -n 12
+				'''.format(hours,i+1,i+1,i+1,i+1,i+1,i+1,i+1))
+	with codecs.open(str(splits+1)+'_part_intersect_true_pairs_DBPedia_IDs.txt',"w","utf-8") as f:
+		for line in intersect_true_pairs[splits*partition:]:
+			f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(DBPedia_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(DBPedia_uris_dict[line[4]])),str(line[5]),str(line[6])))
+	with codecs.open(str(splits+1)+'_part_intersect_false_pairs_DBPedia_IDs.txt',"w","utf-8") as f:
+		for line in intersect_false_pairs[splits*partition:]:
+			f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(DBPedia_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(DBPedia_uris_dict[line[4]])),str(line[5]),str(line[6])))
+	with codecs.open(str(splits+1)+'_part_intersect_false_pairs2_DBPedia_IDs.txt',"w","utf-8") as f:
+		for line in intersect_false_pairs2[splits*partition:]:
+			f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(DBPedia_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(DBPedia_uris_dict[line[4]])),str(line[5]),str(line[6])))
+	with codecs.open(str(splits+1)+'_job.sh',"w","utf-8") as f:
+		f.write('''
+#PBS -k o
+#PBS -l nodes=1:ppn=12,vmem=180gb,walltime={}:00:00
+#PBS -M zoher.kachwala@gmail.com
+#PBS -m abe
+#PBS -N {}_KLinker
+#PBS -j oe
+source /N/u/zkachwal/Carbonate/miniconda3/etc/profile.d/conda.sh
+conda activate env-kl
+cd /gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph/Experiment1
+time klinker linkpred /gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph\\ Data/DBPedia\\ Data/dbpedia_uris.txt /gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph\\ Data/DBPedia\\ Data/dbpedia_edgelist.npy {}_part_intersect_true_pairs_DBPedia_IDs.txt {}_part_intersect_true_pairs_DBPedia_IDs.json -u -n 12
+time klinker linkpred /gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph\\ Data/DBPedia\\ Data/dbpedia_uris.txt /gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph\\ Data/DBPedia\\ Data/dbpedia_edgelist.npy {}_part_intersect_false_pairs_DBPedia_IDs.txt {}_part_intersect_false_pairs_DBPedia_IDs.json -u -n 12
+time klinker linkpred /gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph\\ Data/DBPedia\\ Data/dbpedia_uris.txt /gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph\\ Data/DBPedia\\ Data/dbpedia_edgelist.npy {}_part_intersect_false_pairs2_DBPedia_IDs.txt {}_part_intersect_false_pairs2_DBPedia_IDs.json -u -n 12
+				'''.format(hours,splits+1,splits+1,splits+1,splits+1,splits+1,splits+1,splits+1))
+
+def write_pairs_tofile_bulk_all(intersect_all_pairs,TFCG_uris_dict,FFCG_uris_dict,DBpedia_uris_dict):
 	# Reformatting according to the input format acccepted by Knowledge Linker
 	intersect_all_pairs=np.asarray([[np.nan,i[0],np.nan,np.nan,i[1],np.nan,np.nan] for i in intersect_all_pairs])
 	#For second pool
@@ -584,7 +508,7 @@ def write_pairs_tofile_bulk(intersect_all_pairs,TFCG_uris_dict,FFCG_uris_dict,DB
 source /N/u/zkachwal/Carbonate/miniconda3/etc/profile.d/conda.sh
 conda activate env-kl
 cd /gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph/Experiment1
-time klinker linkpred /gpfs/home/z/k/zkachwal/Carbonate/DBPedia\\ Data/dbpedia_uris.txt /gpfs/home/z/k/zkachwal/Carbonate/DBPedia\\ Data/dbpedia_edgelist.npy {}_part_intersect_all_pairs_DBPedia_IDs.txt {}_part_intersect_all_pairs_DBPedia_IDs.json -u -n 12
+time klinker linkpred /gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph\\ Data/DBPedia\\ Data/dbpedia_uris.txt /gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph\\ Data/DBPedia\\ Data/dbpedia_edgelist.npy {}_part_intersect_all_pairs_DBPedia_IDs.txt {}_part_intersect_all_pairs_DBPedia_IDs.json -u -n 12
 				'''.format(hours,i+1,i+1,i+1))
 	with codecs.open(str(splits+1)+'_part_intersect_all_pairs_DBPedia_IDs.txt',"w","utf-8") as f:
 		for line in intersect_all_pairs[splits*partition:]:
@@ -600,11 +524,42 @@ time klinker linkpred /gpfs/home/z/k/zkachwal/Carbonate/DBPedia\\ Data/dbpedia_u
 source /N/u/zkachwal/Carbonate/miniconda3/etc/profile.d/conda.sh
 conda activate env-kl
 cd /gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph/Experiment1
-time klinker linkpred /gpfs/home/z/k/zkachwal/Carbonate/DBPedia\\ Data/dbpedia_uris.txt /gpfs/home/z/k/zkachwal/Carbonate/DBPedia\\ Data/dbpedia_edgelist.npy {}_part_intersect_all_pairs_DBPedia_IDs.txt {}_part_intersect_all_pairs_DBPedia_IDs.json -u -n 12
+time klinker linkpred /gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph\\ Data/DBPedia\\ Data/dbpedia_uris.txt /gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph\\ Data/DBPedia\\ Data/dbpedia_edgelist.npy {}_part_intersect_all_pairs_DBPedia_IDs.txt {}_part_intersect_all_pairs_DBPedia_IDs.json -u -n 12
 			'''.format(hours,splits+1,splits+1,splits+1))
 
 def read_pairs_fromfile_bulk():
-	splits=28
+	splits=20
+	combined1=pd.DataFrame()
+	combined2=pd.DataFrame()
+	combined3=pd.DataFrame()
+	for i in range(splits+1):
+		true=pd.read_json(str(i+1)+"_part_intersect_true_pairs_DBPedia_IDs.json")
+		false=pd.read_json(str(i+1)+"_part_intersect_false_pairs_DBPedia_IDs.json")
+		false2=pd.read_json(str(i+1)+"_part_intersect_false_pairs2_DBPedia_IDs.json")
+		print((i+1),len(true))
+		print((i+1),len(false))
+		print((i+1),len(false2))
+		combined1=pd.concat([combined1,true],ignore_index=True)
+		combined2=pd.concat([combined2,false],ignore_index=True)
+		combined3=pd.concat([combined3,false2],ignore_index=True)
+	print(len(combined1))
+	print(len(combined2))
+	print(len(combined3))
+	# combined1['label']="DBPedia"
+	# combined2['label']="DBPedia"
+	# combined3['label']="DBPedia"
+	# dbpedia_scores1=list(combined1['simil'])
+	# dbpedia_scores2=list(combined2['simil'])
+	# dbpedia_scores3=list(combined3['simil'])
+	# np.save("Intersect_true_pairs_DBPedia_IDs.npy",dbpedia_scores1)
+	# np.save("Intersect_false_pairs_DBPedia_IDs.npy",dbpedia_scores2)
+	# np.save("Intersect_false_pairs2_DBPedia_IDs.npy",dbpedia_scores3)
+	combined1.to_json("Intersect_true_pairs_DBPedia_IDs.json")
+	combined2.to_json("Intersect_false_pairs_DBPedia_IDs.json")
+	combined3.to_json("Intersect_false_pairs2_DBPedia_IDs.json")
+
+def read_pairs_fromfile_bulk_all():
+	splits=20
 	combined=pd.DataFrame()
 	for i in range(splits+1):
 		a=pd.read_json(str(i+1)+"_part_intersect_all_pairs_DBPedia_IDs.json")
@@ -615,6 +570,251 @@ def read_pairs_fromfile_bulk():
 	dbpedia_scores=list(combined['simil'])
 	np.save("dbpedia_scores.npy",dbpedia_scores)
 
+def plot_TFCGvsFFCG():
+	Intersect_true_TFCG=pd.read_json("Intersect_true_pairs_TFCG_IDs.json")
+	Intersect_true_FFCG=pd.read_json("Intersect_true_pairs_FFCG_IDs.json")
+	Intersect_true_DBPedia=pd.read_json("Intersect_true_pairs_DBPedia_IDs.json")
+
+	Intersect_false_TFCG=pd.read_json("Intersect_false_pairs_TFCG_IDs.json")
+	Intersect_false_FFCG=pd.read_json("Intersect_false_pairs_FFCG_IDs.json")
+	Intersect_false_DBPedia=pd.read_json("Intersect_false_pairs_DBPedia_IDs.json")
+
+
+	Intersect_false2_TFCG=pd.read_json("Intersect_false_pairs2_TFCG_IDs.json")
+	Intersect_false2_FFCG=pd.read_json("Intersect_false_pairs2_FFCG_IDs.json")
+	Intersect_false2_DBPedia=pd.read_json("Intersect_false_pairs2_DBPedia_IDs.json")
+	set_trace()
+	Intersect_true_TFCG['label']=1
+	Intersect_false_TFCG['label']=0
+	Intersect_false2_TFCG['label']=0
+
+	Intersect_true_FFCG['label']=1
+	Intersect_false_FFCG['label']=0
+	Intersect_false2_FFCG['label']=0
+
+	Intersect_true_DBPedia['label']=1
+	Intersect_false_DBPedia['label']=0
+	Intersect_false2_DBPedia['label']=0
+
+	true_false_TFCG=pd.concat([Intersect_true_TFCG,Intersect_false_TFCG],ignore_index=True)
+	y_TFCG=list(true_false_TFCG['label'])
+	scores_TFCG=list(true_false_TFCG['simil'])
+
+	true_false2_TFCG=pd.concat([Intersect_true_TFCG,Intersect_false2_TFCG],ignore_index=True)
+	y2_TFCG=list(true_false2_TFCG['label'])
+	scores2_TFCG=list(true_false2_TFCG['simil'])
+
+	true_false_FFCG=pd.concat([Intersect_true_FFCG,Intersect_false_FFCG],ignore_index=True)
+	y_FFCG=list(true_false_FFCG['label'])
+	scores_FFCG=list(true_false_FFCG['simil'])
+
+	true_false2_FFCG=pd.concat([Intersect_true_FFCG,Intersect_false2_FFCG],ignore_index=True)
+	y2_FFCG=list(true_false2_FFCG['label'])
+	scores2_FFCG=list(true_false2_FFCG['simil'])
+
+	true_false_DBPedia=pd.concat([Intersect_true_DBPedia,Intersect_false_DBPedia],ignore_index=True)
+	y_DBPedia=list(true_false_DBPedia['label'])
+	scores_DBPedia=list(true_false_DBPedia['simil'])
+
+	true_false2_DBPedia=pd.concat([Intersect_true_DBPedia,Intersect_false2_DBPedia],ignore_index=True)
+	y2_DBPedia=list(true_false2_DBPedia['label'])
+	scores2_DBPedia=list(true_false2_DBPedia['simil'])
+
+	title="True vs False Pairs"
+	lw = 2
+	plt.figure(1)
+	####TFCG
+	fpr, tpr, thresholds = metrics.roc_curve(y_TFCG, scores_TFCG, pos_label=1)
+	print(metrics.auc(fpr,tpr))
+	print("TFCG P-Value %.2E" %Decimal(stats.ttest_rel(Intersect_true_TFCG['simil'],Intersect_false_TFCG['simil']).pvalue))
+	plt.plot(fpr, tpr,lw=lw, label='TFCG (AUC = %0.2f) ' % metrics.auc(fpr,tpr))
+	####FFCG
+	fpr, tpr, thresholds = metrics.roc_curve(y_FFCG, scores_FFCG, pos_label=1)
+	print(metrics.auc(fpr,tpr))
+	print("FFCG P-Value %.2E" %Decimal(stats.ttest_rel(Intersect_true_FFCG['simil'],Intersect_false_FFCG['simil']).pvalue))
+	plt.plot(fpr, tpr,lw=lw, label='FFCG (AUC = %0.2f) ' % metrics.auc(fpr,tpr))
+	####DBPedia
+	fpr, tpr, thresholds = metrics.roc_curve(y_DBPedia, scores_DBPedia, pos_label=1)
+	print(metrics.auc(fpr,tpr))
+	print("DBPedia P-Value %.2E" %Decimal(stats.ttest_rel(Intersect_true_DBPedia['simil'],Intersect_false_DBPedia['simil']).pvalue))
+	plt.plot(fpr, tpr,lw=lw, label='DBPedia (AUC = %0.2f) ' % metrics.auc(fpr,tpr))
+	plt.plot([0, 1], [0, 1], color='navy', lw=lw, label='Baseline',linestyle='--')
+	plt.legend(loc="lower right")
+	plt.xlabel('False Positive Rate')
+	plt.ylabel('True Positive Rate')
+	plt.savefig(title.replace(" ","_")+".png")
+	plt.close()
+	###########################False2
+	# plt.figure(1)
+	# ####TFCG
+	# fpr, tpr, thresholds = metrics.roc_curve(y2_TFCG, scores2_TFCG, pos_label=1)
+	# print(metrics.auc(fpr,tpr))
+	# print("TFCG P-Value %.2E" %Decimal(stats.ttest_rel(Intersect_true_TFCG['simil'],Intersect_false_TFCG['simil']).pvalue))
+	# plt.plot(fpr, tpr,lw=lw, label='TFCG (AUC = %0.2f) ' % metrics.auc(fpr,tpr))
+	# ####FFCG
+	# fpr, tpr, thresholds = metrics.roc_curve(y2_FFCG, scores2_FFCG, pos_label=1)
+	# print(metrics.auc(fpr,tpr))
+	# print("FFCG P-Value %.2E" %Decimal(stats.ttest_rel(Intersect_true_FFCG['simil'],Intersect_false_FFCG['simil']).pvalue))
+	# plt.plot(fpr, tpr,lw=lw, label='FFCG (AUC = %0.2f) ' % metrics.auc(fpr,tpr))
+	# ####DBPedia
+	# fpr, tpr, thresholds = metrics.roc_curve(y2_DBPedia, scores2_DBPedia, pos_label=1)
+	# print(metrics.auc(fpr,tpr))
+	# print("DBPedia P-Value %.2E" %Decimal(stats.ttest_rel(Intersect_true_DBPedia['simil'],Intersect_false_DBPedia['simil']).pvalue))
+	# plt.plot(fpr, tpr,lw=lw, label='DBPedia (AUC = %0.2f) ' % metrics.auc(fpr,tpr))
+	# plt.plot([0, 1], [0, 1], color='navy', lw=lw, label='Baseline',linestyle='--')
+	# plt.legend(loc="lower right")
+	# plt.xlabel('False Positive Rate')
+	# plt.ylabel('True Positive Rate')
+	# plt.savefig(title.replace(" ","_")+"2.png")
+	# plt.close()
+
+# def plot_overlap():
+# 	Intersect_true_TFCG=pd.read_json("Intersect_true_pairs_TFCG_IDs.json")
+# 	Intersect_true_FFCG=pd.read_json("Intersect_true_pairs_FFCG_IDs.json")
+# 	Intersect_true_DBPedia=pd.read_json("Intersect_true_pairs_DBPedia_IDs.json")
+
+# 	Intersect_false_TFCG=pd.read_json("Intersect_false_pairs_TFCG_IDs.json")
+# 	Intersect_false_FFCG=pd.read_json("Intersect_false_pairs_FFCG_IDs.json")
+# 	Intersect_false_DBPedia=pd.read_json("Intersect_false_pairs_DBPedia_IDs.json")
+
+
+# 	Intersect_false_TFCG=pd.read_json("Intersect_false_pairs2_TFCG_IDs.json")
+# 	Intersect_false_FFCG=pd.read_json("Intersect_false_pairs2_FFCG_IDs.json")
+# 	Intersect_false_DBPedia=pd.read_json("Intersect_false_pairs2_DBPedia_IDs.json")
+# 	set_trace()
+# 	# Random2_TFCG=pd.read_json("Random2_intersect_TFCG_logdegree_u.json")
+# 	# Random2_FFCG=pd.read_json("Random2_intersect_FFCG_logdegree_u.json")
+# 	lw = 2
+# 	#klinker outputs json
+# 	#########################################################################################################################
+# 	#Plot 1
+# 	title="Common DBPedia Triples + Random TFCG vs FFCG"
+# 	plt.figure(1)
+# 	#first overlap plot TFCG vs FFCG
+# 	Intersect_TFCG['label']=1
+# 	Intersect_FFCG['label']=0
+# 	Intersect_TFCG.filter(["simil","paths"]).sort_values(by='simil').to_csv("Intersect_paths_u_degree_TFCG.csv",index=False)
+# 	Intersect_FFCG.filter(["simil","paths"]).sort_values(by='simil').to_csv("Intersect_paths_u_degree_FFCG.csv",index=False)
+# 	pos_neg=pd.concat([Intersect_TFCG,Intersect_FFCG],ignore_index=True)
+# 	y=list(pos_neg['label'])
+# 	scores=list(pos_neg['simil'])
+# 	fpr, tpr, thresholds = metrics.roc_curve(y, scores, pos_label=1)
+# 	print(metrics.auc(fpr,tpr))
+# 	print("P-Value %.2E" %Decimal(stats.ttest_rel(Intersect_TFCG['simil'],Intersect_FFCG['simil']).pvalue))
+# 	plt.plot(fpr, tpr,lw=lw, label='DBpedia TFCG vs FFCG (AUC = %0.2f)' % metrics.auc(fpr,tpr))
+# 	#second overlap plot Random
+# 	Random_TFCG['label']=1
+# 	Random_FFCG['label']=0
+# 	Random_TFCG.filter(["simil","paths"]).sort_values(by='simil').to_csv("Random_intersect_paths_u_degree_TFCG.csv",index=False)
+# 	Random_FFCG.filter(["simil","paths"]).sort_values(by='simil').to_csv("Random_intersect_paths_u_degree_FFCG.csv",index=False)
+# 	pos_neg=pd.concat([Random_TFCG,Random_FFCG],ignore_index=True)
+# 	y=list(pos_neg['label'])
+# 	scores=list(pos_neg['simil'])
+# 	fpr, tpr, thresholds = metrics.roc_curve(y, scores, pos_label=1)
+# 	print(metrics.auc(fpr,tpr))
+# 	plt.plot(fpr, tpr,lw=lw, label='Random TFCG vs FFCG (AUC = %0.2f)' % metrics.auc(fpr,tpr))
+# 	#third overlap plot Random
+# 	# Random2_TFCG['label']=1
+# 	# Random2_FFCG['label']=0
+# 	# Random2_TFCG.filter(["simil","paths"]).sort_values(by='simil').to_csv("Random_intersect_paths_u_degree_TFCG.csv",index=False)
+# 	# Random2_FFCG.filter(["simil","paths"]).sort_values(by='simil').to_csv("Random_intersect_paths_u_degree_FFCG.csv",index=False)
+# 	# pos_neg=pd.concat([Random2_TFCG,Random2_FFCG],ignore_index=True)
+# 	# y=list(pos_neg['label'])
+# 	# scores=list(pos_neg['simil'])
+# 	# fpr, tpr, thresholds = metrics.roc_curve(y, scores, pos_label=1)
+# 	# print(metrics.auc(fpr,tpr))
+# 	# plt.plot(fpr, tpr,lw=lw, label='Random2 (AUC = %0.2f)' % metrics.auc(fpr,tpr))
+
+# 	#Basic plot stuff
+# 	plt.plot([0, 1], [0, 1], color='navy', lw=lw, label='Baseline',linestyle='--')
+# 	plt.xlabel('False Positive Rate')
+# 	plt.ylabel('True Positive Rate')
+# 	plt.legend(loc="lower right")
+# 	plt.title(title)
+# 	plt.savefig(title.replace(" ","_")+".png")
+# 	# plt.show()
+# 	plt.close()
+# 	#########################################################################################################################
+# 	# #Plot 2
+# 	# # intersect=pd.DataFrame(columns=['TFCG_Simil','FFCG_Simil'])
+# 	# # intersect['TFCG_Simil']=positive['simil']
+# 	# # intersect['FFCG_Simil']=negative['simil']
+# 	# title="Difference between Simil scores from TFCG vs FFCG"
+# 	# plt.figure()
+# 	# #first overlap plot TFCG vs FFCG
+# 	# intersect=Intersect_TFCG['simil']-Intersect_FFCG['simil']
+# 	# intersect=intersect.reset_index(drop=True)
+# 	# plt.plot(intersect,label='TFCG vs FFCG')
+# 	# #second overlap plot Random
+# 	# intersect=Random_TFCG['simil']-Random_FFCG['simil']
+# 	# intersect=intersect.reset_index(drop=True)
+# 	# plt.plot(intersect,label='Random')
+# 	# #third overlap plot Random
+# 	# intersect=Random2_TFCG['simil']-Random2_FFCG['simil']
+# 	# intersect=intersect.reset_index(drop=True)
+# 	# plt.plot(intersect,label='Random2')
+# 	# #Basic plot stuff
+# 	# plt.legend(loc="upper right")
+# 	# plt.title(title)
+# 	# plt.ylabel("TFCG Simil Score - FFCG Simil Score")
+# 	# plt.xlabel("Index of common triples")
+# 	# plt.show()
+# 	# plt.savefig(title.replace(" ","_")+".png")
+# 	#########################################################################################################################
+# 	#Plot 3
+# 	title="Distribution of difference between Simil Scores in TFCG vs FFCG"
+# 	plt.figure(2)
+# 	#first overlap plot TFCG vs FFCG
+# 	intersect=Intersect_TFCG['simil']-Intersect_FFCG['simil']
+# 	intersect=intersect.reset_index(drop=True)
+# 	plt.hist(intersect,density=True,histtype='step',label='DBPedia TFCG vs FFCG')
+# 	#second overlap plot Random
+# 	intersect=Random_TFCG['simil']-Random_FFCG['simil']
+# 	intersect=intersect.reset_index(drop=True)
+# 	plt.hist(intersect,density=True,histtype='step',label='Random TFCG vs FFCG')
+# 	#third overlap plot Random
+# 	# intersect=Random2_TFCG['simil']-Random2_FFCG['simil']
+# 	# intersect=intersect.reset_index(drop=True)
+# 	# plt.hist(intersect,density=True,histtype='step',label='Random2')
+# 	#Basic plot stuff
+# 	plt.legend(loc="upper right")
+# 	plt.title(title)
+# 	plt.xlabel("TFCG Simil Score - FFCG Simil Score")
+# 	plt.ylabel("Density")
+# 	plt.savefig(title.replace(" ","_")+".png")
+# 	# plt.show()
+# 	plt.close()
+# 	#########################################################################################################################
+# 	#Plot 4
+# 	title="TFCG+FFCG DBpedia-Neighbor-Triples vs Random Triples"
+# 	plt.figure(3)
+# 	#First overlap TFCG
+# 	Intersect_TFCG['label']=1
+# 	Random_TFCG['label']=0
+# 	pos_neg=pd.concat([Intersect_TFCG,Random_TFCG],ignore_index=True)
+# 	y=list(pos_neg['label'])
+# 	scores=list(pos_neg['simil'])
+# 	fpr, tpr, thresholds = metrics.roc_curve(y, scores, pos_label=1)
+# 	print(metrics.auc(fpr,tpr))
+# 	plt.plot(fpr, tpr,lw=lw, label='TFCG DBPedia vs Random (AUC = %0.2f)' % metrics.auc(fpr,tpr))
+# 	#second overlap FFCG
+# 	Intersect_FFCG['label']=1
+# 	Random_FFCG['label']=0
+# 	pos_neg=pd.concat([Intersect_FFCG,Random_FFCG],ignore_index=True)
+# 	y=list(pos_neg['label'])
+# 	scores=list(pos_neg['simil'])
+# 	fpr, tpr, thresholds = metrics.roc_curve(y, scores, pos_label=1)
+# 	print(metrics.auc(fpr,tpr))
+# 	plt.plot(fpr, tpr,lw=lw, label='FFCG DBPedia vs Random (AUC = %0.2f)' % metrics.auc(fpr,tpr))
+# 	#Basic plot stuff
+# 	plt.plot([0, 1], [0, 1], color='navy', lw=lw, label='Baseline',linestyle='--')
+# 	plt.xlabel('False Positive Rate')
+# 	plt.ylabel('True Positive Rate')
+# 	plt.legend(loc="lower right")
+# 	plt.title(title)
+# 	plt.savefig(title.replace(" ","_")+".png")
+# 	# plt.show()
+# 	plt.close()
 # #DRIVER CODE
 # # Try to load stuff if files already exist
 # try:
