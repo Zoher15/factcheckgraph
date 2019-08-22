@@ -26,6 +26,7 @@ import sys
 import os 
 import json
 from IPython.core.debugger import set_trace
+import seaborn as sns
 '''
 The goal of this script is the following:
 1. Read uris (save_uris) and triples (save_edgelist) from the Neo4j Database
@@ -377,8 +378,12 @@ def TFCGvsFFCG():
 				intersect_false_pairs2.append(intersect_all_pairs2[i])
 		else:
 			break
+	intersect_true_pairs=np.asarray(intersect_true_pairs)
 	intersect_false_pairs=np.asarray(intersect_false_pairs)
 	intersect_false_pairs2=np.asarray(intersect_false_pairs2)
+	np.save("intersect_true_pairs.npy",intersect_true_pairs)
+	np.save("intersect_false_pairs.npy",intersect_false_pairs)
+	np.save("intersect_false_pairs2.npy",intersect_false_pairs2)
 	set_trace()
 	# write_pairs_tofile(intersect_true_pairs,intersect_false_pairs,intersect_false_pairs2,TFCG_uris_dict,FFCG_uris_dict,DBPedia_uris_dict)
 	write_pairs_tofile_bulk(intersect_true_pairs,intersect_false_pairs,intersect_false_pairs2,DBPedia_uris_dict)
@@ -558,11 +563,46 @@ def read_pairs_fromfile_bulk():
 	combined2.to_json("Intersect_false_pairs_DBPedia_IDs.json")
 	combined3.to_json("Intersect_false_pairs2_DBPedia_IDs.json")
 
+def correlations():
+	tfcg_scores_all=list(np.load("tfcg_scores.npy"))
+	ffcg_scores_all=list(np.load("ffcg_scores.npy"))
+	dbpedia_scores_all=list(np.load("dbpedia_scores.npy"))
+	for name in ["tfcg_scores_all","ffcg_scores_all","dbpedia_scores_all"]:
+		indices=[i for i, x in enumerate(eval(name)) if x == 0]
+		for i in sorted(indices, reverse = True):
+			del tfcg_scores_all[i]
+			del ffcg_scores_all[i]
+			del dbpedia_scores_all[i]
+	np.save("tfcg_scores_0removed.npy",tfcg_scores_all)
+	np.save("ffcg_scores_0removed.npy",ffcg_scores_all)
+	np.save("dbpedia_scores_0removed.npy",dbpedia_scores_all)
+	title="Proximity Distribution"
+	plt.figure(1)
+	plt.hist(tfcg_scores_all,histtype='step',label='TFCG')
+	plt.hist(ffcg_scores_all,histtype='step',label='FFCG')
+	plt.hist(dbpedia_scores_all,histtype='step',label='DBPedia')
+	plt.xlabel("Proximity Scores")
+	plt.ylabel("Density")
+	plt.legend(loc="upper right")
+	plt.savefig(title.replace(" ","_")+".png")
+	plt.close()
+	plt.clf()
+	sns.set_style("white")
+	sns.set_style("ticks")
+	ax = sns.kdeplot(pd.Series(tfcg_scores_all,name="TFCG"))
+	ax = sns.kdeplot(pd.Series(ffcg_scores_all,name="FFCG"))
+	ax = sns.kdeplot(pd.Series(dbpedia_scores_all,name="DBPedia"))
+	plt.xlabel("Proximity Scores")
+	plt.ylabel("Density")
+	plt.savefig(title.replace(" ","_")+"_seaborn.png")
+	plt.close()
+	plt.clf()
+
 def read_pairs_fromfile_bulk_all():
 	splits=20
 	combined=pd.DataFrame()
 	for i in range(splits+1):
-		a=pd.read_json(str(i+1)+"_part_intersect_all_pairs_DBPedia_IDs.json")
+		a=pd.read_json(str(i+1)+"_Comb_triples_DBPedia_IDs.json")
 		print((i+1),len(a))
 		combined=pd.concat([combined,a],ignore_index=True)
 	print(len(combined))
@@ -583,7 +623,7 @@ def plot_TFCGvsFFCG():
 	Intersect_false2_TFCG=pd.read_json("Intersect_false_pairs2_TFCG_IDs.json")
 	Intersect_false2_FFCG=pd.read_json("Intersect_false_pairs2_FFCG_IDs.json")
 	Intersect_false2_DBPedia=pd.read_json("Intersect_false_pairs2_DBPedia_IDs.json")
-	set_trace()
+
 	Intersect_true_TFCG['label']=1
 	Intersect_false_TFCG['label']=0
 	Intersect_false2_TFCG['label']=0
@@ -644,29 +684,51 @@ def plot_TFCGvsFFCG():
 	plt.ylabel('True Positive Rate')
 	plt.savefig(title.replace(" ","_")+".png")
 	plt.close()
-	###########################False2
-	# plt.figure(1)
-	# ####TFCG
-	# fpr, tpr, thresholds = metrics.roc_curve(y2_TFCG, scores2_TFCG, pos_label=1)
-	# print(metrics.auc(fpr,tpr))
-	# print("TFCG P-Value %.2E" %Decimal(stats.ttest_rel(Intersect_true_TFCG['simil'],Intersect_false_TFCG['simil']).pvalue))
-	# plt.plot(fpr, tpr,lw=lw, label='TFCG (AUC = %0.2f) ' % metrics.auc(fpr,tpr))
-	# ####FFCG
-	# fpr, tpr, thresholds = metrics.roc_curve(y2_FFCG, scores2_FFCG, pos_label=1)
-	# print(metrics.auc(fpr,tpr))
-	# print("FFCG P-Value %.2E" %Decimal(stats.ttest_rel(Intersect_true_FFCG['simil'],Intersect_false_FFCG['simil']).pvalue))
-	# plt.plot(fpr, tpr,lw=lw, label='FFCG (AUC = %0.2f) ' % metrics.auc(fpr,tpr))
-	# ####DBPedia
-	# fpr, tpr, thresholds = metrics.roc_curve(y2_DBPedia, scores2_DBPedia, pos_label=1)
-	# print(metrics.auc(fpr,tpr))
-	# print("DBPedia P-Value %.2E" %Decimal(stats.ttest_rel(Intersect_true_DBPedia['simil'],Intersect_false_DBPedia['simil']).pvalue))
-	# plt.plot(fpr, tpr,lw=lw, label='DBPedia (AUC = %0.2f) ' % metrics.auc(fpr,tpr))
-	# plt.plot([0, 1], [0, 1], color='navy', lw=lw, label='Baseline',linestyle='--')
-	# plt.legend(loc="lower right")
-	# plt.xlabel('False Positive Rate')
-	# plt.ylabel('True Positive Rate')
-	# plt.savefig(title.replace(" ","_")+"2.png")
-	# plt.close()
+	plt.clf()
+	##########################False2
+	plt.figure(2)
+	####TFCG
+	fpr, tpr, thresholds = metrics.roc_curve(y2_TFCG, scores2_TFCG, pos_label=1)
+	print(metrics.auc(fpr,tpr))
+	print("TFCG P-Value %.2E" %Decimal(stats.ttest_rel(Intersect_true_TFCG['simil'],Intersect_false_TFCG['simil']).pvalue))
+	plt.plot(fpr, tpr,lw=lw, label='TFCG (AUC = %0.2f) ' % metrics.auc(fpr,tpr))
+	####FFCG
+	fpr, tpr, thresholds = metrics.roc_curve(y2_FFCG, scores2_FFCG, pos_label=1)
+	print(metrics.auc(fpr,tpr))
+	print("FFCG P-Value %.2E" %Decimal(stats.ttest_rel(Intersect_true_FFCG['simil'],Intersect_false_FFCG['simil']).pvalue))
+	plt.plot(fpr, tpr,lw=lw, label='FFCG (AUC = %0.2f) ' % metrics.auc(fpr,tpr))
+	####DBPedia
+	fpr, tpr, thresholds = metrics.roc_curve(y2_DBPedia, scores2_DBPedia, pos_label=1)
+	print(metrics.auc(fpr,tpr))
+	print("DBPedia P-Value %.2E" %Decimal(stats.ttest_rel(Intersect_true_DBPedia['simil'],Intersect_false_DBPedia['simil']).pvalue))
+	plt.plot(fpr, tpr,lw=lw, label='DBPedia (AUC = %0.2f) ' % metrics.auc(fpr,tpr))
+	plt.plot([0, 1], [0, 1], color='navy', lw=lw, label='Baseline',linestyle='--')
+	plt.legend(loc="lower right")
+	plt.xlabel('False Positive Rate')
+	plt.ylabel('True Positive Rate')
+	plt.savefig(title.replace(" ","_")+"2.png")
+	plt.close()
+	plt.clf()
+	##########################Distribution Plot
+	#Plot 3
+	plt.figure(3)
+	title="Score Difference between True and False Pairs"
+	#first overlap plot TFCG vs FFCG
+	intersect=Intersect_true_TFCG['simil']
+	intersect=intersect.reset_index(drop=True)
+	set_trace()
+	plt.hist(Intersect_true_TFCG['simil']-Intersect_false_TFCG['simil'],density=True,histtype='step',label='TFCG')
+	plt.hist(Intersect_true_FFCG['simil']-Intersect_false_TFCG['simil'],density=True,histtype='step',label='FFCG')
+	plt.hist(Intersect_true_DBPedia['simil']-Intersect_false_DBPedia['simil'],density=True,histtype='step',label='DBPedia')	
+	plt.legend(loc="upper right")
+	plt.title(title)
+	plt.xlabel("True Pair Proximity - False Pair Proximity")
+	plt.ylabel("Density")
+	plt.savefig(title.replace(" ","_")+".png")
+	plt.close()
+	plt.clf()
+	# plt.show()
+
 
 # def plot_overlap():
 # 	Intersect_true_TFCG=pd.read_json("Intersect_true_pairs_TFCG_IDs.json")
