@@ -1,13 +1,15 @@
-Number of DBpedia Uris: 2169 
-Number of Triples to Check: 2034 
-Average Degree: 5.3417190775681345 
-Average Squared Degree: 684.7685534591195 
-Kappa/Heterogenity Coefficient (average of squared degree/square of average degree): 23.998368560683538 
-Average Clustering Coefficient: 0.12067617155908535 
-Density: 0.0005331967210412599 
-Number of Edges: 24261 
-Number of Nodes: 9540 
-Average Shortest Path Length: 3.9809179869098124 
+Number of Edges: 2.43E+04 
+Number of Nodes: 9.54E+03 
+Number of Connected Components: 9 
+Largest Component Edges: 2.43E+04 
+Largest Component Nodes: 9.52E+03 
+Number of DBpedia Uris: 2.17E+03 
+Average Degree: 5.34E+00 
+Average Squared Degree: 6.85E+02 
+Kappa/Heterogenity Coefficient: 2.40E+01 
+Average Clustering Coefficient: 1.21E-01 
+Density: 5.33E-04 
+Average Shortest Path Length: 3.98E+00 
 
 Length #Paths 
 0 9540 

@@ -1,0 +1,36 @@
+
+2019-08-23 19:36:04.703806:
+    metric: ultrametric
+    edges:  undirected
+    weight: logdegree
+    nodes:  TFCG_co/TFCG_co_uris.txt
+    graph:  TFCG_co/TFCG_co_edgelist.npy
+    input:  TFCG_co/Intersect_all_pairs_TFCG_co_IDs.txt
+    output: TFCG_co/Intersect_all_pairs_TFCG_co_IDs.json
+2019-08-23 19:36:04.704435: reading nodes from text file..
+2019-08-23 19:36:04.846957: reading graph from text file..
+2019-08-23 19:36:04.906380: reading input..
+2019-08-23 19:36:05.895336: launching pool of 12 workers.
+2019-08-23 19:41:29.322010: done
+
+real	6m24.831s
+user	61m39.219s
+sys	0m12.872s
+
+2019-08-23 19:41:35.705639:
+    metric: ultrametric
+    edges:  undirected
+    weight: logdegree
+    nodes:  FFCG_co/FFCG_co_uris.txt
+    graph:  FFCG_co/FFCG_co_edgelist.npy
+    input:  FFCG_co/Intersect_all_pairs_FFCG_co_IDs.txt
+    output: FFCG_co/Intersect_all_pairs_FFCG_co_IDs.json
+2019-08-23 19:41:35.705842: reading nodes from text file..
+2019-08-23 19:41:35.801751: reading graph from text file..
+2019-08-23 19:41:35.856055: reading input..
+2019-08-23 19:41:37.080532: launching pool of 12 workers.
+2019-08-23 20:05:30.273884: done
+
+real	24m5.266s
+user	280m54.011s
+sys	0m59.570s

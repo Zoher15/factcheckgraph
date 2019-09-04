@@ -54,33 +54,34 @@ def save_degree():
 def calculate_stats():
 	degreelist={}
 	pathlengths={}
-	for mode in ['TFCG','FFCG']:
-		dbpedia_uris=np.load(os.path.join(mode,mode+"_dbpedia_uris.npy"))
-		triples_tocheck=np.load(os.path.join(mode,mode+"_entity_triples_dbpedia.npy"))
-		degreelist[mode]=np.load(os.path.join(mode,mode+"_degreelist.npy"))
+	for mode in ['TFCG_co','FFCG_co']:
+		dbpedia_uris=np.load(os.path.join(mode,mode+"_uris.npy"))
+		# triples_tocheck=np.load(os.path.join(mode,mode+"_entity_triples_dbpedia.npy"))
+		G=nx.read_edgelist(os.path.join(mode,mode+".edgelist"))
+		degreelist[mode]=[val for (node, val) in G.degree()]
 		with open(os.path.join(mode,mode+"_stats.txt"),"w") as f:
-			f.write("Number of DBpedia Uris: %s \n" % (len(dbpedia_uris)))
-			f.write("Number of Triples to Check: %s \n" % (len(triples_tocheck)))
+			f.write("Number of Edges: %.2E \n" %Decimal(G.number_of_edges()))
+			f.write("Number of Nodes: %.2E \n" %Decimal(G.number_of_nodes()))
+			f.write("Number of Connected Components: %s \n" %(len(list(nx.connected_components(G)))))
+			largest_cc = max(nx.connected_component_subgraphs(G), key=len)
+			f.write("Largest Component Edges: %.2E \n" %Decimal(len(largest_cc.edges())))			
+			f.write("Largest Component Nodes: %.2E \n" %Decimal(len(largest_cc.nodes())))
+			f.write("Number of DBpedia Uris: %.2E \n" %Decimal(len(dbpedia_uris)))
+			# f.write("Number of Triples to Check: %s \n" % (len(triples_tocheck)))
 			degree_square_list=np.asarray(list(map(np.square,degreelist[mode])))
-			f.write("Average Degree: %s \n" % (np.average(degreelist[mode])))
-			f.write("Average Squared Degree: %s \n" % (np.average(degree_square_list)))
+			f.write("Average Degree: %.2E \n" %Decimal(np.average(degreelist[mode])))
+			f.write("Average Squared Degree: %.2E \n" %Decimal(np.average(degree_square_list)))
 			kappa=np.average(degree_square_list)/(np.square(np.average(degreelist[mode])))
-			f.write("Kappa/Heterogenity Coefficient (average of squared degree/square of average degree): %s \n" % (kappa))
-			try:
-				G=nx.read_weighted_edgelist(os.path.join(mode,mode+"_edgelist.txt"))
-			except:
-				pdb.set_trace()
-			f.write("Average Clustering Coefficient: %s \n" % (nx.average_clustering(G)))
-			f.write("Density: %s \n" %(nx.density(G)))
-			f.write("Number of Edges: %s \n" %(G.number_of_edges()))
-			f.write("Number of Nodes: %s \n" %(G.number_of_nodes()))
+			f.write("Kappa/Heterogenity Coefficient: %.2E \n" %Decimal(kappa))
+			f.write("Average Clustering Coefficient: %.2E \n" %Decimal(nx.average_clustering(G)))
+			f.write("Density: %.2E \n" %(nx.density(G)))
 			#average path length calculation
 			pathlengths[mode]= []
 			for v in G.nodes():
 				spl = dict(nx.single_source_shortest_path_length(G, v))
 				for p in spl:
 					pathlengths[mode].append(spl[p])
-			f.write("Average Shortest Path Length: %s \n\n" % (sum(pathlengths[mode]) / len(pathlengths[mode])))
+			f.write("Average Shortest Path Length: %.2E \n\n" %Decimal(sum(pathlengths[mode]) / len(pathlengths[mode])))
 			dist = {}
 			for p in pathlengths[mode]:
 				if p in dist:
@@ -562,6 +563,65 @@ def read_pairs_fromfile_bulk():
 	combined1.to_json("Intersect_true_pairs_DBPedia_IDs.json")
 	combined2.to_json("Intersect_false_pairs_DBPedia_IDs.json")
 	combined3.to_json("Intersect_false_pairs2_DBPedia_IDs.json")
+
+def quantile_correlations():
+	tfcg_scores_all=list(np.load(os.path.join("TFCG","TFCG_scores.npy")))
+	ffcg_scores_all=list(np.load(os.path.join("FFCG","FFCG_scores.npy")))
+	dbpedia_scores_all=list(np.load(os.path.join("DBPedia","DBPedia_scores.npy")))	
+	title_text=""
+	# for name in ["tfcg_scores_all","ffcg_scores_all","dbpedia_scores_all"]:
+	# 	indices=[i for i, x in enumerate(eval(name)) if x == 0]
+	# 	for i in sorted(indices, reverse = True):
+	# 		del tfcg_scores_all[i]
+	# 		del ffcg_scores_all[i]
+	# 		del dbpedia_scores_all[i]
+	# 	title_text="_0removed"
+	scores_all=pd.DataFrame(columns=['DBPedia','TFCG','FFCG'])
+	scores_all['DBPedia']=dbpedia_scores_all
+	scores_all['TFCG']=tfcg_scores_all
+	scores_all['FFCG']=ffcg_scores_all
+	scores_all=scores_all.sort_values(by='DBPedia')
+	scores_all=scores_all.reset_index(drop=True)
+	percentiles=[.1,.15,.2,.25,.3,.35,.4,.45,.5,.55,.6,.65,.7,.75,.8,.85,.9,.95,1]
+	dbpedia_percentiles=list(scores_all.quantile(percentiles)['DBPedia'])
+	dataframes_percentiles=[scores_all[scores_all.DBPedia<i] for i in dbpedia_percentiles]
+	correlations_percentile=pd.DataFrame(columns=['percentile','type','kendalltau','p-value','size'])
+	for i in range(len(dataframes_percentiles)):
+		dataframe=dataframes_percentiles[i]
+		dbpedia_tfcg=stats.kendalltau(dataframe['DBPedia'],dataframe['TFCG'])
+		dbpedia_ffcg=stats.kendalltau(dataframe['DBPedia'],dataframe['FFCG'])
+		tfcg_ffcg=stats.kendalltau(dataframe['TFCG'],dataframe['FFCG'])
+		dbpedia_tfcg_row={'percentile':percentiles[i],'type':'DBPedia - TFCG','kendalltau':dbpedia_tfcg.correlation,'p-value':pvalue_sign(dbpedia_tfcg.pvalue),'size':len(dataframe)}
+		dbpedia_ffcg_row={'percentile':percentiles[i],'type':'DBPedia - FFCG','kendalltau':dbpedia_ffcg.correlation,'p-value':pvalue_sign(dbpedia_ffcg.pvalue),'size':len(dataframe)}
+		# tfcg_ffcg_row={'percentile':percentiles[i],'type':'TFCG - FFCG','kendalltau':tfcg_ffcg.correlation,'p-value':tfcg_ffcg.pvalue,'size':len(dataframe)}
+		correlations_percentile=correlations_percentile.append(dbpedia_tfcg_row, ignore_index=True)
+		correlations_percentile=correlations_percentile.append(dbpedia_ffcg_row, ignore_index=True)
+		# correlations_percentile=correlations_percentile.append(tfcg_ffcg_row, ignore_index=True)
+	correlations_percentile_dbpedia_tfcg=correlations_percentile[correlations_percentile['type']=="DBPedia - TFCG"].reset_index()
+	correlations_percentile_dbpedia_ffcg=correlations_percentile[correlations_percentile['type']=="DBPedia - FFCG"].reset_index().reset_index()
+	correlations_percentile_tfcg_ffcg=correlations_percentile[correlations_percentile['type']=="TFCG - FFCG"].reset_index()
+	title="Percentile Correlations FRED"
+	plt.figure(1)
+	plt.title("FRED Network")
+	plt.plot(percentiles,correlations_percentile_dbpedia_tfcg["kendalltau"],label="DBPedia - TFCG",marker='o',linestyle='dashed')
+	for i,value in enumerate(correlations_percentile_dbpedia_tfcg['p-value']):
+		plt.annotate(value,(percentiles[i],correlations_percentile_dbpedia_tfcg["kendalltau"][i]))
+	plt.plot(percentiles,correlations_percentile_dbpedia_ffcg["kendalltau"],label="DBPedia - FFCG",marker='o',linestyle='dashed')
+	for i,value in enumerate(correlations_percentile_dbpedia_ffcg['p-value']):
+		plt.annotate(value,(percentiles[i],correlations_percentile_dbpedia_ffcg["kendalltau"][i]))	
+	# plt.plot(percentiles,correlations_percentile[correlations_percentile['type']=="TFCG - FFCG"]["kendalltau"],label="TFCG - FFCG")
+	plt.xlabel("Percentiles")
+	plt.ylabel("Correlations")
+	plt.legend(loc="upper right")
+	plt.savefig(title.replace(" ","_")+title_text+".png")
+	plt.close()
+	plt.clf()
+
+def pvalue_sign(pvalue):
+	if pvalue>0.01:
+		return '!'
+	else:
+		return '*'
 
 def correlations():
 	tfcg_scores_all=list(np.load("tfcg_scores.npy"))

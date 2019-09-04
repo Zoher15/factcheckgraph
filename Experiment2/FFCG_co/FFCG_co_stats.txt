@@ -1,0 +1,25 @@
+Number of Edges: 1.54E+04 
+Number of Nodes: 5.07E+03 
+Number of Connected Components: 207 
+Largest Component Edges: 1.50E+04 
+Largest Component Nodes: 4.55E+03 
+Number of DBpedia Uris: 5.07E+03 
+Average Degree: 6.08E+00 
+Average Squared Degree: 2.70E+02 
+Kappa/Heterogenity Coefficient: 7.29E+00 
+Average Clustering Coefficient: 5.89E-01 
+Density: 1.20E-03 
+Average Shortest Path Length: 3.98E+00 
+
+Length #Paths 
+0 5066 
+1 30814 
+2 975884 
+3 5943682 
+4 8057730 
+5 4142478 
+6 1250146 
+7 258596 
+8 35904 
+9 3548 
+10 142 

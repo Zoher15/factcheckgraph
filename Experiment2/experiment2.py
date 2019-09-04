@@ -16,6 +16,7 @@ import matplotlib.pyplot as plt
 from sklearn import metrics
 import scipy.stats as stats
 from IPython.core.debugger import set_trace
+import seaborn as sns
 '''
 The goal of the script is the following:
 1. Parse DBpedia and create a dictionary of uris
@@ -87,6 +88,9 @@ def parse_dbpedia():
 			f.write("{} {} {}\n".format(str(line[0]),str(int(line[1])),str(line[2])))
 	return uris,uris_dict,edgelist
 
+#Calculate Graph statistics of interest and saves them to a file called stats.txt
+
+
 #Go through True and False Claims to return the entities present per claim
 def parse_claims(uris_dict):
 	data=pd.read_csv("/gpfs/home/z/k/zkachwal/Carbonate/RDF Files/claimreviews_db2.csv",index_col=0)
@@ -147,6 +151,181 @@ def parse_claims(uris_dict):
 		f.write(json.dumps(trueclaim_uris,ensure_ascii=False))
 	with codecs.open("falseclaim_uris.json","w","utf-8") as f:
 		f.write(json.dumps(falseclaim_uris,ensure_ascii=False))
+
+def read_pairs_fromfile_bulk_all():
+	splits=28
+	combined=pd.DataFrame()
+	for i in range(splits+1):
+		a=pd.read_json(os.path.join("DBPedia",str(i+1)+"_part_intersect_all_pairs_DBPedia_IDs_co.json"))
+		print((i+1),len(a))
+		combined=pd.concat([combined,a],ignore_index=True)
+	print(len(combined))
+	combined['label']="DBPedia"
+	dbpedia_scores=list(combined['simil'])
+	tfcg=pd.read_json(os.path.join("TFCG_co","Intersect_all_pairs_TFCG_co_IDs.json"))
+	ffcg=pd.read_json(os.path.join("FFCG_co","Intersect_all_pairs_FFCG_co_IDs.json"))
+	np.save(os.path.join("DBPedia","DBPedia_co_scores.npy"),dbpedia_scores)
+	np.save(os.path.join("TFCG_co","TFCG_co_scores.npy"),list(tfcg['simil']))
+	np.save(os.path.join("FFCG_co","FFCG_co_scores.npy"),list(ffcg['simil']))
+	combined.to_csv("/gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph Data/DBPedia Data/Intersect_all_pairs_DBPedia_IDs_co.csv")
+
+def quantile_correlations():
+	tfcg_scores_all=list(np.load(os.path.join("TFCG_co","TFCG_co_scores.npy")))
+	ffcg_scores_all=list(np.load(os.path.join("FFCG_co","FFCG_co_scores.npy")))
+	dbpedia_scores_all=list(np.load(os.path.join("DBPedia","DBPedia_co_scores.npy")))
+	title_text=""
+	# for name in ["tfcg_scores_all","ffcg_scores_all","dbpedia_scores_all"]:
+	# 	indices=[i for i, x in enumerate(eval(name)) if x == 0]
+	# 	for i in sorted(indices, reverse = True):
+	# 		del tfcg_scores_all[i]
+	# 		del ffcg_scores_all[i]
+	# 		del dbpedia_scores_all[i]
+	# 	title_text="_0removed"	
+	scores_all=pd.DataFrame(columns=['DBPedia','TFCG','FFCG'])
+	scores_all['DBPedia']=dbpedia_scores_all
+	scores_all['TFCG']=tfcg_scores_all
+	scores_all['FFCG']=ffcg_scores_all
+	scores_all=scores_all.sort_values(by='DBPedia')
+	scores_all=scores_all.reset_index(drop=True)
+	percentiles=[.1,.15,.2,.25,.3,.35,.4,.45,.5,.55,.6,.65,.7,.75,.8,.85,.9,.95,1]
+	dbpedia_percentiles=list(scores_all.quantile(percentiles)['DBPedia'])
+	dataframes_percentiles=[scores_all[scores_all.DBPedia<i] for i in dbpedia_percentiles]
+	correlations_percentile=pd.DataFrame(columns=['percentile','type','kendalltau','p-value','size'])
+	for i in range(len(dataframes_percentiles)):
+		dataframe=dataframes_percentiles[i]
+		dbpedia_tfcg=stats.kendalltau(dataframe['DBPedia'],dataframe['TFCG'])
+		dbpedia_ffcg=stats.kendalltau(dataframe['DBPedia'],dataframe['FFCG'])
+		tfcg_ffcg=stats.kendalltau(dataframe['TFCG'],dataframe['FFCG'])
+
+		dbpedia_tfcg_row={'percentile':percentiles[i],'type':'DBPedia - TFCG','kendalltau':dbpedia_tfcg.correlation,'p-value':pvalue_sign(dbpedia_tfcg.pvalue),'size':len(dataframe)}
+		dbpedia_ffcg_row={'percentile':percentiles[i],'type':'DBPedia - FFCG','kendalltau':dbpedia_ffcg.correlation,'p-value':pvalue_sign(dbpedia_ffcg.pvalue),'size':len(dataframe)}
+		# tfcg_ffcg_row={'percentile':percentiles[i],'type':'TFCG - FFCG','kendalltau':tfcg_ffcg.correlation,'p-value':tfcg_ffcg.pvalue,'size':len(dataframe)}
+		correlations_percentile=correlations_percentile.append(dbpedia_tfcg_row, ignore_index=True)
+		correlations_percentile=correlations_percentile.append(dbpedia_ffcg_row, ignore_index=True)
+		# correlations_percentile=correlations_percentile.append(tfcg_ffcg_row, ignore_index=True)
+	correlations_percentile_dbpedia_tfcg=correlations_percentile[correlations_percentile['type']=="DBPedia - TFCG"].reset_index()
+	correlations_percentile_dbpedia_ffcg=correlations_percentile[correlations_percentile['type']=="DBPedia - FFCG"].reset_index().reset_index()
+	correlations_percentile_tfcg_ffcg=correlations_percentile[correlations_percentile['type']=="TFCG - FFCG"].reset_index()
+	title="Percentile Correlations Co-Occurr"
+	plt.figure(1)
+	plt.title("Co-Occurr Network")
+	plt.plot(percentiles,correlations_percentile_dbpedia_tfcg["kendalltau"],label="DBPedia - TFCG",marker='o',linestyle='dashed')
+	for i,value in enumerate(correlations_percentile_dbpedia_tfcg['p-value']):
+		plt.annotate(value,(percentiles[i],correlations_percentile_dbpedia_tfcg["kendalltau"][i]))
+	plt.plot(percentiles,correlations_percentile_dbpedia_ffcg["kendalltau"],label="DBPedia - FFCG",marker='o',linestyle='dashed')
+	for i,value in enumerate(correlations_percentile_dbpedia_ffcg['p-value']):
+		plt.annotate(value,(percentiles[i],correlations_percentile_dbpedia_ffcg["kendalltau"][i]))	
+	# plt.plot(percentiles,correlations_percentile[correlations_percentile['type']=="TFCG - FFCG"]["kendalltau"],label="TFCG - FFCG")
+	plt.xlabel("Percentiles")
+	plt.ylabel("Correlations")
+	plt.legend(loc="lower right")
+	# plt.savefig(title.replace(" ","_")+".png")
+	plt.savefig(title.replace(" ","_")+title_text+".png")
+	plt.close()
+	plt.clf()
+
+def pvalue_sign(pvalue):
+	if pvalue>0.01:
+		return '!'
+	else:
+		return '*'
+
+def correlations():
+	tfcg_scores_all=list(np.load(os.path.join("TFCG_co","TFCG_co_scores.npy")))
+	ffcg_scores_all=list(np.load(os.path.join("FFCG_co","FFCG_co_scores.npy")))
+	dbpedia_scores_all=list(np.load(os.path.join("DBPedia","DBPedia_co_scores.npy")))
+	print("TFCG_co-DBPedia_co",stats.kendalltau(tfcg_scores_all,dbpedia_scores_all))
+	print("FFCG_co-DBPedia_co",stats.kendalltau(ffcg_scores_all,dbpedia_scores_all))
+	print("TFCG_co-FFCG_co",stats.kendalltau(tfcg_scores_all,ffcg_scores_all))
+	title="Proximity Distribution"
+	plt.figure(1)
+	plt.hist(tfcg_scores_all,histtype='step',label='TFCG')
+	plt.hist(ffcg_scores_all,histtype='step',label='FFCG')
+	plt.hist(dbpedia_scores_all,histtype='step',label='DBPedia')
+	plt.xlabel("Proximity Scores")
+	plt.ylabel("Density")
+	plt.legend(loc="upper right")
+	plt.savefig(title.replace(" ","_")+".png")
+	plt.close()
+	plt.clf()
+	sns.set_style("white")
+	sns.set_style("ticks")
+	ax = sns.kdeplot(pd.Series(tfcg_scores_all,name="TFCG"))
+	ax = sns.kdeplot(pd.Series(ffcg_scores_all,name="FFCG"))
+	ax = sns.kdeplot(pd.Series(dbpedia_scores_all,name="DBPedia"))
+	plt.xlabel("Proximity Scores")
+	plt.ylabel("Density")
+	plt.savefig(title.replace(" ","_")+"_seaborn.png")
+	plt.close()
+	plt.clf()
+	for name in ["tfcg_scores_all","ffcg_scores_all","dbpedia_scores_all"]:
+		indices=[i for i, x in enumerate(eval(name)) if x == 0]
+		for i in sorted(indices, reverse = True):
+			del tfcg_scores_all[i]
+			del ffcg_scores_all[i]
+			del dbpedia_scores_all[i]
+	np.save("tfcg_scores_0removed.npy",tfcg_scores_all)
+	np.save("ffcg_scores_0removed.npy",ffcg_scores_all)
+	np.save("dbpedia_scores_0removed.npy",dbpedia_scores_all)
+	print("TFCG_co-DBPedia_co",stats.kendalltau(tfcg_scores_all,dbpedia_scores_all))
+	print("FFCG_co-DBPedia_co",stats.kendalltau(ffcg_scores_all,dbpedia_scores_all))
+	print("TFCG_co-FFCG_co",stats.kendalltau(tfcg_scores_all,ffcg_scores_all))
+	title="Proximity Distribution after 0 removal"
+	plt.figure(2)
+	plt.hist(tfcg_scores_all,histtype='step',label='TFCG')
+	plt.hist(ffcg_scores_all,histtype='step',label='FFCG')
+	plt.hist(dbpedia_scores_all,histtype='step',label='DBPedia')
+	plt.xlabel("Proximity Scores")
+	plt.ylabel("Density")
+	plt.legend(loc="upper right")
+	plt.savefig(title.replace(" ","_")+".png")
+	plt.close()
+	plt.clf()
+	sns.set_style("white")
+	sns.set_style("ticks")
+	ax = sns.kdeplot(pd.Series(tfcg_scores_all,name="TFCG"))
+	ax = sns.kdeplot(pd.Series(ffcg_scores_all,name="FFCG"))
+	ax = sns.kdeplot(pd.Series(dbpedia_scores_all,name="DBPedia"))
+	plt.xlabel("Proximity Scores")
+	plt.ylabel("Density")
+	plt.savefig(title.replace(" ","_")+"_seaborn.png")
+	plt.close()
+	plt.clf()
+
+
+def testlengths():
+	data=pd.read_csv("/gpfs/home/z/k/zkachwal/Carbonate/RDF Files/claimreviews_db2.csv",index_col=0)
+	##Dropping non-str rows
+	filter=list(map(lambda x:type(x)!=str,data['rating_name']))
+	data.drop(data[filter].index,inplace=True)
+	print(data.groupby('fact_checkerID').count())
+	trueregex=re.compile(r'(?i)^true|^correct$|^mostly true$|^geppetto checkmark$')
+	falseregex=re.compile(r'(?i)^false|^mostly false|^pants on fire$|^four pinocchios$|^no\ |^no:|^distorts the facts|^wrong$')
+	trueind=data['rating_name'].apply(lambda x:trueregex.match(x)!=None)
+	trueclaims=list(data.loc[trueind]['claim_text'])
+	falseind=data['rating_name'].apply(lambda x:falseregex.match(x)!=None)
+	falseclaims=list(data.loc[falseind]['claim_text'])
+	np.save("true_claims.npy",list(trueclaims))
+	np.save("false_claims.npy",list(falseclaims))
+	trueclaims=np.load("true_claims.npy")
+	falseclaims=np.load("false_claims.npy")
+	trueclaims=[claim.split() for claim in trueclaims]
+	falseclaims=[claim.split() for claim in falseclaims]
+	trueclaims_lengths=list(map(len,trueclaims))
+	falseclaims_lengths=list(map(len,falseclaims))
+	title="Claim Length Distribution"
+	plt.figure(1)
+	sns.set_style("white")
+	sns.set_style("ticks")
+	ax = sns.kdeplot(pd.Series(trueclaims_lengths,name="True Claims Mean {} Median {}".format(round(np.mean(trueclaims_lengths),2),int(np.median(trueclaims_lengths)))))
+	ax = sns.kdeplot(pd.Series(falseclaims_lengths,name="False Claims Mean {} Median {}".format(round(np.mean(falseclaims_lengths),2),int(np.median(falseclaims_lengths)))))
+	plt.title(title+" P-Value %.2E" %Decimal(stats.ttest_ind(trueclaims_lengths,falseclaims_lengths).pvalue))
+	plt.xlabel("Claim Length")
+	plt.legend(loc="upper right")
+	plt.ylabel("Density")
+	plt.savefig(title.replace(" ","_")+"_seaborn.png")
+	plt.close()
+	plt.clf()
 
 def create_cooccurrence_network():
 	# data=pd.read_csv("/gpfs/home/z/k/zkachwal/Carbonate/RDF Files/claimreviews_db2.csv",index_col=0)
@@ -222,6 +401,7 @@ def create_cooccurrence_network():
 		edges=list(eval(mode).edges())
 		#Saving the uris
 		with codecs.open(os.path.join(mode,mode+"_uris.txt"),"w","utf-8") as f:
+			np.save(os.path.join(mode,mode+"_uris.npy"),uris)
 			for uri in uris:
 				try:
 					f.write(str(uri)+"\n")
@@ -234,6 +414,7 @@ def create_cooccurrence_network():
 		#Saving the edgelist to input Knowledge Linker
 		edgelist=np.asarray([[uris_dict[edge[0]],uris_dict[edge[1]],1] for edge in edges])
 		np.save(os.path.join(mode,mode+"_edgelist.npy"),edgelist)
+	set_trace()
 	#Loading the dictionaries
 	with codecs.open("/gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph Data/DBPedia Data/dbpedia_uris_dict.json","r","utf-8") as f:
 		DBPedia_uris_dict=json.loads(f.read())
@@ -245,51 +426,95 @@ def create_cooccurrence_network():
 	intersect_uris=np.asarray(list(set(intersect_uris).intersection(set(DBPedia_uris_dict.keys()))))
 	np.save("intersect_dbpedia_uris_co.npy",list(intersect_uris))
 	#Loading True Pairs after DBPedia has found the adjacent nodes
-	intersect_true_pairs=np.load("/gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph/Experiment2/intersect_entity_true_pairs_dbpedia_co.npy")
-	#Converting list to set, to get rid of duplicates
-	intersect_true_pairs_set=set(list(map(str,list(map(set,intersect_true_pairs)))))
-	set_trace()
-	#Converting it back. Getting rid of pairs where both uris are duplicates, as well as duplicate of each pair
-	intersect_true_pairs=np.asarray([i for i in list(map(list,list(map(eval,list(intersect_true_pairs_set))))) if len(i)==2])
+	# intersect_true_pairs=np.load("/gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph/Experiment2/intersect_entity_true_pairs_dbpedia_co.npy")
+	# #Converting list to set, to get rid of duplicates
+	# intersect_true_pairs_set=set(list(map(str,list(map(set,intersect_true_pairs)))))
+	# set_trace()
+	# #Converting it back. Getting rid of pairs where both uris are duplicates, as well as duplicate of each pair
+	# intersect_true_pairs=np.asarray([i for i in list(map(list,list(map(eval,list(intersect_true_pairs_set))))) if len(i)==2])
 	#Find all possible combinations of these uris
 	intersect_all_pairs=combinations(intersect_uris,2)
 	intersect_all_pairs=np.asarray(list(map(list,intersect_all_pairs)))
+	# set_trace()
 	#Choosing 2n random pairs, where n is the lenght of the total true_pairs 
-	random_pairs=np.random.choice(range(len(intersect_all_pairs)),size=len(intersect_true_pairs)*2,replace=False)
-	intersect_false_pairs=[]
-	rejected_pairs=[]
-	set_trace()
-	#Rejecting pairs from random pairs that are already present in true pairs
-	counter=0
-	for i in random_pairs:
-		if counter<len(intersect_true_pairs):
-			if str(set(intersect_all_pairs[i])) in intersect_true_pairs_set or str(set(list(reversed(intersect_all_pairs[i])))) in intersect_true_pairs_set:#eliminating random triple if it exists in the intersect set (converted individiual triples to str to make a set)
-				rejected_pairs.append(intersect_all_pairs[i])
-			else:
-				counter+=1
-				intersect_false_pairs.append(intersect_all_pairs[i])
-		else:
-			break
-	intersect_true_pairs=np.asarray(intersect_true_pairs)
-	intersect_false_pairs=np.asarray(intersect_false_pairs)
-	#Saving true and false pairs pairs
-	np.save("intersect_true_pairs_co.npy",intersect_true_pairs)
-	np.save("intersect_false_pairs_co.npy",intersect_false_pairs)
-	#Loading saved True Pairs
-	intersect_true_pairs=np.load("intersect_true_pairs_co.npy")
-	intersect_false_pairs=np.load("intersect_false_pairs_co.npy")
-	# Reformatting according to the input format acccepted by Knowledge Linker
-	intersect_true_pairs=np.asarray([[np.nan,i[0],np.nan,np.nan,i[1],np.nan,np.nan] for i in intersect_true_pairs])
-	intersect_false_pairs=np.asarray([[np.nan,i[0],np.nan,np.nan,i[1],np.nan,np.nan] for i in intersect_false_pairs])
+	# random_pairs=np.random.choice(range(len(intersect_all_pairs)),size=len(intersect_true_pairs)*2,replace=False)
+	# intersect_false_pairs=[]
+	# rejected_pairs=[]
+	# set_trace()
+	# #Rejecting pairs from random pairs that are already present in true pairs
+	# counter=0
+	# for i in random_pairs:
+	# 	if counter<len(intersect_true_pairs):
+	# 		if str(set(intersect_all_pairs[i])) in intersect_true_pairs_set or str(set(list(reversed(intersect_all_pairs[i])))) in intersect_true_pairs_set:#eliminating random triple if it exists in the intersect set (converted individiual triples to str to make a set)
+	# 			rejected_pairs.append(intersect_all_pairs[i])
+	# 		else:
+	# 			counter+=1
+	# 			intersect_false_pairs.append(intersect_all_pairs[i])
+	# 	else:
+	# 		break
+	# intersect_true_pairs=np.asarray(intersect_true_pairs)
+	# intersect_false_pairs=np.asarray(intersect_false_pairs)
+	# #Saving true and false pairs pairs
+	# np.save("intersect_true_pairs_co.npy",intersect_true_pairs)
+	# np.save("intersect_false_pairs_co.npy",intersect_false_pairs)
+	# #Loading saved True Pairs
+	# intersect_true_pairs=np.load("intersect_true_pairs_co.npy")
+	# intersect_false_pairs=np.load("intersect_false_pairs_co.npy")
+	# # Reformatting according to the input format acccepted by Knowledge Linker
+	# intersect_true_pairs=np.asarray([[np.nan,i[0],np.nan,np.nan,i[1],np.nan,np.nan] for i in intersect_true_pairs])
+	# intersect_false_pairs=np.asarray([[np.nan,i[0],np.nan,np.nan,i[1],np.nan,np.nan] for i in intersect_false_pairs])
 	######################################################################Writing True Pairs
 	# Writing true pairs to file using TFCG,FFCG and DBPedia entity IDs
-	for mode in ["TFCG_co","FFCG_co","DBPedia"]:
-		with codecs.open(os.path.join(mode,'Intersect_true_pairs_'+mode+'_IDs.txt'),"w","utf-8") as f:
-			for line in intersect_true_pairs:
+	# for mode in ["TFCG_co","FFCG_co","DBPedia"]:
+	# 	with codecs.open(os.path.join(mode,'Intersect_true_pairs_'+mode+'_IDs.txt'),"w","utf-8") as f:
+	# 		for line in intersect_true_pairs:
+	# 			f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(eval(mode+"_uris_dict")[line[1]])),str(line[2]),str(line[3]),str(int(eval(mode+"_uris_dict")[line[4]])),str(line[5]),str(line[6])))
+	# 	with codecs.open(os.path.join(mode,'Intersect_false_pairs_'+mode+'_IDs.txt'),"w","utf-8") as f:
+	# 		for line in intersect_false_pairs:
+	# 			f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(eval(mode+"_uris_dict")[line[1]])),str(line[2]),str(line[3]),str(int(eval(mode+"_uris_dict")[line[4]])),str(line[5]),str(line[6])))
+	intersect_all_pairs=np.asarray([[np.nan,i[0],np.nan,np.nan,i[1],np.nan,np.nan] for i in intersect_all_pairs])
+	for mode in ["TFCG_co","FFCG_co"]:
+		with codecs.open(os.path.join(mode,'Intersect_all_pairs_'+mode+'_IDs.txt'),"w","utf-8") as f:
+			for line in intersect_all_pairs:
 				f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(eval(mode+"_uris_dict")[line[1]])),str(line[2]),str(line[3]),str(int(eval(mode+"_uris_dict")[line[4]])),str(line[5]),str(line[6])))
-		with codecs.open(os.path.join(mode,'Intersect_false_pairs_'+mode+'_IDs.txt'),"w","utf-8") as f:
-			for line in intersect_false_pairs:
-				f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(eval(mode+"_uris_dict")[line[1]])),str(line[2]),str(line[3]),str(int(eval(mode+"_uris_dict")[line[4]])),str(line[5]),str(line[6])))
+	splits=28
+	hours=30
+	partition=int(len(intersect_all_pairs)/splits)
+	for i in range(0,splits):	
+		with codecs.open(os.path.join("DBPedia",str(i+1)+'_part_intersect_all_pairs_DBPedia_IDs_co.txt'),"w","utf-8") as f:
+			for line in intersect_all_pairs[partition*i:partition*(i+1)]:
+				f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(DBPedia_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(DBPedia_uris_dict[line[4]])),str(line[5]),str(line[6])))
+		with codecs.open(os.path.join("DBPedia",str(i+1)+'_job_co.sh'),"w","utf-8") as f:
+			f.write('''
+#PBS -k o
+#PBS -l nodes=1:ppn=12,vmem=180gb,walltime={}:00:00
+#PBS -M zoher.kachwala@gmail.com
+#PBS -m abe
+#PBS -N {}_KLinker
+#PBS -j oe
+source /N/u/zkachwal/Carbonate/miniconda3/etc/profile.d/conda.sh
+conda activate env-kl
+cd /gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph/Experiment2/DBPedia
+time klinker linkpred /gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph\\ Data/DBPedia\\ Data/dbpedia_uris.txt /gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph\\ Data/DBPedia\\ Data/dbpedia_edgelist.npy {}_part_intersect_all_pairs_DBPedia_IDs_co.txt {}_part_intersect_all_pairs_DBPedia_IDs_co.json -u -n 12
+				'''.format(hours,i+1,i+1,i+1))
+	with codecs.open(os.path.join("DBPedia",str(splits+1)+'_part_intersect_all_pairs_DBPedia_IDs_co.txt'),"w","utf-8") as f:
+		for line in intersect_all_pairs[splits*partition:]:
+			f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(DBPedia_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(DBPedia_uris_dict[line[4]])),str(line[5]),str(line[6])))
+	with codecs.open(os.path.join("DBPedia",str(splits+1)+'_job_co.sh'),"w","utf-8") as f:
+		f.write('''
+#PBS -k o
+#PBS -l nodes=1:ppn=12,vmem=180gb,walltime={}:00:00
+#PBS -M zoher.kachwala@gmail.com
+#PBS -m abe
+#PBS -N {}_KLinker
+#PBS -j oe
+source /N/u/zkachwal/Carbonate/miniconda3/etc/profile.d/conda.sh
+conda activate env-kl
+cd /gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph/Experiment2/DBPedia
+time klinker linkpred /gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph\\ Data/DBPedia\\ Data/dbpedia_uris.txt /gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph\\ Data/DBPedia\\ Data/dbpedia_edgelist.npy {}_part_intersect_all_pairs_DBPedia_IDs_co.txt {}_part_intersect_all_pairs_DBPedia_IDs_co.json -u -n 12
+			'''.format(hours,splits+1,splits+1,splits+1))
+
+
 	# with codecs.open("trueclaim_uris.json","w","utf-8") as f:
 	# 	f.write(json.dumps(trueclaim_uris,ensure_ascii=False))
 	# with codecs.open("falseclaim_uris.json","w","utf-8") as f:
@@ -298,14 +523,15 @@ def create_cooccurrence_network():
 	# 	f.write(json.dumps(trueclaim_edges,ensure_ascii=False))
 	# with codecs.open("falseclaim_edges.json","w","utf-8") as f:
 	# 	f.write(json.dumps(falseclaim_edges,ensure_ascii=False))
+
 def plot_TFCGvsFFCG():
 	Intersect_true_TFCG=pd.read_json("TFCG_co/Intersect_true_pairs_TFCG_co_IDs.json")
 	Intersect_true_FFCG=pd.read_json("FFCG_co/Intersect_true_pairs_FFCG_co_IDs.json")
-	# Intersect_true_DBPedia=pd.read_json("/DBPedia/Intersect_true_pairs_DBPedia_IDs.json")
+	Intersect_true_DBPedia=pd.read_json("DBPedia/Intersect_true_pairs_DBPedia_IDs.json")
 
 	Intersect_false_TFCG=pd.read_json("TFCG_co/Intersect_false_pairs_TFCG_co_IDs.json")
 	Intersect_false_FFCG=pd.read_json("FFCG_co/Intersect_false_pairs_FFCG_co_IDs.json")
-	# Intersect_false_DBPedia=pd.read_json("/DBPedia/Intersect_false_pairs_DBPedia_IDs.json")
+	Intersect_false_DBPedia=pd.read_json("DBPedia/Intersect_false_pairs_DBPedia_IDs.json")
 
 
 	# Intersect_false2_TFCG=pd.read_json("/TFCG_co/Intersect_false_pairs2_TFCG_IDs.json")
@@ -320,8 +546,8 @@ def plot_TFCGvsFFCG():
 	Intersect_false_FFCG['label']=0
 	# Intersect_false2_FFCG['label']=0
 
-	# Intersect_true_DBPedia['label']=1
-	# Intersect_false_DBPedia['label']=0
+	Intersect_true_DBPedia['label']=1
+	Intersect_false_DBPedia['label']=0
 	# Intersect_false2_DBPedia['label']=0
 
 	true_false_TFCG=pd.concat([Intersect_true_TFCG,Intersect_false_TFCG],ignore_index=True)
@@ -340,9 +566,9 @@ def plot_TFCGvsFFCG():
 	# y2_FFCG=list(true_false2_FFCG['label'])
 	# scores2_FFCG=list(true_false2_FFCG['simil'])
 
-	# true_false_DBPedia=pd.concat([Intersect_true_DBPedia,Intersect_false_DBPedia],ignore_index=True)
-	# y_DBPedia=list(true_false_DBPedia['label'])
-	# scores_DBPedia=list(true_false_DBPedia['simil'])
+	true_false_DBPedia=pd.concat([Intersect_true_DBPedia,Intersect_false_DBPedia],ignore_index=True)
+	y_DBPedia=list(true_false_DBPedia['label'])
+	scores_DBPedia=list(true_false_DBPedia['simil'])
 
 	# true_false2_DBPedia=pd.concat([Intersect_true_DBPedia,Intersect_false2_DBPedia],ignore_index=True)
 	# y2_DBPedia=list(true_false2_DBPedia['label'])
@@ -362,10 +588,10 @@ def plot_TFCGvsFFCG():
 	print("FFCG P-Value %.2E" %Decimal(stats.ttest_rel(Intersect_true_FFCG['simil'],Intersect_false_FFCG['simil']).pvalue))
 	plt.plot(fpr, tpr,lw=lw, label='FFCG (AUC = %0.2f) ' % metrics.auc(fpr,tpr))
 	####DBPedia
-	# fpr, tpr, thresholds = metrics.roc_curve(y_DBPedia, scores_DBPedia, pos_label=1)
-	# print(metrics.auc(fpr,tpr))
-	# print("DBPedia P-Value %.2E" %Decimal(stats.ttest_rel(Intersect_true_DBPedia['simil'],Intersect_false_DBPedia['simil']).pvalue))
-	# plt.plot(fpr, tpr,lw=lw, label='DBPedia (AUC = %0.2f) ' % metrics.auc(fpr,tpr))
+	fpr, tpr, thresholds = metrics.roc_curve(y_DBPedia, scores_DBPedia, pos_label=1)
+	print(metrics.auc(fpr,tpr))
+	print("DBPedia P-Value %.2E" %Decimal(stats.ttest_rel(Intersect_true_DBPedia['simil'],Intersect_false_DBPedia['simil']).pvalue))
+	plt.plot(fpr, tpr,lw=lw, label='DBPedia (AUC = %0.2f) ' % metrics.auc(fpr,tpr))
 	plt.plot([0, 1], [0, 1], color='navy', lw=lw, label='Baseline',linestyle='--')
 	plt.legend(loc="lower right")
 	plt.xlabel('False Positive Rate')
@@ -416,64 +642,54 @@ def plot_TFCGvsFFCG():
 	# plt.close()
 	# plt.clf()
 	# plt.show()
+#Calculate Graph statistics of interest and saves them to a file called stats.txt
+def calculate_stats():
+	degreelist={}
+	pathlengths={}
+	for mode in ['TFCG_co','FFCG_co']:
+		dbpedia_uris=np.load(os.path.join(mode,mode+"_uris.npy"))
+		# triples_tocheck=np.load(os.path.join(mode,mode+"_entity_triples_dbpedia.npy"))
+		G=nx.read_edgelist(os.path.join(mode,mode+".edgelist"))
+		degreelist[mode]=[val for (node, val) in G.degree()]
+		with open(os.path.join(mode,mode+"_stats.txt"),"w") as f:
+			f.write("Number of Edges: %.2E \n" %Decimal(G.number_of_edges()))
+			f.write("Number of Nodes: %.2E \n" %Decimal(G.number_of_nodes()))
+			f.write("Number of Connected Components: %s \n" %(len(list(nx.connected_components(G)))))
+			largest_cc = max(nx.connected_component_subgraphs(G), key=len)
+			f.write("Largest Component Edges: %.2E \n" %Decimal(len(largest_cc.edges())))			
+			f.write("Largest Component Nodes: %.2E \n" %Decimal(len(largest_cc.nodes())))
+			f.write("Number of DBpedia Uris: %.2E \n" %Decimal(len(dbpedia_uris)))
+			# f.write("Number of Triples to Check: %s \n" % (len(triples_tocheck)))
+			degree_square_list=np.asarray(list(map(np.square,degreelist[mode])))
+			f.write("Average Degree: %.2E \n" %Decimal(np.average(degreelist[mode])))
+			f.write("Average Squared Degree: %.2E \n" %Decimal(np.average(degree_square_list)))
+			kappa=np.average(degree_square_list)/(np.square(np.average(degreelist[mode])))
+			f.write("Kappa/Heterogenity Coefficient: %.2E \n" %Decimal(kappa))
+			f.write("Average Clustering Coefficient: %.2E \n" %Decimal(nx.average_clustering(G)))
+			f.write("Density: %.2E \n" %(nx.density(G)))
+			#average path length calculation
+			pathlengths[mode]= []
+			for v in G.nodes():
+				spl = dict(nx.single_source_shortest_path_length(G, v))
+				for p in spl:
+					pathlengths[mode].append(spl[p])
+			f.write("Average Shortest Path Length: %.2E \n\n" %Decimal(sum(pathlengths[mode]) / len(pathlengths[mode])))
+			dist = {}
+			for p in pathlengths[mode]:
+				if p in dist:
+					dist[p] += 1
+				else:
+					dist[p] = 1
+			f.write("Length #Paths \n")
+			verts = dist.keys()
+			pathlen=[]
+			for d in sorted(verts):
+				f.write('%s %d \n' % (d, dist[d]))
+				pathlen.append([d,dist[d]])
+			pathlen=np.asarray(pathlen)
+			np.save(os.path.join(mode,mode+"_pathlen.npy"),pathlen)
+			np.save(os.path.join(mode,mode+"_pathlengths.npy"),pathlengths[mode])
 
-def calculate_DBPedia_stats():
-	with open("/gpfs/home/z/k/zkachwal/Carbonate/DBPedia Data/DBPedia_stats2.txt","w") as f:
-		try:
-			G=nx.read_weighted_edgelist("/gpfs/home/z/k/zkachwal/Carbonate/DBPedia Data/dbpedia_edgelist.txt")
-		except:
-			pdb.set_trace()
-		degreelist=list(G.degree())
-		degreelist=list(map(lambda x:x[1],degreelist))
-		f.write("Number of DBpedia Uris: %s \n" % (len(G)))
-		degreefreq=np.asarray([float(0) for i in range(max(degreelist)+1)])
-		for degree in degreelist:
-			degreefreq[degree]+=1
-		degreeprob=degreefreq/sum(degreefreq)
-		plt.figure()	
-		plt.loglog(range(0,max(degreelist)+1),degreeprob)
-		plt.xlabel('Degree')
-		plt.ylabel('Probability')
-		plt.title('Degree Distribution')
-		plt.savefig("/gpfs/home/z/k/zkachwal/Carbonate/DBPedia Data/dbpedia_degreedist.png")
-		degree_square_list=np.asarray(list(map(np.square,degreelist)))
-		f.write("Average Degree: %s \n" % (np.average(degreelist)))
-		f.write("Average Squared Degree: %s \n" % (np.average(degree_square_list)))
-		kappa=np.average(degree_square_list)/(np.square(np.average(degreelist)))
-		f.write("Kappa/Heterogenity Coefficient (average of squared degree/square of average degree): %s \n" % (kappa))
-		f.write("Average Clustering Coefficient: %s \n" % (nx.average_clustering(G)))
-		f.write("Density: %s \n" %(nx.density(G)))
-		f.write("Number of Edges: %s \n" %(G.number_of_edges()))
-		f.write("Number of Nodes: %s \n" %(G.number_of_nodes()))
-		#average path length calculation
-		pathlengths = []
-		for v in G.nodes():
-			spl = dict(nx.single_source_shortest_path_length(G, v))
-			for p in spl:
-				pathlengths.append(spl[p])
-		f.write("Average Shortest Path Length: %s \n\n" % (sum(pathlengths) / len(pathlengths)))
-		dist = {}
-		for p in pathlengths:
-			if p in dist:
-				dist[p] += 1
-			else:
-				dist[p] = 1
-		f.write("Length #Paths \n")
-		verts = dist.keys()
-		pathlen=[]
-		for d in sorted(verts):
-			f.write('%s %d \n' % (d, dist[d]))
-			pathlen.append([d,dist[d]])
-		pathlen=np.asarray(pathlen)
-		x=pathlen[:,0]
-		y=pathlen[:,1]
-		plt.figure()	
-		plt.bar(x,y)
-		plt.xlabel('Path Length')
-		plt.ylabel('Number of Times')
-		plt.title("DBPedia Distribution of Path Lengths")
-		plt.savefig("/gpfs/home/z/k/zkachwal/Carbonate/DBPedia Data/dbpedia_pathlen.png")
-		np.save("/gpfs/home/z/k/zkachwal/Carbonate/DBPedia Data/dbpedia_pathlen.npy",pathlen)
 #This function loads already saved files
 def load_stuff():
 	# uris=np.load("/gpfs/home/z/k/zkachwal/Carbonate/DBPedia Data/dbpedia_uris.npy")
@@ -530,7 +746,7 @@ def create_input_file(trueclaim_uris,falseclaim_uris):
 	with codecs.open("falseclaim_map.json","w","utf-8") as f:
 		f.write(json.dumps(falseclaim_map,ensure_ascii=False))
 #This function simply calculates and writes stats for TFCG and FFCG
-def calculate_stats(trueclaim_uris,falseclaim_uris,trueclaim_inputlist,falseclaim_inputlist):
+def calculate_claim_stats(trueclaim_uris,falseclaim_uris,trueclaim_inputlist,falseclaim_inputlist):
 	with open("trueclaims_stats.txt","w") as f:
 		trueclaim_list=[z for z in trueclaim_uris.values() if len(z)>0]
 		f.write("Number of True Claims containing DBPedia Uris: %s \n" % (len(trueclaim_list)))

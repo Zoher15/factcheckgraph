@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "experiment1.py", line 38, in <module>
+    mode=sys.argv[1]
+IndexError: list index out of range
+
+real	2m5.515s
+user	0m3.742s
+sys	0m1.438s
