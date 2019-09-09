@@ -14,7 +14,7 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from sklearn import metrics
-import scipy.stats as stats
+from scipy.stats import pearsonr,kendalltau,spearmanr
 from IPython.core.debugger import set_trace
 import seaborn as sns
 '''
@@ -169,58 +169,58 @@ def read_pairs_fromfile_bulk_all():
 	np.save(os.path.join("FFCG_co","FFCG_co_scores.npy"),list(ffcg['simil']))
 	combined.to_csv("/gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph Data/DBPedia Data/Intersect_all_pairs_DBPedia_IDs_co.csv")
 
-def quantile_correlations():
+def quantile_correlations(removal,corr_type):
 	tfcg_scores_all=list(np.load(os.path.join("TFCG_co","TFCG_co_scores.npy")))
 	ffcg_scores_all=list(np.load(os.path.join("FFCG_co","FFCG_co_scores.npy")))
 	dbpedia_scores_all=list(np.load(os.path.join("DBPedia","DBPedia_co_scores.npy")))
 	title_text=""
-	# for name in ["tfcg_scores_all","ffcg_scores_all","dbpedia_scores_all"]:
-	# 	indices=[i for i, x in enumerate(eval(name)) if x == 0]
-	# 	for i in sorted(indices, reverse = True):
-	# 		del tfcg_scores_all[i]
-	# 		del ffcg_scores_all[i]
-	# 		del dbpedia_scores_all[i]
-	# 	title_text="_0removed"	
+	if removal:
+		for name in ["tfcg_scores_all","ffcg_scores_all","dbpedia_scores_all"]:
+			indices=[i for i, x in enumerate(eval(name)) if x == 0]
+			for i in sorted(indices, reverse = True):
+				del tfcg_scores_all[i]
+				del ffcg_scores_all[i]
+				del dbpedia_scores_all[i]
+			title_text="_0removed"	
 	scores_all=pd.DataFrame(columns=['DBPedia','TFCG','FFCG'])
 	scores_all['DBPedia']=dbpedia_scores_all
 	scores_all['TFCG']=tfcg_scores_all
 	scores_all['FFCG']=ffcg_scores_all
 	scores_all=scores_all.sort_values(by='DBPedia')
 	scores_all=scores_all.reset_index(drop=True)
-	percentiles=[.1,.15,.2,.25,.3,.35,.4,.45,.5,.55,.6,.65,.7,.75,.8,.85,.9,.95,1]
+	percentiles=[0.95,0.9,0.85,0.8,0.75,0.7,0.65,0.6,0.55,0.5,0.45,0.4,0.35,0.3,0.25,0.2,0.15,0.1,0.05]
 	dbpedia_percentiles=list(scores_all.quantile(percentiles)['DBPedia'])
-	dataframes_percentiles=[scores_all[scores_all.DBPedia<i] for i in dbpedia_percentiles]
-	correlations_percentile=pd.DataFrame(columns=['percentile','type','kendalltau','p-value','size'])
+	dataframes_percentiles=[scores_all[scores_all.DBPedia>i] for i in dbpedia_percentiles]
+	correlations_percentile=pd.DataFrame(columns=['percentile','type',corr_type,'p-value','size'])
 	for i in range(len(dataframes_percentiles)):
 		dataframe=dataframes_percentiles[i]
-		dbpedia_tfcg=stats.kendalltau(dataframe['DBPedia'],dataframe['TFCG'])
-		dbpedia_ffcg=stats.kendalltau(dataframe['DBPedia'],dataframe['FFCG'])
-		tfcg_ffcg=stats.kendalltau(dataframe['TFCG'],dataframe['FFCG'])
-
-		dbpedia_tfcg_row={'percentile':percentiles[i],'type':'DBPedia - TFCG','kendalltau':dbpedia_tfcg.correlation,'p-value':pvalue_sign(dbpedia_tfcg.pvalue),'size':len(dataframe)}
-		dbpedia_ffcg_row={'percentile':percentiles[i],'type':'DBPedia - FFCG','kendalltau':dbpedia_ffcg.correlation,'p-value':pvalue_sign(dbpedia_ffcg.pvalue),'size':len(dataframe)}
-		# tfcg_ffcg_row={'percentile':percentiles[i],'type':'TFCG - FFCG','kendalltau':tfcg_ffcg.correlation,'p-value':tfcg_ffcg.pvalue,'size':len(dataframe)}
+		dbpedia_tfcg=eval(corr_type)(dataframe['DBPedia'],dataframe['TFCG'])
+		dbpedia_ffcg=eval(corr_type)(dataframe['DBPedia'],dataframe['FFCG'])
+		tfcg_ffcg=eval(corr_type)(dataframe['TFCG'],dataframe['FFCG'])
+		dbpedia_tfcg_row={'percentile':percentiles[i],'type':'DBPedia - TFCG',corr_type:dbpedia_tfcg[0],'p-value':pvalue_sign(dbpedia_tfcg[1]),'size':len(dataframe)}
+		dbpedia_ffcg_row={'percentile':percentiles[i],'type':'DBPedia - FFCG',corr_type:dbpedia_ffcg[0],'p-value':pvalue_sign(dbpedia_ffcg[1]),'size':len(dataframe)}
+		# tfcg_ffcg_row={'percentile':percentiles[i],'type':'TFCG - FFCG',corr_type:tfcg_ffcg[0],'p-value':tfcg_ffcg[1],'size':len(dataframe)}
 		correlations_percentile=correlations_percentile.append(dbpedia_tfcg_row, ignore_index=True)
 		correlations_percentile=correlations_percentile.append(dbpedia_ffcg_row, ignore_index=True)
 		# correlations_percentile=correlations_percentile.append(tfcg_ffcg_row, ignore_index=True)
 	correlations_percentile_dbpedia_tfcg=correlations_percentile[correlations_percentile['type']=="DBPedia - TFCG"].reset_index()
 	correlations_percentile_dbpedia_ffcg=correlations_percentile[correlations_percentile['type']=="DBPedia - FFCG"].reset_index().reset_index()
 	correlations_percentile_tfcg_ffcg=correlations_percentile[correlations_percentile['type']=="TFCG - FFCG"].reset_index()
-	title="Percentile Correlations Co-Occurr"
+	title="Percentile Correlations Co-Occur"
 	plt.figure(1)
-	plt.title("Co-Occurr Network")
-	plt.plot(percentiles,correlations_percentile_dbpedia_tfcg["kendalltau"],label="DBPedia - TFCG",marker='o',linestyle='dashed')
+	plt.title("Co-Occur Network "+corr_type+title_text)
+	plt.plot(percentiles,correlations_percentile_dbpedia_tfcg[corr_type],label="DBPedia - TFCG",marker='o',linestyle='dashed')
 	for i,value in enumerate(correlations_percentile_dbpedia_tfcg['p-value']):
-		plt.annotate(value,(percentiles[i],correlations_percentile_dbpedia_tfcg["kendalltau"][i]))
-	plt.plot(percentiles,correlations_percentile_dbpedia_ffcg["kendalltau"],label="DBPedia - FFCG",marker='o',linestyle='dashed')
+		plt.annotate(value,(percentiles[i],correlations_percentile_dbpedia_tfcg[corr_type][i]))
+	plt.plot(percentiles,correlations_percentile_dbpedia_ffcg[corr_type],label="DBPedia - FFCG",marker='o',linestyle='dashed')
 	for i,value in enumerate(correlations_percentile_dbpedia_ffcg['p-value']):
-		plt.annotate(value,(percentiles[i],correlations_percentile_dbpedia_ffcg["kendalltau"][i]))	
-	# plt.plot(percentiles,correlations_percentile[correlations_percentile['type']=="TFCG - FFCG"]["kendalltau"],label="TFCG - FFCG")
-	plt.xlabel("Percentiles")
+		plt.annotate(value,(percentiles[i],correlations_percentile_dbpedia_ffcg[corr_type][i]))	
+	# plt.plot(percentiles,correlations_percentile[correlations_percentile['type']=="TFCG - FFCG"][corr_type],label="TFCG - FFCG")
+	plt.xlabel("Decreasing Proximity Percentiles")
+	plt.gca().invert_xaxis()
 	plt.ylabel("Correlations")
-	plt.legend(loc="lower right")
-	# plt.savefig(title.replace(" ","_")+".png")
-	plt.savefig(title.replace(" ","_")+title_text+".png")
+	plt.legend(loc="lower left")
+	plt.savefig(title.replace(" ","_")+title_text+"_"+corr_type+".png")
 	plt.close()
 	plt.clf()
 
@@ -230,13 +230,13 @@ def pvalue_sign(pvalue):
 	else:
 		return '*'
 
-def correlations():
+def correlations(removal):
 	tfcg_scores_all=list(np.load(os.path.join("TFCG_co","TFCG_co_scores.npy")))
 	ffcg_scores_all=list(np.load(os.path.join("FFCG_co","FFCG_co_scores.npy")))
 	dbpedia_scores_all=list(np.load(os.path.join("DBPedia","DBPedia_co_scores.npy")))
-	print("TFCG_co-DBPedia_co",stats.kendalltau(tfcg_scores_all,dbpedia_scores_all))
-	print("FFCG_co-DBPedia_co",stats.kendalltau(ffcg_scores_all,dbpedia_scores_all))
-	print("TFCG_co-FFCG_co",stats.kendalltau(tfcg_scores_all,ffcg_scores_all))
+	print("TFCG_co-DBPedia_co",kendalltau(tfcg_scores_all,dbpedia_scores_all))
+	print("FFCG_co-DBPedia_co",kendalltau(ffcg_scores_all,dbpedia_scores_all))
+	print("TFCG_co-FFCG_co",kendalltau(tfcg_scores_all,ffcg_scores_all))
 	title="Proximity Distribution"
 	plt.figure(1)
 	plt.hist(tfcg_scores_all,histtype='step',label='TFCG')
@@ -258,37 +258,41 @@ def correlations():
 	plt.savefig(title.replace(" ","_")+"_seaborn.png")
 	plt.close()
 	plt.clf()
-	for name in ["tfcg_scores_all","ffcg_scores_all","dbpedia_scores_all"]:
-		indices=[i for i, x in enumerate(eval(name)) if x == 0]
-		for i in sorted(indices, reverse = True):
-			del tfcg_scores_all[i]
-			del ffcg_scores_all[i]
-			del dbpedia_scores_all[i]
-	np.save("tfcg_scores_0removed.npy",tfcg_scores_all)
-	np.save("ffcg_scores_0removed.npy",ffcg_scores_all)
-	np.save("dbpedia_scores_0removed.npy",dbpedia_scores_all)
-	print("TFCG_co-DBPedia_co",stats.kendalltau(tfcg_scores_all,dbpedia_scores_all))
-	print("FFCG_co-DBPedia_co",stats.kendalltau(ffcg_scores_all,dbpedia_scores_all))
-	print("TFCG_co-FFCG_co",stats.kendalltau(tfcg_scores_all,ffcg_scores_all))
-	title="Proximity Distribution after 0 removal"
+	title_text=""
+	if removal:
+		for name in ["tfcg_scores_all","ffcg_scores_all","dbpedia_scores_all"]:
+			indices=[i for i, x in enumerate(eval(name)) if x == 0]
+			for i in sorted(indices, reverse = True):
+				del tfcg_scores_all[i]
+				del ffcg_scores_all[i]
+				del dbpedia_scores_all[i]
+		title_text="0 removal"
+		np.save("tfcg_scores_0removed.npy",tfcg_scores_all)
+		np.save("ffcg_scores_0removed.npy",ffcg_scores_all)
+		np.save("dbpedia_scores_0removed.npy",dbpedia_scores_all)
+	print("TFCG_co-DBPedia_co",kendalltau(tfcg_scores_all,dbpedia_scores_all))
+	print("FFCG_co-DBPedia_co",kendalltau(ffcg_scores_all,dbpedia_scores_all))
+	print("TFCG_co-FFCG_co",kendalltau(tfcg_scores_all,ffcg_scores_all))
+	title="Proximity Distribution"
 	plt.figure(2)
-	plt.hist(tfcg_scores_all,histtype='step',label='TFCG')
-	plt.hist(ffcg_scores_all,histtype='step',label='FFCG')
-	plt.hist(dbpedia_scores_all,histtype='step',label='DBPedia')
-	plt.xlabel("Proximity Scores")
-	plt.ylabel("Density")
-	plt.legend(loc="upper right")
-	plt.savefig(title.replace(" ","_")+".png")
-	plt.close()
-	plt.clf()
+	# plt.hist(tfcg_scores_all,histtype='step',label='TFCG')
+	# plt.hist(ffcg_scores_all,histtype='step',label='FFCG')
+	# plt.hist(dbpedia_scores_all,histtype='step',label='DBPedia')
+	# plt.xlabel("Proximity Scores Co-Occur")
+	# plt.ylabel("Density")
+	# plt.legend(loc="upper right")
+	# plt.savefig(title.replace(" ","_")+".png")
+	# plt.close()
+	# plt.clf()
 	sns.set_style("white")
 	sns.set_style("ticks")
 	ax = sns.kdeplot(pd.Series(tfcg_scores_all,name="TFCG"))
 	ax = sns.kdeplot(pd.Series(ffcg_scores_all,name="FFCG"))
 	ax = sns.kdeplot(pd.Series(dbpedia_scores_all,name="DBPedia"))
 	plt.xlabel("Proximity Scores")
+	plt.title("Co-Occur Network "+title_text)
 	plt.ylabel("Density")
-	plt.savefig(title.replace(" ","_")+"_seaborn.png")
+	plt.savefig(title.replace(" ","_")+title_text+".png")
 	plt.close()
 	plt.clf()
 

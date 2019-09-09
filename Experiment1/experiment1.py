@@ -14,11 +14,12 @@ import re
 from decimal import Decimal
 import networkx as nx 
 import matplotlib
-import scipy.stats as stats
+from scipy.stats import pearsonr,kendalltau,spearmanr
 matplotlib.use('Agg')
 # font = {'family' : 'Normal',
 #         'size'   : 12}
 # matplotlib.rc('font', **font)
+import math
 import matplotlib.pyplot as plt
 # from matplotlib.pyplot import figure
 import pdb
@@ -38,6 +39,9 @@ The goal of this script is the following:
 mode=sys.argv[1]
 #PC can be 0 local, or 1 Carbonate
 pc=int(sys.argv[2])
+start=int(sys.argv[3])
+end=int(sys.argv[4])
+
 port={"FFCG":"7687","TFCG":"11007"}
 g=rdflib.Graph()
 graph = Graph("bolt://127.0.0.1:"+port[mode],password="1234")
@@ -564,58 +568,70 @@ def read_pairs_fromfile_bulk():
 	combined2.to_json("Intersect_false_pairs_DBPedia_IDs.json")
 	combined3.to_json("Intersect_false_pairs2_DBPedia_IDs.json")
 
-def quantile_correlations():
+def quantile_correlations(start,end):
+	corr_type="kendalltau"
 	tfcg_scores_all=list(np.load(os.path.join("TFCG","TFCG_scores.npy")))
 	ffcg_scores_all=list(np.load(os.path.join("FFCG","FFCG_scores.npy")))
-	dbpedia_scores_all=list(np.load(os.path.join("DBPedia","DBPedia_scores.npy")))	
+	dbpedia_scores_all=list(np.load(os.path.join("DBPedia","DBPedia_scores.npy")))
 	title_text=""
-	# for name in ["tfcg_scores_all","ffcg_scores_all","dbpedia_scores_all"]:
-	# 	indices=[i for i, x in enumerate(eval(name)) if x == 0]
-	# 	for i in sorted(indices, reverse = True):
-	# 		del tfcg_scores_all[i]
-	# 		del ffcg_scores_all[i]
-	# 		del dbpedia_scores_all[i]
-	# 	title_text="_0removed"
+	# if removal:
+	# 	for name in ["tfcg_scores_all","ffcg_scores_all","dbpedia_scores_all"]:
+	# 		indices=[i for i, x in enumerate(eval(name)) if x == 0]
+	# 		for i in sorted(indices, reverse = True):
+	# 			del tfcg_scores_all[i]
+	# 			del ffcg_scores_all[i]
+	# 			del dbpedia_scores_all[i]
+	# 		title_text="_0removed"	
 	scores_all=pd.DataFrame(columns=['DBPedia','TFCG','FFCG'])
 	scores_all['DBPedia']=dbpedia_scores_all
 	scores_all['TFCG']=tfcg_scores_all
 	scores_all['FFCG']=ffcg_scores_all
 	scores_all=scores_all.sort_values(by='DBPedia')
 	scores_all=scores_all.reset_index(drop=True)
-	percentiles=[.1,.15,.2,.25,.3,.35,.4,.45,.5,.55,.6,.65,.7,.75,.8,.85,.9,.95,1]
-	dbpedia_percentiles=list(scores_all.quantile(percentiles)['DBPedia'])
-	dataframes_percentiles=[scores_all[scores_all.DBPedia<i] for i in dbpedia_percentiles]
-	correlations_percentile=pd.DataFrame(columns=['percentile','type','kendalltau','p-value','size'])
-	for i in range(len(dataframes_percentiles)):
-		dataframe=dataframes_percentiles[i]
-		dbpedia_tfcg=stats.kendalltau(dataframe['DBPedia'],dataframe['TFCG'])
-		dbpedia_ffcg=stats.kendalltau(dataframe['DBPedia'],dataframe['FFCG'])
-		tfcg_ffcg=stats.kendalltau(dataframe['TFCG'],dataframe['FFCG'])
-		dbpedia_tfcg_row={'percentile':percentiles[i],'type':'DBPedia - TFCG','kendalltau':dbpedia_tfcg.correlation,'p-value':pvalue_sign(dbpedia_tfcg.pvalue),'size':len(dataframe)}
-		dbpedia_ffcg_row={'percentile':percentiles[i],'type':'DBPedia - FFCG','kendalltau':dbpedia_ffcg.correlation,'p-value':pvalue_sign(dbpedia_ffcg.pvalue),'size':len(dataframe)}
-		# tfcg_ffcg_row={'percentile':percentiles[i],'type':'TFCG - FFCG','kendalltau':tfcg_ffcg.correlation,'p-value':tfcg_ffcg.pvalue,'size':len(dataframe)}
-		correlations_percentile=correlations_percentile.append(dbpedia_tfcg_row, ignore_index=True)
-		correlations_percentile=correlations_percentile.append(dbpedia_ffcg_row, ignore_index=True)
-		# correlations_percentile=correlations_percentile.append(tfcg_ffcg_row, ignore_index=True)
-	correlations_percentile_dbpedia_tfcg=correlations_percentile[correlations_percentile['type']=="DBPedia - TFCG"].reset_index()
-	correlations_percentile_dbpedia_ffcg=correlations_percentile[correlations_percentile['type']=="DBPedia - FFCG"].reset_index().reset_index()
-	correlations_percentile_tfcg_ffcg=correlations_percentile[correlations_percentile['type']=="TFCG - FFCG"].reset_index()
-	title="Percentile Correlations FRED"
-	plt.figure(1)
-	plt.title("FRED Network")
-	plt.plot(percentiles,correlations_percentile_dbpedia_tfcg["kendalltau"],label="DBPedia - TFCG",marker='o',linestyle='dashed')
-	for i,value in enumerate(correlations_percentile_dbpedia_tfcg['p-value']):
-		plt.annotate(value,(percentiles[i],correlations_percentile_dbpedia_tfcg["kendalltau"][i]))
-	plt.plot(percentiles,correlations_percentile_dbpedia_ffcg["kendalltau"],label="DBPedia - FFCG",marker='o',linestyle='dashed')
-	for i,value in enumerate(correlations_percentile_dbpedia_ffcg['p-value']):
-		plt.annotate(value,(percentiles[i],correlations_percentile_dbpedia_ffcg["kendalltau"][i]))	
-	# plt.plot(percentiles,correlations_percentile[correlations_percentile['type']=="TFCG - FFCG"]["kendalltau"],label="TFCG - FFCG")
-	plt.xlabel("Percentiles")
-	plt.ylabel("Correlations")
-	plt.legend(loc="upper right")
-	plt.savefig(title.replace(" ","_")+title_text+".png")
-	plt.close()
-	plt.clf()
+	if end>len(scores_all):
+		end=len(scores_all)
+	# interval=math.floor(len(scores_all)*0.05)
+	# percentiles=[0.95,0.9,0.85,0.8,0.75,0.7,0.65,0.6,0.55,0.5,0.45,0.4,0.35,0.3,0.25,0.2,0.15,0.1,0.05,0.0]
+	# dbpedia_percentiles=list(scores_all.quantile(percentiles)['DBPedia'])
+	# print(len(dbpedia_percentiles))
+	# print(dbpedia_percentiles)
+	# dataframes_percentiles=[scores_all[scores_all.DBPedia>i] for i in dbpedia_percentiles]
+	# dataframes=[scores_all.iloc[0:i+1] for i in range(len(scores_all))]
+	# set_trace()
+	correlations_roll=pd.DataFrame(columns=['index','type',corr_type,'p-value'])
+	for i in range(start,end):
+		dbpedia_tfcg=eval(corr_type)(scores_all.loc[start:i+1,'DBPedia'],scores_all.loc[start:i+1,'TFCG'])
+		dbpedia_ffcg=eval(corr_type)(scores_all.loc[start:i+1,'DBPedia'],scores_all.loc[start:i+1,'FFCG'])
+		tfcg_ffcg=eval(corr_type)(scores_all.loc[start:i+1,'TFCG'],scores_all.loc[start:i+1,'FFCG'])
+		dbpedia_tfcg_row={'index':i+1,'type':'DBPedia - TFCG',corr_type:dbpedia_tfcg[0],'p-value':pvalue_sign(dbpedia_tfcg[1])}
+		dbpedia_ffcg_row={'index':i+1,'type':'DBPedia - FFCG',corr_type:dbpedia_ffcg[0],'p-value':pvalue_sign(dbpedia_ffcg[1])}
+		tfcg_ffcg_row={'index':i+1,'type':'TFCG - FFCG',corr_type:tfcg_ffcg[0],'p-value':pvalue_sign(tfcg_ffcg[1])}
+		correlations_roll=correlations_roll.append(dbpedia_tfcg_row, ignore_index=True)
+		correlations_roll=correlations_roll.append(dbpedia_ffcg_row, ignore_index=True)
+		correlations_roll=correlations_roll.append(tfcg_ffcg_row, ignore_index=True)
+	correlations_roll.to_csv("/gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph Data/Correlations/correlations_roll_{}_{}.csv".format(start,end),index=False)
+	# correlations_roll_dbpedia_tfcg=correlations_roll[correlations_roll['type']=="DBPedia - TFCG"].reset_index()
+	# correlations_roll_dbpedia_ffcg=correlations_roll[correlations_roll['type']=="DBPedia - FFCG"].reset_index()
+	# correlations_roll_tfcg_ffcg=correlations_roll[correlations_roll['type']=="TFCG - FFCG"].reset_index()
+
+	# set_trace()
+	# title="Correlations Fred"
+	# plt.figure(1)
+	# plt.title("FRED Network "+corr_type+title_text)
+	# plt.plot([interval*i for i in range(1,21)],correlations_roll_percentile_dbpedia_tfcg[corr_type],label="DBPedia - TFCG",marker='o',linestyle='dashed')
+	# for i,value in enumerate(correlations_roll_percentile_dbpedia_tfcg['p-value']):
+	# 	plt.annotate(value,(percentiles[i],correlations_roll_percentile_dbpedia_tfcg[corr_type][i]))
+	# plt.plot([interval*i for i in range(1,21)],correlations_roll_percentile_dbpedia_ffcg[corr_type],label="DBPedia - FFCG",marker='o',linestyle='dashed')
+	# for i,value in enumerate(correlations_roll_percentile_dbpedia_ffcg['p-value']):
+	# 	plt.annotate(value,(percentiles[i],correlations_roll_percentile_dbpedia_ffcg[corr_type][i]))	
+	# # plt.plot(percentiles,correlations_roll_percentile[correlations_roll_percentile['type']=="TFCG - FFCG"][corr_type],label="TFCG - FFCG")
+	# plt.xlabel("Decreasing Proximity Percentiles")
+	# # plt.gca().invert_xaxis()
+	# plt.ylabel("Correlations")
+	# plt.legend(loc="upper right")
+	# plt.savefig(title.replace(" ","_")+title_text+"_"+corr_type+".png")
+	# plt.close()
+	# plt.clf()
 
 def pvalue_sign(pvalue):
 	if pvalue>0.01:
@@ -623,52 +639,75 @@ def pvalue_sign(pvalue):
 	else:
 		return '*'
 
-def correlations():
-	tfcg_scores_all=list(np.load("tfcg_scores.npy"))
-	ffcg_scores_all=list(np.load("ffcg_scores.npy"))
-	dbpedia_scores_all=list(np.load("dbpedia_scores.npy"))
-	for name in ["tfcg_scores_all","ffcg_scores_all","dbpedia_scores_all"]:
-		indices=[i for i, x in enumerate(eval(name)) if x == 0]
-		for i in sorted(indices, reverse = True):
-			del tfcg_scores_all[i]
-			del ffcg_scores_all[i]
-			del dbpedia_scores_all[i]
-	np.save("tfcg_scores_0removed.npy",tfcg_scores_all)
-	np.save("ffcg_scores_0removed.npy",ffcg_scores_all)
-	np.save("dbpedia_scores_0removed.npy",dbpedia_scores_all)
+def correlations(removal):
+	tfcg_scores_all=list(np.load(os.path.join("TFCG","TFCG_scores.npy")))
+	ffcg_scores_all=list(np.load(os.path.join("FFCG","FFCG_scores.npy")))
+	dbpedia_scores_all=list(np.load(os.path.join("DBPedia","DBPedia_scores.npy")))
+	title_text=""
+	if removal:
+		for name in ["tfcg_scores_all","ffcg_scores_all","dbpedia_scores_all"]:
+			indices=[i for i, x in enumerate(eval(name)) if x == 0]
+			for i in sorted(indices, reverse = True):
+				del tfcg_scores_all[i]
+				del ffcg_scores_all[i]
+				del dbpedia_scores_all[i]
+		title_text="0 removal"
+		np.save("tfcg_scores_0removed.npy",tfcg_scores_all)
+		np.save("ffcg_scores_0removed.npy",ffcg_scores_all)
+		np.save("dbpedia_scores_0removed.npy",dbpedia_scores_all)
 	title="Proximity Distribution"
 	plt.figure(1)
-	plt.hist(tfcg_scores_all,histtype='step',label='TFCG')
-	plt.hist(ffcg_scores_all,histtype='step',label='FFCG')
-	plt.hist(dbpedia_scores_all,histtype='step',label='DBPedia')
-	plt.xlabel("Proximity Scores")
-	plt.ylabel("Density")
-	plt.legend(loc="upper right")
-	plt.savefig(title.replace(" ","_")+".png")
-	plt.close()
-	plt.clf()
+	# plt.hist(tfcg_scores_all,histtype='step',label='TFCG')
+	# plt.hist(ffcg_scores_all,histtype='step',label='FFCG')
+	# plt.hist(dbpedia_scores_all,histtype='step',label='DBPedia')
+	# plt.xlabel("Proximity Scores")
+	# plt.ylabel("Density")
+	# plt.legend(loc="upper right")
+	# plt.savefig(title.replace(" ","_")+".png")
+	# plt.close()
+	# plt.clf()
 	sns.set_style("white")
 	sns.set_style("ticks")
 	ax = sns.kdeplot(pd.Series(tfcg_scores_all,name="TFCG"))
 	ax = sns.kdeplot(pd.Series(ffcg_scores_all,name="FFCG"))
 	ax = sns.kdeplot(pd.Series(dbpedia_scores_all,name="DBPedia"))
 	plt.xlabel("Proximity Scores")
+	plt.title("FRED Network "+title_text)
 	plt.ylabel("Density")
-	plt.savefig(title.replace(" ","_")+"_seaborn.png")
+	plt.savefig(title.replace(" ","_")+title_text+".png")
 	plt.close()
 	plt.clf()
 
-def read_pairs_fromfile_bulk_all():
-	splits=20
-	combined=pd.DataFrame()
-	for i in range(splits+1):
-		a=pd.read_json(str(i+1)+"_Comb_triples_DBPedia_IDs.json")
-		print((i+1),len(a))
-		combined=pd.concat([combined,a],ignore_index=True)
-	print(len(combined))
-	combined['label']="DBPedia"
-	dbpedia_scores=list(combined['simil'])
-	np.save("dbpedia_scores.npy",dbpedia_scores)
+def write_corr_tofile_bulk():
+	# Reformatting according to the input format acccepted by Knowledge Linker
+	tfcg_scores_all=list(np.load(os.path.join("TFCG","TFCG_scores.npy")))
+	ffcg_scores_all=list(np.load(os.path.join("FFCG","FFCG_scores.npy")))
+	dbpedia_scores_all=list(np.load(os.path.join("DBPedia","DBPedia_scores.npy")))
+	scores_all=pd.DataFrame(columns=['DBPedia','TFCG','FFCG'])
+	scores_all['DBPedia']=dbpedia_scores_all
+	scores_all['TFCG']=tfcg_scores_all
+	scores_all['FFCG']=ffcg_scores_all
+	n=len(scores_all)
+	x=math.ceil(math.log(n,3))
+	for i in range(1,x):
+		start=int(n-math.pow(3,i))
+		end=n
+		if start<0:
+			start=0			
+		with codecs.open('/gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph Data/Correlations/'+str(i)+'_job.sh',"w","utf-8") as f:
+			f.write('''
+#PBS -k o
+#PBS -l nodes=1:ppn=1,vmem=50gb,walltime=4:00:00
+#PBS -M zoher.kachwala@gmail.com
+#PBS -m abe
+#PBS -N {}_Corr
+#PBS -j oe
+source /N/u/zkachwal/Carbonate/miniconda3/etc/profile.d/conda.sh
+conda activate
+cd /gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph/Experiment1
+python experiment1.py TFCG 1 {} {}
+				'''.format(i,start,end))
+		n=start
 
 def plot_TFCGvsFFCG():
 	Intersect_true_TFCG=pd.read_json("Intersect_true_pairs_TFCG_IDs.json")
@@ -975,3 +1014,4 @@ def plot_TFCGvsFFCG():
 #klinker linkpred TFCG_uris.txt TFCG_edgelist.npy TFCG_dbpedia_triples.txt TFCG_u_logdegree_+ve.json -u -n 1 -w logdegree
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # calculate_stats()
+quantile_correlations(start,end)
