@@ -11,13 +11,15 @@ from sklearn import metrics
 import codecs
 import csv
 import re
+from scipy import stats
 from decimal import Decimal
 import networkx as nx 
 import matplotlib
 from scipy.stats import pearsonr,kendalltau,spearmanr
-matplotlib.use('Agg')
+import tkinter
+# matplotlib.use('Agg')
 # font = {'family' : 'Normal',
-#         'size'   : 12}
+#         'size'   :6.75}
 # matplotlib.rc('font', **font)
 import math
 import matplotlib.pyplot as plt
@@ -28,6 +30,7 @@ import os
 import json
 from IPython.core.debugger import set_trace
 import seaborn as sns
+import fredlib
 '''
 The goal of this script is the following:
 1. Read uris (save_uris) and triples (save_edgelist) from the Neo4j Database
@@ -36,15 +39,16 @@ The goal of this script is the following:
 3. Plot and Calculate ROC for the given triples versus randomly generated triples
 '''
 #Mode can be TFCG or FFCG
-mode=sys.argv[1]
-#PC can be 0 local, or 1 Carbonate
-pc=int(sys.argv[2])
-start=int(sys.argv[3])
-end=int(sys.argv[4])
+# mode=sys.argv[1]
+# #PC can be 0 local, or 1 Carbonate
+# pc=int(sys.argv[2])
+start=int(sys.argv[1])
+end=int(sys.argv[2])
+zo_in=int(sys.argv[3])
 
-port={"FFCG":"7687","TFCG":"11007"}
-g=rdflib.Graph()
-graph = Graph("bolt://127.0.0.1:"+port[mode],password="1234")
+# port={"FFCG":"7687","TFCG":"11007"}
+# g=rdflib.Graph()
+# graph = Graph("bolt://127.0.0.1:"+port[mode],password="1234")
 #Getting the list of degrees of the given FactCheckGraph from Neo4j
 def save_degree():
 	tx = graph.begin()
@@ -55,10 +59,14 @@ def save_degree():
 	return degreelist
 
 #Calculate Graph statistics of interest and saves them to a file called stats.txt
-def calculate_stats():
+def calculate_stats(mode):
+	if mode=="FRED":
+		modelist=['TFCG_co','FFCG_co']
+	elif mode=="Co-occur":
+		modelist=['TFCG_co','FFCG_co']
 	degreelist={}
 	pathlengths={}
-	for mode in ['TFCG_co','FFCG_co']:
+	for mode in modelist:
 		dbpedia_uris=np.load(os.path.join(mode,mode+"_uris.npy"))
 		# triples_tocheck=np.load(os.path.join(mode,mode+"_entity_triples_dbpedia.npy"))
 		G=nx.read_edgelist(os.path.join(mode,mode+".edgelist"))
@@ -102,9 +110,119 @@ def calculate_stats():
 			np.save(os.path.join(mode,mode+"_pathlen.npy"),pathlen)
 			np.save(os.path.join(mode,mode+"_pathlengths.npy"),pathlengths[mode])
 
-#Fetches the uris of all nodes in the given FactCheckGraph
-#Do note: It creates a dictionary assigning each uri an integer ID. This is to conform to the way Knowledge Linker accepts data 
-#It also finds dbpedia specific uris
+#Funcion to standardize all non-neutral ratings (e.g., ‘True’, ‘False’, ‘Pants on Fire’, ‘Four Pinocchios’, etc.), 
+#into two possible classes (True and False), and discard all claims whose rating was neutral (e.g. ‘Mixture’)
+def standardize_claims():
+	data=pd.read_csv("/gpfs/home/z/k/zkachwal/Carbonate/RDF Files/claimreviews_db2.csv",index_col=0)
+	##Dropping non-str rows
+	filter=list(map(lambda x:type(x)!=str,data['rating_name']))
+	data.drop(data[filter].index,inplace=True)
+	print(data.groupby('fact_checkerID').count())
+	trueregex=re.compile(r'(?i)^true|^correct$|^mostly true$|^geppetto checkmark$')
+	falseregex=re.compile(r'(?i)^false|^mostly false|^pants on fire$|^four pinocchios$|^no\ |^no:|^distorts the facts|^wrong$')
+	trueind=data['rating_name'].apply(lambda x:trueregex.match(x)!=None)
+	trueclaims=list(data.loc[trueind]['claimID'])
+	falseind=data['rating_name'].apply(lambda x:falseregex.match(x)!=None)
+	falseclaims=list(data.loc[falseind]['claimID'])
+	np.save("true_claimID_list.npy",list(trueclaims))
+	np.save("false_claimID_list.npy",list(falseclaims))
+
+def create_fred_network():
+	data=pd.read_csv("/gpfs/home/z/k/zkachwal/Carbonate/RDF Files/claimreviews_db2.csv",index_col=0)
+	##Dropping non-str rows
+	filter=list(map(lambda x:type(x)!=str,data['rating_name']))
+	data.drop(data[filter].index,inplace=True)
+	print(data.groupby('fact_checkerID').count())
+	trueregex=re.compile(r'(?i)^true|^correct$|^mostly true$|^geppetto checkmark$')
+	falseregex=re.compile(r'(?i)^false|^mostly false|^pants on fire$|^four pinocchios$|^no\ |^no:|^distorts the facts|^wrong$')
+	trueind=data['rating_name'].apply(lambda x:trueregex.match(x)!=None)
+	trueclaims=data.loc[trueind]
+	falseind=data['rating_name'].apply(lambda x:falseregex.match(x)!=None)
+	falseclaims=data.loc[falseind]
+
+	TFCG,FFCG,FCG=nx.Graph()
+	TFCG_filterdata,FFCG_fiterdata,FCG_filterdata={}
+	for t in trueclaims:
+		claim_text=html.unescape(t['claim_text']).replace("`","'")
+		claimID=t['claimID']
+		filename="/gpfs/home/z/k/zkachwal/Carbonate/RDF Files/True Claims/Claim"+claimID
+		nx_graph,removed_edges,contracted_edges = checkFredSentence(claim_text,"Bearer 56a28f54-7918-3fdd-9d6f-850f13bd4041",filename)
+		TFCG=nx.union(TFCG,nx_graph)
+		TFCG_filterdata[claimID]={}
+		TFCG_filterdata[claimID]['removed_edges']=removed_edges
+		TFCG_filterdata[claimID]['contracted_edges']=contracted_edges
+
+	with codecs.open("TFCG/TFCG_filterdata.json","w","utf-8") as f:
+		f.write(json.dumps(TFCG_filterdata,ensure_ascii=False))
+	nx.write_edgelist(FFCG,os.path.join("TFCG","TFCG.edgelist"))
+	set_trace()
+	for t in falseclaims:
+		claim_text=html.unescape(t['claim_text']).replace("`","'")
+		claimID=t['claimID']
+		filename="/gpfs/home/z/k/zkachwal/Carbonate/RDF Files/False Claims/Claim"+claimID
+		nx_graph,removed_edges,contracted_edges = checkFredSentence(claim_text,"Bearer 56a28f54-7918-3fdd-9d6f-850f13bd4041",filename)
+		FFCG=nx.union(FFCG,nx_graph)
+		FFCG_filterdata[claimID]={}
+		FFCG_filterdata[claimID]['removed_edges']=removed_edges
+		FFCG_filterdata[claimID]['contracted_edges']=contracted_edges
+	with codecs.open("FFCG/FFCG_filterdata.json","w","utf-8") as f:
+		f.write(json.dumps(FFCG_filterdata,ensure_ascii=False))
+	nx.write_edgelist(FFCG,os.path.join("FFCG","FFCG.edgelist"))
+
+#Function to create a network where nodes are entities and edges are added if they occur in the same claim
+def create_cooccurrence_network():
+	#Reading True and False claims list standardized by standardize_claims()
+	trueclaims=np.load("true_claimID_list.npy")
+	falseclaims=np.load("false_claimID_list.npy")
+	trueclaim_uris,trueclaim_edges,falseclaim_uris,falseclaim_edges={}
+	TFCG_co,FFCG_co=nx.Graph()
+	dbpediaregex=re.compile(r'http:\/\/dbpedia\.org\/resource\/')
+	#Parsing True Claims, find dbpedia entities, adding edges and saving the graph
+	for t in trueclaims:
+		claim_uris=set([])
+		g=rdflib.Graph()
+		filename="claim"+str(t)+".rdf"
+		try:
+			g.parse("/gpfs/home/z/k/zkachwal/Carbonate/RDF Files/"+filename,format='application/rdf+xml')
+		except:
+			pass
+		for triple in g:
+			subject,predicate,obj=list(map(str,triple))
+			try:
+				if dbpediaregex.search(subject):
+					claim_uris.add(subject)
+				if dbpediaregex.search(obj):
+					claim_uris.add(obj)
+			except KeyError:
+				pass
+		trueclaim_uris[t]=list(claim_uris)
+		trueclaim_edges[t]=list(combinations(trueclaim_uris[t],2))
+		TFCG_co.add_edges_from(trueclaim_edges[t])
+	nx.write_edgelist(TFCG_co,os.path.join("TFCG_co","TFCG_co.edgelist"),data=False)
+	#Parsing False Claims, find dbpedia entities, adding edges and saving the graph
+	for f in falseclaims:
+		claim_uris=set([])
+		g=rdflib.Graph()
+		filename="claim"+str(f)+".rdf"
+		try:
+			g.parse("/gpfs/home/z/k/zkachwal/Carbonate/RDF Files/"+filename,format='application/rdf+xml')
+		except:
+			# continue
+			pass
+		for triple in g:
+			subject,predicate,obj=list(map(str,triple))
+			try:
+				if dbpediaregex.search(subject):
+					claim_uris.add(subject)
+				if dbpediaregex.search(obj):
+					claim_uris.add(obj)
+			except KeyError:
+				pass
+		falseclaim_uris[f]=list(claim_uris)
+		falseclaim_edges[f]=list(combinations(falseclaim_uris[f],2))
+		FFCG_co.add_edges_from(falseclaim_edges[f])
+	nx.write_edgelist(FFCG_co,os.path.join("FFCG_co","FFCG_co.edgelist"),data=False)
+
 def save_uris():
 	G=nx.read_weighted_edgelist(os.path.join(mode,mode+"_edgelist.txt"))
 	Gc = max(nx.connected_component_subgraphs(G), key=len)
@@ -134,7 +252,7 @@ def load_stuff():
 	return uris_dict,dbpedia_uris,edgelist,degreelist
 #Saves the graph in the form of edges as a .npy file as well as a .txt. 
 #Do note: It uses an id for the uris instead of the uri itself. This is to conform with the way Knowledge Linker accepts data
-def save_edgelist(uris_dict):
+def save_edgelist(mode,uris_dict):
 	tx = graph.begin()
 	graph_triples=tx.run("MATCH (n)-[r]-(m) return n,r,m;")
 	tx.commit()
@@ -568,7 +686,7 @@ def read_pairs_fromfile_bulk():
 	combined2.to_json("Intersect_false_pairs_DBPedia_IDs.json")
 	combined3.to_json("Intersect_false_pairs2_DBPedia_IDs.json")
 
-def quantile_correlations(start,end):
+def quantile_correlations(zo_in,start,end):
 	corr_type="kendalltau"
 	tfcg_scores_all=list(np.load(os.path.join("TFCG","TFCG_scores.npy")))
 	ffcg_scores_all=list(np.load(os.path.join("FFCG","FFCG_scores.npy")))
@@ -586,7 +704,7 @@ def quantile_correlations(start,end):
 	scores_all['DBPedia']=dbpedia_scores_all
 	scores_all['TFCG']=tfcg_scores_all
 	scores_all['FFCG']=ffcg_scores_all
-	scores_all=scores_all.sort_values(by='DBPedia')
+	scores_all=scores_all.sort_values(by='DBPedia',ascending=False)
 	scores_all=scores_all.reset_index(drop=True)
 	if end>len(scores_all):
 		end=len(scores_all)
@@ -600,16 +718,16 @@ def quantile_correlations(start,end):
 	# set_trace()
 	correlations_roll=pd.DataFrame(columns=['index','type',corr_type,'p-value'])
 	for i in range(start,end):
-		dbpedia_tfcg=eval(corr_type)(scores_all.loc[start:i+1,'DBPedia'],scores_all.loc[start:i+1,'TFCG'])
-		dbpedia_ffcg=eval(corr_type)(scores_all.loc[start:i+1,'DBPedia'],scores_all.loc[start:i+1,'FFCG'])
-		tfcg_ffcg=eval(corr_type)(scores_all.loc[start:i+1,'TFCG'],scores_all.loc[start:i+1,'FFCG'])
+		dbpedia_tfcg=eval(corr_type)(scores_all.loc[0:i+1,'DBPedia'],scores_all.loc[0:i+1,'TFCG'])
+		dbpedia_ffcg=eval(corr_type)(scores_all.loc[0:i+1,'DBPedia'],scores_all.loc[0:i+1,'FFCG'])
+		tfcg_ffcg=eval(corr_type)(scores_all.loc[0:i+1,'TFCG'],scores_all.loc[0:i+1,'FFCG'])
 		dbpedia_tfcg_row={'index':i+1,'type':'DBPedia - TFCG',corr_type:dbpedia_tfcg[0],'p-value':pvalue_sign(dbpedia_tfcg[1])}
 		dbpedia_ffcg_row={'index':i+1,'type':'DBPedia - FFCG',corr_type:dbpedia_ffcg[0],'p-value':pvalue_sign(dbpedia_ffcg[1])}
 		tfcg_ffcg_row={'index':i+1,'type':'TFCG - FFCG',corr_type:tfcg_ffcg[0],'p-value':pvalue_sign(tfcg_ffcg[1])}
 		correlations_roll=correlations_roll.append(dbpedia_tfcg_row, ignore_index=True)
 		correlations_roll=correlations_roll.append(dbpedia_ffcg_row, ignore_index=True)
 		correlations_roll=correlations_roll.append(tfcg_ffcg_row, ignore_index=True)
-	correlations_roll.to_csv("/gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph Data/Correlations/correlations_roll_{}_{}.csv".format(start,end),index=False)
+	correlations_roll.to_csv("/gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph/Experiment1/Correlations/{}_correlations_roll_{}_{}.csv".format(zo_in,start,end),index=False)
 	# correlations_roll_dbpedia_tfcg=correlations_roll[correlations_roll['type']=="DBPedia - TFCG"].reset_index()
 	# correlations_roll_dbpedia_ffcg=correlations_roll[correlations_roll['type']=="DBPedia - FFCG"].reset_index()
 	# correlations_roll_tfcg_ffcg=correlations_roll[correlations_roll['type']=="TFCG - FFCG"].reset_index()
@@ -632,6 +750,38 @@ def quantile_correlations(start,end):
 	# plt.savefig(title.replace(" ","_")+title_text+"_"+corr_type+".png")
 	# plt.close()
 	# plt.clf()
+
+def plot_corr():
+	title="Correlations Decreasing DBPedia Proximity"
+	correlations_roll_dbpedia_tfcg=pd.read_csv("/gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph/Experiment1/Correlations/correlations_roll_dbpedia_tfcg.csv")
+	correlations_roll_dbpedia_ffcg=pd.read_csv("/gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph/Experiment1/Correlations/correlations_roll_dbpedia_ffcg.csv")
+	correlations_roll_tfcg_ffcg=pd.read_csv("/gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph/Experiment1/Correlations/correlations_roll_tfcg_ffcg.csv")
+	fig, (ax1, ax2) = plt.subplots(ncols=2, sharey=True)
+	fig.set_size_inches(9,4)
+	ax1.set_xscale("log")
+	ax1.set_title("FRED")
+	ax1.plot(correlations_roll_dbpedia_tfcg['index'],correlations_roll_dbpedia_tfcg['kendalltau'],label="DBPedia - TFCG")
+	ax1.plot(correlations_roll_dbpedia_ffcg['index'],correlations_roll_dbpedia_ffcg['kendalltau'],label="DBPedia - FFCG")
+	ax1.set_xlabel("Number of pairs")
+	ax1.set_ylabel("Correlation")
+	ax1.legend(loc="upper right")
+	# plt.savefig(title.replace(" ","_")+".png")
+	correlations_roll_dbpedia_tfcg=pd.read_csv("/gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph/Experiment2/Correlations/correlations_co_roll_dbpedia_tfcg.csv")
+	correlations_roll_dbpedia_ffcg=pd.read_csv("/gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph/Experiment2/Correlations/correlations_co_roll_dbpedia_ffcg.csv")
+	correlations_roll_tfcg_ffcg=pd.read_csv("/gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph/Experiment2/Correlations/correlations_co_roll_tfcg_ffcg.csv")
+	ax2.set_xscale("log")
+	ax2.set_title("Co-occur")
+	ax2.plot(correlations_roll_dbpedia_tfcg['index'],correlations_roll_dbpedia_tfcg['kendalltau'],label="DBPedia - TFCG")
+	ax2.plot(correlations_roll_dbpedia_ffcg['index'],correlations_roll_dbpedia_ffcg['kendalltau'],label="DBPedia - FFCG")
+	ax2.set_xlabel("Number of pairs")
+	ax2.legend(loc="upper right")
+	plt.tight_layout()
+	plt.savefig(title.replace(" ","_")+".png")
+	plt.close()
+	plt.clf()
+	# plt.show()
+	plt.close()
+	plt.clf()
 
 def pvalue_sign(pvalue):
 	if pvalue>0.01:
@@ -678,6 +828,24 @@ def correlations(removal):
 	plt.close()
 	plt.clf()
 
+def read_corr_fromfile_bulk():
+	start=0
+	n=562330
+	combined=pd.DataFrame()
+	for i in range(1,30):
+		end=start+20000
+		if end>n:
+			end=n
+		combined=pd.concat([combined,pd.read_csv("/gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph/Experiment1/Correlations/{}_correlations_roll_{}_{}.csv".format(i,start,end))],ignore_index=True)
+		start=end
+	combined=combined.sort_values(by='index').reset_index(drop=True)
+	correlations_roll_dbpedia_tfcg=combined[combined['type']=="DBPedia - TFCG"].reset_index(drop=True)
+	correlations_roll_dbpedia_ffcg=combined[combined['type']=="DBPedia - FFCG"].reset_index(drop=True)
+	correlations_roll_tfcg_ffcg=combined[combined['type']=="TFCG - FFCG"].reset_index(drop=True)
+	correlations_roll_dbpedia_tfcg.to_csv("/gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph/Experiment1/Correlations/correlations_roll_dbpedia_tfcg.csv",index=False)
+	correlations_roll_dbpedia_ffcg.to_csv("/gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph/Experiment1/Correlations/correlations_roll_dbpedia_ffcg.csv",index=False)
+	correlations_roll_tfcg_ffcg.to_csv("/gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph/Experiment1/Correlations/correlations_roll_tfcg_ffcg.csv",index=False)
+
 def write_corr_tofile_bulk():
 	# Reformatting according to the input format acccepted by Knowledge Linker
 	tfcg_scores_all=list(np.load(os.path.join("TFCG","TFCG_scores.npy")))
@@ -688,16 +856,15 @@ def write_corr_tofile_bulk():
 	scores_all['TFCG']=tfcg_scores_all
 	scores_all['FFCG']=ffcg_scores_all
 	n=len(scores_all)
-	x=math.ceil(math.log(n,3))
-	for i in range(1,x):
-		start=int(n-math.pow(3,i))
-		end=n
-		if start<0:
-			start=0			
-		with codecs.open('/gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph Data/Correlations/'+str(i)+'_job.sh',"w","utf-8") as f:
+	start=0
+	for i in range(1,30):
+		end=start+20000
+		if end>n:
+			end=n		
+		with codecs.open('/gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph/Experiment1/Correlations/'+str(i)+'_job.sh',"w","utf-8") as f:
 			f.write('''
 #PBS -k o
-#PBS -l nodes=1:ppn=1,vmem=50gb,walltime=4:00:00
+#PBS -l nodes=1:ppn=1,vmem=5gb,walltime=2:00:00
 #PBS -M zoher.kachwala@gmail.com
 #PBS -m abe
 #PBS -N {}_Corr
@@ -705,9 +872,9 @@ def write_corr_tofile_bulk():
 source /N/u/zkachwal/Carbonate/miniconda3/etc/profile.d/conda.sh
 conda activate
 cd /gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph/Experiment1
-python experiment1.py TFCG 1 {} {}
-				'''.format(i,start,end))
-		n=start
+python experiment1.py {} {} {}
+				'''.format(i,start,end,i))
+		start=end
 
 def plot_TFCGvsFFCG():
 	Intersect_true_TFCG=pd.read_json("Intersect_true_pairs_TFCG_IDs.json")
@@ -761,71 +928,154 @@ def plot_TFCGvsFFCG():
 
 	title="True vs False Pairs"
 	lw = 2
-	plt.figure(1)
+	fig, (ax1, ax2) = plt.subplots(ncols=2, sharey=True)
+	fig.set_size_inches(9,4)
 	####TFCG
 	fpr, tpr, thresholds = metrics.roc_curve(y_TFCG, scores_TFCG, pos_label=1)
 	print(metrics.auc(fpr,tpr))
 	print("TFCG P-Value %.2E" %Decimal(stats.ttest_rel(Intersect_true_TFCG['simil'],Intersect_false_TFCG['simil']).pvalue))
-	plt.plot(fpr, tpr,lw=lw, label='TFCG (AUC = %0.2f) ' % metrics.auc(fpr,tpr))
+	# ax1.subplot(1,2,1)
+	ax1.plot(fpr, tpr,lw=lw, label='TFCG (%0.2f) ' % metrics.auc(fpr,tpr))
 	####FFCG
 	fpr, tpr, thresholds = metrics.roc_curve(y_FFCG, scores_FFCG, pos_label=1)
 	print(metrics.auc(fpr,tpr))
 	print("FFCG P-Value %.2E" %Decimal(stats.ttest_rel(Intersect_true_FFCG['simil'],Intersect_false_FFCG['simil']).pvalue))
-	plt.plot(fpr, tpr,lw=lw, label='FFCG (AUC = %0.2f) ' % metrics.auc(fpr,tpr))
+	ax1.plot(fpr, tpr,lw=lw, label='FFCG (%0.2f) ' % metrics.auc(fpr,tpr))
 	####DBPedia
 	fpr, tpr, thresholds = metrics.roc_curve(y_DBPedia, scores_DBPedia, pos_label=1)
 	print(metrics.auc(fpr,tpr))
 	print("DBPedia P-Value %.2E" %Decimal(stats.ttest_rel(Intersect_true_DBPedia['simil'],Intersect_false_DBPedia['simil']).pvalue))
-	plt.plot(fpr, tpr,lw=lw, label='DBPedia (AUC = %0.2f) ' % metrics.auc(fpr,tpr))
-	plt.plot([0, 1], [0, 1], color='navy', lw=lw, label='Baseline',linestyle='--')
-	plt.legend(loc="lower right")
-	plt.xlabel('False Positive Rate')
-	plt.ylabel('True Positive Rate')
-	plt.savefig(title.replace(" ","_")+".png")
-	plt.close()
-	plt.clf()
+	ax1.plot(fpr, tpr,lw=lw, label='DBPedia (%0.2f) ' % metrics.auc(fpr,tpr))
+	ax1.plot([0, 1], [0, 1], color='navy', lw=lw,linestyle='--')
+	ax1.legend(loc="lower right")
+	ax1.set_title("FRED")
+	ax1.set_xlabel('False Positive Rate')
+	ax1.set_ylabel('True Positive Rate')
+	# plt.ylabel('True Positive Rate')
+	# plt.savefig(title.replace(" ","_")+".png")
+	# plt.close()
+	# plt.clf()
 	##########################False2
-	plt.figure(2)
+	# plt.subplot(1,2,2)
 	####TFCG
-	fpr, tpr, thresholds = metrics.roc_curve(y2_TFCG, scores2_TFCG, pos_label=1)
+	# fpr, tpr, thresholds = metrics.roc_curve(y2_TFCG, scores2_TFCG, pos_label=1)
+	# print(metrics.auc(fpr,tpr))
+	# print("TFCG P-Value %.2E" %Decimal(stats.ttest_rel(Intersect_true_TFCG['simil'],Intersect_false_TFCG['simil']).pvalue))
+	# plt.plot(fpr, tpr,lw=lw, label='TFCG (AUC = %0.2f) ' % metrics.auc(fpr,tpr))
+	# ####FFCG
+	# fpr, tpr, thresholds = metrics.roc_curve(y2_FFCG, scores2_FFCG, pos_label=1)
+	# print(metrics.auc(fpr,tpr))
+	# print("FFCG P-Value %.2E" %Decimal(stats.ttest_rel(Intersect_true_FFCG['simil'],Intersect_false_FFCG['simil']).pvalue))
+	# plt.plot(fpr, tpr,lw=lw, label='FFCG (AUC = %0.2f) ' % metrics.auc(fpr,tpr))
+	# ####DBPedia
+	# fpr, tpr, thresholds = metrics.roc_curve(y2_DBPedia, scores2_DBPedia, pos_label=1)
+	# print(metrics.auc(fpr,tpr))
+	# print("DBPedia P-Value %.2E" %Decimal(stats.ttest_rel(Intersect_true_DBPedia['simil'],Intersect_false_DBPedia['simil']).pvalue))
+	# plt.plot(fpr, tpr,lw=lw, label='DBPedia (AUC = %0.2f) ' % metrics.auc(fpr,tpr))
+	# plt.plot([0, 1], [0, 1], color='navy', lw=lw, label='Baseline',linestyle='--')
+	# plt.legend(loc="lower right")
+	# plt.title("Co-occur")
+	# plt.xlabel('False Positive Rate')
+	# # plt.ylabel('True Positive Rate')
+	# plt.savefig(title.replace(" ","_")+"2.png")
+	# plt.close()
+	# plt.clf()
+
+
+
+	Intersect_true_TFCG=pd.read_json("/gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph/Experiment2/TFCG_co/Intersect_true_pairs_TFCG_co_IDs.json")
+	Intersect_true_FFCG=pd.read_json("/gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph/Experiment2/FFCG_co/Intersect_true_pairs_FFCG_co_IDs.json")
+	Intersect_true_DBPedia=pd.read_json("/gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph/Experiment2/DBPedia/Intersect_true_pairs_DBPedia_IDs.json")
+
+	Intersect_false_TFCG=pd.read_json("/gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph/Experiment2/TFCG_co/Intersect_false_pairs_TFCG_co_IDs.json")
+	Intersect_false_FFCG=pd.read_json("/gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph/Experiment2/FFCG_co/Intersect_false_pairs_FFCG_co_IDs.json")
+	Intersect_false_DBPedia=pd.read_json("/gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph/Experiment2/DBPedia/Intersect_false_pairs_DBPedia_IDs.json")
+
+
+	# Intersect_false2_TFCG=pd.read_json("/TFCG_co/Intersect_false_pairs2_TFCG_IDs.json")
+	# Intersect_false2_FFCG=pd.read_json("/FFCG_co/Intersect_false_pairs2_FFCG_IDs.json")
+	# Intersect_false2_DBPedia=pd.read_json("/DBPedia/Intersect_false_pairs2_DBPedia_IDs.json")
+
+	Intersect_true_TFCG['label']=1
+	Intersect_false_TFCG['label']=0
+	# Intersect_false2_TFCG['label']=0
+
+	Intersect_true_FFCG['label']=1
+	Intersect_false_FFCG['label']=0
+	# Intersect_false2_FFCG['label']=0
+
+	Intersect_true_DBPedia['label']=1
+	Intersect_false_DBPedia['label']=0
+	# Intersect_false2_DBPedia['label']=0
+
+	true_false_TFCG=pd.concat([Intersect_true_TFCG,Intersect_false_TFCG],ignore_index=True)
+	y_TFCG=list(true_false_TFCG['label'])
+	scores_TFCG=list(true_false_TFCG['simil'])
+
+	# true_false2_TFCG=pd.concat([Intersect_true_TFCG,Intersect_false2_TFCG],ignore_index=True)
+	# y2_TFCG=list(true_false2_TFCG['label'])
+	# scores2_TFCG=list(true_false2_TFCG['simil'])
+
+	true_false_FFCG=pd.concat([Intersect_true_FFCG,Intersect_false_FFCG],ignore_index=True)
+	y_FFCG=list(true_false_FFCG['label'])
+	scores_FFCG=list(true_false_FFCG['simil'])
+
+	# true_false2_FFCG=pd.concat([Intersect_true_FFCG,Intersect_false2_FFCG],ignore_index=True)
+	# y2_FFCG=list(true_false2_FFCG['label'])
+	# scores2_FFCG=list(true_false2_FFCG['simil'])
+
+	true_false_DBPedia=pd.concat([Intersect_true_DBPedia,Intersect_false_DBPedia],ignore_index=True)
+	y_DBPedia=list(true_false_DBPedia['label'])
+	scores_DBPedia=list(true_false_DBPedia['simil'])
+
+	# true_false2_DBPedia=pd.concat([Intersect_true_DBPedia,Intersect_false2_DBPedia],ignore_index=True)
+	# y2_DBPedia=list(true_false2_DBPedia['label'])
+	# scores2_DBPedia=list(true_false2_DBPedia['simil'])
+
+	title="True vs False Pairs"
+	lw = 2
+	# plt.figure(1)
+	####TFCG
+	fpr, tpr, thresholds = metrics.roc_curve(y_TFCG, scores_TFCG, pos_label=1)
 	print(metrics.auc(fpr,tpr))
 	print("TFCG P-Value %.2E" %Decimal(stats.ttest_rel(Intersect_true_TFCG['simil'],Intersect_false_TFCG['simil']).pvalue))
-	plt.plot(fpr, tpr,lw=lw, label='TFCG (AUC = %0.2f) ' % metrics.auc(fpr,tpr))
+	ax2.plot(fpr, tpr,lw=lw, label='TFCG (%0.2f) ' % metrics.auc(fpr,tpr))
 	####FFCG
-	fpr, tpr, thresholds = metrics.roc_curve(y2_FFCG, scores2_FFCG, pos_label=1)
+	fpr, tpr, thresholds = metrics.roc_curve(y_FFCG, scores_FFCG, pos_label=1)
 	print(metrics.auc(fpr,tpr))
 	print("FFCG P-Value %.2E" %Decimal(stats.ttest_rel(Intersect_true_FFCG['simil'],Intersect_false_FFCG['simil']).pvalue))
-	plt.plot(fpr, tpr,lw=lw, label='FFCG (AUC = %0.2f) ' % metrics.auc(fpr,tpr))
+	ax2.plot(fpr, tpr,lw=lw, label='FFCG (%0.2f) ' % metrics.auc(fpr,tpr))
 	####DBPedia
-	fpr, tpr, thresholds = metrics.roc_curve(y2_DBPedia, scores2_DBPedia, pos_label=1)
+	fpr, tpr, thresholds = metrics.roc_curve(y_DBPedia, scores_DBPedia, pos_label=1)
 	print(metrics.auc(fpr,tpr))
 	print("DBPedia P-Value %.2E" %Decimal(stats.ttest_rel(Intersect_true_DBPedia['simil'],Intersect_false_DBPedia['simil']).pvalue))
-	plt.plot(fpr, tpr,lw=lw, label='DBPedia (AUC = %0.2f) ' % metrics.auc(fpr,tpr))
-	plt.plot([0, 1], [0, 1], color='navy', lw=lw, label='Baseline',linestyle='--')
-	plt.legend(loc="lower right")
-	plt.xlabel('False Positive Rate')
-	plt.ylabel('True Positive Rate')
-	plt.savefig(title.replace(" ","_")+"2.png")
-	plt.close()
-	plt.clf()
-	##########################Distribution Plot
-	#Plot 3
-	plt.figure(3)
-	title="Score Difference between True and False Pairs"
-	#first overlap plot TFCG vs FFCG
-	intersect=Intersect_true_TFCG['simil']
-	intersect=intersect.reset_index(drop=True)
-	set_trace()
-	plt.hist(Intersect_true_TFCG['simil']-Intersect_false_TFCG['simil'],density=True,histtype='step',label='TFCG')
-	plt.hist(Intersect_true_FFCG['simil']-Intersect_false_TFCG['simil'],density=True,histtype='step',label='FFCG')
-	plt.hist(Intersect_true_DBPedia['simil']-Intersect_false_DBPedia['simil'],density=True,histtype='step',label='DBPedia')	
-	plt.legend(loc="upper right")
-	plt.title(title)
-	plt.xlabel("True Pair Proximity - False Pair Proximity")
-	plt.ylabel("Density")
+	ax2.plot(fpr, tpr,lw=lw, label='DBPedia (%0.2f) ' % metrics.auc(fpr,tpr))
+	ax2.plot([0, 1], [0, 1], color='navy', lw=lw,linestyle='--')
+	ax2.legend(loc="lower right")
+	ax2.set_title("Co-occur")
+	ax2.set_xlabel('False Positive Rate')
+	plt.tight_layout()
 	plt.savefig(title.replace(" ","_")+".png")
 	plt.close()
 	plt.clf()
+	# ##########################Distribution Plot
+	# #Plot 3
+	# plt.figure(3)
+	# title="Score Difference between True and False Pairs"
+	# #first overlap plot TFCG vs FFCG
+	# intersect=Intersect_true_TFCG['simil']
+	# intersect=intersect.reset_index(drop=True)
+	# # set_trace()
+	# plt.hist(Intersect_true_TFCG['simil']-Intersect_false_TFCG['simil'],density=True,histtype='step',label='TFCG')
+	# plt.hist(Intersect_true_FFCG['simil']-Intersect_false_TFCG['simil'],density=True,histtype='step',label='FFCG')
+	# plt.hist(Intersect_true_DBPedia['simil']-Intersect_false_DBPedia['simil'],density=True,histtype='step',label='DBPedia')	
+	# plt.legend(loc="upper right")
+	# plt.title(title)
+	# plt.xlabel("True Pair Proximity - False Pair Proximity")
+	# plt.ylabel("Density")
+	# plt.savefig(title.replace(" ","_")+".png")
+	# plt.close()
+	# plt.clf()
 	# plt.show()
 
 
@@ -1014,4 +1264,4 @@ def plot_TFCGvsFFCG():
 #klinker linkpred TFCG_uris.txt TFCG_edgelist.npy TFCG_dbpedia_triples.txt TFCG_u_logdegree_+ve.json -u -n 1 -w logdegree
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # calculate_stats()
-quantile_correlations(start,end)
+# quantile_correlations(zo_in,start,end)
