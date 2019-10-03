@@ -567,209 +567,213 @@ def openFredGraph(filename):
     rdf.parse(filename)
     return FredGraph(rdf)
 
-if __name__ == "__main__":
-    def checkFredSentence(sentence, key, filename):
-        g = getFredGraph(preprocessText(sentence), key, filename)
-        #g = openFredGraph(graph)
-        nx_graph,removed_edges,contracted_edges=checkFredGraph(g)
-        return nx_graph,removed_edges,contracted_edges
+def checkFredSentence(sentence, key, filename):
+    g = getFredGraph(preprocessText(sentence), key, filename)
+    #g = openFredGraph(graph)
+    nx_graph,removed_edges,contracted_edges=checkFredGraph(g)
+    return nx_graph,removed_edges,contracted_edges
 
-    def checkFredFile(filename):
-        g = openFredGraph(filename)
-        checkFredGraph(g)
+def checkFredFile(filename):
+    g = openFredGraph(filename)
+    checkFredGraph(g)
 
-    def checkFredGraph(g):
-        nx_graph=nx.Graph()
-        removed_edges=[]
-        contracted_edges=[]
-        # print("getNodes")
-        # for n in g.getNodes():
-        #     print(n)
+def checkFredGraph(g):
+    nx_graph=nx.Graph()
+    removed_edges=[]
+    contracted_edges=[]
+    # print("getNodes")
+    # for n in g.getNodes():
+    #     print(n)
 
-        # print("getClassNodes")
-        # for n in g.getClassNodes():
-        #     print(n)
+    # print("getClassNodes")
+    # for n in g.getClassNodes():
+    #     print(n)
 
-        # print("getInstanceNodes")
-        # for n in g.getInstanceNodes():
-        #     print(n)
+    # print("getInstanceNodes")
+    # for n in g.getInstanceNodes():
+    #     print(n)
 
-        # print("getEventNodes")
-        # for n in g.getEventNodes():
-        #     print(n)
+    # print("getEventNodes")
+    # for n in g.getEventNodes():
+    #     print(n)
 
-        # print("getSituationNodes")
-        # for n in g.getSituationNodes():
-        #     print(n)
+    # print("getSituationNodes")
+    # for n in g.getSituationNodes():
+    #     print(n)
 
-        # print("getNamedEntityNodes")
-        # for n in g.getNamedEntityNodes():
-        #     print(n)
+    # print("getNamedEntityNodes")
+    # for n in g.getNamedEntityNodes():
+    #     print(n)
 
-        # print("getQualityNodes")
-        # for n in g.getQualityNodes():
-        #     print(n)
+    # print("getQualityNodes")
+    # for n in g.getQualityNodes():
+    #     print(n)
 
-        # print("getInfoNodes")
-        # ns = g.getInfoNodes()
-        # for n in ns:
-        #     print(n, ns[n].Type, ns[n].FredType, ns[n].ResourceType)
-        regex_27=re.compile(r'^http:\/\/www\.ontologydesignpatterns\.org\/ont\/fred\/domain\.owl#%27.*')
-        regex_vndata=re.compile(r'^http:\/\/www\.ontologydesignpatterns\.org\/ont\/vn\/data\/(.*)')
-        regex_freddata_low=re.compile(r'^http:\/\/www\.ontologydesignpatterns\.org\/ont\/fred\/domain\.owl#([a-z]*)_.*')
-        regex_freddata_upp=re.compile(r'^http:\/\/www\.ontologydesignpatterns\.org\/ont\/fred\/domain\.owl#([a-zA-Z]*)$')
-        regex_dbpedia=re.compile(r'^http:\/\/dbpedia\.org\/resource\/(.*)')
-        regex_dul=re.compile(r'^http:\/\/www\.ontologydesignpatterns\.org\/ont\/dul\/DUL\.owl#(.*)')
-        regex_owl=re.compile(r'^http:\/\/www\.w3\.org\/2002\/07\/owl#(.*)')
-        regex_schema=re.compile(r'^http:\/\/schema\.org\/(.*)')
-        regex_quant=re.compile(r'^http:\/\/www\.ontologydesignpatterns\.org\/ont\/fred\/quantifiers\.owl#.*')
-        regex_assoc=re.compile(r'^http:\/\/www\.ontologydesignpatterns\.org\/ont\/dul\/DUL\.owl#associatedWith$')
-        print("getEdges")
-        for (a,b,c) in g.getEdges():
-            if not regex_27.match(a) and not regex_27.match(c) and not regex_dul.match(a) and not regex_dul.match(c):
-                nx_graph.add_edge(a,c,label=b)
-            if b=="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#associatedWith":
-                if regex_freddata_low.match(a) and regex_freddata_low.match(c):
-                    if regex_freddata_low.match(a)[1]==regex_freddata_low.match(c)[1]:
-                        removed_edges.append((a,b,c))
-                        nx_graph.remove_edge(a,c)
-                elif regex_freddata_low.match(a) and regex_freddata_upp.match(c):
-                    if regex_freddata_low.match(a)[1]==regex_freddata_upp.match(c)[1].lower():
-                        removed_edges.append((a,b,c))
-                        nx_graph.remove_edge(a,c)
-                elif regex_freddata_low.match(c) and regex_freddata_upp.match(a):
-                    if regex_freddata_low.match(c)[1]==regex_freddata_upp.match(a)[1].lower():
-                        removed_edges.append((a,b,c))
-                        nx_graph.remove_edge(a,c)
-            elif regex_quant.match(b):
-                removed_edges.append((a,b,c))
-                nx_graph.remove_edge(a,c)
-            # print(a,b,c)
-        # print("getEdgeMotif(EdgeMotif.Role)")
-        # for (a,b,c) in g.getEdgeMotif(EdgeMotif.Role):
-        #     print(a,b,c)
+    # print("getInfoNodes")
+    # ns = g.getInfoNodes()
+    # for n in ns:
+    #     print(n, ns[n].Type, ns[n].FredType, ns[n].ResourceType)
+    regex_27=re.compile(r'^http:\/\/www\.ontologydesignpatterns\.org\/ont\/fred\/domain\.owl#%27.*')
+    regex_vndata=re.compile(r'^http:\/\/www\.ontologydesignpatterns\.org\/ont\/vn\/data\/(.*)')
+    regex_freddata_low=re.compile(r'^http:\/\/www\.ontologydesignpatterns\.org\/ont\/fred\/domain\.owl#([a-z]*)_.*')
+    regex_freddata_upp=re.compile(r'^http:\/\/www\.ontologydesignpatterns\.org\/ont\/fred\/domain\.owl#([a-zA-Z]*)$')
+    regex_dbpedia=re.compile(r'^http:\/\/dbpedia\.org\/resource\/(.*)')
+    regex_dul=re.compile(r'^http:\/\/www\.ontologydesignpatterns\.org\/ont\/dul\/DUL\.owl#(.*)')
+    regex_owl=re.compile(r'^http:\/\/www\.w3\.org\/2002\/07\/owl#(.*)')
+    regex_schema=re.compile(r'^http:\/\/schema\.org\/(.*)')
+    regex_quant=re.compile(r'^http:\/\/www\.ontologydesignpatterns\.org\/ont\/fred\/quantifiers\.owl#.*')
+    regex_assoc=re.compile(r'^http:\/\/www\.ontologydesignpatterns\.org\/ont\/dul\/DUL\.owl#associatedWith$')
+    print("getEdges")
+    for (a,b,c) in g.getEdges():
+        if not regex_27.match(a) and not regex_27.match(c) and not regex_dul.match(a) and not regex_dul.match(c):
+            nx_graph.add_edge(a,c,label=b)
+        if b=="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#associatedWith":
+            if regex_freddata_low.match(a) and regex_freddata_low.match(c):
+                if regex_freddata_low.match(a)[1]==regex_freddata_low.match(c)[1]:
+                    removed_edges.append((a,b,c))
+                    nx_graph.remove_edge(a,c)
+            elif regex_freddata_low.match(a) and regex_freddata_upp.match(c):
+                if regex_freddata_low.match(a)[1]==regex_freddata_upp.match(c)[1].lower():
+                    removed_edges.append((a,b,c))
+                    nx_graph.remove_edge(a,c)
+            elif regex_freddata_low.match(c) and regex_freddata_upp.match(a):
+                if regex_freddata_low.match(c)[1]==regex_freddata_upp.match(a)[1].lower():
+                    removed_edges.append((a,b,c))
+                    nx_graph.remove_edge(a,c)
+        elif regex_quant.match(b):
+            removed_edges.append((a,b,c))
+            nx_graph.remove_edge(a,c)
+        # print(a,b,c)
+    # print("getEdgeMotif(EdgeMotif.Role)")
+    # for (a,b,c) in g.getEdgeMotif(EdgeMotif.Role):
+    #     print(a,b,c)
 
-        # print("getEdgeMotif(EdgeMotif.Identity)")
-        # for (a,b,c) in g.getEdgeMotif(EdgeMotif.Identity):
-        #     print(a,b,c)
+    # print("getEdgeMotif(EdgeMotif.Identity)")
+    # for (a,b,c) in g.getEdgeMotif(EdgeMotif.Identity):
+    #     print(a,b,c)
 
-        # print("getEdgeMotif(EdgeMotif.Type)")
-        # for (a,b,c) in g.getEdgeMotif(EdgeMotif.Type):
-        #     print(a,b,c)
+    # print("getEdgeMotif(EdgeMotif.Type)")
+    # for (a,b,c) in g.getEdgeMotif(EdgeMotif.Type):
+    #     print(a,b,c)
 
-        # print("getEdgeMotif(EdgeMotif.Property)")
-        # for (a,b,c) in g.getEdgeMotif(EdgeMotif.Property):
-        #     print(a,b,c)
+    # print("getEdgeMotif(EdgeMotif.Property)")
+    # for (a,b,c) in g.getEdgeMotif(EdgeMotif.Property):
+    #     print(a,b,c)
 
-        print("getPathMotif(PathMotif.Type)")
-        for (a,b) in g.getPathMotif(PathMotif.Type):
-            if regex_freddata_low.match(a)!=None and regex_freddata_upp.match(b)!=None:
-                if regex_freddata_low.match(a)[1]==regex_freddata_upp.match(b)[1].lower():
-                    nx_graph = nx.contracted_nodes(nx_graph, b, a)
-                    contracted_edges.append((b,a))
-            elif regex_freddata_low.match(b)!=None and regex_freddata_upp.match(a)!=None:
-                if regex_freddata_low.match(b)[1]==regex_freddata_upp.match(a)[1].lower():
-                    nx_graph = nx.contracted_nodes(nx_graph, a, b)
-                    contracted_edges.append((a,b))
-            elif regex_freddata_low.match(a)!=None and regex_owl.match(b)!=None:
-                if regex_freddata_low.match(a)[1]==regex_owl.match(b)[1].lower():
-                    nx_graph = nx.contracted_nodes(nx_graph, b, a)
-                    contracted_edges.append((b,a))
-            elif regex_freddata_low.match(b)!=None and regex_owl.match(a)!=None:
-                if regex_freddata_low.match(b)[1]==regex_owl.match(a)[1].lower():
-                    nx_graph = nx.contracted_nodes(nx_graph, a, b)
-                    contracted_edges.append((a,b))
-
-            elif regex_schema.match(a) or regex_schema.match(b):
-                removed_edges.append((a,b))
-                nx_graph.remove_edge(a,b)
-
-        # print("getEdgeMotif(EdgeMotif.SubClass)")
-        # for (a,b,c) in g.getEdgeMotif(EdgeMotif.SubClass):
-        #     print(a,b,c)
-
-        # print("getEdgeMotif(EdgeMotif.Equivalence)")
-        # for (a,b,c) in g.getEdgeMotif(EdgeMotif.Equivalence):
-        #     print(a,b,c)
-
-        # print("getEdgeMotif(EdgeMotif.Modality)")
-        # for (a,b,c) in g.getEdgeMotif(EdgeMotif.Modality):
-        #     print(a,b,c)
-
-        # print("getEdgeMotif(EdgeMotif.Negation)")
-        # for (a,b,c) in g.getEdgeMotif(EdgeMotif.Negation):
-        #     print(a,b,c)
-
-        # print("getInfoEdges")
-        # es = g.getInfoEdges()
-        # for e in es:
-        #     print(e, es[e].Type)
-
-        print("getPathMotif(PathMotif.SubClass)")
-        for (a,b) in g.getPathMotif(PathMotif.SubClass):
-            print(a,b)
-
-        # print("getClusterMotif(ClusterMotif.Identity)")
-        # for cluster in g.getClusterMotif(ClusterMotif.Identity):
-        #     print(cluster)
-
-        # print("getClusterMotif(ClusterMotif.Equivalence)")
-        # for cluster in g.getClusterMotif(ClusterMotif.Equivalence):
-        #     print(cluster)
-
-        print("getClusterMotif(ClusterMotif.IdentityEquivalence)")
-        for cluster in g.getClusterMotif(ClusterMotif.IdentityEquivalence):
-            # print(cluster)
-            a=list(cluster)[0]
-            b=list(cluster)[1]
-            if regex_vndata.match(a) or regex_dbpedia.match(a):
-                nx_graph = nx.contracted_nodes(nx_graph, a, b)
+    print("getPathMotif(PathMotif.Type)")
+    for (a,b) in g.getPathMotif(PathMotif.Type):
+        if regex_freddata_low.match(a)!=None and regex_freddata_upp.match(b)!=None:
+            if regex_freddata_low.match(a)[1]==regex_freddata_upp.match(b)[1].lower():
+                nx_graph = nx.contracted_edge(nx_graph,(b, a),self_loops=False)
+                contracted_edges.append((b,a))
+        elif regex_freddata_low.match(b)!=None and regex_freddata_upp.match(a)!=None:
+            if regex_freddata_low.match(b)[1]==regex_freddata_upp.match(a)[1].lower():
+                nx_graph = nx.contracted_edge(nx_graph,(a, b),self_loops=False)
                 contracted_edges.append((a,b))
-            elif regex_vndata.match(b) or regex_dbpedia.match(b):
-                nx_graph = nx.contracted_nodes(nx_graph, b, a)
+        elif regex_freddata_low.match(a)!=None and regex_owl.match(b)!=None:
+            if regex_freddata_low.match(a)[1]==regex_owl.match(b)[1].lower():
+                nx_graph = nx.contracted_edge(nx_graph,(b, a),self_loops=False)
+                contracted_edges.append((b,a))
+        elif regex_freddata_low.match(b)!=None and regex_owl.match(a)!=None:
+            if regex_freddata_low.match(b)[1]==regex_owl.match(a)[1].lower():
+                nx_graph = nx.contracted_edge(nx_graph,(a, b),self_loops=False)
                 contracted_edges.append((a,b))
 
-        # print("g.getNaryMotif(NaryMotif.Event)")
-        # motif_occurrences = g.getNaryMotif(NaryMotif.Event)
-        # for event in motif_occurrences:
-        #     roles = motif_occurrences[event]
-        #     print(event,"{", end=' ')
-        #     for r in roles:
-        #         print(r,":",roles[r],";", end=' ')
-        #     print("}")
+        elif regex_schema.match(a) or regex_schema.match(b):
+            removed_edges.append((a,b))
+            nx_graph.remove_edge(a,b)
 
-        # print("g.getNaryMotif(NaryMotif.Situation)")
-        # motif_occurrences = g.getNaryMotif(NaryMotif.Situation)
-        # for situation in motif_occurrences:
-        #     roles = motif_occurrences[situation]
-        #     print(event,"{", end=' ')
-        #     for r in roles:
-        #         print(r,":",roles[r],";", end=' ')
-        #     print("}")
+    # print("getEdgeMotif(EdgeMotif.SubClass)")
+    # for (a,b,c) in g.getEdgeMotif(EdgeMotif.SubClass):
+    #     print(a,b,c)
 
-        # print("g.getNaryMotif(NaryMotif.OtherEvent)")
-        # motif_occurrences = g.getNaryMotif(NaryMotif.OtherEvent)
-        # for other_event in motif_occurrences:
-        #     roles = motif_occurrences[other_event]
-        #     print(event,"{", end=' ')
-        #     for r in roles:
-        #         print(r,":",roles[r],";", end=' ')
-        #     print("}")
+    # print("getEdgeMotif(EdgeMotif.Equivalence)")
+    # for (a,b,c) in g.getEdgeMotif(EdgeMotif.Equivalence):
+    #     print(a,b,c)
 
-        # print("g.getNaryMotif(NaryMotif.Concept)")
-        # motif_occurrences = g.getNaryMotif(NaryMotif.Concept)
-        # for concept in motif_occurrences:
-        #     roles = motif_occurrences[concept]
-        #     print(event,"{", end=' ')
-        #     for r in roles:
-        #         print(r,":",roles[r],";", end=' ')
-        #     print("}")
-        # nx_graph.remove_nodes_from(list(nx.isolates(nx_graph)))
-        # plt.figure()
-        # pos = nx.spring_layout(nx_graph)
-        # nx.draw(nx_graph,pos,labels={node:node.split("/")[-1].split("#")[-1] for node in nx_graph.nodes()},node_size=400)
-        # edge_labels = {(edge[0], edge[1]): edge[2]['label'].split("/")[-1].split("#")[-1] for edge in nx_graph.edges(data=True)}
-        # nx.draw_networkx_edge_labels(nx_graph,pos,edge_labels)
-        # plt.axis('off')
-        # plt.show()
-        return nx_graph,removed_edges,contracted_edges
+    # print("getEdgeMotif(EdgeMotif.Modality)")
+    # for (a,b,c) in g.getEdgeMotif(EdgeMotif.Modality):
+    #     print(a,b,c)
+
+    # print("getEdgeMotif(EdgeMotif.Negation)")
+    # for (a,b,c) in g.getEdgeMotif(EdgeMotif.Negation):
+    #     print(a,b,c)
+
+    # print("getInfoEdges")
+    # es = g.getInfoEdges()
+    # for e in es:
+    #     print(e, es[e].Type)
+
+    print("getPathMotif(PathMotif.SubClass)")
+    for (a,b) in g.getPathMotif(PathMotif.SubClass):
+        print(a,b)
+
+    # print("getClusterMotif(ClusterMotif.Identity)")
+    # for cluster in g.getClusterMotif(ClusterMotif.Identity):
+    #     print(cluster)
+
+    # print("getClusterMotif(ClusterMotif.Equivalence)")
+    # for cluster in g.getClusterMotif(ClusterMotif.Equivalence):
+    #     print(cluster)
+
+    print("getClusterMotif(ClusterMotif.IdentityEquivalence)")
+    for cluster in g.getClusterMotif(ClusterMotif.IdentityEquivalence):
+        # print(cluster)
+        a=list(cluster)[0]
+        b=list(cluster)[1]
+        if regex_vndata.match(a) or regex_dbpedia.match(a):
+            nx_graph = nx.contracted_edge(nx_graph,(a, b),self_loops=False)
+            contracted_edges.append((a,b))
+        elif regex_vndata.match(b) or regex_dbpedia.match(b):
+            nx_graph = nx.contracted_edge(nx_graph,(b, a),self_loops=False)
+            contracted_edges.append((a,b))
+
+    # print("g.getNaryMotif(NaryMotif.Event)")
+    # motif_occurrences = g.getNaryMotif(NaryMotif.Event)
+    # for event in motif_occurrences:
+    #     roles = motif_occurrences[event]
+    #     print(event,"{", end=' ')
+    #     for r in roles:
+    #         print(r,":",roles[r],";", end=' ')
+    #     print("}")
+
+    # print("g.getNaryMotif(NaryMotif.Situation)")
+    # motif_occurrences = g.getNaryMotif(NaryMotif.Situation)
+    # for situation in motif_occurrences:
+    #     roles = motif_occurrences[situation]
+    #     print(event,"{", end=' ')
+    #     for r in roles:
+    #         print(r,":",roles[r],";", end=' ')
+    #     print("}")
+
+    # print("g.getNaryMotif(NaryMotif.OtherEvent)")
+    # motif_occurrences = g.getNaryMotif(NaryMotif.OtherEvent)
+    # for other_event in motif_occurrences:
+    #     roles = motif_occurrences[other_event]
+    #     print(event,"{", end=' ')
+    #     for r in roles:
+    #         print(r,":",roles[r],";", end=' ')
+    #     print("}")
+
+    # print("g.getNaryMotif(NaryMotif.Concept)")
+    # motif_occurrences = g.getNaryMotif(NaryMotif.Concept)
+    # for concept in motif_occurrences:
+    #     roles = motif_occurrences[concept]
+    #     print(event,"{", end=' ')
+    #     for r in roles:
+    #         print(r,":",roles[r],";", end=' ')
+    #     print("}")
+    nx_graph.remove_nodes_from(list(nx.isolates(nx_graph)))
+    return nx_graph,removed_edges,contracted_edges
+
+def plotFredGraph(nx_graph,filename):
+    plt.figure()
+    pos = nx.spring_layout(nx_graph)
+    nx.draw(nx_graph,pos,labels={node:node.split("/")[-1].split("#")[-1] for node in nx_graph.nodes()},node_size=400)
+    edge_labels = {(edge[0], edge[1]): edge[2]['label'].split("/")[-1].split("#")[-1] for edge in nx_graph.edges(data=True)}
+    set_trace()
+    nx.draw_networkx_edge_labels(nx_graph,pos,edge_labels)
+    plt.axis('off')
+    plt.savefig(filename.replace(".rdf",".png"))
+    plt.close()
+    plt.clf()

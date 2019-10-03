@@ -5,7 +5,7 @@ import numpy as np
 import rdflib
 from rdflib import BNode, Literal
 from rdflib.namespace import RDF
-from py2neo import Graph, NodeMatcher, RelationshipMatcher
+# from py2neo import Graph, NodeMatcher, RelationshipMatcher
 from itertools import combinations
 from sklearn import metrics
 import codecs
@@ -22,6 +22,7 @@ import tkinter
 #         'size'   :6.75}
 # matplotlib.rc('font', **font)
 import math
+import html
 import matplotlib.pyplot as plt
 # from matplotlib.pyplot import figure
 import pdb
@@ -30,7 +31,9 @@ import os
 import json
 from IPython.core.debugger import set_trace
 import seaborn as sns
-import fredlib
+import fredlib as fred
+from urllib.parse import urljoin
+from urllib.request import pathname2url
 '''
 The goal of this script is the following:
 1. Read uris (save_uris) and triples (save_edgelist) from the Neo4j Database
@@ -61,7 +64,7 @@ def save_degree():
 #Calculate Graph statistics of interest and saves them to a file called stats.txt
 def calculate_stats(mode):
 	if mode=="FRED":
-		modelist=['TFCG_co','FFCG_co']
+		modelist=['TFCG','FFCG']
 	elif mode=="Co-occur":
 		modelist=['TFCG_co','FFCG_co']
 	degreelist={}
@@ -139,14 +142,18 @@ def create_fred_network():
 	trueclaims=data.loc[trueind]
 	falseind=data['rating_name'].apply(lambda x:falseregex.match(x)!=None)
 	falseclaims=data.loc[falseind]
-
-	TFCG,FFCG,FCG=nx.Graph()
-	TFCG_filterdata,FFCG_fiterdata,FCG_filterdata={}
-	for t in trueclaims:
+	TFCG=nx.Graph()
+	FFCG=nx.Graph()
+	FCG=nx.Graph()
+	TFCG_filterdata={}
+	FFCG_fiterdata={}
+	FCG_filterdata={}
+	for index,t in trueclaims.iterrows():
 		claim_text=html.unescape(t['claim_text']).replace("`","'")
 		claimID=t['claimID']
-		filename="/gpfs/home/z/k/zkachwal/Carbonate/RDF Files/True Claims/Claim"+claimID
-		nx_graph,removed_edges,contracted_edges = checkFredSentence(claim_text,"Bearer 56a28f54-7918-3fdd-9d6f-850f13bd4041",filename)
+		filename="/gpfs/home/z/k/zkachwal/Carbonate/RDF Files/True Claims/Claim"+str(claimID)
+		nx_graph,removed_edges,contracted_edges = fred.checkFredSentence(claim_text,"Bearer 56a28f54-7918-3fdd-9d6f-850f13bd4041",filename)
+		fred.plotFredGraph(nx_graph,filename)
 		TFCG=nx.union(TFCG,nx_graph)
 		TFCG_filterdata[claimID]={}
 		TFCG_filterdata[claimID]['removed_edges']=removed_edges
@@ -159,8 +166,9 @@ def create_fred_network():
 	for t in falseclaims:
 		claim_text=html.unescape(t['claim_text']).replace("`","'")
 		claimID=t['claimID']
-		filename="/gpfs/home/z/k/zkachwal/Carbonate/RDF Files/False Claims/Claim"+claimID
-		nx_graph,removed_edges,contracted_edges = checkFredSentence(claim_text,"Bearer 56a28f54-7918-3fdd-9d6f-850f13bd4041",filename)
+		filename="/gpfs/home/z/k/zkachwal/Carbonate/RDF Files/False Claims/Claim"+str(claimID)
+		nx_graph,removed_edges,contracted_edges = fred.checkFredSentence(claim_text,"Bearer 56a28f54-7918-3fdd-9d6f-850f13bd4041",filename)
+		fred.plotFredGraph(nx_graph,filename)
 		FFCG=nx.union(FFCG,nx_graph)
 		FFCG_filterdata[claimID]={}
 		FFCG_filterdata[claimID]['removed_edges']=removed_edges
@@ -175,7 +183,8 @@ def create_cooccurrence_network():
 	trueclaims=np.load("true_claimID_list.npy")
 	falseclaims=np.load("false_claimID_list.npy")
 	trueclaim_uris,trueclaim_edges,falseclaim_uris,falseclaim_edges={}
-	TFCG_co,FFCG_co=nx.Graph()
+	TFCG_co=nx.Graph()
+	FFCG_co=nx.Graph()
 	dbpediaregex=re.compile(r'http:\/\/dbpedia\.org\/resource\/')
 	#Parsing True Claims, find dbpedia entities, adding edges and saving the graph
 	for t in trueclaims:
@@ -426,6 +435,44 @@ def parse_dbpedia_triples():
 	return triple_list
 	return pair_list
 
+def create_FCG():
+	with codecs.open("TFCG/TFCG_uris_dict.json","r","utf-8") as f:
+		TFCG_uris_dict=json.loads(f.read())
+	with codecs.open("FFCG/FFCG_uris_dict.json","r","utf-8") as f:
+		FFCG_uris_dict=json.loads(f.read())
+	TFCG_uris_dict_ID={value:key for key,value in TFCG_uris_dict.items()}
+	FFCG_uris_dict_ID={value:key for key,value in FFCG_uris_dict.items()}
+	TFCG_id_edgelist=np.load(os.path.join("TFCG","TFCG"+"_edgelist.npy"))
+	FFCG_id_edgelist=np.load(os.path.join("FFCG","FFCG"+"_edgelist.npy"))
+	TFCG_edgelist=[tuple([TFCG_uris_dict_ID[line[0]],TFCG_uris_dict_ID[line[1]]]) for line in TFCG_id_edgelist]
+	FFCG_edgelist=[tuple([FFCG_uris_dict_ID[line[0]],FFCG_uris_dict_ID[line[1]]]) for line in FFCG_id_edgelist]
+	np.save(os.path.join("TFCG","TFCG"+"_edgelist_full.npy"),TFCG_edgelist)
+	np.save(os.path.join("FFCG","FFCG"+"_edgelist_full.npy"),FFCG_edgelist)
+	TFCG=nx.Graph()
+	FFCG=nx.Graph()
+	TFCG.add_edges_from(TFCG_edgelist)
+	FFCG.add_edges_from(FFCG_edgelist)
+	nx.write_edgelist(TFCG,os.path.join("TFCG","TFCG_full.edgelist"))
+	nx.write_edgelist(FFCG,os.path.join("FFCG","FFCG_full.edgelist"))
+	# with codecs.open(os.path.join("TFCG","TFCG_full.edgelist"),"w","utf-8") as f:
+	# 	for line in TFCG_edgelist:
+	# 		f.write("{} {}\n".format(str(line[0]),str(line[1])))
+	# with codecs.open(os.path.join("FFCG","FFCG_full.edgelist"),"w","utf-8") as f:
+	# 	for line in FFCG_edgelist:
+	# 		f.write("{} {}\n".format(str(line[0]),str(line[1])))
+	# TFCG=nx.read_edgelist(os.path.join("TFCG","TFCG"+"_edgelist_full.txt"),nodetype=str)
+	# FFCG=nx.read_edgelist(os.path.join("FFCG","FFCG"+"_edgelist_full.txt"),nodetype=str)
+	FCG=nx.compose(TFCG,FFCG)
+	nx.write_edgelist(FCG,os.path.join("FCG","FCG_full.edgelist"))
+	FCG_uris_dict={key:i for i,key in enumerate(FCG.nodes())}
+	with codecs.open("FCG/FCG_uris_dict.json","w","utf-8") as f:
+		f.write(json.dumps(FCG_uris_dict,ensure_ascii=False))
+	# with codecs.open("FCG/FCG_uris_dict.json","r","utf-8") as f:
+	# 	FCG_uris_dict=json.loads(f.read())
+	with codecs.open(os.path.join("FCG",'FCG_edgelist.txt'),"w","utf-8") as f:
+		for line in FCG.edges():
+			f.write("{} {} {}\n".format(str(FCG_uris_dict[line[0]]),str(FCG_uris_dict[line[1]]),str(1)))
+
 
 def TFCGvsFFCG():
 	#We load all uris as we need to assign each a unique int ID to work with knowledge linkers
@@ -435,8 +482,8 @@ def TFCGvsFFCG():
 	TFCG_uris=np.load(os.path.join("TFCG","TFCG"+"_dbpedia_uris.npy"))
 	FFCG_uris=np.load(os.path.join("FFCG","FFCG"+"_dbpedia_uris.npy"))
 	#Creating dictionaries to assign unique ids to each uri for knowledge linker to process
-	TFCG_uris_dict={TFCG_uris_all[i]:i for i in range(len(TFCG_uris_all))}
-	FFCG_uris_dict={FFCG_uris_all[i]:i for i in range(len(FFCG_uris_all))}
+	TFCG_uris_dict={key:i for i,key in enumerate(TFCG_uris_all)}
+	FFCG_uris_dict={key:i for i,key in enumerate(FFCG_uris_all)}
 	#Saving the dictionaries
 	with codecs.open("TFCG/TFCG_uris_dict.json","w","utf-8") as f:
 		f.write(json.dumps(TFCG_uris_dict,ensure_ascii=False))
