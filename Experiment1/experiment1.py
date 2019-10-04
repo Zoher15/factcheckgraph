@@ -17,7 +17,7 @@ import networkx as nx
 import matplotlib
 from scipy.stats import pearsonr,kendalltau,spearmanr
 import tkinter
-# matplotlib.use('Agg')
+matplotlib.use('Agg')
 # font = {'family' : 'Normal',
 #         'size'   :6.75}
 # matplotlib.rc('font', **font)
@@ -45,9 +45,10 @@ The goal of this script is the following:
 # mode=sys.argv[1]
 # #PC can be 0 local, or 1 Carbonate
 # pc=int(sys.argv[2])
-start=int(sys.argv[1])
-end=int(sys.argv[2])
-zo_in=int(sys.argv[3])
+# start=int(sys.argv[1])
+# end=int(sys.argv[2])
+# zo_in=int(sys.argv[3])
+init=int(sys.argv[1])
 
 # port={"FFCG":"7687","TFCG":"11007"}
 # g=rdflib.Graph()
@@ -130,107 +131,116 @@ def standardize_claims():
 	np.save("true_claimID_list.npy",list(trueclaims))
 	np.save("false_claimID_list.npy",list(falseclaims))
 
-def create_fred_network():
-	data=pd.read_csv("/gpfs/home/z/k/zkachwal/Carbonate/RDF Files/claimreviews_db2.csv",index_col=0)
-	##Dropping non-str rows
-	filter=list(map(lambda x:type(x)!=str,data['rating_name']))
-	data.drop(data[filter].index,inplace=True)
-	print(data.groupby('fact_checkerID').count())
-	trueregex=re.compile(r'(?i)^true|^correct$|^mostly true$|^geppetto checkmark$')
-	falseregex=re.compile(r'(?i)^false|^mostly false|^pants on fire$|^four pinocchios$|^no\ |^no:|^distorts the facts|^wrong$')
-	trueind=data['rating_name'].apply(lambda x:trueregex.match(x)!=None)
-	trueclaims=data.loc[trueind]
-	falseind=data['rating_name'].apply(lambda x:falseregex.match(x)!=None)
-	falseclaims=data.loc[falseind]
-	TFCG=nx.Graph()
-	FFCG=nx.Graph()
-	FCG=nx.Graph()
-	TFCG_filterdata={}
-	FFCG_fiterdata={}
-	FCG_filterdata={}
-	for index,t in trueclaims.iterrows():
-		claim_text=html.unescape(t['claim_text']).replace("`","'")
-		claimID=t['claimID']
-		filename="/gpfs/home/z/k/zkachwal/Carbonate/RDF Files/True Claims/Claim"+str(claimID)
-		nx_graph,removed_edges,contracted_edges = fred.checkFredSentence(claim_text,"Bearer 56a28f54-7918-3fdd-9d6f-850f13bd4041",filename)
-		fred.plotFredGraph(nx_graph,filename)
-		TFCG=nx.union(TFCG,nx_graph)
-		TFCG_filterdata[claimID]={}
-		TFCG_filterdata[claimID]['removed_edges']=removed_edges
-		TFCG_filterdata[claimID]['contracted_edges']=contracted_edges
-
-	with codecs.open("TFCG/TFCG_filterdata.json","w","utf-8") as f:
-		f.write(json.dumps(TFCG_filterdata,ensure_ascii=False))
-	nx.write_edgelist(FFCG,os.path.join("TFCG","TFCG.edgelist"))
-	set_trace()
-	for t in falseclaims:
-		claim_text=html.unescape(t['claim_text']).replace("`","'")
-		claimID=t['claimID']
-		filename="/gpfs/home/z/k/zkachwal/Carbonate/RDF Files/False Claims/Claim"+str(claimID)
-		nx_graph,removed_edges,contracted_edges = fred.checkFredSentence(claim_text,"Bearer 56a28f54-7918-3fdd-9d6f-850f13bd4041",filename)
-		fred.plotFredGraph(nx_graph,filename)
-		FFCG=nx.union(FFCG,nx_graph)
-		FFCG_filterdata[claimID]={}
-		FFCG_filterdata[claimID]['removed_edges']=removed_edges
-		FFCG_filterdata[claimID]['contracted_edges']=contracted_edges
-	with codecs.open("FFCG/FFCG_filterdata.json","w","utf-8") as f:
-		f.write(json.dumps(FFCG_filterdata,ensure_ascii=False))
-	nx.write_edgelist(FFCG,os.path.join("FFCG","FFCG.edgelist"))
 
 #Function to create a network where nodes are entities and edges are added if they occur in the same claim
 def create_cooccurrence_network():
 	#Reading True and False claims list standardized by standardize_claims()
-	trueclaims=np.load("true_claimID_list.npy")
-	falseclaims=np.load("false_claimID_list.npy")
-	trueclaim_uris,trueclaim_edges,falseclaim_uris,falseclaim_edges={}
-	TFCG_co=nx.Graph()
-	FFCG_co=nx.Graph()
-	dbpediaregex=re.compile(r'http:\/\/dbpedia\.org\/resource\/')
-	#Parsing True Claims, find dbpedia entities, adding edges and saving the graph
-	for t in trueclaims:
-		claim_uris=set([])
-		g=rdflib.Graph()
-		filename="claim"+str(t)+".rdf"
-		try:
-			g.parse("/gpfs/home/z/k/zkachwal/Carbonate/RDF Files/"+filename,format='application/rdf+xml')
-		except:
-			pass
-		for triple in g:
-			subject,predicate,obj=list(map(str,triple))
-			try:
-				if dbpediaregex.search(subject):
-					claim_uris.add(subject)
-				if dbpediaregex.search(obj):
-					claim_uris.add(obj)
-			except KeyError:
-				pass
-		trueclaim_uris[t]=list(claim_uris)
-		trueclaim_edges[t]=list(combinations(trueclaim_uris[t],2))
-		TFCG_co.add_edges_from(trueclaim_edges[t])
-	nx.write_edgelist(TFCG_co,os.path.join("TFCG_co","TFCG_co.edgelist"),data=False)
-	#Parsing False Claims, find dbpedia entities, adding edges and saving the graph
-	for f in falseclaims:
-		claim_uris=set([])
-		g=rdflib.Graph()
-		filename="claim"+str(f)+".rdf"
-		try:
-			g.parse("/gpfs/home/z/k/zkachwal/Carbonate/RDF Files/"+filename,format='application/rdf+xml')
-		except:
-			# continue
-			pass
-		for triple in g:
-			subject,predicate,obj=list(map(str,triple))
-			try:
-				if dbpediaregex.search(subject):
-					claim_uris.add(subject)
-				if dbpediaregex.search(obj):
-					claim_uris.add(obj)
-			except KeyError:
-				pass
-		falseclaim_uris[f]=list(claim_uris)
-		falseclaim_edges[f]=list(combinations(falseclaim_uris[f],2))
-		FFCG_co.add_edges_from(falseclaim_edges[f])
-	nx.write_edgelist(FFCG_co,os.path.join("FFCG_co","FFCG_co.edgelist"),data=False)
+	# trueclaims=np.load("true_claimID_list.npy")
+	# falseclaims=np.load("false_claimID_list.npy")
+	# trueclaim_uris,trueclaim_edges,falseclaim_uris,falseclaim_edges={}
+	# TFCG_co=nx.Graph()
+	# FFCG_co=nx.Graph()
+	# dbpediaregex=re.compile(r'http:\/\/dbpedia\.org\/resource\/')
+	# #Parsing True Claims, find dbpedia entities, adding edges and saving the graph
+	# for t in trueclaims:
+	# 	claim_uris=set([])
+	# 	g=rdflib.Graph()
+	# 	filename="claim"+str(t)+".rdf"
+	# 	try:
+	# 		g.parse("/gpfs/home/z/k/zkachwal/Carbonate/RDF Files/Old Claims/"+filename,format='application/rdf+xml')
+	# 	except:
+	# 		pass
+	# 	for triple in g:
+	# 		subject,predicate,obj=list(map(str,triple))
+	# 		try:
+	# 			if dbpediaregex.search(subject):
+	# 				claim_uris.add(subject)
+	# 			if dbpediaregex.search(obj):
+	# 				claim_uris.add(obj)
+	# 		except KeyError:
+	# 			pass
+	# 	trueclaim_uris[t]=list(claim_uris)
+	# 	trueclaim_edges[t]=list(combinations(trueclaim_uris[t],2))
+	# 	TFCG_co.add_edges_from(trueclaim_edges[t])
+	# nx.write_edgelist(TFCG_co,os.path.join("TFCG_co","TFCG_co.edgelist"),data=False)
+	# #Parsing False Claims, find dbpedia entities, adding edges and saving the graph
+	# for f in falseclaims:
+	# 	claim_uris=set([])
+	# 	g=rdflib.Graph()
+	# 	filename="claim"+str(f)+".rdf"
+	# 	try:
+	# 		g.parse("/gpfs/home/z/k/zkachwal/Carbonate/RDF Files/"+filename,format='application/rdf+xml')
+	# 	except:
+	# 		# continue
+	# 		pass
+	# 	for triple in g:
+	# 		subject,predicate,obj=list(map(str,triple))
+	# 		try:
+	# 			if dbpediaregex.search(subject):
+	# 				claim_uris.add(subject)
+	# 			if dbpediaregex.search(obj):
+	# 				claim_uris.add(obj)
+	# 		except KeyError:
+	# 			pass
+	# 	falseclaim_uris[f]=list(claim_uris)
+	# 	falseclaim_edges[f]=list(combinations(falseclaim_uris[f],2))
+	# 	FFCG_co.add_edges_from(falseclaim_edges[f])
+	# nx.write_edgelist(FFCG_co,os.path.join("FFCG_co","FFCG_co.edgelist"),data=False)
+	TFCG_co=nx.read_edgelist(os.path.join("TFCG_co","TFCG_co.edgelist")) 
+	FFCG_co=nx.read_edgelist(os.path.join("FFCG_co","FFCG_co.edgelist")) 
+	FCG_co=nx.compose(TFCG_co,FFCG_co)
+	nx.write_edgelist(FCG_co,os.path.join("FCG_co","FCG_co.edgelist"),data=False)
+	for mode in ["TFCG_co","FFCG_co","FCG_co"]:
+		uris=list(eval(mode).nodes())
+		edges=list(eval(mode).edges())
+		#Saving the uris
+		with codecs.open(os.path.join(mode,mode+"_uris.txt"),"w","utf-8") as f:
+			np.save(os.path.join(mode,mode+"_uris.npy"),uris)
+			for uri in uris:
+				try:
+					f.write(str(uri)+"\n")
+				except:
+					pdb.set_trace()
+		uris_dict={uris[i]:i for i in range(len(uris))}
+		#Saving the dictionaries
+		with codecs.open(os.path.join(mode,mode+"_uris_dict.json"),"w","utf-8") as f:
+			f.write(json.dumps(uris_dict,ensure_ascii=False))
+		#Saving the edgelist to input Knowledge Linker
+		edgelist=np.asarray([[uris_dict[edge[0]],uris_dict[edge[1]],1] for edge in edges])
+		np.save(os.path.join(mode,mode+"_edgelist.npy"),edgelist)
+	with codecs.open("/gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph Data/DBPedia Data/dbpedia_uris_dict.json","r","utf-8") as f:
+		DBPedia_uris_dict=json.loads(f.read())
+	with codecs.open("TFCG_co/TFCG_co_uris_dict.json","r","utf-8") as f:
+		TFCG_co_uris_dict=json.loads(f.read())
+	with codecs.open("FFCG_co/FFCG_co_uris_dict.json","r","utf-8") as f:
+		FFCG_co_uris_dict=json.loads(f.read())
+	with codecs.open("FCG_co/FCG_co_uris_dict.json","r","utf-8") as f:
+		FCG_co_uris_dict=json.loads(f.read())
+	intersect_uris=np.asarray(list(set(TFCG_co.nodes()).intersection(set(FFCG_co.nodes()))))
+	intersect_uris=np.asarray(list(set(intersect_uris).intersection(set(FCG_co.nodes()))))
+	intersect_uris=np.asarray(list(set(intersect_uris).intersection(set(DBPedia_uris_dict.keys()))))
+	np.save("intersect_dbpedia_uris_co.npy",list(intersect_uris))
+	intersect_true_pairs=np.load("intersect_true_pairs_co.npy")
+	intersect_false_pairs=np.load("intersect_false_pairs_co.npy")
+	# Reformatting according to the input format acccepted by Knowledge Linker
+	intersect_true_pairs=np.asarray([[np.nan,i[0],np.nan,np.nan,i[1],np.nan,np.nan] for i in intersect_true_pairs])
+	intersect_false_pairs=np.asarray([[np.nan,i[0],np.nan,np.nan,i[1],np.nan,np.nan] for i in intersect_false_pairs])
+	######################################################################Writing True Pairs
+	# Writing true pairs to file using TFCG,FFCG and DBPedia entity IDs
+	for mode in ["TFCG_co","FFCG_co","FCG_co","DBPedia"]:
+		with codecs.open(os.path.join(mode,'Intersect_true_pairs_'+mode+'_IDs.txt'),"w","utf-8") as f:
+			for line in intersect_true_pairs:
+				f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(eval(mode+"_uris_dict")[line[1]])),str(line[2]),str(line[3]),str(int(eval(mode+"_uris_dict")[line[4]])),str(line[5]),str(line[6])))
+		with codecs.open(os.path.join(mode,'Intersect_false_pairs_'+mode+'_IDs.txt'),"w","utf-8") as f:
+			for line in intersect_false_pairs:
+				f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(eval(mode+"_uris_dict")[line[1]])),str(line[2]),str(line[3]),str(int(eval(mode+"_uris_dict")[line[4]])),str(line[5]),str(line[6])))
+	intersect_all_pairs=combinations(intersect_uris,2)
+	intersect_all_pairs=np.asarray(list(map(list,intersect_all_pairs)))
+	intersect_all_pairs=np.asarray([[np.nan,i[0],np.nan,np.nan,i[1],np.nan,np.nan] for i in intersect_all_pairs])
+	for mode in ["TFCG_co","FFCG_co","FCG_co"]:
+		with codecs.open(os.path.join(mode,'Intersect_all_pairs_'+mode+'_IDs.txt'),"w","utf-8") as f:
+			for line in intersect_all_pairs:
+				f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(eval(mode+"_uris_dict")[line[1]])),str(line[2]),str(line[3]),str(int(eval(mode+"_uris_dict")[line[4]])),str(line[5]),str(line[6])))
 
 def save_uris():
 	G=nx.read_weighted_edgelist(os.path.join(mode,mode+"_edgelist.txt"))
@@ -446,8 +456,8 @@ def create_FCG():
 	FFCG_id_edgelist=np.load(os.path.join("FFCG","FFCG"+"_edgelist.npy"))
 	TFCG_edgelist=[tuple([TFCG_uris_dict_ID[line[0]],TFCG_uris_dict_ID[line[1]]]) for line in TFCG_id_edgelist]
 	FFCG_edgelist=[tuple([FFCG_uris_dict_ID[line[0]],FFCG_uris_dict_ID[line[1]]]) for line in FFCG_id_edgelist]
-	np.save(os.path.join("TFCG","TFCG"+"_edgelist_full.npy"),TFCG_edgelist)
-	np.save(os.path.join("FFCG","FFCG"+"_edgelist_full.npy"),FFCG_edgelist)
+	# np.save(os.path.join("TFCG","TFCG"+"_edgelist_full.npy"),TFCG_edgelist)
+	# np.save(os.path.join("FFCG","FFCG"+"_edgelist_full.npy"),FFCG_edgelist)
 	TFCG=nx.Graph()
 	FFCG=nx.Graph()
 	TFCG.add_edges_from(TFCG_edgelist)
@@ -464,14 +474,24 @@ def create_FCG():
 	# FFCG=nx.read_edgelist(os.path.join("FFCG","FFCG"+"_edgelist_full.txt"),nodetype=str)
 	FCG=nx.compose(TFCG,FFCG)
 	nx.write_edgelist(FCG,os.path.join("FCG","FCG_full.edgelist"))
-	FCG_uris_dict={key:i for i,key in enumerate(FCG.nodes())}
+	FCG_uris=np.asarray(FCG.nodes())
+	regex_dbpedia=re.compile(r'^http:\/\/dbpedia\.org\/resource\/.*')
+	FCG_uris_dbpedia=[uri for uri in FCG_uris if regex_dbpedia.match(uri)]
+	FCG_uris_dict={key:i for i,key in enumerate(FCG_uris)}
+	np.save("FCG/FCG_uris.npy",FCG_uris)
+	np.save("FCG/FCG_dbpedia_uris.npy",FCG_uris_dbpedia)
+	with codecs.open(os.path.join("FCG","FCG_uris.txt"),"w","utf-8") as f:
+		for uri in FCG_uris:
+			f.write(str(uri)+"\n")
+	FCG_ID_edgelist=np.asarray([[FCG_uris_dict[line[0]],FCG_uris_dict[line[1]],1] for line in FCG.edges()])
+	np.save("FCG/FCG_edgelist.npy",FCG_ID_edgelist)
 	with codecs.open("FCG/FCG_uris_dict.json","w","utf-8") as f:
 		f.write(json.dumps(FCG_uris_dict,ensure_ascii=False))
 	# with codecs.open("FCG/FCG_uris_dict.json","r","utf-8") as f:
 	# 	FCG_uris_dict=json.loads(f.read())
 	with codecs.open(os.path.join("FCG",'FCG_edgelist.txt'),"w","utf-8") as f:
-		for line in FCG.edges():
-			f.write("{} {} {}\n".format(str(FCG_uris_dict[line[0]]),str(FCG_uris_dict[line[1]]),str(1)))
+		for line in FCG_ID_edgelist:
+			f.write("{} {} {}\n".format(str(line[0]),str(line[1]),str(1)))
 
 
 def TFCGvsFFCG():
@@ -481,6 +501,7 @@ def TFCGvsFFCG():
 	#loading DBPedia FCG Uris as they are our focus
 	TFCG_uris=np.load(os.path.join("TFCG","TFCG"+"_dbpedia_uris.npy"))
 	FFCG_uris=np.load(os.path.join("FFCG","FFCG"+"_dbpedia_uris.npy"))
+	FCG_uris=np.load(os.path.join("FCG","FCG"+"_dbpedia_uris.npy"))
 	#Creating dictionaries to assign unique ids to each uri for knowledge linker to process
 	TFCG_uris_dict={key:i for i,key in enumerate(TFCG_uris_all)}
 	FFCG_uris_dict={key:i for i,key in enumerate(FFCG_uris_all)}
@@ -494,10 +515,13 @@ def TFCGvsFFCG():
 		TFCG_uris_dict=json.loads(f.read())
 	with codecs.open("FFCG/FFCG_uris_dict.json","r","utf-8") as f:
 		FFCG_uris_dict=json.loads(f.read())
+	with codecs.open("FCG/FCG_uris_dict.json","r","utf-8") as f:
+		FCG_uris_dict=json.loads(f.read())
 	with codecs.open("/gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph Data/DBPedia Data/dbpedia_uris_dict.json","r","utf-8") as f:
 		DBPedia_uris_dict=json.loads(f.read())
 	#Performing intersection betwen TFCG, FFCG and DBPedia
 	intersect_uris=np.asarray(list(set(TFCG_uris).intersection(set(FFCG_uris))))
+	intersect_uris=np.asarray(list(set(intersect_uris).intersection(set(FCG_uris))))
 	intersect_uris=np.asarray(list(set(intersect_uris).intersection(set(DBPedia_uris_dict.keys()))))
 	#Save the intersection set
 	np.save("intersect_dbpedia_uris.npy",list(intersect_uris))
@@ -518,7 +542,6 @@ def TFCGvsFFCG():
 	random_pairs=np.random.choice(range(len(intersect_all_pairs)),size=len(intersect_true_pairs)*2,replace=False)
 	intersect_false_pairs=[]
 	rejected_pairs=[]
-	set_trace()
 	#Rejecting pairs from random pairs that are already present in true pairs
 	counter=0
 	for i in random_pairs:
@@ -554,11 +577,10 @@ def TFCGvsFFCG():
 	np.save("intersect_true_pairs.npy",intersect_true_pairs)
 	np.save("intersect_false_pairs.npy",intersect_false_pairs)
 	np.save("intersect_false_pairs2.npy",intersect_false_pairs2)
-	set_trace()
-	# write_pairs_tofile(intersect_true_pairs,intersect_false_pairs,intersect_false_pairs2,TFCG_uris_dict,FFCG_uris_dict,DBPedia_uris_dict)
-	write_pairs_tofile_bulk(intersect_true_pairs,intersect_false_pairs,intersect_false_pairs2,DBPedia_uris_dict)
+	write_pairs_tofile(intersect_true_pairs,intersect_false_pairs,intersect_false_pairs2,TFCG_uris_dict,FFCG_uris_dict,FCG_uris_dict,DBPedia_uris_dict)
+	# write_pairs_tofile_bulk(intersect_true_pairs,intersect_false_pairs,intersect_false_pairs2,DBPedia_uris_dict)
 
-def write_pairs_tofile(intersect_true_pairs,intersect_false_pairs,intersect_false_pairs2,TFCG_uris_dict,FFCG_uris_dict,DBPedia_uris_dict):
+def write_pairs_tofile(intersect_true_pairs,intersect_false_pairs,intersect_false_pairs2,TFCG_uris_dict,FFCG_uris_dict,FCG_uris_dict,DBPedia_uris_dict):
 	# Reformatting according to the input format acccepted by Knowledge Linker
 	intersect_true_pairs=np.asarray([[np.nan,i[0],np.nan,np.nan,i[1],np.nan,np.nan] for i in intersect_true_pairs])
 	intersect_false_pairs=np.asarray([[np.nan,i[0],np.nan,np.nan,i[1],np.nan,np.nan] for i in intersect_false_pairs])
@@ -572,6 +594,10 @@ def write_pairs_tofile(intersect_true_pairs,intersect_false_pairs,intersect_fals
 	with codecs.open('Intersect_true_pairs_FFCG_IDs.txt',"w","utf-8") as f:
 		for line in intersect_true_pairs:
 			f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(FFCG_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(FFCG_uris_dict[line[4]])),str(line[5]),str(line[6])))
+	# Writing true pairs to file using FCG entity IDs
+	with codecs.open('Intersect_true_pairs_FCG_IDs.txt',"w","utf-8") as f:
+		for line in intersect_true_pairs:
+			f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(FCG_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(FCG_uris_dict[line[4]])),str(line[5]),str(line[6])))
 	# Writing true pairs to file using DBPedia entity IDs
 	with codecs.open('Intersect_true_pairs_DBPedia_IDs.txt',"w","utf-8") as f:
 		for line in intersect_true_pairs:
@@ -585,23 +611,27 @@ def write_pairs_tofile(intersect_true_pairs,intersect_false_pairs,intersect_fals
 	with codecs.open('Intersect_false_pairs_FFCG_IDs.txt',"w","utf-8") as f:
 		for line in intersect_false_pairs:
 			f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(FFCG_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(FFCG_uris_dict[line[4]])),str(line[5]),str(line[6])))
+	# Writing false pairs to file using FFCG entity IDs
+	with codecs.open('Intersect_false_pairs_FCG_IDs.txt',"w","utf-8") as f:
+		for line in intersect_false_pairs:
+			f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(FCG_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(FCG_uris_dict[line[4]])),str(line[5]),str(line[6])))
 	# Writing false pairs to file using DBPedia entity IDs
 	with codecs.open('Intersect_false_pairs_DBPedia_IDs.txt',"w","utf-8") as f:
 		for line in intersect_false_pairs:
 			f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(DBPedia_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(DBPedia_uris_dict[line[4]])),str(line[5]),str(line[6])))
 	######################################################################Writing False Pairs 2
-	# Writing false pairs 2 to file using TFCG entity IDs
-	with codecs.open('Intersect_false_pairs2_TFCG_IDs.txt',"w","utf-8") as f:
-		for line in intersect_false_pairs2:
-			f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(TFCG_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(TFCG_uris_dict[line[4]])),str(line[5]),str(line[6])))
-	# Writing false pairs 2 to file using FFCG entity IDs
-	with codecs.open('Intersect_false_pairs2_FFCG_IDs.txt',"w","utf-8") as f:
-		for line in intersect_false_pairs2:
-			f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(FFCG_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(FFCG_uris_dict[line[4]])),str(line[5]),str(line[6])))
-	# Writing false pairs 2 to file using DBPedia entity IDs
-	with codecs.open('Intersect_false_pairs2_DBPedia_IDs.txt',"w","utf-8") as f:
-		for line in intersect_false_pairs2:
-			f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(DBPedia_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(DBPedia_uris_dict[line[4]])),str(line[5]),str(line[6])))
+	# # Writing false pairs 2 to file using TFCG entity IDs
+	# with codecs.open('Intersect_false_pairs2_TFCG_IDs.txt',"w","utf-8") as f:
+	# 	for line in intersect_false_pairs2:
+	# 		f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(TFCG_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(TFCG_uris_dict[line[4]])),str(line[5]),str(line[6])))
+	# # Writing false pairs 2 to file using FFCG entity IDs
+	# with codecs.open('Intersect_false_pairs2_FFCG_IDs.txt',"w","utf-8") as f:
+	# 	for line in intersect_false_pairs2:
+	# 		f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(FFCG_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(FFCG_uris_dict[line[4]])),str(line[5]),str(line[6])))
+	# # Writing false pairs 2 to file using DBPedia entity IDs
+	# with codecs.open('Intersect_false_pairs2_DBPedia_IDs.txt',"w","utf-8") as f:
+	# 	for line in intersect_false_pairs2:
+	# 		f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(DBPedia_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(DBPedia_uris_dict[line[4]])),str(line[5]),str(line[6])))
 
 def write_pairs_tofile_bulk(intersect_true_pairs,intersect_false_pairs,intersect_false_pairs2,DBPedia_uris_dict):
 	# Reformatting according to the input format acccepted by Knowledge Linker
@@ -924,179 +954,148 @@ python experiment1.py {} {} {}
 		start=end
 
 def plot_TFCGvsFFCG():
-	Intersect_true_TFCG=pd.read_json("Intersect_true_pairs_TFCG_IDs.json")
-	Intersect_true_FFCG=pd.read_json("Intersect_true_pairs_FFCG_IDs.json")
-	Intersect_true_DBPedia=pd.read_json("Intersect_true_pairs_DBPedia_IDs.json")
+	Intersect_true_TFCG=pd.read_json("TFCG/Intersect_true_pairs_TFCG_IDs.json")
+	Intersect_true_FFCG=pd.read_json("FFCG/Intersect_true_pairs_FFCG_IDs.json")
+	Intersect_true_FCG=pd.read_json("FCG/Intersect_true_pairs_FCG_IDs.json")
+	Intersect_true_DBPedia=pd.read_json("DBPedia/Intersect_true_pairs_DBPedia_IDs.json")
 
-	Intersect_false_TFCG=pd.read_json("Intersect_false_pairs_TFCG_IDs.json")
-	Intersect_false_FFCG=pd.read_json("Intersect_false_pairs_FFCG_IDs.json")
-	Intersect_false_DBPedia=pd.read_json("Intersect_false_pairs_DBPedia_IDs.json")
-
-
-	Intersect_false2_TFCG=pd.read_json("Intersect_false_pairs2_TFCG_IDs.json")
-	Intersect_false2_FFCG=pd.read_json("Intersect_false_pairs2_FFCG_IDs.json")
-	Intersect_false2_DBPedia=pd.read_json("Intersect_false_pairs2_DBPedia_IDs.json")
+	Intersect_false_TFCG=pd.read_json("TFCG/Intersect_false_pairs_TFCG_IDs.json")
+	Intersect_false_FFCG=pd.read_json("FFCG/Intersect_false_pairs_FFCG_IDs.json")
+	Intersect_false_FCG=pd.read_json("FCG/Intersect_false_pairs_FCG_IDs.json")
+	Intersect_false_DBPedia=pd.read_json("DBPedia/Intersect_false_pairs_DBPedia_IDs.json")
 
 	Intersect_true_TFCG['label']=1
 	Intersect_false_TFCG['label']=0
-	Intersect_false2_TFCG['label']=0
 
 	Intersect_true_FFCG['label']=1
 	Intersect_false_FFCG['label']=0
-	Intersect_false2_FFCG['label']=0
+
+	Intersect_true_FCG['label']=1
+	Intersect_false_FCG['label']=0
 
 	Intersect_true_DBPedia['label']=1
 	Intersect_false_DBPedia['label']=0
-	Intersect_false2_DBPedia['label']=0
 
 	true_false_TFCG=pd.concat([Intersect_true_TFCG,Intersect_false_TFCG],ignore_index=True)
 	y_TFCG=list(true_false_TFCG['label'])
 	scores_TFCG=list(true_false_TFCG['simil'])
 
-	true_false2_TFCG=pd.concat([Intersect_true_TFCG,Intersect_false2_TFCG],ignore_index=True)
-	y2_TFCG=list(true_false2_TFCG['label'])
-	scores2_TFCG=list(true_false2_TFCG['simil'])
-
 	true_false_FFCG=pd.concat([Intersect_true_FFCG,Intersect_false_FFCG],ignore_index=True)
 	y_FFCG=list(true_false_FFCG['label'])
 	scores_FFCG=list(true_false_FFCG['simil'])
 
-	true_false2_FFCG=pd.concat([Intersect_true_FFCG,Intersect_false2_FFCG],ignore_index=True)
-	y2_FFCG=list(true_false2_FFCG['label'])
-	scores2_FFCG=list(true_false2_FFCG['simil'])
+	true_false_FCG=pd.concat([Intersect_true_FCG,Intersect_false_FCG],ignore_index=True)
+	y_FCG=list(true_false_FCG['label'])
+	scores_FCG=list(true_false_FCG['simil'])
 
 	true_false_DBPedia=pd.concat([Intersect_true_DBPedia,Intersect_false_DBPedia],ignore_index=True)
 	y_DBPedia=list(true_false_DBPedia['label'])
 	scores_DBPedia=list(true_false_DBPedia['simil'])
-
-	true_false2_DBPedia=pd.concat([Intersect_true_DBPedia,Intersect_false2_DBPedia],ignore_index=True)
-	y2_DBPedia=list(true_false2_DBPedia['label'])
-	scores2_DBPedia=list(true_false2_DBPedia['simil'])
 
 	title="True vs False Pairs"
 	lw = 2
 	fig, (ax1, ax2) = plt.subplots(ncols=2, sharey=True)
 	fig.set_size_inches(9,4)
-	####TFCG
-	fpr, tpr, thresholds = metrics.roc_curve(y_TFCG, scores_TFCG, pos_label=1)
-	print(metrics.auc(fpr,tpr))
-	print("TFCG P-Value %.2E" %Decimal(stats.ttest_rel(Intersect_true_TFCG['simil'],Intersect_false_TFCG['simil']).pvalue))
-	# ax1.subplot(1,2,1)
-	ax1.plot(fpr, tpr,lw=lw, label='TFCG (%0.2f) ' % metrics.auc(fpr,tpr))
-	####FFCG
-	fpr, tpr, thresholds = metrics.roc_curve(y_FFCG, scores_FFCG, pos_label=1)
-	print(metrics.auc(fpr,tpr))
-	print("FFCG P-Value %.2E" %Decimal(stats.ttest_rel(Intersect_true_FFCG['simil'],Intersect_false_FFCG['simil']).pvalue))
-	ax1.plot(fpr, tpr,lw=lw, label='FFCG (%0.2f) ' % metrics.auc(fpr,tpr))
-	####DBPedia
-	fpr, tpr, thresholds = metrics.roc_curve(y_DBPedia, scores_DBPedia, pos_label=1)
-	print(metrics.auc(fpr,tpr))
-	print("DBPedia P-Value %.2E" %Decimal(stats.ttest_rel(Intersect_true_DBPedia['simil'],Intersect_false_DBPedia['simil']).pvalue))
-	ax1.plot(fpr, tpr,lw=lw, label='DBPedia (%0.2f) ' % metrics.auc(fpr,tpr))
+	for g_type in ["TFCG","FFCG","FCG","DBPedia"]:
+		fpr, tpr, thresholds = metrics.roc_curve(eval("y_",g_type), eval("scores_",g_type), pos_label=1)
+		print(metrics.auc(fpr,tpr))
+		print(g_type+" P-Value %.2E" %Decimal(stats.ttest_rel(eval("Intersect_true_{}['simil']".format(g_type)),eval("Intersect_false_{}['simil']".format(g_type))).pvalue))
+		ax1.plot(fpr, tpr,lw=lw, label=g_type+' (%0.2f) ' % metrics.auc(fpr,tpr))
+
+	# ####TFCG
+	# fpr, tpr, thresholds = metrics.roc_curve(y_TFCG, scores_TFCG, pos_label=1)
+	# print(metrics.auc(fpr,tpr))
+	# print("TFCG P-Value %.2E" %Decimal(stats.ttest_rel(Intersect_true_TFCG['simil'],Intersect_false_TFCG['simil']).pvalue))
+	# # ax1.subplot(1,2,1)
+	# ax1.plot(fpr, tpr,lw=lw, label='TFCG (%0.2f) ' % metrics.auc(fpr,tpr))
+	# ####FFCG
+	# fpr, tpr, thresholds = metrics.roc_curve(y_FFCG, scores_FFCG, pos_label=1)
+	# print(metrics.auc(fpr,tpr))
+	# print("FFCG P-Value %.2E" %Decimal(stats.ttest_rel(Intersect_true_FFCG['simil'],Intersect_false_FFCG['simil']).pvalue))
+	# ax1.plot(fpr, tpr,lw=lw, label='FFCG (%0.2f) ' % metrics.auc(fpr,tpr))
+	# ####FCG
+	# fpr, tpr, thresholds = metrics.roc_curve(y_FCG, scores_FCG, pos_label=1)
+	# print(metrics.auc(fpr,tpr))
+	# print("FFCG P-Value %.2E" %Decimal(stats.ttest_rel(Intersect_true_FCG['simil'],Intersect_false_FCG['simil']).pvalue))
+	# ax1.plot(fpr, tpr,lw=lw, label='TFCG U FFCG (%0.2f) ' % metrics.auc(fpr,tpr))
+	# ####DBPedia
+	# fpr, tpr, thresholds = metrics.roc_curve(y_DBPedia, scores_DBPedia, pos_label=1)
+	# print(metrics.auc(fpr,tpr))
+	# print("DBPedia P-Value %.2E" %Decimal(stats.ttest_rel(Intersect_true_DBPedia['simil'],Intersect_false_DBPedia['simil']).pvalue))
+	# ax1.plot(fpr, tpr,lw=lw, label='DBPedia (%0.2f) ' % metrics.auc(fpr,tpr))
 	ax1.plot([0, 1], [0, 1], color='navy', lw=lw,linestyle='--')
 	ax1.legend(loc="lower right")
 	ax1.set_title("FRED")
 	ax1.set_xlabel('False Positive Rate')
 	ax1.set_ylabel('True Positive Rate')
-	# plt.ylabel('True Positive Rate')
-	# plt.savefig(title.replace(" ","_")+".png")
-	# plt.close()
-	# plt.clf()
-	##########################False2
-	# plt.subplot(1,2,2)
-	####TFCG
-	# fpr, tpr, thresholds = metrics.roc_curve(y2_TFCG, scores2_TFCG, pos_label=1)
-	# print(metrics.auc(fpr,tpr))
-	# print("TFCG P-Value %.2E" %Decimal(stats.ttest_rel(Intersect_true_TFCG['simil'],Intersect_false_TFCG['simil']).pvalue))
-	# plt.plot(fpr, tpr,lw=lw, label='TFCG (AUC = %0.2f) ' % metrics.auc(fpr,tpr))
-	# ####FFCG
-	# fpr, tpr, thresholds = metrics.roc_curve(y2_FFCG, scores2_FFCG, pos_label=1)
-	# print(metrics.auc(fpr,tpr))
-	# print("FFCG P-Value %.2E" %Decimal(stats.ttest_rel(Intersect_true_FFCG['simil'],Intersect_false_FFCG['simil']).pvalue))
-	# plt.plot(fpr, tpr,lw=lw, label='FFCG (AUC = %0.2f) ' % metrics.auc(fpr,tpr))
-	# ####DBPedia
-	# fpr, tpr, thresholds = metrics.roc_curve(y2_DBPedia, scores2_DBPedia, pos_label=1)
-	# print(metrics.auc(fpr,tpr))
-	# print("DBPedia P-Value %.2E" %Decimal(stats.ttest_rel(Intersect_true_DBPedia['simil'],Intersect_false_DBPedia['simil']).pvalue))
-	# plt.plot(fpr, tpr,lw=lw, label='DBPedia (AUC = %0.2f) ' % metrics.auc(fpr,tpr))
-	# plt.plot([0, 1], [0, 1], color='navy', lw=lw, label='Baseline',linestyle='--')
-	# plt.legend(loc="lower right")
-	# plt.title("Co-occur")
-	# plt.xlabel('False Positive Rate')
-	# # plt.ylabel('True Positive Rate')
-	# plt.savefig(title.replace(" ","_")+"2.png")
-	# plt.close()
-	# plt.clf()
 
+	#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@Co-Occur
+	Intersect_true_TFCG=pd.read_json("TFCG_co/Intersect_true_pairs_TFCG_co_IDs.json")
+	Intersect_true_FFCG=pd.read_json("FFCG_co/Intersect_true_pairs_FFCG_co_IDs.json")
+	Intersect_true_FCG=pd.read_json("FCG_co/Intersect_true_pairs_FCG_co_IDs.json")
+	Intersect_true_DBPedia=pd.read_json("DBPedia/Intersect_true_pairs_DBPedia_IDs.json")
 
-
-	Intersect_true_TFCG=pd.read_json("/gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph/Experiment2/TFCG_co/Intersect_true_pairs_TFCG_co_IDs.json")
-	Intersect_true_FFCG=pd.read_json("/gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph/Experiment2/FFCG_co/Intersect_true_pairs_FFCG_co_IDs.json")
-	Intersect_true_DBPedia=pd.read_json("/gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph/Experiment2/DBPedia/Intersect_true_pairs_DBPedia_IDs.json")
-
-	Intersect_false_TFCG=pd.read_json("/gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph/Experiment2/TFCG_co/Intersect_false_pairs_TFCG_co_IDs.json")
-	Intersect_false_FFCG=pd.read_json("/gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph/Experiment2/FFCG_co/Intersect_false_pairs_FFCG_co_IDs.json")
-	Intersect_false_DBPedia=pd.read_json("/gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph/Experiment2/DBPedia/Intersect_false_pairs_DBPedia_IDs.json")
-
-
-	# Intersect_false2_TFCG=pd.read_json("/TFCG_co/Intersect_false_pairs2_TFCG_IDs.json")
-	# Intersect_false2_FFCG=pd.read_json("/FFCG_co/Intersect_false_pairs2_FFCG_IDs.json")
-	# Intersect_false2_DBPedia=pd.read_json("/DBPedia/Intersect_false_pairs2_DBPedia_IDs.json")
+	Intersect_false_TFCG=pd.read_json("TFCG_co/Intersect_false_pairs_TFCG_co_IDs.json")
+	Intersect_false_FFCG=pd.read_json("FFCG_co/Intersect_false_pairs_FFCG_co_IDs.json")
+	Intersect_false_FCG=pd.read_json("FCG_co/Intersect_false_pairs_FCG_co_IDs.json")
+	Intersect_false_DBPedia=pd.read_json("DBPedia/Intersect_false_pairs_DBPedia_IDs.json")
 
 	Intersect_true_TFCG['label']=1
 	Intersect_false_TFCG['label']=0
-	# Intersect_false2_TFCG['label']=0
 
 	Intersect_true_FFCG['label']=1
 	Intersect_false_FFCG['label']=0
-	# Intersect_false2_FFCG['label']=0
+
+	Intersect_true_FCG['label']=1
+	Intersect_false_FCG['label']=0
 
 	Intersect_true_DBPedia['label']=1
 	Intersect_false_DBPedia['label']=0
-	# Intersect_false2_DBPedia['label']=0
 
 	true_false_TFCG=pd.concat([Intersect_true_TFCG,Intersect_false_TFCG],ignore_index=True)
 	y_TFCG=list(true_false_TFCG['label'])
 	scores_TFCG=list(true_false_TFCG['simil'])
 
-	# true_false2_TFCG=pd.concat([Intersect_true_TFCG,Intersect_false2_TFCG],ignore_index=True)
-	# y2_TFCG=list(true_false2_TFCG['label'])
-	# scores2_TFCG=list(true_false2_TFCG['simil'])
-
 	true_false_FFCG=pd.concat([Intersect_true_FFCG,Intersect_false_FFCG],ignore_index=True)
 	y_FFCG=list(true_false_FFCG['label'])
 	scores_FFCG=list(true_false_FFCG['simil'])
 
-	# true_false2_FFCG=pd.concat([Intersect_true_FFCG,Intersect_false2_FFCG],ignore_index=True)
-	# y2_FFCG=list(true_false2_FFCG['label'])
-	# scores2_FFCG=list(true_false2_FFCG['simil'])
+	true_false_FCG=pd.concat([Intersect_true_FCG,Intersect_false_FCG],ignore_index=True)
+	y_FCG=list(true_false_FCG['label'])
+	scores_FCG=list(true_false_FCG['simil'])
 
 	true_false_DBPedia=pd.concat([Intersect_true_DBPedia,Intersect_false_DBPedia],ignore_index=True)
 	y_DBPedia=list(true_false_DBPedia['label'])
 	scores_DBPedia=list(true_false_DBPedia['simil'])
 
-	# true_false2_DBPedia=pd.concat([Intersect_true_DBPedia,Intersect_false2_DBPedia],ignore_index=True)
-	# y2_DBPedia=list(true_false2_DBPedia['label'])
-	# scores2_DBPedia=list(true_false2_DBPedia['simil'])
-
 	title="True vs False Pairs"
 	lw = 2
 	# plt.figure(1)
-	####TFCG
-	fpr, tpr, thresholds = metrics.roc_curve(y_TFCG, scores_TFCG, pos_label=1)
-	print(metrics.auc(fpr,tpr))
-	print("TFCG P-Value %.2E" %Decimal(stats.ttest_rel(Intersect_true_TFCG['simil'],Intersect_false_TFCG['simil']).pvalue))
-	ax2.plot(fpr, tpr,lw=lw, label='TFCG (%0.2f) ' % metrics.auc(fpr,tpr))
-	####FFCG
-	fpr, tpr, thresholds = metrics.roc_curve(y_FFCG, scores_FFCG, pos_label=1)
-	print(metrics.auc(fpr,tpr))
-	print("FFCG P-Value %.2E" %Decimal(stats.ttest_rel(Intersect_true_FFCG['simil'],Intersect_false_FFCG['simil']).pvalue))
-	ax2.plot(fpr, tpr,lw=lw, label='FFCG (%0.2f) ' % metrics.auc(fpr,tpr))
-	####DBPedia
-	fpr, tpr, thresholds = metrics.roc_curve(y_DBPedia, scores_DBPedia, pos_label=1)
-	print(metrics.auc(fpr,tpr))
-	print("DBPedia P-Value %.2E" %Decimal(stats.ttest_rel(Intersect_true_DBPedia['simil'],Intersect_false_DBPedia['simil']).pvalue))
-	ax2.plot(fpr, tpr,lw=lw, label='DBPedia (%0.2f) ' % metrics.auc(fpr,tpr))
+	for g_type in ["TFCG","FFCG","FCG","DBPedia"]:
+		fpr, tpr, thresholds = metrics.roc_curve(eval("y_",g_type), eval("scores_",g_type), pos_label=1)
+		print(metrics.auc(fpr,tpr))
+		print(g_type+" P-Value %.2E" %Decimal(stats.ttest_rel(eval("Intersect_true_{}['simil']".format(g_type)),eval("Intersect_false_{}['simil']".format(g_type))).pvalue))
+		ax2.plot(fpr, tpr,lw=lw, label=g_type+' (%0.2f) ' % metrics.auc(fpr,tpr))
+	# ####TFCG
+	# fpr, tpr, thresholds = metrics.roc_curve(y_TFCG, scores_TFCG, pos_label=1)
+	# print(metrics.auc(fpr,tpr))
+	# print("TFCG P-Value %.2E" %Decimal(stats.ttest_rel(Intersect_true_TFCG['simil'],Intersect_false_TFCG['simil']).pvalue))
+	# ax2.plot(fpr, tpr,lw=lw, label='TFCG (%0.2f) ' % metrics.auc(fpr,tpr))
+	# ####FFCG
+	# fpr, tpr, thresholds = metrics.roc_curve(y_FFCG, scores_FFCG, pos_label=1)
+	# print(metrics.auc(fpr,tpr))
+	# print("FFCG P-Value %.2E" %Decimal(stats.ttest_rel(Intersect_true_FFCG['simil'],Intersect_false_FFCG['simil']).pvalue))
+	# ax2.plot(fpr, tpr,lw=lw, label='FFCG (%0.2f) ' % metrics.auc(fpr,tpr))
+	# ####FCG
+	# fpr, tpr, thresholds = metrics.roc_curve(y_FCG, scores_FCG, pos_label=1)
+	# print(metrics.auc(fpr,tpr))
+	# print("FFCG P-Value %.2E" %Decimal(stats.ttest_rel(Intersect_true_FCG['simil'],Intersect_false_FCG['simil']).pvalue))
+	# ax2.plot(fpr, tpr,lw=lw, label='TFCG U FFCG (%0.2f) ' % metrics.auc(fpr,tpr))
+	# ####DBPedia
+	# fpr, tpr, thresholds = metrics.roc_curve(y_DBPedia, scores_DBPedia, pos_label=1)
+	# print(metrics.auc(fpr,tpr))
+	# print("DBPedia P-Value %.2E" %Decimal(stats.ttest_rel(Intersect_true_DBPedia['simil'],Intersect_false_DBPedia['simil']).pvalue))
+	# ax2.plot(fpr, tpr,lw=lw, label='DBPedia (%0.2f) ' % metrics.auc(fpr,tpr))
 	ax2.plot([0, 1], [0, 1], color='navy', lw=lw,linestyle='--')
 	ax2.legend(loc="lower right")
 	ax2.set_title("Co-occur")
@@ -1312,3 +1311,4 @@ def plot_TFCGvsFFCG():
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # calculate_stats()
 # quantile_correlations(zo_in,start,end)
+create_fred_network(init)

@@ -1,0 +1,36 @@
+
+2019-10-04 01:46:31.955830:
+    metric: ultrametric
+    edges:  undirected
+    weight: logdegree
+    nodes:  FCG/FCG_uris.txt
+    graph:  FCG/FCG_edgelist.npy
+    input:  Intersect_true_pairs_FCG_IDs.txt
+    output: Intersect_true_pairs_FCG_IDs.json
+2019-10-04 01:46:31.956398: reading nodes from text file..
+2019-10-04 01:46:32.130633: reading graph from text file..
+2019-10-04 01:46:32.945159: reading input..
+2019-10-04 01:46:33.002927: launching pool of 12 workers.
+2019-10-04 01:46:44.265815: done
+
+real	0m49.769s
+user	1m47.606s
+sys	0m3.157s
+
+2019-10-04 01:46:48.285487:
+    metric: ultrametric
+    edges:  undirected
+    weight: logdegree
+    nodes:  FCG/FCG_uris.txt
+    graph:  FCG/FCG_edgelist.npy
+    input:  Intersect_false_pairs_FCG_IDs.txt
+    output: Intersect_false_pairs_FCG_IDs.json
+2019-10-04 01:46:48.285816: reading nodes from text file..
+2019-10-04 01:46:48.291669: reading graph from text file..
+2019-10-04 01:46:48.349300: reading input..
+2019-10-04 01:46:48.404246: launching pool of 12 workers.
+2019-10-04 01:46:59.516508: done
+
+real	0m12.299s
+user	1m48.844s
+sys	0m2.471s

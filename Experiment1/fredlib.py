@@ -1,15 +1,23 @@
 import os
 import re
 import sys
+import time
 import rdflib
+import requests
 import networkx as nx
 from flufl.enum import Enum
 from rdflib import plugin
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import pandas as pd
+import codecs
 from rdflib.serializer import Serializer
 from rdflib.plugins.memory import IOMemory
 from IPython.core.debugger import set_trace
+import json
+import numpy as np
+import xml.sax
 import html
 
 __author__ = 'Misael Mongiovi, Andrea Giovanni Nuzzolese'
@@ -553,25 +561,101 @@ def preprocessText(text):
     return nt
 
 def getFredGraph(sentence,key,filename):
-    command_to_exec = "curl -G -X GET -H \"Accept: application/rdf+xml\" -H \"Authorization: Bearer " + key + "\" --data-urlencode text=\"" + sentence+ "\" -d semantic-subgraph=\"true\" http://wit.istc.cnr.it/stlab-tools/fred > " + filename
-    try:
-        os.system(command_to_exec)
-    except:
-        print("error os running curl FRED")
-        sys.exit(1)
+    url="http://wit.istc.cnr.it/stlab-tools/fred"
+    header={"Accept":"application/rdf+xml","Authorization":key}
+    data={'text':sentence,'semantic-subgraph':True}
+    r=requests.get(url,params=data,headers=header)
+    with open(filename, "w") as f:
+        f.write("<?xml version='1.0' encoding='UTF-8'?>\n"+r.text)
+    # return openFredGraph(filename),r
+    return r
 
-    return openFredGraph(filename)
+def fredParse(data,claim_type,init):
+    graph_type={"True":"TFCG","False":"FFCG"}
+    FCG_label=graph_type[claim_type]
+    key="Bearer 56a28f54-7918-3fdd-9d6f-850f13bd4041"
+    errorclaimid=[]
+    #fred starts
+    start=time.time()
+    start2=time.time()
+    daysec=86400
+    minsec=60
+    FCG=nx.Graph()
+    rdf = rdflib.Graph()
+    FCG_filterdata={}
+    #Read stuff
+    try:
+        rdf.parse('/gpfs/home/z/k/zkachwal/Carbonate/RDF Files/{} Claims/{}claims.rdf'.format(claim_type,claim_type), format='application/rdf+xml')
+        with codecs.open("/gpfs/home/z/k/zkachwal/Carbonate/RDF Files/{} Claims/{}Claims_filterdata.json".format(claim_type,claim_type),"w","utf-8") as f:
+            FCG_filterdata=json.loads(f.read())
+        FCG=nx.read_edgelist(os.path.join(FCG_label,FCG_label+".edgelist"))
+    except:
+        pass
+    for i in range(init,len(data)):
+        dif=abs(time.time()-start)
+        diff=abs(daysec-dif)
+        while True:
+            try:
+                dif=abs(time.time()-start)
+                dif2=abs(time.time()-start2)
+                diff=abs(daysec-dif)
+                claimID=data.iloc[i]['claimID']
+                sentence=html.unescape(data.iloc[i]['claim_text']).replace("`","'")
+                print("Index:",i,"Claim ID:",claimID," DayLim2Go:",round(diff),"MinLim2Go:",round(min(abs(minsec-dif2),60)))
+                filename="/gpfs/home/z/k/zkachwal/Carbonate/RDF Files/{} Claims/Claim{}.rdf".format(claim_type,str(claimID))
+                r=getFredGraph(preprocessText(sentence),key,filename)
+                if "You have exceeded your quota" not in r.text and "Runtime Error" not in r.text and "Service Unavailable" not in r.text:
+                    if r.status_code in range(100,500) and r.text:
+                        g=openFredGraph(filename)
+                        nx_graph,removed_edges,contracted_edges=checkFredGraph(g)
+                        plotFredGraph(nx_graph,filename)
+                        FCG=nx.compose(FCG,nx_graph)
+                        FCG_filterdata[str(claimID)]={}
+                        FCG_filterdata[str(claimID)]['removed_edges']=removed_edges
+                        FCG_filterdata[str(claimID)]['contracted_edges']=contracted_edges
+                        rdf.parse(filename,format='application/rdf+xml')
+                        rdf.serialize(destination='/gpfs/home/z/k/zkachwal/Carbonate/RDF Files/{} Claims/{}claims.rdf'.format(claim_type,claim_type), format='application/rdf+xml')
+                        with codecs.open("/gpfs/home/z/k/zkachwal/Carbonate/RDF Files/{} Claims/{}Claims_filterdata.json".format(claim_type,claim_type),"w","utf-8") as f:
+                            f.write(json.dumps(FCG_filterdata,ensure_ascii=False))
+                        nx.write_edgelist(FCG,os.path.join(FCG_label,FCG_label+".edgelist"))
+                    else:
+                        errorclaimid.append(filename.split("/")[-1].strip(".rdf"))
+                        np.save("/gpfs/home/z/k/zkachwal/Carbonate/RDF Files/Error500_claimID.npy",errorclaimid)
+                    break
+                else:
+                    diff2=min(abs(minsec-dif2),60)
+                    print("Sleeping for ",round(diff2))
+                    time.sleep(abs(diff2))
+                    start2=time.time()
+            except xml.sax._exceptions.SAXParseException:
+                print("Exception Occurred")
+                errorclaimid.append(claimID)
+                break
+    rdf.serialize(destination='/gpfs/home/z/k/zkachwal/Carbonate/RDF Files/{} Claims/{}claims.rdf'.format(claim_type,claim_type), format='application/rdf+xml')
+    with codecs.open("/gpfs/home/z/k/zkachwal/Carbonate/RDF Files/{} Claims/{}Claims_filterdata.json".format(claim_type,claim_type),"w","utf-8") as f:
+        f.write(json.dumps(FCG_filterdata,ensure_ascii=False))
+    nx.write_edgelist(FCG,os.path.join(FCG_label,FCG_label+".edgelist"))
+
+def create_fred_network(init):
+    data=pd.read_csv("/gpfs/home/z/k/zkachwal/Carbonate/RDF Files/claimreviews_db2.csv",index_col=0)
+    ##Dropping non-str rows
+    filter=list(map(lambda x:type(x)!=str,data['rating_name']))
+    data.drop(data[filter].index,inplace=True)
+    print(data.groupby('fact_checkerID').count())
+    trueregex=re.compile(r'(?i)^true|^correct$|^mostly true$|^geppetto checkmark$')
+    falseregex=re.compile(r'(?i)^false|^mostly false|^pants on fire$|^four pinocchios$|^no\ |^no:|^distorts the facts|^wrong$')
+    trueind=data['rating_name'].apply(lambda x:trueregex.match(x)!=None)
+    trueclaims=data.loc[trueind]
+    # set_trace()
+    falseind=data['rating_name'].apply(lambda x:falseregex.match(x)!=None)
+    falseclaims=data.loc[falseind]
+    fredParse(trueclaims,"True",init)
+    fredParse(falseclaims,"False",init)
 
 def openFredGraph(filename):
     rdf = rdflib.Graph()
     rdf.parse(filename)
     return FredGraph(rdf)
-
-def checkFredSentence(sentence, key, filename):
-    g = getFredGraph(preprocessText(sentence), key, filename)
-    #g = openFredGraph(graph)
-    nx_graph,removed_edges,contracted_edges=checkFredGraph(g)
-    return nx_graph,removed_edges,contracted_edges
 
 def checkFredFile(filename):
     g = openFredGraph(filename)
@@ -623,26 +707,22 @@ def checkFredGraph(g):
     regex_schema=re.compile(r'^http:\/\/schema\.org\/(.*)')
     regex_quant=re.compile(r'^http:\/\/www\.ontologydesignpatterns\.org\/ont\/fred\/quantifiers\.owl#.*')
     regex_assoc=re.compile(r'^http:\/\/www\.ontologydesignpatterns\.org\/ont\/dul\/DUL\.owl#associatedWith$')
-    print("getEdges")
+    # print("getEdges")
     for (a,b,c) in g.getEdges():
-        if not regex_27.match(a) and not regex_27.match(c) and not regex_dul.match(a) and not regex_dul.match(c):
-            nx_graph.add_edge(a,c,label=b)
         if b=="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#associatedWith":
             if regex_freddata_low.match(a) and regex_freddata_low.match(c):
                 if regex_freddata_low.match(a)[1]==regex_freddata_low.match(c)[1]:
                     removed_edges.append((a,b,c))
-                    nx_graph.remove_edge(a,c)
             elif regex_freddata_low.match(a) and regex_freddata_upp.match(c):
                 if regex_freddata_low.match(a)[1]==regex_freddata_upp.match(c)[1].lower():
                     removed_edges.append((a,b,c))
-                    nx_graph.remove_edge(a,c)
             elif regex_freddata_low.match(c) and regex_freddata_upp.match(a):
                 if regex_freddata_low.match(c)[1]==regex_freddata_upp.match(a)[1].lower():
                     removed_edges.append((a,b,c))
-                    nx_graph.remove_edge(a,c)
-        elif regex_quant.match(b):
+        elif regex_quant.match(b) or regex_27.match(a) or regex_27.match(c) or regex_dul.match(a) or regex_dul.match(c):
             removed_edges.append((a,b,c))
-            nx_graph.remove_edge(a,c)
+        else:
+            nx_graph.add_edge(a,c,label=b)
         # print(a,b,c)
     # print("getEdgeMotif(EdgeMotif.Role)")
     # for (a,b,c) in g.getEdgeMotif(EdgeMotif.Role):
@@ -660,28 +740,28 @@ def checkFredGraph(g):
     # for (a,b,c) in g.getEdgeMotif(EdgeMotif.Property):
     #     print(a,b,c)
 
-    print("getPathMotif(PathMotif.Type)")
+    # print("getPathMotif(PathMotif.Type)")
     for (a,b) in g.getPathMotif(PathMotif.Type):
-        if regex_freddata_low.match(a)!=None and regex_freddata_upp.match(b)!=None:
-            if regex_freddata_low.match(a)[1]==regex_freddata_upp.match(b)[1].lower():
-                nx_graph = nx.contracted_edge(nx_graph,(b, a),self_loops=False)
-                contracted_edges.append((b,a))
-        elif regex_freddata_low.match(b)!=None and regex_freddata_upp.match(a)!=None:
-            if regex_freddata_low.match(b)[1]==regex_freddata_upp.match(a)[1].lower():
-                nx_graph = nx.contracted_edge(nx_graph,(a, b),self_loops=False)
-                contracted_edges.append((a,b))
-        elif regex_freddata_low.match(a)!=None and regex_owl.match(b)!=None:
-            if regex_freddata_low.match(a)[1]==regex_owl.match(b)[1].lower():
-                nx_graph = nx.contracted_edge(nx_graph,(b, a),self_loops=False)
-                contracted_edges.append((b,a))
-        elif regex_freddata_low.match(b)!=None and regex_owl.match(a)!=None:
-            if regex_freddata_low.match(b)[1]==regex_owl.match(a)[1].lower():
-                nx_graph = nx.contracted_edge(nx_graph,(a, b),self_loops=False)
-                contracted_edges.append((a,b))
-
-        elif regex_schema.match(a) or regex_schema.match(b):
-            removed_edges.append((a,b))
-            nx_graph.remove_edge(a,b)
+        if nx_graph.has_edge(a,b):
+            if regex_freddata_low.match(a)!=None and regex_freddata_upp.match(b)!=None:
+                if regex_freddata_low.match(a)[1]==regex_freddata_upp.match(b)[1].lower():
+                    nx_graph = nx.contracted_edge(nx_graph,(b, a),self_loops=False)
+                    contracted_edges.append((b,a))
+            elif regex_freddata_low.match(b)!=None and regex_freddata_upp.match(a)!=None:
+                if regex_freddata_low.match(b)[1]==regex_freddata_upp.match(a)[1].lower():
+                    nx_graph = nx.contracted_edge(nx_graph,(a, b),self_loops=False)
+                    contracted_edges.append((a,b))
+            elif regex_freddata_low.match(a)!=None and regex_owl.match(b)!=None:
+                if regex_freddata_low.match(a)[1]==regex_owl.match(b)[1].lower():
+                    nx_graph = nx.contracted_edge(nx_graph,(b, a),self_loops=False)
+                    contracted_edges.append((b,a))
+            elif regex_freddata_low.match(b)!=None and regex_owl.match(a)!=None:
+                if regex_freddata_low.match(b)[1]==regex_owl.match(a)[1].lower():
+                    nx_graph = nx.contracted_edge(nx_graph,(a, b),self_loops=False)
+                    contracted_edges.append((a,b))
+            elif regex_schema.match(a) or regex_schema.match(b):
+                removed_edges.append((a,b))
+                nx_graph.remove_edge(a,b)
 
     # print("getEdgeMotif(EdgeMotif.SubClass)")
     # for (a,b,c) in g.getEdgeMotif(EdgeMotif.SubClass):
@@ -704,9 +784,9 @@ def checkFredGraph(g):
     # for e in es:
     #     print(e, es[e].Type)
 
-    print("getPathMotif(PathMotif.SubClass)")
-    for (a,b) in g.getPathMotif(PathMotif.SubClass):
-        print(a,b)
+    # print("getPathMotif(PathMotif.SubClass)")
+    # for (a,b) in g.getPathMotif(PathMotif.SubClass):
+    #     print(a,b)
 
     # print("getClusterMotif(ClusterMotif.Identity)")
     # for cluster in g.getClusterMotif(ClusterMotif.Identity):
@@ -716,17 +796,18 @@ def checkFredGraph(g):
     # for cluster in g.getClusterMotif(ClusterMotif.Equivalence):
     #     print(cluster)
 
-    print("getClusterMotif(ClusterMotif.IdentityEquivalence)")
+    # print("getClusterMotif(ClusterMotif.IdentityEquivalence)")
     for cluster in g.getClusterMotif(ClusterMotif.IdentityEquivalence):
         # print(cluster)
         a=list(cluster)[0]
         b=list(cluster)[1]
-        if regex_vndata.match(a) or regex_dbpedia.match(a):
-            nx_graph = nx.contracted_edge(nx_graph,(a, b),self_loops=False)
-            contracted_edges.append((a,b))
-        elif regex_vndata.match(b) or regex_dbpedia.match(b):
-            nx_graph = nx.contracted_edge(nx_graph,(b, a),self_loops=False)
-            contracted_edges.append((a,b))
+        if nx_graph.has_edge(a,b):
+            if regex_vndata.match(a) or regex_dbpedia.match(a):
+                nx_graph = nx.contracted_edge(nx_graph,(a, b),self_loops=False)
+                contracted_edges.append((a,b))
+            elif regex_vndata.match(b) or regex_dbpedia.match(b):
+                nx_graph = nx.contracted_edge(nx_graph,(b, a),self_loops=False)
+                contracted_edges.append((a,b))
 
     # print("g.getNaryMotif(NaryMotif.Event)")
     # motif_occurrences = g.getNaryMotif(NaryMotif.Event)
@@ -771,7 +852,6 @@ def plotFredGraph(nx_graph,filename):
     pos = nx.spring_layout(nx_graph)
     nx.draw(nx_graph,pos,labels={node:node.split("/")[-1].split("#")[-1] for node in nx_graph.nodes()},node_size=400)
     edge_labels = {(edge[0], edge[1]): edge[2]['label'].split("/")[-1].split("#")[-1] for edge in nx_graph.edges(data=True)}
-    set_trace()
     nx.draw_networkx_edge_labels(nx_graph,pos,edge_labels)
     plt.axis('off')
     plt.savefig(filename.replace(".rdf",".png"))
