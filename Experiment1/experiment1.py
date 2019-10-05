@@ -3,9 +3,6 @@ import pandas as pd
 import re
 import numpy as np
 import rdflib
-from rdflib import BNode, Literal
-from rdflib.namespace import RDF
-# from py2neo import Graph, NodeMatcher, RelationshipMatcher
 from itertools import combinations
 from sklearn import metrics
 import codecs
@@ -18,22 +15,15 @@ import matplotlib
 from scipy.stats import pearsonr,kendalltau,spearmanr
 import tkinter
 matplotlib.use('Agg')
-# font = {'family' : 'Normal',
-#         'size'   :6.75}
-# matplotlib.rc('font', **font)
 import math
 import html
 import matplotlib.pyplot as plt
-# from matplotlib.pyplot import figure
 import pdb
 import sys
 import os 
 import json
 from IPython.core.debugger import set_trace
 import seaborn as sns
-import fredlib as fred
-from urllib.parse import urljoin
-from urllib.request import pathname2url
 '''
 The goal of this script is the following:
 1. Read uris (save_uris) and triples (save_edgelist) from the Neo4j Database
@@ -42,6 +32,12 @@ The goal of this script is the following:
 3. Plot and Calculate ROC for the given triples versus randomly generated triples
 '''
 init=int(sys.argv[1])
+
+def pvalue_sign(pvalue):
+	if pvalue>0.01:
+		return '!'
+	else:
+		return '*'
 
 #Calculate Graph statistics of interest and saves them to a file called stats.txt
 def calculate_stats(mode):
@@ -112,7 +108,6 @@ def standardize_claims():
 	np.save("true_claimID_list.npy",list(trueclaims))
 	np.save("false_claimID_list.npy",list(falseclaims))
 
-
 #Function to create a network where nodes are entities and edges are added if they occur in the same claim
 def create_cooccurrence_network():
 	#Reading True and False claims list standardized by standardize_claims()
@@ -154,206 +149,112 @@ def create_cooccurrence_network():
 				falseclaim_edges[f]=list(combinations(falseclaim_uris[f],2))
 				FFCG_co.add_edges_from(falseclaim_edges[f])
 		nx.write_edgelist(FCG_label,os.path.join(FCG_label,FCG_label+".edgelist"),data=False)
+
+def TFCGvsFFCG(graph_mode):
+	dbpedia_regex=re.compile(r'http:\/\/dbpedia\.org\/resource\/')
+	fcg_modes={"fred":{"t":"TFCG","f":"FFCG","u":"FCG","d":"DBPedia"},"co-occur"{"t":"TFCG_co","f":"FFCG_co","d":"DBPedia"}}
+	fcg_label=fcg_modes["graph_mode"]
 	#Loading the graphs
-	TFCG_co=nx.read_edgelist(os.path.join("TFCG_co","TFCG_co.edgelist")) 
-	FFCG_co=nx.read_edgelist(os.path.join("FFCG_co","FFCG_co.edgelist")) 
-	FCG_co=nx.compose(TFCG_co,FFCG_co)
-	nx.write_edgelist(FCG_co,os.path.join("FCG_co","FCG_co.edgelist"),data=False)
+	TFCG=nx.read_edgelist(os.path.join(fcg_label['t'],fcg_label['t']+".edgelist")) 
+	FFCG=nx.read_edgelist(os.path.join(fcg_label['f'],fcg_label['f']+".edgelist")) 
+	FCG=nx.compose(TFCG,FFCG)
+	nx.write_edgelist(FCG,os.path.join(fcg_label['u'],fcg_label['u']+".edgelist"),data=False)
 	#Saving uris, edgelist and name to ID dictionary, all for inputs to knowledge_linker
-	for mode in ["TFCG_co","FFCG_co","FCG_co"]:
-		uris=list(eval(mode).nodes())
-		edges=list(eval(mode).edges())
-		#Saving the uris
-		with codecs.open(os.path.join(mode,mode+"_uris.txt"),"w","utf-8") as f:
-			np.save(os.path.join(mode,mode+"_uris.npy"),uris)
-			for uri in uris:
-				try:
-					f.write(str(uri)+"\n")
-				except:
-					pdb.set_trace()
-		uris_dict={uris[i]:i for i in range(len(uris))}
-		#Saving the dictionaries
-		with codecs.open(os.path.join(mode,mode+"_uris_dict.json"),"w","utf-8") as f:
-			f.write(json.dumps(uris_dict,ensure_ascii=False))
-		#Saving the edgelist to input Knowledge Linker
-		edgelist=np.asarray([[uris_dict[edge[0]],uris_dict[edge[1]],1] for edge in edges])
-		np.save(os.path.join(mode,mode+"_edgelist.npy"),edgelist)
-	#Loading the name to ID dictionaries
-	with codecs.open("/gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph Data/DBPedia Data/dbpedia_uris_dict.json","r","utf-8") as f:
-		DBPedia_uris_dict=json.loads(f.read())
-	with codecs.open("TFCG_co/TFCG_co_uris_dict.json","r","utf-8") as f:
-		TFCG_co_uris_dict=json.loads(f.read())
-	with codecs.open("FFCG_co/FFCG_co_uris_dict.json","r","utf-8") as f:
-		FFCG_co_uris_dict=json.loads(f.read())
-	with codecs.open("FCG_co/FCG_co_uris_dict.json","r","utf-8") as f:
-		FCG_co_uris_dict=json.loads(f.read())
-	#Finding an intersection between all the sets of nodes
-	intersect_uris=np.asarray(list(set(TFCG_co.nodes()).intersection(set(FFCG_co.nodes()))))
-	intersect_uris=np.asarray(list(set(intersect_uris).intersection(set(FCG_co.nodes()))))
-	intersect_uris=np.asarray(list(set(intersect_uris).intersection(set(DBPedia_uris_dict.keys()))))
-	np.save("intersect_dbpedia_uris_co.npy",list(intersect_uris))
-	intersect_true_pairs=np.load("intersect_true_pairs_co.npy")
-	intersect_false_pairs=np.load("intersect_false_pairs_co.npy")
-	# Reformatting according to the input format acccepted by Knowledge Linker
-	intersect_true_pairs=np.asarray([[np.nan,i[0],np.nan,np.nan,i[1],np.nan,np.nan] for i in intersect_true_pairs])
-	intersect_false_pairs=np.asarray([[np.nan,i[0],np.nan,np.nan,i[1],np.nan,np.nan] for i in intersect_false_pairs])
+	for fcg in fcg_label.values():
+		nodes=list(eval(fcg).nodes())
+		np.save(os.path.join(fcg,fcg+"_nodes.npy"),nodes)
+		edges=list(eval(fcg).edges())
+		# np.save(os.path.join(mode,mode+"_edges.npy"),edges)
+		entities=[entity for entity in nodes if dbpedia_regex.match(entity)]
+		np.save(os.path.join(fcg,fcg+"_entities.npy"),entities)
+		#Saving the nodes
+		with codecs.open(os.path.join(fcg,fcg+"_nodes.txt"),"w","utf-8") as f:
+			for node in nodes:
+				f.write(str(node)+"\n")
+		node2ID_dict={node:i for i,node in enumerate(nodes)}
+		#Saving the node2ID dictionaries
+		with codecs.open(os.path.join(fcg,fcg+"_node2ID_dict.json"),"w","utf-8") as f:
+			f.write(json.dumps(node2ID_dict,ensure_ascii=False))
+		#Saving the edgelist in ID format to input Knowledge Linker
+		edgelistID=np.asarray([[node2ID_dict[edge[0]],node2ID_dict[edge[1]],1] for edge in edges])
+		np.save(os.path.join(fcg,fcg+"_edgelistID.npy"),edgelistID)
+	#Loading the node to ID dictionaries
+	with codecs.open("/gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph Data/DBPedia Data/dbpedia_node2ID_dict.json","r","utf-8") as f:
+		DBPedia_node2ID_dict=json.loads(f.read())
+	with codecs.open("{}/{}_node2ID_dict.json".format(fcg_label['t'],fcg_label['t']),"r","utf-8") as f:
+		TFCG_node2ID_dict=json.loads(f.read())
+	with codecs.open("{}/{}_node2ID_dict.json".format(fcg_label['f'],fcg_label['f']),"r","utf-8") as f:
+		FFCG_node2ID_dict=json.loads(f.read())
+	with codecs.open("{}/{}_node2ID_dict.json".format(fcg_label['u'],fcg_label['u']),"r","utf-8") as f:
+		FCG_node2ID_dict=json.loads(f.read())
+	#Loading the entities
+	TFCG_entities=np.load(os.path.join(fcg_label['t'],fcg_label+"_entities.npy"))
+	FFCG_entities=np.load(os.path.join(fcg_label['f'],fcg_label+"_entities.npy"))
+	FCG_entities=np.load(os.path.join(fcg_label['u'],fcg_label+"_entities.npy"))
+	DBPedia_entities=np.asarray(DBPedia_node2ID_dict.keys())
+	#Finding an intersection between TFCG,FFCG and DBPedia entities (Note for co-occurrence entities=nodes)
+	intersect_entities=np.asarray(list(set(TFCG_entities).intersection(set(FFCG_entities))))
+	intersect_entities=np.asarray(list(set(intersect_entities).intersection(set(DBPedia_entities))))
+	np.save("intersect_entities_{}.npy".format(graph_mode),list(intersect_entities))
+	intersect_truePairs=np.load("intersect_true_entityPairs_{}.npy".format(graph_mode))
+	intersect_falsePairs=np.load("intersect_false_entityPairs_{}.npy".format(graph_mode))
 	# Finding all pairs
-	intersect_all_pairs=combinations(intersect_uris,2)
-	intersect_all_pairs=np.asarray(list(map(list,intersect_all_pairs)))
-	intersect_all_pairs=np.asarray([[np.nan,i[0],np.nan,np.nan,i[1],np.nan,np.nan] for i in intersect_all_pairs])
+	intersect_allPairs=combinations(intersect_entities,2)
+	intersect_allPairs=np.asarray(list(map(list,intersect_all_pairs)))
+	intersect_allPairs=np.asarray([[np.nan,i[0],np.nan,np.nan,i[1],np.nan,np.nan] for i in intersect_allPairs])
 	# Writing true pairs to file using TFCG,FFCG and DBPedia entity IDs
-	for mode in ["TFCG_co","FFCG_co","FCG_co","DBPedia"]:
-		with codecs.open(os.path.join(mode,'Intersect_true_pairs_'+mode+'_IDs.txt'),"w","utf-8") as f:
+	for fcg in fcg_modes["graph_mode"]:
+		with codecs.open(os.path.join(fcg,'Intersect_truePairs_'+fcg+'_IDs.txt'),"w","utf-8") as f:
 		# Writing true pairs to file using TFCG,FFCG and DBPedia entity IDs
-			for line in intersect_true_pairs:
-				f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(eval(mode+"_uris_dict")[line[1]])),str(line[2]),str(line[3]),str(int(eval(mode+"_uris_dict")[line[4]])),str(line[5]),str(line[6])))
+			for line in intersect_truePairs:
+				f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(eval(fcg+"_node2ID_dict")[line[1]])),str(line[2]),str(line[3]),str(int(eval(fcg+"_node2ID_dict")[line[4]])),str(line[5]),str(line[6])))
 		# Writing false pairs to file using TFCG,FFCG and DBPedia entity IDs
-		with codecs.open(os.path.join(mode,'Intersect_false_pairs_'+mode+'_IDs.txt'),"w","utf-8") as f:
-			for line in intersect_false_pairs:
-				f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(eval(mode+"_uris_dict")[line[1]])),str(line[2]),str(line[3]),str(int(eval(mode+"_uris_dict")[line[4]])),str(line[5]),str(line[6])))
+		with codecs.open(os.path.join(fcg,'Intersect_falsePairs_'+fcg+'_IDs.txt'),"w","utf-8") as f:
+			for line in intersect_falsePairs:
+				f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(eval(fcg+"_node2ID_dict")[line[1]])),str(line[2]),str(line[3]),str(int(eval(fcg+"_node2ID_dict")[line[4]])),str(line[5]),str(line[6])))
 		# Writing all pairs to file using TFCG,FFCG and DBPedia entity IDs
-		with codecs.open(os.path.join(mode,'Intersect_all_pairs_'+mode+'_IDs.txt'),"w","utf-8") as f:
-			for line in intersect_all_pairs:
-				f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(eval(mode+"_uris_dict")[line[1]])),str(line[2]),str(line[3]),str(int(eval(mode+"_uris_dict")[line[4]])),str(line[5]),str(line[6])))
+		with codecs.open(os.path.join(fcg,'Intersect_allPairs_'+fcg+'_IDs.txt'),"w","utf-8") as f:
+			for line in intersect_allPairs:
+				f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(eval(fcg+"_node2ID_dict")[line[1]])),str(line[2]),str(line[3]),str(int(eval(fcg+"_node2ID_dict")[line[4]])),str(line[5]),str(line[6])))
 
-def TFCGvsFFCG():
-	#We load all uris as we need to assign each a unique int ID to work with knowledge linkers
-	TFCG_uris_all=np.load(os.path.join("TFCG","TFCG"+"_uris.npy"))
-	FFCG_uris_all=np.load(os.path.join("FFCG","FFCG"+"_uris.npy"))
-	#loading DBPedia FCG Uris as they are our focus
-	TFCG_uris=np.load(os.path.join("TFCG","TFCG"+"_dbpedia_uris.npy"))
-	FFCG_uris=np.load(os.path.join("FFCG","FFCG"+"_dbpedia_uris.npy"))
-	FCG_uris=np.load(os.path.join("FCG","FCG"+"_dbpedia_uris.npy"))
-	#Creating dictionaries to assign unique ids to each uri for knowledge linker to process
-	TFCG_uris_dict={key:i for i,key in enumerate(TFCG_uris_all)}
-	FFCG_uris_dict={key:i for i,key in enumerate(FFCG_uris_all)}
-	#Saving the dictionaries
-	with codecs.open("TFCG/TFCG_uris_dict.json","w","utf-8") as f:
-		f.write(json.dumps(TFCG_uris_dict,ensure_ascii=False))
-	with codecs.open("FFCG/FFCG_uris_dict.json","w","utf-8") as f:
-		f.write(json.dumps(FFCG_uris_dict,ensure_ascii=False))
-	#Loading the dictionaries
-	with codecs.open("TFCG/TFCG_uris_dict.json","r","utf-8") as f:
-		TFCG_uris_dict=json.loads(f.read())
-	with codecs.open("FFCG/FFCG_uris_dict.json","r","utf-8") as f:
-		FFCG_uris_dict=json.loads(f.read())
-	with codecs.open("FCG/FCG_uris_dict.json","r","utf-8") as f:
-		FCG_uris_dict=json.loads(f.read())
-	with codecs.open("/gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph Data/DBPedia Data/dbpedia_uris_dict.json","r","utf-8") as f:
-		DBPedia_uris_dict=json.loads(f.read())
-	#Performing intersection betwen TFCG, FFCG and DBPedia
-	intersect_uris=np.asarray(list(set(TFCG_uris).intersection(set(FFCG_uris))))
-	intersect_uris=np.asarray(list(set(intersect_uris).intersection(set(FCG_uris))))
-	intersect_uris=np.asarray(list(set(intersect_uris).intersection(set(DBPedia_uris_dict.keys()))))
-	#Save the intersection set
-	np.save("intersect_dbpedia_uris.npy",list(intersect_uris))
-	#Load the intersection set
-	intersect_uris=np.load("intersect_dbpedia_uris.npy")
-	#Find all possible combinations of these uris
-	intersect_all_pairs=combinations(intersect_uris,2)
-	intersect_all_pairs=np.asarray(list(map(list,intersect_all_pairs)))
-	#These are the pairs that are "true" by our definition: They are connected in dbpedia
-	intersect_true_pairs=np.load("intersect_entity_pairs_dbpedia.npy")
-	#Converting to a set to eliminate duplicate pairs
-	intersect_true_pairs_set=set(list(map(str,list(map(set,intersect_true_pairs)))))
-	#Converting it back. Getting rid of pairs where both uris are duplicates, as well as duplicate of each pair
-	intersect_true_pairs=np.asarray([i for i in list(map(list,list(map(eval,list(intersect_true_pairs_set))))) if len(i)==2])
-	#Finding uris that are only part of true pairs
-	intersect_true_pairs_uris=list(set(intersect_true_pairs.flatten()))
-	#Choosing 2n random pairs, where n is the lenght of the total true_pairs 
-	random_pairs=np.random.choice(range(len(intersect_all_pairs)),size=len(intersect_true_pairs)*2,replace=False)
-	intersect_false_pairs=[]
-	rejected_pairs=[]
-	#Rejecting pairs from random pairs that are already present in true pairs
-	counter=0
-	for i in random_pairs:
-		if counter<len(intersect_true_pairs):
-			if str(set(intersect_all_pairs[i])) in intersect_true_pairs_set or str(set(list(reversed(intersect_all_pairs[i])))) in intersect_true_pairs_set:#eliminating random triple if it exists in the intersect set (converted individiual triples to str to make a set)
-				rejected_pairs.append(intersect_all_pairs[i])
-			else:
-				counter+=1
-				intersect_false_pairs.append(intersect_all_pairs[i])
-		else:
-			break
-	#Find all possible combinations of uris that only part of the above true pairs
-	intersect_all_pairs2=combinations(intersect_true_pairs_uris,2)
-	intersect_all_pairs2=np.asarray(list(map(list,intersect_all_pairs2)))
-	#Choosing 2n random pairs of the intersect_true_pairs, where n is the lenght of the total true_pairs 
-	random_pairs2=np.random.choice(range(len(intersect_all_pairs2)),size=len(intersect_true_pairs)*2,replace=False)
-	intersect_false_pairs2=[]
-	rejected_pairs2=[]
-	#Rejecting pairs from random pairs that are already present in true pairs
-	counter=0
-	for i in random_pairs2:
-		if counter<len(intersect_true_pairs):
-			if str(set(intersect_all_pairs2[i])) in intersect_true_pairs_set or str(set(list(reversed(intersect_all_pairs2[i])))) in intersect_true_pairs_set:#eliminating random triple if it exists in the intersect set (converted individiual triples to str to make a set)
-				rejected_pairs2.append(intersect_all_pairs2[i])
-			else:
-				counter+=1
-				intersect_false_pairs2.append(intersect_all_pairs2[i])
-		else:
-			break
-	intersect_true_pairs=np.asarray(intersect_true_pairs)
-	intersect_false_pairs=np.asarray(intersect_false_pairs)
-	intersect_false_pairs2=np.asarray(intersect_false_pairs2)
-	np.save("intersect_true_pairs.npy",intersect_true_pairs)
-	np.save("intersect_false_pairs.npy",intersect_false_pairs)
-	np.save("intersect_false_pairs2.npy",intersect_false_pairs2)
-	write_pairs_tofile(intersect_true_pairs,intersect_false_pairs,intersect_false_pairs2,TFCG_uris_dict,FFCG_uris_dict,FCG_uris_dict,DBPedia_uris_dict)
-	# write_pairs_tofile_bulk(intersect_true_pairs,intersect_false_pairs,intersect_false_pairs2,DBPedia_uris_dict)
-
-def write_pairs_tofile(intersect_true_pairs,intersect_false_pairs,intersect_false_pairs2,TFCG_uris_dict,FFCG_uris_dict,FCG_uris_dict,DBPedia_uris_dict):
-	# Reformatting according to the input format acccepted by Knowledge Linker
-	intersect_true_pairs=np.asarray([[np.nan,i[0],np.nan,np.nan,i[1],np.nan,np.nan] for i in intersect_true_pairs])
-	intersect_false_pairs=np.asarray([[np.nan,i[0],np.nan,np.nan,i[1],np.nan,np.nan] for i in intersect_false_pairs])
-	intersect_false_pairs2=np.asarray([[np.nan,i[0],np.nan,np.nan,i[1],np.nan,np.nan] for i in intersect_false_pairs2])
-	######################################################################Writing True Pairs
-	# Writing true pairs to file using TFCG entity IDs
-	with codecs.open('Intersect_true_pairs_TFCG_IDs.txt',"w","utf-8") as f:
-		for line in intersect_true_pairs:
-			f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(TFCG_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(TFCG_uris_dict[line[4]])),str(line[5]),str(line[6])))
-	# Writing true pairs to file using FFCG entity IDs
-	with codecs.open('Intersect_true_pairs_FFCG_IDs.txt',"w","utf-8") as f:
-		for line in intersect_true_pairs:
-			f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(FFCG_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(FFCG_uris_dict[line[4]])),str(line[5]),str(line[6])))
-	# Writing true pairs to file using FCG entity IDs
-	with codecs.open('Intersect_true_pairs_FCG_IDs.txt',"w","utf-8") as f:
-		for line in intersect_true_pairs:
-			f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(FCG_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(FCG_uris_dict[line[4]])),str(line[5]),str(line[6])))
-	# Writing true pairs to file using DBPedia entity IDs
-	with codecs.open('Intersect_true_pairs_DBPedia_IDs.txt',"w","utf-8") as f:
-		for line in intersect_true_pairs:
-			f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(DBPedia_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(DBPedia_uris_dict[line[4]])),str(line[5]),str(line[6])))
-	######################################################################Writing False Pairs
-	# Writing false pairs to file using TFCG entity IDs
-	with codecs.open('Intersect_false_pairs_TFCG_IDs.txt',"w","utf-8") as f:
-		for line in intersect_false_pairs:
-			f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(TFCG_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(TFCG_uris_dict[line[4]])),str(line[5]),str(line[6])))
-	# Writing false pairs to file using FFCG entity IDs
-	with codecs.open('Intersect_false_pairs_FFCG_IDs.txt',"w","utf-8") as f:
-		for line in intersect_false_pairs:
-			f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(FFCG_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(FFCG_uris_dict[line[4]])),str(line[5]),str(line[6])))
-	# Writing false pairs to file using FFCG entity IDs
-	with codecs.open('Intersect_false_pairs_FCG_IDs.txt',"w","utf-8") as f:
-		for line in intersect_false_pairs:
-			f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(FCG_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(FCG_uris_dict[line[4]])),str(line[5]),str(line[6])))
-	# Writing false pairs to file using DBPedia entity IDs
-	with codecs.open('Intersect_false_pairs_DBPedia_IDs.txt',"w","utf-8") as f:
-		for line in intersect_false_pairs:
-			f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(DBPedia_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(DBPedia_uris_dict[line[4]])),str(line[5]),str(line[6])))
-	######################################################################Writing False Pairs 2
-	# # Writing false pairs 2 to file using TFCG entity IDs
-	# with codecs.open('Intersect_false_pairs2_TFCG_IDs.txt',"w","utf-8") as f:
-	# 	for line in intersect_false_pairs2:
-	# 		f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(TFCG_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(TFCG_uris_dict[line[4]])),str(line[5]),str(line[6])))
-	# # Writing false pairs 2 to file using FFCG entity IDs
-	# with codecs.open('Intersect_false_pairs2_FFCG_IDs.txt',"w","utf-8") as f:
-	# 	for line in intersect_false_pairs2:
-	# 		f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(FFCG_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(FFCG_uris_dict[line[4]])),str(line[5]),str(line[6])))
-	# # Writing false pairs 2 to file using DBPedia entity IDs
-	# with codecs.open('Intersect_false_pairs2_DBPedia_IDs.txt',"w","utf-8") as f:
-	# 	for line in intersect_false_pairs2:
-	# 		f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(DBPedia_uris_dict[line[1]])),str(line[2]),str(line[3]),str(int(DBPedia_uris_dict[line[4]])),str(line[5]),str(line[6])))
+def correlations(removal):
+	tfcg_scores_all=list(np.load(os.path.join("TFCG","TFCG_scores.npy")))
+	ffcg_scores_all=list(np.load(os.path.join("FFCG","FFCG_scores.npy")))
+	dbpedia_scores_all=list(np.load(os.path.join("DBPedia","DBPedia_scores.npy")))
+	title_text=""
+	if removal:
+		for name in ["tfcg_scores_all","ffcg_scores_all","dbpedia_scores_all"]:
+			indices=[i for i, x in enumerate(eval(name)) if x == 0]
+			for i in sorted(indices, reverse = True):
+				del tfcg_scores_all[i]
+				del ffcg_scores_all[i]
+				del dbpedia_scores_all[i]
+		title_text="0 removal"
+		np.save("tfcg_scores_0removed.npy",tfcg_scores_all)
+		np.save("ffcg_scores_0removed.npy",ffcg_scores_all)
+		np.save("dbpedia_scores_0removed.npy",dbpedia_scores_all)
+	title="Proximity Distribution"
+	plt.figure(1)
+	# plt.hist(tfcg_scores_all,histtype='step',label='TFCG')
+	# plt.hist(ffcg_scores_all,histtype='step',label='FFCG')
+	# plt.hist(dbpedia_scores_all,histtype='step',label='DBPedia')
+	# plt.xlabel("Proximity Scores")
+	# plt.ylabel("Density")
+	# plt.legend(loc="upper right")
+	# plt.savefig(title.replace(" ","_")+".png")
+	# plt.close()
+	# plt.clf()
+	sns.set_style("white")
+	sns.set_style("ticks")
+	ax = sns.kdeplot(pd.Series(tfcg_scores_all,name="TFCG"))
+	ax = sns.kdeplot(pd.Series(ffcg_scores_all,name="FFCG"))
+	ax = sns.kdeplot(pd.Series(dbpedia_scores_all,name="DBPedia"))
+	plt.xlabel("Proximity Scores")
+	plt.title("FRED Network "+title_text)
+	plt.ylabel("Density")
+	plt.savefig(title.replace(" ","_")+title_text+".png")
+	plt.close()
+	plt.clf()
 
 def write_pairs_tofile_bulk(intersect_true_pairs,intersect_false_pairs,intersect_false_pairs2,DBPedia_uris_dict):
 	# Reformatting according to the input format acccepted by Knowledge Linker
@@ -549,83 +450,6 @@ def quantile_correlations(zo_in,start,end):
 	# plt.savefig(title.replace(" ","_")+title_text+"_"+corr_type+".png")
 	# plt.close()
 	# plt.clf()
-
-def plot_corr():
-	title="Correlations Decreasing DBPedia Proximity"
-	correlations_roll_dbpedia_tfcg=pd.read_csv("/gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph/Experiment1/Correlations/correlations_roll_dbpedia_tfcg.csv")
-	correlations_roll_dbpedia_ffcg=pd.read_csv("/gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph/Experiment1/Correlations/correlations_roll_dbpedia_ffcg.csv")
-	correlations_roll_tfcg_ffcg=pd.read_csv("/gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph/Experiment1/Correlations/correlations_roll_tfcg_ffcg.csv")
-	fig, (ax1, ax2) = plt.subplots(ncols=2, sharey=True)
-	fig.set_size_inches(9,4)
-	ax1.set_xscale("log")
-	ax1.set_title("FRED")
-	ax1.plot(correlations_roll_dbpedia_tfcg['index'],correlations_roll_dbpedia_tfcg['kendalltau'],label="DBPedia - TFCG")
-	ax1.plot(correlations_roll_dbpedia_ffcg['index'],correlations_roll_dbpedia_ffcg['kendalltau'],label="DBPedia - FFCG")
-	ax1.set_xlabel("Number of pairs")
-	ax1.set_ylabel("Correlation")
-	ax1.legend(loc="upper right")
-	# plt.savefig(title.replace(" ","_")+".png")
-	correlations_roll_dbpedia_tfcg=pd.read_csv("/gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph/Experiment2/Correlations/correlations_co_roll_dbpedia_tfcg.csv")
-	correlations_roll_dbpedia_ffcg=pd.read_csv("/gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph/Experiment2/Correlations/correlations_co_roll_dbpedia_ffcg.csv")
-	correlations_roll_tfcg_ffcg=pd.read_csv("/gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph/Experiment2/Correlations/correlations_co_roll_tfcg_ffcg.csv")
-	ax2.set_xscale("log")
-	ax2.set_title("Co-occur")
-	ax2.plot(correlations_roll_dbpedia_tfcg['index'],correlations_roll_dbpedia_tfcg['kendalltau'],label="DBPedia - TFCG")
-	ax2.plot(correlations_roll_dbpedia_ffcg['index'],correlations_roll_dbpedia_ffcg['kendalltau'],label="DBPedia - FFCG")
-	ax2.set_xlabel("Number of pairs")
-	ax2.legend(loc="upper right")
-	plt.tight_layout()
-	plt.savefig(title.replace(" ","_")+".png")
-	plt.close()
-	plt.clf()
-	# plt.show()
-	plt.close()
-	plt.clf()
-
-def pvalue_sign(pvalue):
-	if pvalue>0.01:
-		return '!'
-	else:
-		return '*'
-
-def correlations(removal):
-	tfcg_scores_all=list(np.load(os.path.join("TFCG","TFCG_scores.npy")))
-	ffcg_scores_all=list(np.load(os.path.join("FFCG","FFCG_scores.npy")))
-	dbpedia_scores_all=list(np.load(os.path.join("DBPedia","DBPedia_scores.npy")))
-	title_text=""
-	if removal:
-		for name in ["tfcg_scores_all","ffcg_scores_all","dbpedia_scores_all"]:
-			indices=[i for i, x in enumerate(eval(name)) if x == 0]
-			for i in sorted(indices, reverse = True):
-				del tfcg_scores_all[i]
-				del ffcg_scores_all[i]
-				del dbpedia_scores_all[i]
-		title_text="0 removal"
-		np.save("tfcg_scores_0removed.npy",tfcg_scores_all)
-		np.save("ffcg_scores_0removed.npy",ffcg_scores_all)
-		np.save("dbpedia_scores_0removed.npy",dbpedia_scores_all)
-	title="Proximity Distribution"
-	plt.figure(1)
-	# plt.hist(tfcg_scores_all,histtype='step',label='TFCG')
-	# plt.hist(ffcg_scores_all,histtype='step',label='FFCG')
-	# plt.hist(dbpedia_scores_all,histtype='step',label='DBPedia')
-	# plt.xlabel("Proximity Scores")
-	# plt.ylabel("Density")
-	# plt.legend(loc="upper right")
-	# plt.savefig(title.replace(" ","_")+".png")
-	# plt.close()
-	# plt.clf()
-	sns.set_style("white")
-	sns.set_style("ticks")
-	ax = sns.kdeplot(pd.Series(tfcg_scores_all,name="TFCG"))
-	ax = sns.kdeplot(pd.Series(ffcg_scores_all,name="FFCG"))
-	ax = sns.kdeplot(pd.Series(dbpedia_scores_all,name="DBPedia"))
-	plt.xlabel("Proximity Scores")
-	plt.title("FRED Network "+title_text)
-	plt.ylabel("Density")
-	plt.savefig(title.replace(" ","_")+title_text+".png")
-	plt.close()
-	plt.clf()
 
 def read_corr_fromfile_bulk():
 	start=0
@@ -845,5 +669,38 @@ def plot_TFCGvsFFCG():
 	# plt.close()
 	# plt.clf()
 	# plt.show()
+
+
+def plot_corr():
+	title="Correlations Decreasing DBPedia Proximity"
+	correlations_roll_dbpedia_tfcg=pd.read_csv("/gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph/Experiment1/Correlations/correlations_roll_dbpedia_tfcg.csv")
+	correlations_roll_dbpedia_ffcg=pd.read_csv("/gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph/Experiment1/Correlations/correlations_roll_dbpedia_ffcg.csv")
+	correlations_roll_tfcg_ffcg=pd.read_csv("/gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph/Experiment1/Correlations/correlations_roll_tfcg_ffcg.csv")
+	fig, (ax1, ax2) = plt.subplots(ncols=2, sharey=True)
+	fig.set_size_inches(9,4)
+	ax1.set_xscale("log")
+	ax1.set_title("FRED")
+	ax1.plot(correlations_roll_dbpedia_tfcg['index'],correlations_roll_dbpedia_tfcg['kendalltau'],label="DBPedia - TFCG")
+	ax1.plot(correlations_roll_dbpedia_ffcg['index'],correlations_roll_dbpedia_ffcg['kendalltau'],label="DBPedia - FFCG")
+	ax1.set_xlabel("Number of pairs")
+	ax1.set_ylabel("Correlation")
+	ax1.legend(loc="upper right")
+	# plt.savefig(title.replace(" ","_")+".png")
+	correlations_roll_dbpedia_tfcg=pd.read_csv("/gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph/Experiment2/Correlations/correlations_co_roll_dbpedia_tfcg.csv")
+	correlations_roll_dbpedia_ffcg=pd.read_csv("/gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph/Experiment2/Correlations/correlations_co_roll_dbpedia_ffcg.csv")
+	correlations_roll_tfcg_ffcg=pd.read_csv("/gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph/Experiment2/Correlations/correlations_co_roll_tfcg_ffcg.csv")
+	ax2.set_xscale("log")
+	ax2.set_title("Co-occur")
+	ax2.plot(correlations_roll_dbpedia_tfcg['index'],correlations_roll_dbpedia_tfcg['kendalltau'],label="DBPedia - TFCG")
+	ax2.plot(correlations_roll_dbpedia_ffcg['index'],correlations_roll_dbpedia_ffcg['kendalltau'],label="DBPedia - FFCG")
+	ax2.set_xlabel("Number of pairs")
+	ax2.legend(loc="upper right")
+	plt.tight_layout()
+	plt.savefig(title.replace(" ","_")+".png")
+	plt.close()
+	plt.clf()
+	# plt.show()
+	plt.close()
+	plt.clf()
 
 # create_fred_network(init)
