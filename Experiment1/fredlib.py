@@ -636,7 +636,7 @@ def fredParse(data,claim_type,init):
         f.write(json.dumps(FCG_filterdata,ensure_ascii=False))
     nx.write_edgelist(FCG,os.path.join(FCG_label,FCG_label+".edgelist"))
 
-def create_fred_network(init):
+def create_fred_network(fcg_type,init):
     data=pd.read_csv("/gpfs/home/z/k/zkachwal/Carbonate/RDF Files/claimreviews_db2.csv",index_col=0)
     ##Dropping non-str rows
     filter=list(map(lambda x:type(x)!=str,data['rating_name']))
@@ -646,11 +646,12 @@ def create_fred_network(init):
     falseregex=re.compile(r'(?i)^false|^mostly false|^pants on fire$|^four pinocchios$|^no\ |^no:|^distorts the facts|^wrong$')
     trueind=data['rating_name'].apply(lambda x:trueregex.match(x)!=None)
     trueclaims=data.loc[trueind]
-    # set_trace()
     falseind=data['rating_name'].apply(lambda x:falseregex.match(x)!=None)
     falseclaims=data.loc[falseind]
-    fredParse(trueclaims,"True",init)
-    fredParse(falseclaims,"False",init)
+    if fcg_type.lower()=="true":
+    	fredParse(trueclaims,"True",init)
+    elif fcg_type.lower()=="false":
+    	fredParse(falseclaims,"False",init)
 
 def openFredGraph(filename):
     rdf = rdflib.Graph()

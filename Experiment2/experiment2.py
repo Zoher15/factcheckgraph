@@ -769,6 +769,91 @@ def calculate_stats():
 			np.save(os.path.join(mode,mode+"_pathlen.npy"),pathlen)
 			np.save(os.path.join(mode,mode+"_pathlengths.npy"),pathlengths[mode])
 
+def TFCGvsFFCG():
+	#We load all uris as we need to assign each a unique int ID to work with knowledge linkers
+	TFCG_uris_all=np.load(os.path.join("TFCG","TFCG"+"_uris.npy"))
+	FFCG_uris_all=np.load(os.path.join("FFCG","FFCG"+"_uris.npy"))
+	#loading DBPedia FCG Uris as they are our focus
+	TFCG_uris=np.load(os.path.join("TFCG","TFCG"+"_dbpedia_uris.npy"))
+	FFCG_uris=np.load(os.path.join("FFCG","FFCG"+"_dbpedia_uris.npy"))
+	FCG_uris=np.load(os.path.join("FCG","FCG"+"_dbpedia_uris.npy"))
+	#Creating dictionaries to assign unique ids to each uri for knowledge linker to process
+	TFCG_uris_dict={key:i for i,key in enumerate(TFCG_uris_all)}
+	FFCG_uris_dict={key:i for i,key in enumerate(FFCG_uris_all)}
+	#Saving the uri to ID dictionaries
+	for dict_type in ["TFCG","FFCG"]:
+		with codecs.open("{}/{}_uris_dict.json".format(dict_type,dict_type),"w","utf-8") as f:
+			f.write(json.dumps(eval("{}_uris_dict".format(dict_type)),ensure_ascii=False))
+	#Loading the uri to ID dictionaries
+	with codecs.open("TFCG/TFCG_uris_dict.json","r","utf-8") as f:
+		TFCG_uris_dict=json.loads(f.read())
+	with codecs.open("FFCG/FFCG_uris_dict.json","r","utf-8") as f:
+		FFCG_uris_dict=json.loads(f.read())
+	with codecs.open("FCG/FCG_uris_dict.json","r","utf-8") as f:
+		FCG_uris_dict=json.loads(f.read())
+	with codecs.open("/gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph Data/DBPedia Data/dbpedia_uris_dict.json","r","utf-8") as f:
+		DBPedia_uris_dict=json.loads(f.read())
+	#Performing intersection betwen TFCG, FFCG and DBPedia
+	intersect_uris=np.asarray(list(set(TFCG_uris).intersection(set(FFCG_uris))))
+	intersect_uris=np.asarray(list(set(intersect_uris).intersection(set(FCG_uris))))
+	intersect_uris=np.asarray(list(set(intersect_uris).intersection(set(DBPedia_uris_dict.keys()))))
+	#Save the intersection set
+	np.save("intersect_dbpedia_uris.npy",list(intersect_uris))
+	#Load the intersection set
+	intersect_uris=np.load("intersect_dbpedia_uris.npy")
+	#Find all possible combinations of these uris
+	intersect_all_pairs=combinations(intersect_uris,2)
+	intersect_all_pairs=np.asarray(list(map(list,intersect_all_pairs)))
+	#These are the pairs that are "true" by our definition: They are connected in dbpedia
+	intersect_true_pairs=np.load("intersect_entity_pairs_dbpedia.npy")
+	#Converting to a set to eliminate duplicate pairs
+	intersect_true_pairs_set=set(list(map(str,list(map(set,intersect_true_pairs)))))
+	#Converting it back. Getting rid of pairs where both uris are duplicates, as well as duplicate of each pair
+	intersect_true_pairs=np.asarray([i for i in list(map(list,list(map(eval,list(intersect_true_pairs_set))))) if len(i)==2])
+	#Finding uris that are only part of true pairs
+	intersect_true_pairs_uris=list(set(intersect_true_pairs.flatten()))
+	#Choosing 2n random pairs, where n is the lenght of the total true_pairs 
+	random_pairs=np.random.choice(range(len(intersect_all_pairs)),size=len(intersect_true_pairs)*2,replace=False)
+	intersect_false_pairs=[]
+	rejected_pairs=[]
+	#Rejecting pairs from random pairs that are already present in true pairs
+	counter=0
+	for i in random_pairs:
+		if counter<len(intersect_true_pairs):
+			if str(set(intersect_all_pairs[i])) in intersect_true_pairs_set or str(set(list(reversed(intersect_all_pairs[i])))) in intersect_true_pairs_set:#eliminating random triple if it exists in the intersect set (converted individiual triples to str to make a set)
+				rejected_pairs.append(intersect_all_pairs[i])
+			else:
+				counter+=1
+				intersect_false_pairs.append(intersect_all_pairs[i])
+		else:
+			break
+	#Find all possible combinations of uris that only part of the above true pairs
+	intersect_all_pairs2=combinations(intersect_true_pairs_uris,2)
+	intersect_all_pairs2=np.asarray(list(map(list,intersect_all_pairs2)))
+	#Choosing 2n random pairs of the intersect_true_pairs, where n is the lenght of the total true_pairs 
+	random_pairs2=np.random.choice(range(len(intersect_all_pairs2)),size=len(intersect_true_pairs)*2,replace=False)
+	intersect_false_pairs2=[]
+	rejected_pairs2=[]
+	#Rejecting pairs from random pairs that are already present in true pairs
+	counter=0
+	for i in random_pairs2:
+		if counter<len(intersect_true_pairs):
+			if str(set(intersect_all_pairs2[i])) in intersect_true_pairs_set or str(set(list(reversed(intersect_all_pairs2[i])))) in intersect_true_pairs_set:#eliminating random triple if it exists in the intersect set (converted individiual triples to str to make a set)
+				rejected_pairs2.append(intersect_all_pairs2[i])
+			else:
+				counter+=1
+				intersect_false_pairs2.append(intersect_all_pairs2[i])
+		else:
+			break
+	intersect_true_pairs=np.asarray(intersect_true_pairs)
+	intersect_false_pairs=np.asarray(intersect_false_pairs)
+	intersect_false_pairs2=np.asarray(intersect_false_pairs2)
+	np.save("intersect_true_pairs.npy",intersect_true_pairs)
+	np.save("intersect_false_pairs.npy",intersect_false_pairs)
+	np.save("intersect_false_pairs2.npy",intersect_false_pairs2)
+	write_pairs_tofile(intersect_true_pairs,intersect_false_pairs,intersect_false_pairs2,TFCG_uris_dict,FFCG_uris_dict,FCG_uris_dict,DBPedia_uris_dict)
+	# write_pairs_tofile_bulk(intersect_true_pairs,intersect_false_pairs,intersect_false_pairs2,DBPedia_uris_dict)
+
 #This function loads already saved files
 def load_stuff():
 	# uris=np.load("/gpfs/home/z/k/zkachwal/Carbonate/DBPedia Data/dbpedia_uris.npy")
