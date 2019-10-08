@@ -1,5 +1,5 @@
 #PBS -k o
-#PBS -l nodes=1:ppn=12,vmem=128gb,walltime=1:30:00
+#PBS -l nodes=1:ppn=12,vmem=128gb,walltime=2:30:00
 #PBS -M zoher.kachwala@gmail.com
 #PBS -m abe
 #PBS -N IntersectFCG
@@ -8,8 +8,8 @@ source /N/u/zkachwal/Carbonate/miniconda3/etc/profile.d/conda.sh
 conda activate env-kl
 cd /gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph/Experiment1/
 
-# time klinker linkpred FCG/FCG_uris.txt FCG/FCG_edgelist.npy FCG/Intersect_all_pairs_FCG_IDs.txt /gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph\ Data/FCG\ Data/Experiment1/FCG/Intersect_FCG.json -u -n 12 -w logdegree
-time klinker linkpred FCG_co/FCG_co_uris.txt FCG_co/FCG_co_edgelist.npy FCG_co/Intersect_all_pairs_FCG_co_IDs.txt /gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph\ Data/FCG\ Data/Experiment1/FCG_co/Intersect_FCG_co.json -u -n 12 -w logdegree
+time klinker linkpred FCG/FCG_uris.txt FCG/FCG_edgelist.npy FCG/Intersect_all_pairs_FCG_IDs.txt /gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph\ Data/FCG\ Data/Experiment1/FCG/Intersect_FCG.json -u -n 12 -w logdegree
+# time klinker linkpred FCG_co/FCG_co_uris.txt FCG_co/FCG_co_edgelist.npy FCG_co/Intersect_all_pairs_FCG_co_IDs.txt /gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph\ Data/FCG\ Data/Experiment1/FCG_co/Intersect_FCG_co.json -u -n 12 -w logdegree
 
 # # time klinker linkpred TFCG/TFCG_uris.txt TFCG/TFCG_edgelist.npy Intersect_triples_TFCG_IDs.txt TFCG/Intersect_TFCG.json -u -n 12 -w logdegree
 # # time klinker linkpred FFCG/FFCG_uris.txt FFCG/FFCG_edgelist.npy Intersect_triples_FFCG_IDs.txt FFCG/Intersect_FFCG.json -u -n 12 -w logdegree

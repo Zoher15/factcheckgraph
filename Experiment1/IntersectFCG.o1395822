@@ -1,0 +1,18 @@
+
+2019-10-08 11:57:48.798599:
+    metric: ultrametric
+    edges:  undirected
+    weight: logdegree
+    nodes:  FCG/FCG_uris.txt
+    graph:  FCG/FCG_edgelist.npy
+    input:  FCG/Intersect_all_pairs_FCG_IDs.txt
+    output: /gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph Data/FCG Data/Experiment1/FCG/Intersect_FCG.json
+2019-10-08 11:57:48.799231: reading nodes from text file..
+2019-10-08 11:57:48.881190: reading graph from text file..
+2019-10-08 11:57:49.252430: reading input..
+2019-10-08 11:57:50.285376: launching pool of 12 workers.
+2019-10-08 13:44:25.400980: done
+
+real	107m52.204s
+user	1256m37.144s
+sys	0m38.999s
