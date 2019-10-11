@@ -1,9 +1,0 @@
-23927655
-Traceback (most recent call last):
-  File "dbpedia_script.py", line 40, in <module>
-    np.save("Intersect_true_entityPairs_{}.npy".format(),pair_list)
-IndexError: tuple index out of range
-
-real	24m42.613s
-user	23m52.529s
-sys	0m36.576s
