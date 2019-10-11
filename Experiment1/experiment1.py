@@ -8,6 +8,7 @@ from sklearn import metrics
 import codecs
 import csv
 import re
+import time
 from scipy import stats
 from decimal import Decimal
 import networkx as nx 
@@ -164,52 +165,43 @@ def create_cooccurrence_network():
 				falseclaim_edges[f]=list(combinations(falseclaim_uris[f],2))
 				FFCG_co.add_edges_from(falseclaim_edges[f])
 		nx.write_edgelist(FCG_label,os.path.join(FCG_label,FCG_label+".edgelist"),data=False)
+def build_ct(graph_mode):
+	TFCG=nx.read_edgelist("TFCG/TFCG_full.edgelist",comments="@")
+	FFCG=nx.read_edgelist("FFCG/FFCG_full.edgelist",comments="@")
+	FCG=nx.read_edgelist("FCG/FCG_full.edgelist",comments="@")
+	intersect_entities=np.load("Intersect_entities_{}.npy".format(graph_mode))
+	between_TFCG=nx.betweenness_centrality_subset(TFCG, intersect_entities,intersect_entities)
+	between_FFCG=nx.betweenness_centrality_subset(FFCG, intersect_entities,intersect_entities)
+	between_FCG=nx.betweenness_centrality_subset(FCG, intersect_entities,intersect_entities)
+	remove_nodes_TFCG=set([node for node,val in between_TFCG.items() if val<=0 and node not in set(intersect_entities)])
+	remove_nodes_FFCG=set([node for node,val in between_FFCG.items() if val<=0 and node not in set(intersect_entities)])
+	remove_nodes_FCG=set([node for node,val in between_FCG.items() if val<=0 and node not in set(intersect_entities)])
+	TFCG.remove_nodes_from(remove_nodes_TFCG)
+	FFCG.remove_nodes_from(remove_nodes_FFCG)
+	FCG.remove_nodes_from(remove_nodes_FCG)
+	set_trace()
+	nx.write_edgelist(TFCG,"TFCG_ct/TFCG_ct.edgelist",data=True)
+	nx.write_edgelist(FFCG,"FFCG_ct/FFCG_ct.edgelist",data=True)
+	nx.write_edgelist(FCG,"FCG_ct/FCG_ct.edgelist",data=True)
 
 def between_centrality(graph_mode):
 	dbpedia_regex=re.compile(r'http:\/\/dbpedia\.org\/')
 	fcg_modes={"fred":{"t":"TFCG_ct","f":"FFCG_ct","u":"FCG_ct"}}#,"d":"DBPedia"},"co-occur":{"t":"TFCG_co","f":"FFCG_co","d":"DBPedia"}}
-	fcg_label=fcg_modes[graph_mode]
-	#Loading the graphs
-	TFCG_ID=nx.read_weighted_edgelist(os.path.join("TFCG","TFCG_edgelist.txt")) 
-	FFCG_ID=nx.read_weighted_edgelist(os.path.join("FFCG","FFCG_edgelist.txt"))
-	with codecs.open("{}/{}_node2ID_dict.json".format("TFCG","TFCG"),"r","utf-8") as f:
-		TFCG_node2ID_dict=json.loads(f.read())
-	with codecs.open("{}/{}_node2ID_dict.json".format("FFCG","FFCG"),"r","utf-8") as f:
-		FFCG_node2ID_dict=json.loads(f.read())
-	TFCG_ID2node_dict={str(value):key for key,value in TFCG_node2ID_dict.items()}	
-	FFCG_ID2node_dict={str(value):key for key,value in FFCG_node2ID_dict.items()}
-	TFCG=nx.Graph()
-	TFCG.add_edges_from([(TFCG_ID2node_dict[edge[0]],TFCG_ID2node_dict[edge[1]]) for edge in TFCG_ID.edges()])
-	FFCG=nx.Graph()
-	FFCG.add_edges_from([(FFCG_ID2node_dict[edge[0]],FFCG_ID2node_dict[edge[1]]) for edge in FFCG_ID.edges()])
-	FCG=nx.compose(TFCG,FFCG)	
-	# TFCG_entities=[entity for entity in TFCG.nodes() if dbpedia_regex.match(entity)]
-	# FFCG_entities=[entity for entity in FFCG.nodes() if dbpedia_regex.match(entity)]
-	# FCG_entities=[entity for entity in FCG.nodes() if dbpedia_regex.match(entity)]
-	# with codecs.open("/gpfs/home/z/k/zkachwal/Carbonate/FactCheckGraph Data/DBPedia Data/dbpedia_uris_dict.json","r","utf-8") as f:
-	# 	DBPedia_node2ID_dict=json.loads(f.read())
-	# # DBPedia_entities=np.asarray(list(DBPedia_node2ID_dict.keys()))
-	# intersect_entities=np.asarray(list(set(TFCG_entities).intersection(set(FFCG_entities))))
-	# intersect_entities=np.asarray(list(set(intersect_entities).intersection(set(list(DBPedia_node2ID_dict.keys())))))
-	# np.save("Intersect_entities_{}.npy".format(graph_mode),list(intersect_entities))
 	intersect_entities=np.load("Intersect_entities_{}.npy".format(graph_mode))
-	# between_TFCG=nx.betweenness_centrality_subset(TFCG, intersect_entities,intersect_entities)
-	# between_FFCG=nx.betweenness_centrality_subset(FFCG, intersect_entities,intersect_entities)
-	# between_FCG=nx.betweenness_centrality_subset(FCG, intersect_entities,intersect_entities)
-	remove_nodes_TFCG=set([node for node,val in between_TFCG.items() if val<=0])
-	remove_nodes_FFCG=set([node for node,val in between_FFCG.items() if val<=0])
-	remove_nodes_FCG=set([node for node,val in between_FCG.items() if val<=0])
-	TFCG.remove_nodes_from(remove_nodes_TFCG)
-	FFCG.remove_nodes_from(remove_nodes_FFCG)
-	FCG.remove_nodes_from(remove_nodes_FCG)
+	fcg_label=fcg_modes[graph_mode]
+	TFCG_ct=nx.read_edgelist(os.path.join(fcg_label['t'],fcg_label['t']+".edgelist"),comments="@") 
+	FFCG_ct=nx.read_edgelist(os.path.join(fcg_label['f'],fcg_label['f']+".edgelist"),comments="@") 
+	FCG_ct=nx.read_edgelist(os.path.join(fcg_label['u'],fcg_label['u']+".edgelist"),comments="@") 
 	for fcg in fcg_label.values():
+		edgelist=eval(fcg).edges()
+		eval(fcg).add_edges_from([(edge[0],edge[1]) for edge in edgelist])
 		nodes=list(eval(fcg).nodes())
 		np.save(os.path.join(fcg,fcg+"_nodes.npy"),nodes)
 		edges=list(eval(fcg).edges())
 		# np.save(os.path.join(mode,mode+"_edges.npy"),edges)
-		# entities=[entity for entity in nodes if dbpedia_regex.match(entity)]
-		# np.save(os.path.join(fcg,fcg+"_entities.npy"),entities)
-		#Saving the nodes
+		entities=[entity for entity in nodes if dbpedia_regex.match(entity)]
+		np.save(os.path.join(fcg,fcg+"_entities.npy"),entities)
+		# Saving the nodes
 		with codecs.open(os.path.join(fcg,fcg+"_nodes.txt"),"w","utf-8") as f:
 			for node in nodes:
 				f.write(str(node)+"\n")
@@ -221,26 +213,34 @@ def between_centrality(graph_mode):
 		edgelistID=np.asarray([[node2ID_dict[edge[0]],node2ID_dict[edge[1]],1] for edge in edges])
 		np.save(os.path.join(fcg,fcg+"_edgelistID.npy"),edgelistID)
 	intersect_true_entityPairs=np.load("Intersect_true_entityPairs_{}.npy".format(graph_mode))
-	intersect_false_entityPairs=np.load("Intersect_false_entityPairs_{}.npy".format(graph_mode))
 	# Finding all pairs
 	intersect_all_entityPairs=combinations(intersect_entities,2)
-	intersect_all_entityPairs=np.asarray(list(map(list,intersect_all_pairs)))
+	#converting the tuples to list
+	intersect_all_entityPairs=np.asarray(list(map(list,intersect_all_entityPairs)))
+	#converting the true entity pairs to string set
+	intersect_true_str=set(map(str,list(map(tuple,intersect_true_entityPairs))))
+	# #creating the false entity pairs array
+	intersect_false_entityPairs=np.asarray([tuple([index,pair]) for index,pair in enumerate(intersect_all_entityPairs) if (str(tuple(pair)) not in intersect_true_str) and (str(tuple(pair[::-1])) not in intersect_true_str)])
+	np.save("Intersect_false_entityPairs_{}.npy".format(graph_mode),intersect_false_entityPairs)
+	set_trace()
+	intersect_true_entityPairs_klformat=np.asarray([[np.nan,i[0],np.nan,np.nan,i[1],np.nan,np.nan] for i in intersect_true_entityPairs])
+	# intersect_false_entityPairs_klformat=np.asarray([[np.nan,i[0],np.nan,np.nan,i[1],np.nan,np.nan] for i in intersect_false_entityPairs])
 	intersect_all_entityPairs_klformat=np.asarray([[np.nan,i[0],np.nan,np.nan,i[1],np.nan,np.nan] for i in intersect_all_entityPairs])
 	with codecs.open("{}/{}_node2ID_dict.json".format(fcg_label['t'],fcg_label['t']),"r","utf-8") as f:
-		TFCG_node2ID_dict=json.loads(f.read())
+		TFCG_ct_node2ID_dict=json.loads(f.read())
 	with codecs.open("{}/{}_node2ID_dict.json".format(fcg_label['f'],fcg_label['f']),"r","utf-8") as f:
-		FFCG_node2ID_dict=json.loads(f.read())
+		FFCG_ct_node2ID_dict=json.loads(f.read())
 	with codecs.open("{}/{}_node2ID_dict.json".format(fcg_label['u'],fcg_label['u']),"r","utf-8") as f:
-		FCG_node2ID_dict=json.loads(f.read())
-	for fcg in ["TFCG_ct","FFCG_ct","FCG_ct"]:
+		FCG_ct_node2ID_dict=json.loads(f.read())
+	for fcg in fcg_label.values():
 		with codecs.open(os.path.join(fcg,'Intersect_true_entityPairs_'+fcg+'_IDs_klformat.txt'),"w","utf-8") as f:
 		# Writing true pairs to file using TFCG,FFCG and DBPedia entity IDs
 			for line in intersect_true_entityPairs_klformat:
 				f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(eval(fcg+"_node2ID_dict")[line[1]])),str(line[2]),str(line[3]),str(int(eval(fcg+"_node2ID_dict")[line[4]])),str(line[5]),str(line[6])))
 		# Writing false pairs to file using TFCG,FFCG and DBPedia entity IDs
-		with codecs.open(os.path.join(fcg,'Intersect_false_entityPairs_'+fcg+'_IDs_klformat.txt'),"w","utf-8") as f:
-			for line in intersect_false_entityPairs_klformat:
-				f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(eval(fcg+"_node2ID_dict")[line[1]])),str(line[2]),str(line[3]),str(int(eval(fcg+"_node2ID_dict")[line[4]])),str(line[5]),str(line[6])))
+		# with codecs.open(os.path.join(fcg,'Intersect_false_entityPairs_'+fcg+'_IDs_klformat.txt'),"w","utf-8") as f:
+		# 	for line in intersect_false_entityPairs_klformat:
+		# 		f.write("{} {} {} {} {} {} {}\n".format(str(line[0]),str(int(eval(fcg+"_node2ID_dict")[line[1]])),str(line[2]),str(line[3]),str(int(eval(fcg+"_node2ID_dict")[line[4]])),str(line[5]),str(line[6])))
 		# Writing all pairs to file using TFCG,FFCG and DBPedia entity IDs
 		with codecs.open(os.path.join(fcg,'Intersect_all_entityPairs_'+fcg+'_IDs_klformat.txt'),"w","utf-8") as f:
 			for line in intersect_all_entityPairs_klformat:
@@ -293,7 +293,6 @@ def TFCGvsFFCG(graph_mode):
 	intersect_entities=np.asarray(list(set(intersect_entities).intersection(set(DBPedia_entities))))
 	np.save("Intersect_entities_{}.npy".format(graph_mode),list(intersect_entities))
 	intersect_true_entityPairs=np.load("Intersect_true_entityPairs_{}.npy".format(graph_mode))
-	intersect_false_entityPairs=np.load("Intersect_false_entityPairs_{}.npy".format(graph_mode))
 	# Finding all pairs
 	intersect_all_entityPairs=combinations(intersect_entities,2)
 	intersect_all_entityPairs=np.asarray(list(map(list,intersect_all_pairs)))
