@@ -187,6 +187,7 @@ http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Topic http://www.ontol
 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Topic http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Derision {'label': 'http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#hasQuality'}
 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Topic http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Madigan {'label': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type'}
 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Topic http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Marwig {'label': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type'}
+http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Topic http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Suggest {'label': 'http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#hasQuality'}
 http://www.ontologydesignpatterns.org/ont/vn/data/Cut_21010100 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#justice_department_1 {'label': 'http://www.ontologydesignpatterns.org/ont/vn/abox/role/Source'}
 http://www.ontologydesignpatterns.org/ont/vn/data/Cut_21010100 http://dbpedia.org/resource/Donald_Trump {'label': 'http://www.ontologydesignpatterns.org/ont/vn/abox/role/Agent'}
 http://www.ontologydesignpatterns.org/ont/vn/data/Cut_21010100 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Benefit {'label': 'http://www.ontologydesignpatterns.org/ont/vn/abox/role/Patient'}
@@ -678,6 +679,11 @@ http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Situation http://www.o
 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Situation http://www.ontologydesignpatterns.org/ont/vn/data/Lower_9040000 {'label': 'http://www.ontologydesignpatterns.org/ont/boxer/boxing.owl#involves'}
 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Situation http://www.ontologydesignpatterns.org/ont/vn/data/Get_13051100 {'label': 'http://www.ontologydesignpatterns.org/ont/boxer/boxing.owl#involves'}
 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Situation http://www.ontologydesignpatterns.org/ont/fred/domain.owl#High {'label': 'http://www.ontologydesignpatterns.org/ont/boxer/boxing.owl#involves'}
+http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Situation http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Drought {'label': 'http://www.ontologydesignpatterns.org/ont/boxer/boxing.owl#involves'}
+http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Situation http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Plenty {'label': 'http://www.ontologydesignpatterns.org/ont/boxer/boxing.owl#involves'}
+http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Situation http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Water {'label': 'http://www.ontologydesignpatterns.org/ont/boxer/boxing.owl#involves'}
+http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Situation http://www.ontologydesignpatterns.org/ont/vn/data/Promise_37130000 {'label': 'http://www.ontologydesignpatterns.org/ont/boxer/boxing.owl#involves'}
+http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Situation http://www.ontologydesignpatterns.org/ont/vn/data/Start_55010100 {'label': 'http://www.ontologydesignpatterns.org/ont/boxer/boxing.owl#involves'}
 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#elect_1 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#outsider_1 {'label': 'http://www.ontologydesignpatterns.org/ont/vn/abox/role/Theme'}
 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#elect_1 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#EventuallyElect {'label': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type'}
 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#elect_1 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Eventually {'label': 'http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#hasQuality'}
@@ -787,6 +793,7 @@ http://www.ontologydesignpatterns.org/ont/vn/data/Say_37070100 http://dbpedia.or
 http://www.ontologydesignpatterns.org/ont/vn/data/Say_37070100 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Not {'label': 'http://www.ontologydesignpatterns.org/ont/vn/abox/role/Topic'}
 http://www.ontologydesignpatterns.org/ont/vn/data/Say_37070100 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#syrian_refugees_1 {'label': 'http://www.ontologydesignpatterns.org/ont/vn/abox/role/Agent'}
 http://www.ontologydesignpatterns.org/ont/vn/data/Say_37070100 http://dbpedia.org/resource/United_States {'label': 'http://www.ontologydesignpatterns.org/ont/vn/abox/role/Agent'}
+http://www.ontologydesignpatterns.org/ont/vn/data/Say_37070100 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Accidentally {'label': 'http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#hasQuality'}
 http://www.ontologydesignpatterns.org/ont/vn/data/Buy_13051000 http://www.ontologydesignpatterns.org/ont/vn/data/Surprise_31010000 {'label': 'http://www.ontologydesignpatterns.org/ont/fred/domain.owl#entails'}
 http://www.ontologydesignpatterns.org/ont/vn/data/Buy_13051000 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#insurance_2 {'label': 'http://www.ontologydesignpatterns.org/ont/vn/abox/role/Theme'}
 http://www.ontologydesignpatterns.org/ont/vn/data/Buy_13051000 http://dbpedia.org/resource/President_of_the_United_States {'label': 'http://www.ontologydesignpatterns.org/ont/vn/abox/role/Agent'}
@@ -850,7 +857,7 @@ http://www.w3.org/2002/07/owl#Thing http://www.ontologydesignpatterns.org/ont/vn
 http://www.w3.org/2002/07/owl#Thing http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Death {'label': 'http://www.ontologydesignpatterns.org/ont/fred/domain.owl#deathOf'}
 http://www.w3.org/2002/07/owl#Thing http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Afford {'label': 'http://www.ontologydesignpatterns.org/ont/boxer/boxer.owl#agent'}
 http://www.w3.org/2002/07/owl#Thing http://dbpedia.org/resource/Hillary_Clinton {'label': 'http://www.ontologydesignpatterns.org/ont/fred/domain.owl#about'}
-http://www.w3.org/2002/07/owl#Thing http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Do {'label': 'http://www.ontologydesignpatterns.org/ont/boxer/boxer.owl#patient'}
+http://www.w3.org/2002/07/owl#Thing http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Do {'label': 'http://www.ontologydesignpatterns.org/ont/boxer/boxer.owl#agent'}
 http://www.w3.org/2002/07/owl#Thing http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Country {'label': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type'}
 http://www.w3.org/2002/07/owl#Thing http://www.ontologydesignpatterns.org/ont/vn/data/Murder_42010000 {'label': 'http://www.ontologydesignpatterns.org/ont/vn/abox/role/Agent'}
 http://www.w3.org/2002/07/owl#Thing http://dbpedia.org/resource/Joe_Biden {'label': 'http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#hasQuality'}
@@ -993,6 +1000,7 @@ http://www.ontologydesignpatterns.org/ont/boxer/boxing.owl#Necessary http://www.
 http://www.ontologydesignpatterns.org/ont/boxer/boxing.owl#Necessary http://www.ontologydesignpatterns.org/ont/vn/data/Go_47070000 {'label': 'http://www.ontologydesignpatterns.org/ont/boxer/boxing.owl#hasModality'}
 http://www.ontologydesignpatterns.org/ont/boxer/boxing.owl#Necessary http://www.ontologydesignpatterns.org/ont/vn/data/Resign_10110000 {'label': 'http://www.ontologydesignpatterns.org/ont/boxer/boxing.owl#hasModality'}
 http://www.ontologydesignpatterns.org/ont/boxer/boxing.owl#Necessary http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Not {'label': 'http://www.ontologydesignpatterns.org/ont/boxer/boxing.owl#hasModality'}
+http://www.ontologydesignpatterns.org/ont/boxer/boxing.owl#Necessary http://www.ontologydesignpatterns.org/ont/vn/data/Experience_30020000 {'label': 'http://www.ontologydesignpatterns.org/ont/boxer/boxing.owl#hasModality'}
 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#DemocraticNomination http://www.ontologydesignpatterns.org/ont/fred/domain.owl#nomination_1 {'label': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type'}
 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#DemocraticNomination http://dbpedia.org/resource/Democratic_Party_(United_States) {'label': 'http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#hasQuality'}
 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#DemocraticNomination http://dbpedia.org/resource/Democratic_Party_presidential_primaries,_2016 {'label': 'http://www.w3.org/2000/01/rdf-schema#subClassOf'}
@@ -1246,6 +1254,9 @@ http://www.ontologydesignpatterns.org/ont/vn/data/Give_13010100 http://www.ontol
 http://www.ontologydesignpatterns.org/ont/vn/data/Give_13010100 http://dbpedia.org/resource/Bob_Corker {'label': 'http://www.ontologydesignpatterns.org/ont/vn/abox/role/Agent'}
 http://www.ontologydesignpatterns.org/ont/vn/data/Give_13010100 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Over {'label': 'http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#hasQuality'}
 http://www.ontologydesignpatterns.org/ont/vn/data/Give_13010100 http://dbpedia.org/resource/United_States_Border_Patrol {'label': 'http://www.ontologydesignpatterns.org/ont/vn/abox/role/Recipient'}
+http://www.ontologydesignpatterns.org/ont/vn/data/Give_13010100 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Do {'label': 'http://www.ontologydesignpatterns.org/ont/boxer/boxer.owl#theme'}
+http://www.ontologydesignpatterns.org/ont/vn/data/Give_13010100 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#nazi_salute_1 {'label': 'http://www.ontologydesignpatterns.org/ont/vn/abox/role/Theme'}
+http://www.ontologydesignpatterns.org/ont/vn/data/Give_13010100 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#David_hogg {'label': 'http://www.ontologydesignpatterns.org/ont/vn/abox/role/Agent'}
 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#residency_1 http://dbpedia.org/resource/Permanent_residence_(United_States) {'label': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type'}
 http://dbpedia.org/resource/Arabic http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Arabic {'label': 'http://www.w3.org/2002/07/owl#sameAs'}
 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Even http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Hillary_%5B_clinton_%5D {'label': 'http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#hasQuality'}
@@ -1391,6 +1402,7 @@ http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Up http://www.ontology
 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Up http://www.ontologydesignpatterns.org/ont/vn/data/Pick_13051000 {'label': 'http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#hasQuality'}
 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Up http://www.ontologydesignpatterns.org/ont/fred/domain.owl#DemandUp {'label': 'http://www.w3.org/2000/01/rdf-schema#subClassOf'}
 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Up http://www.ontologydesignpatterns.org/ont/fred/domain.owl#unemployment_1 {'label': 'http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#hasQuality'}
+http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Up http://www.ontologydesignpatterns.org/ont/vn/data/Open_55050100 {'label': 'http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#hasQuality'}
 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Female http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Constituent {'label': 'http://www.ontologydesignpatterns.org/ont/fred/domain.owl#constituentOf'}
 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Female http://www.ontologydesignpatterns.org/ont/vn/data/Sit_50000000 {'label': 'http://www.ontologydesignpatterns.org/ont/vn/abox/role/Agent'}
 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Female http://dbpedia.org/resource/Elizabeth_Warren {'label': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type'}
@@ -1592,6 +1604,7 @@ http://www.ontologydesignpatterns.org/ont/vn/data/Have_39040100 http://dbpedia.o
 http://www.ontologydesignpatterns.org/ont/vn/data/Have_39040100 8000000000 {'label': 'http://www.ontologydesignpatterns.org/ont/vn/abox/role/Patient'}
 http://www.ontologydesignpatterns.org/ont/vn/data/Have_39040100 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Treaty {'label': 'http://www.ontologydesignpatterns.org/ont/vn/abox/role/Patient'}
 http://www.ontologydesignpatterns.org/ont/vn/data/Have_39040100 http://dbpedia.org/resource/United_States {'label': 'http://www.ontologydesignpatterns.org/ont/vn/abox/role/Agent'}
+http://www.ontologydesignpatterns.org/ont/vn/data/Have_39040100 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Plenty {'label': 'http://www.ontologydesignpatterns.org/ont/vn/abox/role/Patient'}
 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#JustPour http://www.ontologydesignpatterns.org/ont/vn/data/Pour_43040000 {'label': 'http://www.w3.org/2000/01/rdf-schema#subClassOf'}
 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#In http://www.ontologydesignpatterns.org/ont/vn/data/Pour_43040000 {'label': 'http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#hasQuality'}
 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#In http://www.ontologydesignpatterns.org/ont/fred/domain.owl#ThingIn {'label': 'http://www.w3.org/2000/01/rdf-schema#subClassOf'}
@@ -1604,6 +1617,8 @@ http://dbpedia.org/resource/Hillary_Clinton http://www.ontologydesignpatterns.or
 http://dbpedia.org/resource/Hillary_Clinton http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Champion {'label': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type'}
 http://dbpedia.org/resource/Hillary_Clinton http://www.ontologydesignpatterns.org/ont/fred/domain.owl#agreement_1 {'label': 'http://www.ontologydesignpatterns.org/ont/fred/domain.owl#championOf'}
 http://dbpedia.org/resource/Hillary_Clinton http://www.ontologydesignpatterns.org/ont/vn/data/Change_13060100 {'label': 'http://www.ontologydesignpatterns.org/ont/vn/abox/role/Agent'}
+http://dbpedia.org/resource/Hillary_Clinton http://www.ontologydesignpatterns.org/ont/fred/domain.owl#tell_1 {'label': 'http://www.ontologydesignpatterns.org/ont/vn/abox/role/Agent'}
+http://dbpedia.org/resource/Hillary_Clinton http://www.ontologydesignpatterns.org/ont/vn/data/Raise_9040000 {'label': 'http://www.ontologydesignpatterns.org/ont/vn/abox/role/Agent'}
 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Do http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Actually {'label': 'http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#hasQuality'}
 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Do http://www.ontologydesignpatterns.org/ont/fred/domain.owl#rate_2 {'label': 'http://www.ontologydesignpatterns.org/ont/fred/domain.owl#smallerThan'}
 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Do http://www.ontologydesignpatterns.org/ont/fred/domain.owl#time_1 {'label': 'http://www.ontologydesignpatterns.org/ont/boxer/boxer.owl#patient'}
@@ -1633,6 +1648,8 @@ http://www.ontologydesignpatterns.org/ont/vn/data/Want_32010110 http://dbpedia.o
 http://www.ontologydesignpatterns.org/ont/vn/data/Want_32010110 http://www.ontologydesignpatterns.org/ont/vn/data/Hear_84000110 {'label': 'http://www.ontologydesignpatterns.org/ont/vn/abox/role/Theme'}
 http://www.ontologydesignpatterns.org/ont/vn/data/Want_32010110 http://www.ontologydesignpatterns.org/ont/vn/data/Expand_45040000 {'label': 'http://www.ontologydesignpatterns.org/ont/vn/abox/role/Theme'}
 http://www.ontologydesignpatterns.org/ont/vn/data/Want_32010110 http://dbpedia.org/resource/Tim_Kaine {'label': 'http://www.ontologydesignpatterns.org/ont/vn/abox/role/Experiencer'}
+http://www.ontologydesignpatterns.org/ont/vn/data/Want_32010110 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#tell_1 {'label': 'http://www.ontologydesignpatterns.org/ont/vn/abox/role/Topic'}
+http://www.ontologydesignpatterns.org/ont/vn/data/Want_32010110 http://www.ontologydesignpatterns.org/ont/vn/data/Raise_9040000 {'label': 'http://www.ontologydesignpatterns.org/ont/vn/abox/role/Theme'}
 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#World http://www.ontologydesignpatterns.org/ont/vn/data/Tax_54050000 {'label': 'http://www.ontologydesignpatterns.org/ont/fred/domain.owl#in'}
 http://www.ontologydesignpatterns.org/ont/vn/data/Tax_54050000 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#nation_1 {'label': 'http://www.ontologydesignpatterns.org/ont/vn/abox/role/Recipient'}
 100000000 http://dbpedia.org/resource/Bill_Clinton {'label': 'http://www.ontologydesignpatterns.org/ont/fred/domain.owl#inExcessOf'}
@@ -1801,7 +1818,11 @@ http://www.ontologydesignpatterns.org/ont/fred/domain.owl#There http://www.ontol
 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#There http://www.ontologydesignpatterns.org/ont/vn/data/Provide_13041200 {'label': 'http://www.ontologydesignpatterns.org/ont/vn/abox/role/Agent'}
 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#There http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Not {'label': 'http://www.ontologydesignpatterns.org/ont/boxer/boxer.owl#agent'}
 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#There http://dbpedia.org/resource/National_Day_of_Prayer {'label': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type'}
+http://www.ontologydesignpatterns.org/ont/fred/domain.owl#There http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Drought {'label': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type'}
+http://www.ontologydesignpatterns.org/ont/fred/domain.owl#There http://dbpedia.org/resource/Drought_in_California {'label': 'http://www.ontologydesignpatterns.org/ont/fred/domain.owl#locatedIn'}
 http://www.ontologydesignpatterns.org/ont/vn/data/Confirm_29050200 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#JustConfirm {'label': 'http://www.w3.org/2000/01/rdf-schema#subClassOf'}
+http://www.ontologydesignpatterns.org/ont/vn/data/Confirm_29050200 http://dbpedia.org/resource/NASA {'label': 'http://www.ontologydesignpatterns.org/ont/vn/abox/role/Agent'}
+http://www.ontologydesignpatterns.org/ont/vn/data/Confirm_29050200 http://www.ontologydesignpatterns.org/ont/vn/data/Experience_30020000 {'label': 'http://www.ontologydesignpatterns.org/ont/vn/abox/role/Theme'}
 60 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#quantity_1 {'label': 'http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#hasDataValue'}
 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#State http://www.ontologydesignpatterns.org/ont/fred/domain.owl#U.s. {'label': 'http://www.ontologydesignpatterns.org/ont/fred/domain.owl#locatedIn'}
 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#State http://www.ontologydesignpatterns.org/ont/vn/data/Require_60000100 {'label': 'http://www.ontologydesignpatterns.org/ont/vn/abox/role/Agent'}
@@ -1810,6 +1831,9 @@ http://www.ontologydesignpatterns.org/ont/fred/domain.owl#State http://www.ontol
 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#State http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Legalize {'label': 'http://www.ontologydesignpatterns.org/ont/boxer/boxer.owl#agent'}
 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#State http://www.ontologydesignpatterns.org/ont/vn/data/Pass_17010100 {'label': 'http://www.ontologydesignpatterns.org/ont/vn/abox/role/Theme'}
 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#State http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Maine_virginia_florida_missouri {'label': 'http://www.ontologydesignpatterns.org/ont/fred/domain.owl#like'}
+http://www.ontologydesignpatterns.org/ont/fred/domain.owl#State http://www.ontologydesignpatterns.org/ont/vn/data/Open_55050100 {'label': 'http://www.ontologydesignpatterns.org/ont/vn/abox/role/Agent'}
+http://www.ontologydesignpatterns.org/ont/fred/domain.owl#State http://www.ontologydesignpatterns.org/ont/vn/data/Promise_37130000 {'label': 'http://www.ontologydesignpatterns.org/ont/vn/abox/role/Agent'}
+http://www.ontologydesignpatterns.org/ont/fred/domain.owl#State http://www.ontologydesignpatterns.org/ont/vn/data/Start_55010100 {'label': 'http://www.ontologydesignpatterns.org/ont/vn/abox/role/Agent'}
 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Criticism http://dbpedia.org/resource/Criminalization {'label': 'http://www.ontologydesignpatterns.org/ont/boxer/boxer.owl#patient'}
 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#U.s. http://www.ontologydesignpatterns.org/ont/fred/domain.owl#spending_1 {'label': 'http://www.ontologydesignpatterns.org/ont/fred/domain.owl#entireRecordedSpendingOf'}
 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#U.s. http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Stuff {'label': 'http://www.ontologydesignpatterns.org/ont/fred/domain.owl#hereIn'}
@@ -1969,6 +1993,7 @@ http://www.ontologydesignpatterns.org/ont/vn/data/Raise_9040000 http://dbpedia.o
 http://www.ontologydesignpatterns.org/ont/vn/data/Raise_9040000 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Era {'label': 'http://www.ontologydesignpatterns.org/ont/vn/abox/role/Location'}
 http://www.ontologydesignpatterns.org/ont/vn/data/Raise_9040000 800000000 {'label': 'http://www.ontologydesignpatterns.org/ont/vn/abox/role/Agent'}
 http://www.ontologydesignpatterns.org/ont/vn/data/Raise_9040000 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Tax {'label': 'http://www.ontologydesignpatterns.org/ont/vn/abox/role/Theme'}
+http://www.ontologydesignpatterns.org/ont/vn/data/Raise_9040000 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#class_1 {'label': 'http://www.ontologydesignpatterns.org/ont/vn/abox/role/Location'}
 http://dbpedia.org/resource/Social_Security_(United_States) http://www.ontologydesignpatterns.org/ont/fred/domain.owl#social_security_1 {'label': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type'}
 http://dbpedia.org/resource/Social_Security_(United_States) http://www.ontologydesignpatterns.org/ont/vn/data/Break_45010000 {'label': 'http://www.ontologydesignpatterns.org/ont/vn/abox/role/Agent'}
 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#age_1 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#social_security_1 {'label': 'http://www.ontologydesignpatterns.org/ont/fred/domain.owl#for'}
@@ -1988,6 +2013,7 @@ http://www.ontologydesignpatterns.org/ont/fred/domain.owl#declare_1 http://www.o
 http://dbpedia.org/resource/California http://www.ontologydesignpatterns.org/ont/fred/domain.owl#SeparateNation {'label': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type'}
 http://dbpedia.org/resource/California http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Nation {'label': 'http://www.w3.org/2002/07/owl#sameAs'}
 http://dbpedia.org/resource/California http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Seventy {'label': 'http://www.ontologydesignpatterns.org/ont/fred/domain.owl#locatedIn'}
+http://dbpedia.org/resource/California http://dbpedia.org/resource/Drought_in_California {'label': 'http://www.w3.org/2002/07/owl#sameAs'}
 http://www.ontologydesignpatterns.org/ont/vn/data/Serve_29060200 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Leader {'label': 'http://www.ontologydesignpatterns.org/ont/vn/abox/role/Agent'}
 http://www.ontologydesignpatterns.org/ont/vn/data/Serve_29060200 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#council_1 {'label': 'http://www.ontologydesignpatterns.org/ont/vn/abox/role/Predicate'}
 http://www.ontologydesignpatterns.org/ont/vn/data/Serve_29060200 http://www.ontologydesignpatterns.org/ont/vn/data/Vote_13030000 {'label': 'http://www.ontologydesignpatterns.org/ont/fred/domain.owl#while'}
@@ -2448,6 +2474,9 @@ http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Day http://dbpedia.org
 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Day http://www.ontologydesignpatterns.org/ont/vn/data/Pledge_55010000 {'label': 'http://www.ontologydesignpatterns.org/ont/fred/domain.owl#in'}
 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Day http://www.ontologydesignpatterns.org/ont/fred/domain.owl#VacationDay {'label': 'http://www.w3.org/2000/01/rdf-schema#subClassOf'}
 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Day http://www.ontologydesignpatterns.org/ont/fred/domain.owl#StraightDay {'label': 'http://www.w3.org/2000/01/rdf-schema#subClassOf'}
+http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Day 15 {'label': 'http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#hasDataValue'}
+http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Day http://dbpedia.org/resource/Days_of_Darkness_(2007_Canadian_film) {'label': 'http://www.ontologydesignpatterns.org/ont/fred/domain.owl#dayOf'}
+http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Day http://www.ontologydesignpatterns.org/ont/vn/data/Experience_30020000 {'label': 'http://www.ontologydesignpatterns.org/ont/vn/abox/role/Stimulus'}
 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Child http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Thousand {'label': 'http://www.ontologydesignpatterns.org/ont/fred/domain.owl#thousandOf'}
 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Child http://www.ontologydesignpatterns.org/ont/vn/data/Rush_51032000 {'label': 'http://www.ontologydesignpatterns.org/ont/vn/abox/role/Theme'}
 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Child http://www.ontologydesignpatterns.org/ont/fred/domain.owl#MigrantChild {'label': 'http://www.w3.org/2000/01/rdf-schema#subClassOf'}
@@ -3004,6 +3033,7 @@ http://dbpedia.org/resource/Tammy_Baldwin http://www.ontologydesignpatterns.org/
 http://dbpedia.org/resource/Whistleblower http://www.ontologydesignpatterns.org/ont/vn/data/Tell_37011110 {'label': 'http://www.ontologydesignpatterns.org/ont/vn/abox/role/Agent'}
 http://www.ontologydesignpatterns.org/ont/vn/data/Tell_37011110 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Believe {'label': 'http://www.ontologydesignpatterns.org/ont/vn/abox/role/Topic'}
 http://www.ontologydesignpatterns.org/ont/vn/data/Tell_37011110 http://dbpedia.org/resource/Federal_Bureau_of_Investigation {'label': 'http://www.ontologydesignpatterns.org/ont/vn/abox/role/Topic'}
+http://www.ontologydesignpatterns.org/ont/vn/data/Tell_37011110 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#AccidentallyTell {'label': 'http://www.w3.org/2000/01/rdf-schema#subClassOf'}
 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#DeadlyMistake http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Mistake {'label': 'http://www.w3.org/2000/01/rdf-schema#subClassOf'}
 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Mental http://dbpedia.org/resource/Mental_health {'label': 'http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#hasQuality'}
 http://dbpedia.org/resource/Security http://dbpedia.org/resource/Mental_health {'label': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type'}
@@ -3036,6 +3066,7 @@ http://www.ontologydesignpatterns.org/ont/fred/domain.owl#CompletelyFocus http:/
 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#TheMiddleClass http://dbpedia.org/resource/Middle_class {'label': 'http://www.w3.org/2000/01/rdf-schema#subClassOf'}
 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Middle http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Not {'label': 'http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#hasQuality'}
 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Middle http://dbpedia.org/resource/Middle_class {'label': 'http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#hasQuality'}
+http://dbpedia.org/resource/Middle_class http://www.ontologydesignpatterns.org/ont/fred/domain.owl#class_1 {'label': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type'}
 http://dbpedia.org/resource/Quid_pro_quo http://www.ontologydesignpatterns.org/ont/fred/domain.owl#ProQuo {'label': 'http://www.w3.org/2000/01/rdf-schema#subClassOf'}
 http://dbpedia.org/resource/Quid_pro_quo http://www.ontologydesignpatterns.org/ont/fred/domain.owl#quo_1 {'label': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type'}
 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#ProQuo http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Quo {'label': 'http://www.w3.org/2000/01/rdf-schema#subClassOf'}
@@ -3272,3 +3303,13 @@ http://www.ontologydesignpatterns.org/ont/fred/domain.owl#TaxAppeal http://www.o
 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#TaxAppeal http://www.ontologydesignpatterns.org/ont/fred/domain.owl#appeal_1 {'label': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type'}
 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#FriendMillion http://www.ontologydesignpatterns.org/ont/fred/domain.owl#million_1 {'label': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type'}
 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#InsideGame http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Inside {'label': 'http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#hasQuality'}
+http://www.ontologydesignpatterns.org/ont/fred/domain.owl#nazi_salute_1 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Nazi_salute {'label': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type'}
+http://www.ontologydesignpatterns.org/ont/fred/domain.owl#tell_1 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Accidentally {'label': 'http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#hasQuality'}
+http://www.ontologydesignpatterns.org/ont/fred/domain.owl#tell_1 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#AccidentallyTell {'label': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type'}
+http://www.ontologydesignpatterns.org/ont/fred/domain.owl#tell_1 http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Truth {'label': 'http://www.ontologydesignpatterns.org/ont/vn/abox/role/Recipient'}
+http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Plenty http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Water {'label': 'http://www.ontologydesignpatterns.org/ont/fred/domain.owl#plentyOf'}
+http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Water http://www.ontologydesignpatterns.org/ont/vn/data/Open_55050100 {'label': 'http://www.ontologydesignpatterns.org/ont/vn/abox/role/Theme'}
+http://www.ontologydesignpatterns.org/ont/vn/data/Open_55050100 http://www.ontologydesignpatterns.org/ont/vn/data/Start_55010100 {'label': 'http://www.ontologydesignpatterns.org/ont/vn/abox/role/Theme'}
+http://www.ontologydesignpatterns.org/ont/vn/data/Promise_37130000 http://www.ontologydesignpatterns.org/ont/vn/data/Start_55010100 {'label': 'http://www.ontologydesignpatterns.org/ont/vn/abox/role/Topic'}
+2017-11-01 http://www.ontologydesignpatterns.org/ont/vn/data/Experience_30020000 {'label': 'http://www.ontologydesignpatterns.org/ont/fred/domain.owl#in'}
+http://dbpedia.org/resource/Earth http://www.ontologydesignpatterns.org/ont/vn/data/Experience_30020000 {'label': 'http://www.ontologydesignpatterns.org/ont/vn/abox/role/Experiencer'}
