@@ -766,9 +766,10 @@ def checkFredGraph(g):
 	return claim_g,removed_edges,contracted_edges
 
 def fredParse(rdf_path,graph_path,fcg_type,init):
-	claim_type={"tfcg":"true","ffcg":"false"}
+	claim_types={"tfcg":"true","ffcg":"false"}
+	claim_type=claim_types[fcg_type]
 	#Reading claims csv 
-	claims=pd.read_csv(os.path.join(rdf_path,"{}_claims.csv".format(claim_type[fcg_type])),index_col=0)
+	claims=pd.read_csv(os.path.join(rdf_path,"{}_claims.csv".format(claim_type)),index_col=0)
 	key="Bearer 56a28f54-7918-3fdd-9d6f-850f13bd4041"
 	errorclaimid=[]
 	#fred starts
@@ -778,14 +779,14 @@ def fredParse(rdf_path,graph_path,fcg_type,init):
 	minsec=60
 	fcg=nx.Graph()
 	rdf=rdflib.Graph()
-	fcg_filter_claims={}
-	claims_path=os.path.join(rdf_path,"{} claims".format(claim_type))
-	fcg_path=os.path.join(graph_path,fcg_type)
+	fcg_prune_claims={}
+	claims_path=os.path.join(rdf_path,"{}_claims".format(claim_type))
+	fcg_path=os.path.join(graph_path,"fred",fcg_type)
 	if init>0:
 		try:
 			rdf.parse(os.path.join(claims_path,"{}_claims.rdf".format(claim_type)), format='application/rdf+xml')
-			with codecs.open(os.path.join(claims_path,"{}_claims_filter_claims.json".format(claim_type)),"w","utf-8") as f:
-				fcg_filter_claims=json.loads(f.read())
+			with codecs.open(os.path.join(claims_path,"{}_claims_prune_data.json".format(claim_type)),"w","utf-8") as f:
+				fcg_prune_claims=json.loads(f.read())
 			fcg=nx.read_edgelist(os.path.join(fcg_path,"{}.edgelist".format(fcg_type)))
 		except:
 			raise Exception("Previous claims not found, initial index cannot be greater than 0")
@@ -798,28 +799,39 @@ def fredParse(rdf_path,graph_path,fcg_type,init):
 					dif=abs(time.time()-start)
 					dif2=abs(time.time()-start2)
 					diff=abs(daysec-dif)
-					claimID=claims.iloc[i]['claimID']
+					# set_trace()
+					claim_ID=claims.iloc[i]['claimID']
 					sentence=html.unescape(claims.iloc[i]['claim_text']).replace("`","'")
-					print("Index:",i,"Claim ID:",claimID," DayLim2Go:",round(diff),"MinLim2Go:",round(min(abs(minsec-dif2),60)))
-					filename=os.path.join(claims_path,"claim{}.rdf".format(str(claimID)))
-					r=getFredGraph(preprocessText(sentence),key,filename)
+					print("Index:",i,"Claim ID:",claim_ID," DayLim2Go:",round(diff),"MinLim2Go:",round(min(abs(minsec-dif2),60)))
+					filename=os.path.join(claims_path,"claim{}".format(str(claim_ID)))
+					r=getFredGraph(preprocessText(sentence),key,filename+".rdf")
 					if "You have exceeded your quota" not in r.text and "Runtime Error" not in r.text and "Service Unavailable" not in r.text:
 						if r.status_code in range(100,500) and r.text:
-							g=openFredGraph(filename)
+							g=openFredGraph(filename+".rdf")
 							claim_g,removed_edges,contracted_edges=checkFredGraph(g)
-							plotFredGraph(claim_g,filename)
-							fcg_filter_claims[str(claimID)]={}
-							fcg_filter_claims[str(claimID)]['removed_edges']=removed_edges
-							fcg_filter_claims[str(claimID)]['contracted_edges']=contracted_edges
-							rdf.parse(filename,format='application/rdf+xml')
-							rdf.serialize(destination=os.path.join(claims_path,"{}_claims.rdf".format(claim_type)), format='application/rdf+xml')
-							nx.write_graphml_lxml(claim_g,os.path.join(claims_path,"{}.graphml".format(filename.strip(".rdf"))),prettyprint=True)
-							with codecs.open(os.path.join(claims_path,"{}_claims_filter_claims.json".format(claim_type)),"w","utf-8") as f:
-								f.write(json.dumps(fcg_filter_claims,ensure_ascii=False))
+							#store pruning data
+							fcg_prune_claims[str(claim_ID)]={}
+							fcg_prune_claims[str(claim_ID)]['removed_edges']=removed_edges
+							fcg_prune_claims[str(claim_ID)]['contracted_edges']=contracted_edges
+							#write pruning data
+							with codecs.open(os.path.join(rdf_path,"{}_claims_prune_data.json".format(claim_type)),"w","utf-8") as f:
+								f.write(json.dumps(fcg_prune_claims,ensure_ascii=False))
+							#write claim graph as edgelist and graphml
+							nx.write_edgelist(claim_g,filename+".edgelist")
+							# nx.write_graphml(claim_g,filename+".graphml")
+							#plot claim graph
+							plotFredGraph(claim_g,filename+".png")
+							#aggregating claim graph in rdf
+							rdf.parse(filename+".rdf",format='application/rdf+xml')
+							#writing aggregated rdf
+							rdf.serialize(destination=os.path.join(rdf_path,"{}_claims.rdf".format(claim_type)), format='application/rdf+xml')
+							#aggregating claim graph in networkx
 							fcg=nx.compose(fcg,claim_g)
+							#making directory if it does not exist
 							os.makedirs(fcg_path, exist_ok=True)
+							#writing aggregated networkx graphs as edgelist and graphml
 							nx.write_edgelist(fcg,os.path.join(fcg_path,"{}.edgelist".format(fcg_type)))
-							nx.write_graphml_lxml(fcg,os.path.join(fcg_path,"{}.graphml".format(fcg_type)),prettyprint=True)
+							# nx.write_graphml(fcg,os.path.join(fcg_path,"{}.graphml".format(fcg_type)),prettyprint=True)
 						else:
 							errorclaimid.append(filename.split("/")[-1].strip(".rdf"))
 							np.save(os.path.join(rdf_path,"Error500_claimID.npy"),errorclaimid)
@@ -831,12 +843,13 @@ def fredParse(rdf_path,graph_path,fcg_type,init):
 						start2=time.time()
 				except xml.sax._exceptions.SAXParseException:
 					print("Exception Occurred")
-					errorclaimid.append(claimID)
+					errorclaimid.append(claim_ID)
 					break
 		rdf.serialize(destination=os.path.join(claims_path,"{}_claims.rdf".format(claim_type)), format='application/rdf+xml')
-		with codecs.open(os.path.join(claims_path,"{}_claims_filter_claims.json".format(claim_type)),"w","utf-8") as f:
-			f.write(json.dumps(fcg_filter_claims,ensure_ascii=False))
+		with codecs.open(os.path.join(claims_path,"{}_claims_prune_data.json".format(claim_type)),"w","utf-8") as f:
+			f.write(json.dumps(fcg_prune_claims,ensure_ascii=False))
 		nx.write_edgelist(fcg,os.path.join(fcg_path,"{}.edgelist".format(fcg_type)))
+		# nx.write_graphml(fcg,os.path.join(fcg_path,"{}.graphml".format(fcg_type)),prettyprint=True)
 
 def createFred(rdf_path,graph_path,fcg_type,init):
 	if fcg_type=="ufcg":
@@ -862,14 +875,14 @@ def plotFredGraph(claim_g,filename):
 	edge_labels={(edge[0], edge[1]): edge[2]['label'].split("/")[-1].split("#")[-1] for edge in claim_g.edges(data=True)}
 	nx.draw_networkx_edge_labels(claim_g,pos,edge_labels)
 	plt.axis('off')
-	plt.savefig(filename.replace(".rdf",".png"))
+	plt.savefig(filename)
 	plt.close()
 	plt.clf()
 
 if __name__== "__main__":
-	parser=argparse.ArgumentParser(description='Create Fred Network from claims')
-	parser.add_argument('-r','--rdfpath', metavar='rdf path',type=str,help='Path to the rdf files created by FRED',default="/gpfs/home/z/k/zkachwal/Carbonate/RDF Files/")
-	parser.add_argument('-gp','--graphpath', metavar='graph path',type=str,help='Graph directory to store the graphs')
+	parser=argparse.ArgumentParser(description='Create fred graph')
+	parser.add_argument('-r','--rdfpath', metavar='rdf path',type=str,help='Path to the rdf files parsed by FRED',default='/gpfs/home/z/k/zkachwal/Carbonate/factcheckgraph_data/rdf_files/')
+	parser.add_argument('-gp','--graphpath', metavar='graph path',type=str,help='Graph directory to store the graphs',default='/gpfs/home/z/k/zkachwal/Carbonate/factcheckgraph_data/graphs/')
 	parser.add_argument('-ft','--fcgtype', metavar='FactCheckGraph type',type=str,choices=['tfcg','ffcg','ufcg'],help='True False or Union FactCheckGraph')
 	parser.add_argument('-i','--init', metavar='Index Start',type=str,help='Index number of claims to start from',default=0)
 	args=parser.parse_args()
