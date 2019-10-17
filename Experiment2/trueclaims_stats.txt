@@ -1,3 +1,0 @@
-Number of True Claims containing DBPedia Uris: 1588 
-Total number of DBPedia Uris across all True claims: 3860 
-Total number of Triples across all True claims: 4244 
