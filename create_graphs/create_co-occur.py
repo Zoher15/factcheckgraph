@@ -18,7 +18,7 @@ def create_co_occur(rdf_path,graph_path,fcg_label):
 			fcg_path=os.path.join(graph_path,fcg_label)
 			os.makedirs(fcg_path, exist_ok=True)
 			nx.write_edgelist(ufcg,os.path.join(fcg_path,"{}.edgelist".format(fcg_label)))
-			nx.write_graphml_lxml(ufcg,os.path.join(fcg_path,"{}.graphml".format(fcg_label)),prettyprint=True)
+			# nx.write_graphml(ufcg,os.path.join(fcg_path,"{}.graphml".format(fcg_label)),prettyprint=True)
 		else:
 			print("Create tfcg_co and ffcg_co before attempting to create the union: ufcg_co")     
 	else:
@@ -51,7 +51,7 @@ def create_co_occur(rdf_path,graph_path,fcg_label):
 		fcg_path=os.path.join(graph_path,fcg_label)
 		os.makedirs(fcg_path, exist_ok=True)
 		nx.write_edgelist(os.path.join(fcg_path,"{}.edgelist".format(fcg_label)),data=False)
-		nx.write_graphml_lxml(fcg,os.path.join(fcg_path,"{}.graphml".format(fcg_label)),prettyprint=True)
+		# nx.write_graphml(fcg,os.path.join(fcg_path,"{}.graphml".format(fcg_label)),prettyprint=True)
 
 if __name__== "__main__":
 	parser=argparse.ArgumentParser(description='Create co-cccur graph')

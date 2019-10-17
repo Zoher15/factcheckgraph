@@ -17,7 +17,7 @@ def create_backbone(graph_path,graph_class,fcg_label,kg_type):
 		fcg_path=os.path.join(graph_path,"backbone","{}_bb".format(fcg_label))
 		os.makedirs(fcg_path, exist_ok=True)
 		nx.write_edgelist(fcg,os.path.join(fcg_path,"{}_bb.edgelist".format(fcg_label)),data=True)
-		nx.write_graphml_lxml(fcg,os.path.join(fcg_path,"{}.graphml".format(fcg_label)),prettyprint=True)
+		# nx.write_graphml(fcg,os.path.join(fcg_path,"{}.graphml".format(fcg_label)),prettyprint=True)
 	else:
 		print("The file for intersect_entities needs to be created")
 
