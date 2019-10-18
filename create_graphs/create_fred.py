@@ -787,7 +787,7 @@ def fredParse(rdf_path,graph_path,fcg_type,init):
 			rdf.parse(os.path.join(claims_path,"{}_claims.rdf".format(claim_type)), format='application/rdf+xml')
 			with codecs.open(os.path.join(claims_path,"{}_claims_prune_data.json".format(claim_type)),"w","utf-8") as f:
 				fcg_prune_claims=json.loads(f.read())
-			fcg=nx.read_edgelist(os.path.join(fcg_path,"{}.edgelist".format(fcg_type)))
+			fcg=nx.read_edgelist(os.path.join(fcg_path,"{}.edgelist".format(fcg_type)),comments="@")
 		except:
 			raise Exception("Previous claims not found, initial index cannot be greater than 0")
 	else:	
@@ -857,8 +857,8 @@ def createFred(rdf_path,graph_path,fcg_type,init):
 		tfcg_path=os.path.join(graph_path,"tfcg","tfcg.edgelist")
 		ffcg_path=os.path.join(graph_path,"ffcg","ffcg.edgelist")
 		if os.path.exists(tfcg_path) and os.path.exists(ffcg_path):
-			tfcg=nx.read_edgelist(tfcg_path)
-			ffcg=nx.read_edgelist(ffcg_path)
+			tfcg=nx.read_edgelist(tfcg_path,comments="@")
+			ffcg=nx.read_edgelist(ffcg_path,comments="@")
 			ufcg=nx.compose(tfcg,ffcg)
 			fcg_path=os.path.join(graph_path,"ufcg")
 			os.makedirs(fcg_path, exist_ok=True)
@@ -884,6 +884,6 @@ if __name__== "__main__":
 	parser.add_argument('-r','--rdfpath', metavar='rdf path',type=str,help='Path to the rdf files parsed by FRED',default='/gpfs/home/z/k/zkachwal/Carbonate/factcheckgraph_data/rdf_files/')
 	parser.add_argument('-gp','--graphpath', metavar='graph path',type=str,help='Graph directory to store the graphs',default='/gpfs/home/z/k/zkachwal/Carbonate/factcheckgraph_data/graphs/')
 	parser.add_argument('-ft','--fcgtype', metavar='FactCheckGraph type',type=str,choices=['tfcg','ffcg','ufcg'],help='True False or Union FactCheckGraph')
-	parser.add_argument('-i','--init', metavar='Index Start',type=str,help='Index number of claims to start from',default=0)
+	parser.add_argument('-i','--init', metavar='Index Start',type=int,help='Index number of claims to start from',default=0)
 	args=parser.parse_args()
 	createFred(args.rdfpath,args.graphpath,args.fcgtype,args.init)

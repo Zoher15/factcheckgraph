@@ -12,8 +12,8 @@ def create_co_occur(rdf_path,graph_path,fcg_label):
 		tfcg_path=os.path.join(graph_path,"tfcg_co","tfcg_co.edgelist")
 		ffcg_path=os.path.join(graph_path,"ffcg_co","ffcg_co.edgelist")
 		if os.path.exists(tfcgpath) and os.path.exists(ffcgpath):
-			tfcg=nx.read_edgelist(tfcgpath)
-			ffcg=nx.read_edgelist(ffcgpath)
+			tfcg=nx.read_edgelist(tfcgpath,comments="@")
+			ffcg=nx.read_edgelist(ffcgpath,comments="@")
 			ufcg=nx.compose(tfcg,ffcg)
 			fcg_path=os.path.join(graph_path,fcg_label)
 			os.makedirs(fcg_path, exist_ok=True)
