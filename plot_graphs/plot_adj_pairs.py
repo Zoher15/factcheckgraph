@@ -19,12 +19,23 @@ def plot_adj_pairs(graph_path,fcg_class,kg_label):
 		intersect_adj=pd.read_json(os.path.join(fcg_path,fcg_label,"intersect_adj_{}_{}_ID.json".format(kg_label,fcg_label)))
 		intersect_nonadj=pd.read_json(os.path.join(fcg_path,fcg_label,"intersect_nonadj_{}_{}_ID.json".format(kg_label,fcg_label)))
 		intersect_adj['label']=1
-		intersect_adj['label']=0
+		intersect_nonadj['label']=0
 		adj_nonadj=pd.concat([intersect_adj,intersect_nonadj],ignore_index=True)
 		y=list(adj_nonadj['label'])
 		scores=list(adj_nonadj['simil'])
 		fpr,tpr,thresholds=metrics.roc_curve(y,scores, pos_label=1)
 		plt.plot(fpr,tpr,lw=lw,label=fcg_label+' (%0.2f) '%metrics.auc(fpr,tpr))
+	#plotting the kg upperline ROC
+	kg_adj=pd.read_json(os.path.join(graphpath,"kg",kg_label,fcg_class,"intersect_adj_{}_{}_ID.json".format(fcg_class,kg_label)))
+	kg_nonadj=pd.read_json(os.path.join(graphpath,"kg",kg_label,fcg_class,"intersect_nonadj_{}_{}_ID.json".format(fcg_class,kg_label)))
+	kg_adj['label']=1
+	kg_nonadj['label']=0
+	adj_nonadj=pd.concat([kg_adj,kg_nonadj],ignore_index=True)
+	y=list(adj_nonadj['label'])
+	scores=list(adj_nonadj['simil'])
+	fpr,tpr,thresholds=metrics.roc_curve(y,scores, pos_label=1)
+	plt.plot(fpr,tpr,lw=lw,label=kg_label+' (%0.2f) '%metrics.auc(fpr,tpr))
+	#Setting figure parameters
 	plt.set_xlabel('true positive rate')
 	plt.set_xlabel('false positive rate')
 	plt.legend(loc="upper right")

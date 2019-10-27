@@ -19,24 +19,12 @@ def calculate_stats(graph_path,graph_class,graph_type):
 	"Largest Component Edges","Average Degree","Kappa/Heterogenity Coefficient","Average Clustering Coefficient","Density","Average Shortest Path Length"]
 	graph_stats=pd.DataFrame(index=stats_index,columns=g_labels)
 	read_path=os.path.join(graph_path,graph_class,g_label,g_label)
+	G=nx.read_edgelist(read_path+".edgelist",comments="@")
+	entity_regex=re.compile(r'http:\/\/dbpedia\.org\/resource\/')
+	nodes=G.nodes()
 	if graph_class=="kg":
-		try:
-			#Trying if KG exists in edgelist form
-			G=nx.read_edgelist(read_path+".edgelist",comments="@")
-		except FileNotFoundError:
-			#Reading KG from .nt format and saving in edgelist form
-			g = rdflib.Graph()
-			g.parse(read_path+".nt",format='nt')
-			G=nx.Graph()
-			for (a,b,c) in g.getEdges():
-				G.add_edge(a,c,label=b)
-			G.write_edgelist(read_path+".edgelist",data=True)
-			nodes=G.nodes()
-			entities=nodes
+		entities=list(nodes)
 	else:
-		G=nx.read_edgelist(read_path+".edgelist",comments="@")
-		entity_regex=re.compile(r'http:\/\/dbpedia\.org\/resource\/')
-		nodes=G.nodes()
 		entities=[node for node in nodes if entity_regex.match(node)]
 	degree_list=[val for (node, val) in G.degree()]
 	avg_degree=np.average(degreelist)

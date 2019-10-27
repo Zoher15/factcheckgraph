@@ -765,9 +765,9 @@ def checkFredGraph(g):
 	claim_g.remove_nodes_from(list(nx.isolates(claim_g)))
 	return claim_g,removed_edges,contracted_edges
 
-def fredParse(rdf_path,graph_path,fcg_type,init):
+def fredParse(rdf_path,fcg_path,fcg_label,init):
 	claim_types={"tfcg":"true","ffcg":"false"}
-	claim_type=claim_types[fcg_type]
+	claim_type=claim_types[fcg_label]
 	#Reading claims csv 
 	claims=pd.read_csv(os.path.join(rdf_path,"{}_claims.csv".format(claim_type)),index_col=0)
 	key="Bearer 56a28f54-7918-3fdd-9d6f-850f13bd4041"
@@ -781,92 +781,115 @@ def fredParse(rdf_path,graph_path,fcg_type,init):
 	rdf=rdflib.Graph()
 	fcg_prune_claims={}
 	claims_path=os.path.join(rdf_path,"{}_claims".format(claim_type))
-	fcg_path=os.path.join(graph_path,"fred",fcg_type)
 	if init>0:
 		try:
 			rdf.parse(os.path.join(claims_path,"{}_claims.rdf".format(claim_type)), format='application/rdf+xml')
 			with codecs.open(os.path.join(claims_path,"{}_claims_prune_data.json".format(claim_type)),"w","utf-8") as f:
 				fcg_prune_claims=json.loads(f.read())
-			fcg=nx.read_edgelist(os.path.join(fcg_path,"{}.edgelist".format(fcg_type)),comments="@")
+			fcg=nx.read_edgelist(os.path.join(fcg_path,"{}.edgelist".format(fcg_label)),comments="@")
 		except:
 			raise Exception("Previous claims not found, initial index cannot be greater than 0")
-	else:	
-		for i in range(init,len(claims)):
-			dif=abs(time.time()-start)
-			diff=abs(daysec-dif)
-			while True:
-				try:
-					dif=abs(time.time()-start)
-					dif2=abs(time.time()-start2)
-					diff=abs(daysec-dif)
-					# set_trace()
-					claim_ID=claims.iloc[i]['claimID']
-					sentence=html.unescape(claims.iloc[i]['claim_text']).replace("`","'")
-					print("Index:",i,"Claim ID:",claim_ID," DayLim2Go:",round(diff),"MinLim2Go:",round(min(abs(minsec-dif2),60)))
-					filename=os.path.join(claims_path,"claim{}".format(str(claim_ID)))
-					r=getFredGraph(preprocessText(sentence),key,filename+".rdf")
-					if "You have exceeded your quota" not in r.text and "Runtime Error" not in r.text and "Service Unavailable" not in r.text:
-						if r.status_code in range(100,500) and r.text:
-							g=openFredGraph(filename+".rdf")
-							claim_g,removed_edges,contracted_edges=checkFredGraph(g)
-							#store pruning data
-							fcg_prune_claims[str(claim_ID)]={}
-							fcg_prune_claims[str(claim_ID)]['removed_edges']=removed_edges
-							fcg_prune_claims[str(claim_ID)]['contracted_edges']=contracted_edges
-							#write pruning data
-							with codecs.open(os.path.join(rdf_path,"{}_claims_prune_data.json".format(claim_type)),"w","utf-8") as f:
-								f.write(json.dumps(fcg_prune_claims,ensure_ascii=False))
-							#write claim graph as edgelist and graphml
-							nx.write_edgelist(claim_g,filename+".edgelist")
-							# nx.write_graphml(claim_g,filename+".graphml")
-							#plot claim graph
-							plotFredGraph(claim_g,filename+".png")
-							#aggregating claim graph in rdf
-							rdf.parse(filename+".rdf",format='application/rdf+xml')
-							#writing aggregated rdf
-							rdf.serialize(destination=os.path.join(rdf_path,"{}_claims.rdf".format(claim_type)), format='application/rdf+xml')
-							#aggregating claim graph in networkx
-							fcg=nx.compose(fcg,claim_g)
-							#making directory if it does not exist
-							os.makedirs(fcg_path, exist_ok=True)
-							#writing aggregated networkx graphs as edgelist and graphml
-							nx.write_edgelist(fcg,os.path.join(fcg_path,"{}.edgelist".format(fcg_type)))
-							# nx.write_graphml(fcg,os.path.join(fcg_path,"{}.graphml".format(fcg_type)),prettyprint=True)
-						else:
-							errorclaimid.append(filename.split("/")[-1].strip(".rdf"))
-							np.save(os.path.join(rdf_path,"Error500_claimID.npy"),errorclaimid)
-						break
+	for i in range(init,len(claims)):
+		dif=abs(time.time()-start)
+		diff=abs(daysec-dif)
+		while True:
+			try:
+				dif=abs(time.time()-start)
+				dif2=abs(time.time()-start2)
+				diff=abs(daysec-dif)
+				claim_ID=claims.iloc[i]['claimID']
+				sentence=html.unescape(claims.iloc[i]['claim_text']).replace("`","'")
+				print("Index:",i,"Claim ID:",claim_ID," DayLim2Go:",round(diff),"MinLim2Go:",round(min(abs(minsec-dif2),60)))
+				filename=os.path.join(claims_path,"claim{}".format(str(claim_ID)))
+				r=getFredGraph(preprocessText(sentence),key,filename+".rdf")
+				if "You have exceeded your quota" not in r.text and "Runtime Error" not in r.text and "Service Unavailable" not in r.text:
+					if r.status_code in range(100,500) and r.text:
+						g=openFredGraph(filename+".rdf")
+						claim_g,removed_edges,contracted_edges=checkFredGraph(g)
+						#store pruning data
+						fcg_prune_claims[str(claim_ID)]={}
+						fcg_prune_claims[str(claim_ID)]['removed_edges']=removed_edges
+						fcg_prune_claims[str(claim_ID)]['contracted_edges']=contracted_edges
+						#write pruning data
+						with codecs.open(os.path.join(rdf_path,"{}_claims_prune_data.json".format(claim_type)),"w","utf-8") as f:
+							f.write(json.dumps(fcg_prune_claims,ensure_ascii=False))
+						#write claim graph as edgelist and graphml
+						nx.write_edgelist(claim_g,filename+".edgelist")
+						claim_g=nx.read_edgelist(filename+".edgelist",comments="@")
+						nx.write_graphml(claim_g,filename+".graphml",prettyprint=True)
+						#plot claim graph
+						# plotFredGraph(claim_g,filename+".png")
+						#aggregating claim graph in rdf
+						rdf.parse(filename+".rdf",format='application/rdf+xml')
+						#writing aggregated rdf
+						rdf.serialize(destination=os.path.join(rdf_path,"{}_claims.rdf".format(claim_type)), format='application/rdf+xml')
+						#aggregating claim graph in networkx
+						fcg=nx.compose(fcg,claim_g)
+						#making directory if it does not exist
+						os.makedirs(fcg_path, exist_ok=True)
+						#writing aggregated networkx graphs as edgelist and graphml
+						nx.write_edgelist(fcg,os.path.join(fcg_path,"{}.edgelist".format(fcg_label)))
+						fcg=nx.read_edgelist(os.path.join(fcg_path,"{}.edgelist".format(fcg_label)),comments="@")
+						nx.write_graphml(fcg,os.path.join(fcg_path,"{}.graphml".format(fcg_label)),prettyprint=True)
 					else:
-						diff2=min(abs(minsec-dif2),60)
-						print("Sleeping for ",round(diff2))
-						time.sleep(abs(diff2))
-						start2=time.time()
-				except xml.sax._exceptions.SAXParseException:
-					print("Exception Occurred")
-					errorclaimid.append(claim_ID)
+						errorclaimid.append(filename.split("/")[-1].strip(".rdf"))
+						np.save(os.path.join(rdf_path,"Error500_claimID.npy"),errorclaimid)
 					break
-		rdf.serialize(destination=os.path.join(claims_path,"{}_claims.rdf".format(claim_type)), format='application/rdf+xml')
-		with codecs.open(os.path.join(claims_path,"{}_claims_prune_data.json".format(claim_type)),"w","utf-8") as f:
-			f.write(json.dumps(fcg_prune_claims,ensure_ascii=False))
-		nx.write_edgelist(fcg,os.path.join(fcg_path,"{}.edgelist".format(fcg_type)))
-		# nx.write_graphml(fcg,os.path.join(fcg_path,"{}.graphml".format(fcg_type)),prettyprint=True)
+				else:
+					diff2=min(abs(minsec-dif2),60)
+					print("Sleeping for ",round(diff2))
+					time.sleep(abs(diff2))
+					start2=time.time()
+			except xml.sax._exceptions.SAXParseException:
+				print("Exception Occurred")
+				errorclaimid.append(claim_ID)
+				break
+	rdf.serialize(destination=os.path.join(claims_path,"{}_claims.rdf".format(claim_type)), format='application/rdf+xml')
+	with codecs.open(os.path.join(claims_path,"{}_claims_prune_data.json".format(claim_type)),"w","utf-8") as f:
+		f.write(json.dumps(fcg_prune_claims,ensure_ascii=False))
+	nx.write_edgelist(fcg,os.path.join(fcg_path,"{}.edgelist".format(fcg_label)))
 
-def createFred(rdf_path,graph_path,fcg_type,init):
-	if fcg_type=="ufcg":
+def createFred(rdf_path,graph_path,fcg_label,init):
+	fcg_path=os.path.join(graph_path,"fred",fcg_label)
+	if fcg_label=="ufcg":
 		#Assumes that tfcg and ffcg exists
-		tfcg_path=os.path.join(graph_path,"tfcg","tfcg.edgelist")
-		ffcg_path=os.path.join(graph_path,"ffcg","ffcg.edgelist")
+		tfcg_path=os.path.join(graph_path,"fred","tfcg","tfcg.edgelist")
+		ffcg_path=os.path.join(graph_path,"fred","ffcg","ffcg.edgelist")
 		if os.path.exists(tfcg_path) and os.path.exists(ffcg_path):
 			tfcg=nx.read_edgelist(tfcg_path,comments="@")
 			ffcg=nx.read_edgelist(ffcg_path,comments="@")
 			ufcg=nx.compose(tfcg,ffcg)
-			fcg_path=os.path.join(graph_path,"ufcg")
 			os.makedirs(fcg_path, exist_ok=True)
-			nx.write_edgelist(fcg,os.path.join(fcg_path,"ufcg.edgelist"))
+			nx.write_edgelist(ufcg,os.path.join(fcg_path,"ufcg.edgelist"))
 		else:
 			print("Create tfcg and ffcg before attempting to create the union: ufcg")
-	else:
-		fredParse(rdf_path,graph_path,fcg_type,init)   
+	# else:
+	# 	fredParse(rdf_path,fcg_path,fcg_label,init)
+	# fcg_path=os.path.join(graph_path,"fred",fcg_label)
+	fcg=nx.read_edgelist(os.path.join(fcg_path,"{}.edgelist".format(fcg_label)),comments="@")
+	#Saving graph as graphml
+	nx.write_graphml(fcg,os.path.join(fcg_path,"{}.graphml".format(fcg_label)),prettyprint=True)
+	os.makedirs(os.path.join(fcg_path,"data"),exist_ok=True)
+	write_path=os.path.join(fcg_path,"data",fcg_label)
+	nodes=list(fcg.nodes)
+	edges=list(fcg.edges)
+	#Save Nodes
+	with codecs.open(write_path+"_nodes.txt","w","utf-8") as f:
+		for node in nodes:
+			f.write(str(node)+"\n")
+	#Save Entities
+	entity_regex=re.compile(r'http:\/\/dbpedia\.org')
+	entities=np.asarray([node for node in nodes if entity_regex.match(node)])
+	with codecs.open(write_path+"_entities.txt","w","utf-8") as f:
+		for entity in entities:
+			f.write(str(entity)+"\n")
+	#Save node2ID dictionary
+	node2ID={node:i for i,node in enumerate(nodes)}
+	with codecs.open(write_path+"_node2ID.json","w","utf-8") as f:
+		f.write(json.dumps(node2ID,ensure_ascii=False))
+	#Save Edgelist ID
+	edgelistID=np.asarray([[node2ID[edge[0]],node2ID[edge[1]],1] for edge in edges])
+	np.save(write_path+"_edgelistID.npy",edgelistID)  
 
 def plotFredGraph(claim_g,filename):
 	plt.figure()
