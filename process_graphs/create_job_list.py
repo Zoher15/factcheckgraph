@@ -28,10 +28,10 @@ def create_job_list(graph_path,kg_label,fcg_class,total_t,n):
 #PBS -N {}_klinker
 #PBS -j oe
 source /N/u/zkachwal/Carbonate/miniconda3/etc/profile.d/conda.sh
-conda activate env-klinker
-cd {}
-klinker linkpred {} {} {}.txt {}.json
-				'''.format(t,str(i+1),kg_datapath,kg_label+"_nodes.txt",kg_label+"_edglistID.npy",inout,inout))
+conda activate env-kl
+cd {}/
+klinker linkpred {} {} {}.txt {}.json -u -n 12 -w logdegree
+				'''.format(t,str(i+1),kg_datapath,kg_label+"_nodes.txt",kg_label+"_edgelistID.npy",inout,inout))
 
 if __name__== "__main__":
 	parser=argparse.ArgumentParser(description='Create klinker job list')

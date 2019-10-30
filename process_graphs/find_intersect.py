@@ -9,7 +9,9 @@ import codecs
 from itertools import combinations
 
 def find_intersect(graph_path,fcg_class,kg_label):
-	fcg_types={"fred":["tfcg","ffcg","ufcg"],"co-occur":["tfcg_co","ffcg_co","ufcg_co"],"backbone-dbpedia-fred":["tfcg_bbdf","ffcg_bbdf","ufcg_bbdf"],"backbone-dbpedia-co-occur":["tfcg_bbdc","ffcg_bbdc","ufcg_bbdc"]}
+	fcg_types={"fred":["tfcg","ffcg","ufcg"],"co-occur":["tfcg_co","ffcg_co","ufcg_co"],
+	"backbone_df":["tfcg_bbdf","ffcg_bbdf","ufcg_bbdf"],"backbone_dc":["tfcg_bbdc","ffcg_bbdc","ufcg_bbdc"],
+	"largest_ccf":["tfcg_lgccf","ffcg_lgccf","ufcg_lgccf"],"largest_ccc":["tfcg_lgccc","ffcg_lgccc","ufcg_lgccc"]}
 	fcg_labels=fcg_types[fcg_class]
 	fcg_path=os.path.join(graph_path,fcg_class)
 	tfcg_entities=np.loadtxt(os.path.join(fcg_path,fcg_labels[0],"data","{}_entities.txt".format(fcg_labels[0])),dtype='str',encoding='utf-8')
@@ -45,7 +47,7 @@ def find_intersect(graph_path,fcg_class,kg_label):
 if __name__== "__main__":
 	parser = argparse.ArgumentParser(description='Find intersection of entities for graphs')
 	parser.add_argument('-gp','--graphpath', metavar='graph path',type=str,help='Path to the graph directory',default='/gpfs/home/z/k/zkachwal/Carbonate/factcheckgraph_data/graphs/')
-	parser.add_argument('-fcg','--fcgclass', metavar='fcg class',type=str,choices=['fred','co-occur','backbone-dbpedia-fred','backbone-dbpedia-co-occur'],help='Class of FactCheckGraph to process')
+	parser.add_argument('-fcg','--fcgclass', metavar='fcg class',type=str,choices=['fred','co-occur','backbone_df','backbone_dc','largest_ccf','largest_ccc'],help='Class of FactCheckGraph to process')
 	parser.add_argument('-kg','--kg', metavar='knowledgegraph type',type=str,choices=['dbpedia','wikidata'],help='DBPedia or Wikidata Graph')
 	args=parser.parse_args()
 	find_intersect(args.graphpath,args.fcgclass,args.kg)

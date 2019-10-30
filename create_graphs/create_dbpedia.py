@@ -30,7 +30,10 @@ def create_dbpedia(graph_path):
 			kg_nx.add_edge(t[0],t[2],label=t[1])
 	kg.serialize(destination=os.path.join(kg_path,'dbpedia.nt'), format='nt')
 	nx.write_edgelist(kg_nx,os.path.join(kg_path,"dbpedia.edgelist"))
-	np.save(os.path.join(kg_path,"removed_triples.npy"),np.asarray(removed_triples))
+	#Save removed triples
+	with codecs.open(write_path+"_removed_triples.txt","w","utf-8") as f:
+		for triple in removed_triples:
+			f.write(str(triple)+"\n")
 	os.makedirs(os.path.join(kg_path,"data"),exist_ok=True)
 	write_path=os.path.join(kg_path,"data","dbpedia")
 	nodes=list(kg_nx.nodes)
@@ -50,7 +53,7 @@ def create_dbpedia(graph_path):
 	with codecs.open(write_path+"_node2ID.json","w","utf-8") as f:
 		f.write(json.dumps(node2ID,ensure_ascii=False))
 	#Save Edgelist ID
-	edgelistID=np.asarray([[node2ID[edge[0]],node2ID[edge[1]],1] for edge in edges])
+	edgelistID=np.asarray([[int(node2ID[edge[0]]),int(node2ID[edge[1]]),1] for edge in edges])
 	np.save(write_path+"_edgelistID.npy",edgelistID)
 
 if __name__== "__main__":

@@ -888,7 +888,7 @@ def createFred(rdf_path,graph_path,fcg_label,init):
 	with codecs.open(write_path+"_node2ID.json","w","utf-8") as f:
 		f.write(json.dumps(node2ID,ensure_ascii=False))
 	#Save Edgelist ID
-	edgelistID=np.asarray([[node2ID[edge[0]],node2ID[edge[1]],1] for edge in edges])
+	edgelistID=np.asarray([[int(node2ID[edge[0]]),int(node2ID[edge[1]]),1] for edge in edges])
 	np.save(write_path+"_edgelistID.npy",edgelistID)  
 
 def plotFredGraph(claim_g,filename):

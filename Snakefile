@@ -60,11 +60,11 @@ rule create_bbdc_ufcg:
 		"{graphpath}/co-occur/intersect_entities_dbpedia_co-occur.txt",
 		"{graphpath}/co-occur/ufcg/ufcg.edgelist"
 	output:
-		"{graphpath}/backbone-dbpedia-co-occur/ufcg_bbdc/ufcg_bbdc.edgelist",
-		"{graphpath}/backbone-dbpedia-co-occur/ufcg_bbdc/ufcg_bbdc.graphml"
-		"{graphpath}/backbone-dbpedia-co-occur/ufcg_bbdc/data/ufcg_bbdc_entities.txt",
-		"{graphpath}/backbone-dbpedia-co-occur/ufcg_bbdc/data/ufcg_bbdc_node2ID.json",
-		"{graphpath}/backbone-dbpedia-co-occur/ufcg_bbdc/data/ufcg_bbdc_edgelistID.npy"
+		"{graphpath}/backbone_dc/ufcg_bbdc/ufcg_bbdc.edgelist",
+		"{graphpath}/backbone_dc/ufcg_bbdc/ufcg_bbdc.graphml"
+		"{graphpath}/backbone_dc/ufcg_bbdc/data/ufcg_bbdc_entities.txt",
+		"{graphpath}/backbone_dc/ufcg_bbdc/data/ufcg_bbdc_node2ID.json",
+		"{graphpath}/backbone_dc/ufcg_bbdc/data/ufcg_bbdc_edgelistID.npy"
 	shell:
 		"python {createpath}/create_backbone.py -fcg co-occur -ft ufcg -kg dbpedia"
 
@@ -73,11 +73,11 @@ rule create_bbdc_ffcg:
 		"{graphpath}/co-occur/intersect_entities_dbpedia_co-occur.txt",
 		"{graphpath}/co-occur/ffcg/ffcg.edgelist"
 	output:
-		"{graphpath}/backbone-dbpedia-co-occur/ffcg_bbdc/ffcg_bbdc.edgelist",
-		"{graphpath}/backbone-dbpedia-co-occur/ffcg_bbdc/ffcg_bbdc.graphml"
-		"{graphpath}/backbone-dbpedia-co-occur/ffcg_bbdc/data/ffcg_bbdc_entities.txt",
-		"{graphpath}/backbone-dbpedia-co-occur/ffcg_bbdc/data/ffcg_bbdc_node2ID.json",
-		"{graphpath}/backbone-dbpedia-co-occur/ffcg_bbdc/data/ffcg_bbdc_edgelistID.npy"
+		"{graphpath}/backbone_dc/ffcg_bbdc/ffcg_bbdc.edgelist",
+		"{graphpath}/backbone_dc/ffcg_bbdc/ffcg_bbdc.graphml"
+		"{graphpath}/backbone_dc/ffcg_bbdc/data/ffcg_bbdc_entities.txt",
+		"{graphpath}/backbone_dc/ffcg_bbdc/data/ffcg_bbdc_node2ID.json",
+		"{graphpath}/backbone_dc/ffcg_bbdc/data/ffcg_bbdc_edgelistID.npy"
 	shell:
 		"python {createpath}/create_backbone.py -fcg co-occur -ft ffcg -kg dbpedia"
 
@@ -86,11 +86,11 @@ rule create_bbdc_tfcg:
 		"{graphpath}/co-occur/intersect_entities_dbpedia_co-occur.txt",
 		"{graphpath}/co-occur/tfcg/tfcg.edgelist"
 	output:
-		"{graphpath}/backbone-dbpedia-co-occur/tfcg_bbdc/tfcg_bbdc.edgelist",
-		"{graphpath}/backbone-dbpedia-co-occur/tfcg_bbdc/tfcg_bbdc.graphml"
-		"{graphpath}/backbone-dbpedia-co-occur/tfcg_bbdc/data/tfcg_bbdc_entities.txt",
-		"{graphpath}/backbone-dbpedia-co-occur/tfcg_bbdc/data/tfcg_bbdc_node2ID.json",
-		"{graphpath}/backbone-dbpedia-co-occur/tfcg_bbdc/data/tfcg_bbdc_edgelistID.npy"
+		"{graphpath}/backbone_dc/tfcg_bbdc/tfcg_bbdc.edgelist",
+		"{graphpath}/backbone_dc/tfcg_bbdc/tfcg_bbdc.graphml"
+		"{graphpath}/backbone_dc/tfcg_bbdc/data/tfcg_bbdc_entities.txt",
+		"{graphpath}/backbone_dc/tfcg_bbdc/data/tfcg_bbdc_node2ID.json",
+		"{graphpath}/backbone_dc/tfcg_bbdc/data/tfcg_bbdc_edgelistID.npy"
 	shell:
 		"python {createpath}/create_backbone.py -fcg co-occur -ft tfcg -kg dbpedia"
 
@@ -99,11 +99,11 @@ rule create_bbdf_ufcg:
 		"{graphpath}/fred/intersect_entities_dbpedia_fred.txt",
 		"{graphpath}/fred/ufcg/ufcg.edgelist"
 	output:
-		"{graphpath}/backbone-dbpedia-fred/ufcg_bbdf/ufcg_bbdf.edgelist",
-		"{graphpath}/backbone-dbpedia-fred/ufcg_bbdf/ufcg_bbdf.graphml"
-		"{graphpath}/backbone-dbpedia-fred/ufcg_bbdf/data/ufcg_bbdf_entities.txt",
-		"{graphpath}/backbone-dbpedia-fred/ufcg_bbdf/data/ufcg_bbdf_node2ID.json",
-		"{graphpath}/backbone-dbpedia-fred/ufcg_bbdf/data/ufcg_bbdf_edgelistID.npy"
+		"{graphpath}/backbone_df/ufcg_bbdf/ufcg_bbdf.edgelist",
+		"{graphpath}/backbone_df/ufcg_bbdf/ufcg_bbdf.graphml"
+		"{graphpath}/backbone_df/ufcg_bbdf/data/ufcg_bbdf_entities.txt",
+		"{graphpath}/backbone_df/ufcg_bbdf/data/ufcg_bbdf_node2ID.json",
+		"{graphpath}/backbone_df/ufcg_bbdf/data/ufcg_bbdf_edgelistID.npy"
 	shell:
 		"python {createpath}/create_backbone.py -fcg fred -ft ufcg -kg dbpedia"
 
@@ -112,11 +112,11 @@ rule create_bbdf_ffcg:
 		"{graphpath}/fred/intersect_entities_dbpedia_fred.txt",
 		"{graphpath}/fred/ffcg/ffcg.edgelist"
 	output:
-		"{graphpath}/backbone-dbpedia-fred/ffcg_bbdf/ffcg_bbdf.edgelist",
-		"{graphpath}/backbone-dbpedia-fred/ffcg_bbdf/ffcg_bbdf.graphml"
-		"{graphpath}/backbone-dbpedia-fred/ffcg_bbdf/data/ffcg_bbdf_entities.txt",
-		"{graphpath}/backbone-dbpedia-fred/ffcg_bbdf/data/ffcg_bbdf_node2ID.json",
-		"{graphpath}/backbone-dbpedia-fred/ffcg_bbdf/data/ffcg_bbdf_edgelistID.npy"
+		"{graphpath}/backbone_df/ffcg_bbdf/ffcg_bbdf.edgelist",
+		"{graphpath}/backbone_df/ffcg_bbdf/ffcg_bbdf.graphml"
+		"{graphpath}/backbone_df/ffcg_bbdf/data/ffcg_bbdf_entities.txt",
+		"{graphpath}/backbone_df/ffcg_bbdf/data/ffcg_bbdf_node2ID.json",
+		"{graphpath}/backbone_df/ffcg_bbdf/data/ffcg_bbdf_edgelistID.npy"
 	shell:
 		"python {createpath}/create_backbone.py -fcg fred -ft ffcg -kg dbpedia"
 
@@ -125,11 +125,11 @@ rule create_bbdf_tfcg:
 		"{graphpath}/fred/intersect_entities_dbpedia_fred.txt",
 		"{graphpath}/fred/tfcg/tfcg.edgelist"
 	output:
-		"{graphpath}/backbone-dbpedia-fred/tfcg_bbdf/tfcg_bbdf.edgelist",
-		"{graphpath}/backbone-dbpedia-fred/tfcg_bbdf/tfcg_bbdf.graphml"
-		"{graphpath}/backbone-dbpedia-fred/tfcg_bbdf/data/tfcg_bbdf_entities.txt",
-		"{graphpath}/backbone-dbpedia-fred/tfcg_bbdf/data/tfcg_bbdf_node2ID.json",
-		"{graphpath}/backbone-dbpedia-fred/tfcg_bbdf/data/tfcg_bbdf_edgelistID.npy"
+		"{graphpath}/backbone_df/tfcg_bbdf/tfcg_bbdf.edgelist",
+		"{graphpath}/backbone_df/tfcg_bbdf/tfcg_bbdf.graphml"
+		"{graphpath}/backbone_df/tfcg_bbdf/data/tfcg_bbdf_entities.txt",
+		"{graphpath}/backbone_df/tfcg_bbdf/data/tfcg_bbdf_node2ID.json",
+		"{graphpath}/backbone_df/tfcg_bbdf/data/tfcg_bbdf_edgelistID.npy"
 	shell:
 		"python {createpath}/create_backbone.py -fcg fred -ft tfcg -kg dbpedia"
 

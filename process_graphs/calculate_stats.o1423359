@@ -1,0 +1,366 @@
+Traceback (most recent call last):
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/pandas/core/indexing.py", line 2150, in _convert_to_indexer
+    self._validate_key(obj, axis)
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/pandas/core/indexing.py", line 2010, in _validate_key
+    "a [{types}]".format(types=self._valid_types)
+ValueError: Can only index by location with a [integer, integer slice (START point is INCLUDED, END point is EXCLUDED), listlike of integers, boolean array]
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "calculate_stats.py", line 71, in <module>
+    calculate_stats(args.graphpath,args.graphclass,args.graphtype)
+  File "calculate_stats.py", line 28, in calculate_stats
+    graph_stats.iloc["Number of Nodes",g_label]=len(list(nodes))
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/pandas/core/indexing.py", line 201, in __setitem__
+    indexer = self._get_setitem_indexer(key)
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/pandas/core/indexing.py", line 179, in _get_setitem_indexer
+    return self._convert_tuple(key, is_setter=True)
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/pandas/core/indexing.py", line 259, in _convert_tuple
+    idx = self._convert_to_indexer(k, axis=i, is_setter=is_setter)
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/pandas/core/indexing.py", line 2155, in _convert_to_indexer
+    "a [{types}]".format(types=self._valid_types)
+ValueError: Can only index by location with a [integer, integer slice (START point is INCLUDED, END point is EXCLUDED), listlike of integers, boolean array]
+
+real	0m25.075s
+user	0m1.761s
+sys	0m0.658s
+Traceback (most recent call last):
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/pandas/core/indexing.py", line 2150, in _convert_to_indexer
+    self._validate_key(obj, axis)
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/pandas/core/indexing.py", line 2010, in _validate_key
+    "a [{types}]".format(types=self._valid_types)
+ValueError: Can only index by location with a [integer, integer slice (START point is INCLUDED, END point is EXCLUDED), listlike of integers, boolean array]
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "calculate_stats.py", line 71, in <module>
+    calculate_stats(args.graphpath,args.graphclass,args.graphtype)
+  File "calculate_stats.py", line 28, in calculate_stats
+    graph_stats.iloc["Number of Nodes",g_label]=len(list(nodes))
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/pandas/core/indexing.py", line 201, in __setitem__
+    indexer = self._get_setitem_indexer(key)
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/pandas/core/indexing.py", line 179, in _get_setitem_indexer
+    return self._convert_tuple(key, is_setter=True)
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/pandas/core/indexing.py", line 259, in _convert_tuple
+    idx = self._convert_to_indexer(k, axis=i, is_setter=is_setter)
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/pandas/core/indexing.py", line 2155, in _convert_to_indexer
+    "a [{types}]".format(types=self._valid_types)
+ValueError: Can only index by location with a [integer, integer slice (START point is INCLUDED, END point is EXCLUDED), listlike of integers, boolean array]
+
+real	0m3.096s
+user	0m2.045s
+sys	0m0.403s
+Traceback (most recent call last):
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/pandas/core/indexing.py", line 2150, in _convert_to_indexer
+    self._validate_key(obj, axis)
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/pandas/core/indexing.py", line 2010, in _validate_key
+    "a [{types}]".format(types=self._valid_types)
+ValueError: Can only index by location with a [integer, integer slice (START point is INCLUDED, END point is EXCLUDED), listlike of integers, boolean array]
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "calculate_stats.py", line 71, in <module>
+    calculate_stats(args.graphpath,args.graphclass,args.graphtype)
+  File "calculate_stats.py", line 28, in calculate_stats
+    graph_stats.iloc["Number of Nodes",g_label]=len(list(nodes))
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/pandas/core/indexing.py", line 201, in __setitem__
+    indexer = self._get_setitem_indexer(key)
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/pandas/core/indexing.py", line 179, in _get_setitem_indexer
+    return self._convert_tuple(key, is_setter=True)
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/pandas/core/indexing.py", line 259, in _convert_tuple
+    idx = self._convert_to_indexer(k, axis=i, is_setter=is_setter)
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/pandas/core/indexing.py", line 2155, in _convert_to_indexer
+    "a [{types}]".format(types=self._valid_types)
+ValueError: Can only index by location with a [integer, integer slice (START point is INCLUDED, END point is EXCLUDED), listlike of integers, boolean array]
+
+real	0m2.609s
+user	0m2.191s
+sys	0m0.323s
+Traceback (most recent call last):
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/pandas/core/indexing.py", line 2150, in _convert_to_indexer
+    self._validate_key(obj, axis)
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/pandas/core/indexing.py", line 2010, in _validate_key
+    "a [{types}]".format(types=self._valid_types)
+ValueError: Can only index by location with a [integer, integer slice (START point is INCLUDED, END point is EXCLUDED), listlike of integers, boolean array]
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "calculate_stats.py", line 71, in <module>
+    calculate_stats(args.graphpath,args.graphclass,args.graphtype)
+  File "calculate_stats.py", line 28, in calculate_stats
+    graph_stats.iloc["Number of Nodes",g_label]=len(list(nodes))
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/pandas/core/indexing.py", line 201, in __setitem__
+    indexer = self._get_setitem_indexer(key)
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/pandas/core/indexing.py", line 179, in _get_setitem_indexer
+    return self._convert_tuple(key, is_setter=True)
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/pandas/core/indexing.py", line 259, in _convert_tuple
+    idx = self._convert_to_indexer(k, axis=i, is_setter=is_setter)
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/pandas/core/indexing.py", line 2155, in _convert_to_indexer
+    "a [{types}]".format(types=self._valid_types)
+ValueError: Can only index by location with a [integer, integer slice (START point is INCLUDED, END point is EXCLUDED), listlike of integers, boolean array]
+
+real	0m1.182s
+user	0m0.753s
+sys	0m0.275s
+Traceback (most recent call last):
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/pandas/core/indexing.py", line 2150, in _convert_to_indexer
+    self._validate_key(obj, axis)
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/pandas/core/indexing.py", line 2010, in _validate_key
+    "a [{types}]".format(types=self._valid_types)
+ValueError: Can only index by location with a [integer, integer slice (START point is INCLUDED, END point is EXCLUDED), listlike of integers, boolean array]
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "calculate_stats.py", line 71, in <module>
+    calculate_stats(args.graphpath,args.graphclass,args.graphtype)
+  File "calculate_stats.py", line 28, in calculate_stats
+    graph_stats.iloc["Number of Nodes",g_label]=len(list(nodes))
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/pandas/core/indexing.py", line 201, in __setitem__
+    indexer = self._get_setitem_indexer(key)
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/pandas/core/indexing.py", line 179, in _get_setitem_indexer
+    return self._convert_tuple(key, is_setter=True)
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/pandas/core/indexing.py", line 259, in _convert_tuple
+    idx = self._convert_to_indexer(k, axis=i, is_setter=is_setter)
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/pandas/core/indexing.py", line 2155, in _convert_to_indexer
+    "a [{types}]".format(types=self._valid_types)
+ValueError: Can only index by location with a [integer, integer slice (START point is INCLUDED, END point is EXCLUDED), listlike of integers, boolean array]
+
+real	0m1.111s
+user	0m0.767s
+sys	0m0.276s
+Traceback (most recent call last):
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/pandas/core/indexing.py", line 2150, in _convert_to_indexer
+    self._validate_key(obj, axis)
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/pandas/core/indexing.py", line 2010, in _validate_key
+    "a [{types}]".format(types=self._valid_types)
+ValueError: Can only index by location with a [integer, integer slice (START point is INCLUDED, END point is EXCLUDED), listlike of integers, boolean array]
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "calculate_stats.py", line 71, in <module>
+    calculate_stats(args.graphpath,args.graphclass,args.graphtype)
+  File "calculate_stats.py", line 28, in calculate_stats
+    graph_stats.iloc["Number of Nodes",g_label]=len(list(nodes))
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/pandas/core/indexing.py", line 201, in __setitem__
+    indexer = self._get_setitem_indexer(key)
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/pandas/core/indexing.py", line 179, in _get_setitem_indexer
+    return self._convert_tuple(key, is_setter=True)
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/pandas/core/indexing.py", line 259, in _convert_tuple
+    idx = self._convert_to_indexer(k, axis=i, is_setter=is_setter)
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/pandas/core/indexing.py", line 2155, in _convert_to_indexer
+    "a [{types}]".format(types=self._valid_types)
+ValueError: Can only index by location with a [integer, integer slice (START point is INCLUDED, END point is EXCLUDED), listlike of integers, boolean array]
+
+real	0m1.223s
+user	0m0.851s
+sys	0m0.260s
+Traceback (most recent call last):
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/pandas/core/indexing.py", line 2150, in _convert_to_indexer
+    self._validate_key(obj, axis)
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/pandas/core/indexing.py", line 2010, in _validate_key
+    "a [{types}]".format(types=self._valid_types)
+ValueError: Can only index by location with a [integer, integer slice (START point is INCLUDED, END point is EXCLUDED), listlike of integers, boolean array]
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "calculate_stats.py", line 71, in <module>
+    calculate_stats(args.graphpath,args.graphclass,args.graphtype)
+  File "calculate_stats.py", line 28, in calculate_stats
+    graph_stats.iloc["Number of Nodes",g_label]=len(list(nodes))
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/pandas/core/indexing.py", line 201, in __setitem__
+    indexer = self._get_setitem_indexer(key)
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/pandas/core/indexing.py", line 179, in _get_setitem_indexer
+    return self._convert_tuple(key, is_setter=True)
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/pandas/core/indexing.py", line 259, in _convert_tuple
+    idx = self._convert_to_indexer(k, axis=i, is_setter=is_setter)
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/pandas/core/indexing.py", line 2155, in _convert_to_indexer
+    "a [{types}]".format(types=self._valid_types)
+ValueError: Can only index by location with a [integer, integer slice (START point is INCLUDED, END point is EXCLUDED), listlike of integers, boolean array]
+
+real	0m1.355s
+user	0m0.962s
+sys	0m0.273s
+Traceback (most recent call last):
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/pandas/core/indexing.py", line 2150, in _convert_to_indexer
+    self._validate_key(obj, axis)
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/pandas/core/indexing.py", line 2010, in _validate_key
+    "a [{types}]".format(types=self._valid_types)
+ValueError: Can only index by location with a [integer, integer slice (START point is INCLUDED, END point is EXCLUDED), listlike of integers, boolean array]
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "calculate_stats.py", line 71, in <module>
+    calculate_stats(args.graphpath,args.graphclass,args.graphtype)
+  File "calculate_stats.py", line 28, in calculate_stats
+    graph_stats.iloc["Number of Nodes",g_label]=len(list(nodes))
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/pandas/core/indexing.py", line 201, in __setitem__
+    indexer = self._get_setitem_indexer(key)
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/pandas/core/indexing.py", line 179, in _get_setitem_indexer
+    return self._convert_tuple(key, is_setter=True)
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/pandas/core/indexing.py", line 259, in _convert_tuple
+    idx = self._convert_to_indexer(k, axis=i, is_setter=is_setter)
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/pandas/core/indexing.py", line 2155, in _convert_to_indexer
+    "a [{types}]".format(types=self._valid_types)
+ValueError: Can only index by location with a [integer, integer slice (START point is INCLUDED, END point is EXCLUDED), listlike of integers, boolean array]
+
+real	0m1.733s
+user	0m1.376s
+sys	0m0.277s
+Traceback (most recent call last):
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/pandas/core/indexing.py", line 2150, in _convert_to_indexer
+    self._validate_key(obj, axis)
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/pandas/core/indexing.py", line 2010, in _validate_key
+    "a [{types}]".format(types=self._valid_types)
+ValueError: Can only index by location with a [integer, integer slice (START point is INCLUDED, END point is EXCLUDED), listlike of integers, boolean array]
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "calculate_stats.py", line 71, in <module>
+    calculate_stats(args.graphpath,args.graphclass,args.graphtype)
+  File "calculate_stats.py", line 28, in calculate_stats
+    graph_stats.iloc["Number of Nodes",g_label]=len(list(nodes))
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/pandas/core/indexing.py", line 201, in __setitem__
+    indexer = self._get_setitem_indexer(key)
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/pandas/core/indexing.py", line 179, in _get_setitem_indexer
+    return self._convert_tuple(key, is_setter=True)
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/pandas/core/indexing.py", line 259, in _convert_tuple
+    idx = self._convert_to_indexer(k, axis=i, is_setter=is_setter)
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/pandas/core/indexing.py", line 2155, in _convert_to_indexer
+    "a [{types}]".format(types=self._valid_types)
+ValueError: Can only index by location with a [integer, integer slice (START point is INCLUDED, END point is EXCLUDED), listlike of integers, boolean array]
+
+real	0m1.841s
+user	0m1.474s
+sys	0m0.299s
+Traceback (most recent call last):
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/pandas/core/indexing.py", line 2150, in _convert_to_indexer
+    self._validate_key(obj, axis)
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/pandas/core/indexing.py", line 2010, in _validate_key
+    "a [{types}]".format(types=self._valid_types)
+ValueError: Can only index by location with a [integer, integer slice (START point is INCLUDED, END point is EXCLUDED), listlike of integers, boolean array]
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "calculate_stats.py", line 71, in <module>
+    calculate_stats(args.graphpath,args.graphclass,args.graphtype)
+  File "calculate_stats.py", line 28, in calculate_stats
+    graph_stats.iloc["Number of Nodes",g_label]=len(list(nodes))
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/pandas/core/indexing.py", line 201, in __setitem__
+    indexer = self._get_setitem_indexer(key)
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/pandas/core/indexing.py", line 179, in _get_setitem_indexer
+    return self._convert_tuple(key, is_setter=True)
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/pandas/core/indexing.py", line 259, in _convert_tuple
+    idx = self._convert_to_indexer(k, axis=i, is_setter=is_setter)
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/pandas/core/indexing.py", line 2155, in _convert_to_indexer
+    "a [{types}]".format(types=self._valid_types)
+ValueError: Can only index by location with a [integer, integer slice (START point is INCLUDED, END point is EXCLUDED), listlike of integers, boolean array]
+
+real	0m1.123s
+user	0m0.772s
+sys	0m0.249s
+Traceback (most recent call last):
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/pandas/core/indexing.py", line 2150, in _convert_to_indexer
+    self._validate_key(obj, axis)
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/pandas/core/indexing.py", line 2010, in _validate_key
+    "a [{types}]".format(types=self._valid_types)
+ValueError: Can only index by location with a [integer, integer slice (START point is INCLUDED, END point is EXCLUDED), listlike of integers, boolean array]
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "calculate_stats.py", line 71, in <module>
+    calculate_stats(args.graphpath,args.graphclass,args.graphtype)
+  File "calculate_stats.py", line 28, in calculate_stats
+    graph_stats.iloc["Number of Nodes",g_label]=len(list(nodes))
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/pandas/core/indexing.py", line 201, in __setitem__
+    indexer = self._get_setitem_indexer(key)
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/pandas/core/indexing.py", line 179, in _get_setitem_indexer
+    return self._convert_tuple(key, is_setter=True)
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/pandas/core/indexing.py", line 259, in _convert_tuple
+    idx = self._convert_to_indexer(k, axis=i, is_setter=is_setter)
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/pandas/core/indexing.py", line 2155, in _convert_to_indexer
+    "a [{types}]".format(types=self._valid_types)
+ValueError: Can only index by location with a [integer, integer slice (START point is INCLUDED, END point is EXCLUDED), listlike of integers, boolean array]
+
+real	0m1.209s
+user	0m0.844s
+sys	0m0.267s
+Traceback (most recent call last):
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/pandas/core/indexing.py", line 2150, in _convert_to_indexer
+    self._validate_key(obj, axis)
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/pandas/core/indexing.py", line 2010, in _validate_key
+    "a [{types}]".format(types=self._valid_types)
+ValueError: Can only index by location with a [integer, integer slice (START point is INCLUDED, END point is EXCLUDED), listlike of integers, boolean array]
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "calculate_stats.py", line 71, in <module>
+    calculate_stats(args.graphpath,args.graphclass,args.graphtype)
+  File "calculate_stats.py", line 28, in calculate_stats
+    graph_stats.iloc["Number of Nodes",g_label]=len(list(nodes))
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/pandas/core/indexing.py", line 201, in __setitem__
+    indexer = self._get_setitem_indexer(key)
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/pandas/core/indexing.py", line 179, in _get_setitem_indexer
+    return self._convert_tuple(key, is_setter=True)
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/pandas/core/indexing.py", line 259, in _convert_tuple
+    idx = self._convert_to_indexer(k, axis=i, is_setter=is_setter)
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/pandas/core/indexing.py", line 2155, in _convert_to_indexer
+    "a [{types}]".format(types=self._valid_types)
+ValueError: Can only index by location with a [integer, integer slice (START point is INCLUDED, END point is EXCLUDED), listlike of integers, boolean array]
+
+real	0m1.239s
+user	0m0.837s
+sys	0m0.307s
+usage: calculate_stats.py [-h] [-gp graph path] [-gc graph class]
+                          [-gt graph type]
+calculate_stats.py: error: argument -gc/--graphclass: invalid choice: 'largest_ccf' (choose from 'fred', 'co-occur', 'backbone_df', 'backbone_dc', 'largest_cc', 'kg')
+
+real	0m1.001s
+user	0m0.691s
+sys	0m0.259s
+usage: calculate_stats.py [-h] [-gp graph path] [-gc graph class]
+                          [-gt graph type]
+calculate_stats.py: error: argument -gc/--graphclass: invalid choice: 'largest_ccf' (choose from 'fred', 'co-occur', 'backbone_df', 'backbone_dc', 'largest_cc', 'kg')
+
+real	0m0.993s
+user	0m0.681s
+sys	0m0.265s
+usage: calculate_stats.py [-h] [-gp graph path] [-gc graph class]
+                          [-gt graph type]
+calculate_stats.py: error: argument -gc/--graphclass: invalid choice: 'largest_ccf' (choose from 'fred', 'co-occur', 'backbone_df', 'backbone_dc', 'largest_cc', 'kg')
+
+real	0m1.001s
+user	0m0.671s
+sys	0m0.281s
+usage: calculate_stats.py [-h] [-gp graph path] [-gc graph class]
+                          [-gt graph type]
+calculate_stats.py: error: argument -gc/--graphclass: invalid choice: 'largest_ccc' (choose from 'fred', 'co-occur', 'backbone_df', 'backbone_dc', 'largest_cc', 'kg')
+
+real	0m1.014s
+user	0m0.665s
+sys	0m0.294s
+usage: calculate_stats.py [-h] [-gp graph path] [-gc graph class]
+                          [-gt graph type]
+calculate_stats.py: error: argument -gc/--graphclass: invalid choice: 'largest_ccc' (choose from 'fred', 'co-occur', 'backbone_df', 'backbone_dc', 'largest_cc', 'kg')
+
+real	0m1.004s
+user	0m0.672s
+sys	0m0.278s
+usage: calculate_stats.py [-h] [-gp graph path] [-gc graph class]
+                          [-gt graph type]
+calculate_stats.py: error: argument -gc/--graphclass: invalid choice: 'largest_ccc' (choose from 'fred', 'co-occur', 'backbone_df', 'backbone_dc', 'largest_cc', 'kg')
+
+real	0m0.978s
+user	0m0.669s
+sys	0m0.269s
