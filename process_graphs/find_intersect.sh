@@ -13,3 +13,4 @@ cd /gpfs/home/z/k/zkachwal/Carbonate/factcheckgraph/process_graphs/
 # time python find_intersect.py -fcg backbone_dc -kg dbpedia
 # time python find_intersect.py -fcg largest_ccf -kg dbpedia
 # time python find_intersect.py -fcg largest_ccc -kg dbpedia
+time python find_intersect.py -fcg old_fred -kg dbpedia

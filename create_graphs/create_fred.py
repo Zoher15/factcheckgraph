@@ -628,7 +628,8 @@ def checkFredGraph(g):
 	regex_assoc=re.compile(r'^http:\/\/www\.ontologydesignpatterns\.org\/ont\/dul\/DUL\.owl#associatedWith$')
 	# print("getEdges")
 	for (a,b,c) in g.getEdges():
-		if b=="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#associatedWith":
+		if regex_assoc.match(b):
+			#To removed triples like ['http://www.ontologydesignpatterns.org/ont/fred/domain.owl#drop_1', 'http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#associatedWith','http://www.ontologydesignpatterns.org/ont/fred/domain.owl#drop_2']
 			if regex_freddata_low.match(a) and regex_freddata_low.match(c):
 				if regex_freddata_low.match(a)[1]==regex_freddata_low.match(c)[1]:
 					removed_edges.append((a,b,c))
@@ -679,7 +680,7 @@ def checkFredGraph(g):
 					claim_g=nx.contracted_edge(claim_g,(a, b),self_loops=False)
 					contracted_edges.append((a,b))
 			elif regex_schema.match(a) or regex_schema.match(b):
-				removed_edges.append((a,b))
+				# removed_edges.append((a,b))
 				claim_g.remove_edge(a,b)
 	# print("getEdgeMotif(EdgeMotif.SubClass)")
 	# for (a,b,c) in g.getEdgeMotif(EdgeMotif.SubClass):

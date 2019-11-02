@@ -40,10 +40,14 @@ def create_ntrue_1true(graph_path,rdf_path):
 	trueclaim_avsp_d=np.asarray([])
 	unused_true_claims=np.asarray([])
 	notfound_true_claims=np.asarray([])
+	for claim_ID2 in np.delete(claim_IDs,i):
+		try:
+			trueclaim_g=nx.read_edgelist(os.path.join(rdf_path,"true_claims","claim{}.edgelist".format(claim_ID2)),comments="@")
 	for i,claim_ID in enumerate(claim_IDs):
 		ntrue=nx.Graph()
 		for claim_ID2 in np.delete(claim_IDs,i):
-			trueclaim_g=nx.read_edgelist(os.path.join(rdf_path,"true_claims","claim{}.edgelist".format(claim_ID2)),comments="@")
+			try:
+				trueclaim_g=nx.read_edgelist(os.path.join(rdf_path,"true_claims","claim{}.edgelist".format(claim_ID2)),comments="@")
 			ntrue=nx.compose(ntrue,trueclaim_g)
 		ntrue=max(nx.connected_component_subgraphs(ntrue), key=len)
 		ntrue_avsp=nx.average_shortest_path_length(ntrue)

@@ -41,7 +41,7 @@ def find_adj_pairs2(graph_path,fcg_class,kg_type):
 if __name__== "__main__":
 	parser = argparse.ArgumentParser(description='Perform closed world assumption on adjacent pairs of entities in knowledge graphs')
 	parser.add_argument('-gp','--graphpath', metavar='graph path',type=str,help='Path to the graph directory',default='/gpfs/home/z/k/zkachwal/Carbonate/factcheckgraph_data/graphs/')
-	parser.add_argument('-fcg','--fcgclass', metavar='fcg class',type=str,choices=['fred','co-occur','backbone'],help='Class of FactCheckGraph to process')
+	parser.add_argument('-fcg','--fcgclass', metavar='fcg class',type=str,help='Class of FactCheckGraph to process')
 	parser.add_argument('-kg','--kgtype', metavar='knowledgegraph type',type=str,choices=['dbpedia','wikidata'],help='DBPedia or Wikidata Graph')
 	args=parser.parse_args()
 	find_adj_pairs(args.graphpath,args.fcgclass,args.kgtype)

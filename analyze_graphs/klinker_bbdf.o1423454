@@ -1,0 +1,48 @@
+
+2019-10-30 13:24:28.374546:
+    metric: ultrametric
+    edges:  undirected
+    weight: logdegree
+    nodes:  tfcg_bbdf/data/tfcg_bbdf_nodes.txt
+    graph:  tfcg_bbdf/data/tfcg_bbdf_edgelistID.npy
+    input:  tfcg_bbdf/data/intersect_all_entityPairs_dbpedia_backbone_df_tfcg_bbdf_IDs_klformat.txt
+    output: tfcg_bbdf/data/intersect_all_entityPairs_dbpedia_backbone_df_tfcg_bbdf_IDs.json
+2019-10-30 13:24:28.375018: reading nodes from text file..
+2019-10-30 13:24:28.446460: reading graph from text file..
+
+>> RuntimeWarning: divide by zero encountered in log
+
+2019-10-30 13:24:28.493157: reading input..
+2019-10-30 13:24:29.584337: launching pool of 12 workers.
+2019-10-30 13:41:48.834036: done
+
+2019-10-30 13:42:05.872656:
+    metric: ultrametric
+    edges:  undirected
+    weight: logdegree
+    nodes:  ffcg_bbdf/data/ffcg_bbdf_nodes.txt
+    graph:  ffcg_bbdf/data/ffcg_bbdf_edgelistID.npy
+    input:  ffcg_bbdf/data/intersect_all_entityPairs_dbpedia_backbone_df_ffcg_bbdf_IDs_klformat.txt
+    output: ffcg_bbdf/data/intersect_all_entityPairs_dbpedia_backbone_df_ffcg_bbdf_IDs.json
+2019-10-30 13:42:05.872838: reading nodes from text file..
+2019-10-30 13:42:05.989635: reading graph from text file..
+
+>> RuntimeWarning: divide by zero encountered in log
+
+2019-10-30 13:42:06.065241: reading input..
+2019-10-30 13:42:06.983105: launching pool of 12 workers.
+2019-10-30 14:11:55.473625: done
+
+2019-10-30 14:12:14.111119:
+    metric: ultrametric
+    edges:  undirected
+    weight: logdegree
+    nodes:  ufcg_bbdf/data/ufcg_bbdf_nodes.txt
+    graph:  ufcg_bbdf/data/ufcg_bbdf_edgelistID.npy
+    input:  ufcg_bbdf/data/intersect_all_entityPairs_dbpedia_backbone_df_ufcg_bbdf_IDs_klformat.txt
+    output: ufcg_bbdf/data/intersect_all_entityPairs_dbpedia_backbone_df_ufcg_bbdf_IDs.json
+2019-10-30 14:12:14.111353: reading nodes from text file..
+2019-10-30 14:12:14.230169: reading graph from text file..
+2019-10-30 14:12:14.299811: reading input..
+2019-10-30 14:12:15.228483: launching pool of 12 workers.
+2019-10-30 14:46:04.904729: done

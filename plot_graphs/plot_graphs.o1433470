@@ -1,0 +1,9 @@
+
+real	2m39.386s
+user	0m33.364s
+sys	0m7.861s
+
+real	2m14.417s
+user	0m27.850s
+sys	0m6.344s
+=>> PBS: job killed: walltime 317 exceeded limit 300

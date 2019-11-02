@@ -36,6 +36,7 @@ def calculate_stats(graph_path,graph_class,g_label):
 	graph_stats.loc["Largest Component Edges",g_label]=len(largest_cc.edges())
 	graph_stats.loc["Average Degree",g_label]=avg_degree
 	graph_stats.loc["Average Squared Degree",g_label]=avg_square_degree
+	kappa=avg_square_degree/np.square(avg_degree)
 	graph_stats.loc["Kappa/Heterogenity Coefficient",g_label]=kappa
 	graph_stats.loc["Average Clustering Coefficient",g_label]=nx.average_clustering(G)
 	graph_stats.loc["Density",g_label]=nx.density(G)
@@ -49,7 +50,7 @@ def calculate_stats(graph_path,graph_class,g_label):
 	# graph_stats.loc["Average Shortest Path Length",g_label]=avg_shortest_path
 	if graph_stats.loc["Number of Connected Components",g_label]==1:
 		graph_stats.loc["Average Shortest Path Length",g_label]=nx.average_shortest_path_length(G)
-	write_path=os.path.join(graph_path,graph_class,graph_type,"stats")
+	write_path=os.path.join(graph_path,graph_class,g_label,"stats")
 	os.makedirs(write_path, exist_ok=True)
 	write_path=os.path.join(write_path,g_label)
 	graph_stats.to_csv(write_path+"_stats.csv")
@@ -65,7 +66,7 @@ def calculate_stats(graph_path,graph_class,g_label):
 if __name__== "__main__":
 	parser = argparse.ArgumentParser(description='calculate stats for graphs')
 	parser.add_argument('-gp','--graphpath', metavar='graph path',type=str,help='Path to the graph directory',default='/gpfs/home/z/k/zkachwal/Carbonate/factcheckgraph_data/graphs/')
-	parser.add_argument('-gc','--graphclass', metavar='graph class',type=str,choices=['fred','co-occur','backbone_df','backbone_dc','largest_ccf','largest_ccc','kg'],help='Class of graph to process')
+	parser.add_argument('-gc','--graphclass', metavar='graph class',type=str,choices=['fred','co-occur','backbone_df','backbone_dc','largest_ccf','largest_ccc','kg','old_fred'],help='Class of graph to process')
 	parser.add_argument('-gt','--graphtype', metavar='graph type',type=str,help='Type of graph like dbpedia,wikidata,tfcg etc')
 	args=parser.parse_args()
 	calculate_stats(args.graphpath,args.graphclass,args.graphtype)
