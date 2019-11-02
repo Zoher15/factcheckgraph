@@ -679,9 +679,11 @@ def checkFredGraph(g):
 				if regex_freddata_low.match(b)[1]==regex_owl.match(a)[1].lower():
 					claim_g=nx.contracted_edge(claim_g,(a, b),self_loops=False)
 					contracted_edges.append((a,b))
-			elif regex_schema.match(a) or regex_schema.match(b):
+			# elif regex_schema.match(a) or regex_schema.match(b):
 				# removed_edges.append((a,b))
-				claim_g.remove_edge(a,b)
+				# claim_g.remove_edge(a,b)
+
+
 	# print("getEdgeMotif(EdgeMotif.SubClass)")
 	# for (a,b,c) in g.getEdgeMotif(EdgeMotif.SubClass):
 	#	 print(a,b,c)
