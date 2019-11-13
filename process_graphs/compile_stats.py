@@ -24,6 +24,6 @@ def calculate_stats(graph_path):
 
 if __name__== "__main__":
 	parser = argparse.ArgumentParser(description='calculate stats for graphs')
-	parser.add_argument('-gp','--graphpath', metavar='graph path',type=str,help='Path to the graph directory',default='/gpfs/home/z/k/zkachwal/Carbonate/factcheckgraph_data/graphs/')
+	parser.add_argument('-gp','--graphpath', metavar='graph path',type=str,help='Path to the graph directory',default='/gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph_data/graphs/')
 	args=parser.parse_args()
 	calculate_stats(args.graphpath)

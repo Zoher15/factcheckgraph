@@ -1,5 +1,5 @@
 
-2019-10-30 13:24:28.374546:
+2019-11-11 21:31:04.804468:
     metric: ultrametric
     edges:  undirected
     weight: logdegree
@@ -7,16 +7,16 @@
     graph:  tfcg_bbdf/data/tfcg_bbdf_edgelistID.npy
     input:  tfcg_bbdf/data/intersect_all_entityPairs_dbpedia_backbone_df_tfcg_bbdf_IDs_klformat.txt
     output: tfcg_bbdf/data/intersect_all_entityPairs_dbpedia_backbone_df_tfcg_bbdf_IDs.json
-2019-10-30 13:24:28.375018: reading nodes from text file..
-2019-10-30 13:24:28.446460: reading graph from text file..
+2019-11-11 21:31:04.804801: reading nodes from text file..
+2019-11-11 21:31:04.917629: reading graph from text file..
 
 >> RuntimeWarning: divide by zero encountered in log
 
-2019-10-30 13:24:28.493157: reading input..
-2019-10-30 13:24:29.584337: launching pool of 12 workers.
-2019-10-30 13:41:48.834036: done
+2019-11-11 21:31:04.974876: reading input..
+2019-11-11 21:31:05.971841: launching pool of 20 workers.
+2019-11-11 21:48:17.087041: done
 
-2019-10-30 13:42:05.872656:
+2019-11-11 21:51:08.689932:
     metric: ultrametric
     edges:  undirected
     weight: logdegree
@@ -24,16 +24,13 @@
     graph:  ffcg_bbdf/data/ffcg_bbdf_edgelistID.npy
     input:  ffcg_bbdf/data/intersect_all_entityPairs_dbpedia_backbone_df_ffcg_bbdf_IDs_klformat.txt
     output: ffcg_bbdf/data/intersect_all_entityPairs_dbpedia_backbone_df_ffcg_bbdf_IDs.json
-2019-10-30 13:42:05.872838: reading nodes from text file..
-2019-10-30 13:42:05.989635: reading graph from text file..
+2019-11-11 21:51:08.690212: reading nodes from text file..
+2019-11-11 21:51:08.845423: reading graph from text file..
+2019-11-11 21:51:09.152708: reading input..
+2019-11-11 21:51:10.063026: launching pool of 20 workers.
+2019-11-11 22:22:46.279795: done
 
->> RuntimeWarning: divide by zero encountered in log
-
-2019-10-30 13:42:06.065241: reading input..
-2019-10-30 13:42:06.983105: launching pool of 12 workers.
-2019-10-30 14:11:55.473625: done
-
-2019-10-30 14:12:14.111119:
+2019-11-11 22:25:42.081856:
     metric: ultrametric
     edges:  undirected
     weight: logdegree
@@ -41,8 +38,8 @@
     graph:  ufcg_bbdf/data/ufcg_bbdf_edgelistID.npy
     input:  ufcg_bbdf/data/intersect_all_entityPairs_dbpedia_backbone_df_ufcg_bbdf_IDs_klformat.txt
     output: ufcg_bbdf/data/intersect_all_entityPairs_dbpedia_backbone_df_ufcg_bbdf_IDs.json
-2019-10-30 14:12:14.111353: reading nodes from text file..
-2019-10-30 14:12:14.230169: reading graph from text file..
-2019-10-30 14:12:14.299811: reading input..
-2019-10-30 14:12:15.228483: launching pool of 12 workers.
-2019-10-30 14:46:04.904729: done
+2019-11-11 22:25:42.082146: reading nodes from text file..
+2019-11-11 22:25:42.669955: reading graph from text file..
+2019-11-11 22:25:42.763039: reading input..
+2019-11-11 22:25:43.667160: launching pool of 20 workers.
+2019-11-11 23:02:02.816497: done

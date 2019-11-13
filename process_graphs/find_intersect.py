@@ -47,7 +47,7 @@ def find_intersect(graph_path,fcg_class,kg_label):
 
 if __name__== "__main__":
 	parser = argparse.ArgumentParser(description='Find intersection of entities for graphs')
-	parser.add_argument('-gp','--graphpath', metavar='graph path',type=str,help='Path to the graph directory',default='/gpfs/home/z/k/zkachwal/Carbonate/factcheckgraph_data/graphs/')
+	parser.add_argument('-gp','--graphpath', metavar='graph path',type=str,help='Path to the graph directory',default='/gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph_data/graphs/')
 	parser.add_argument('-fcg','--fcgclass', metavar='fcg class',type=str,choices=['fred','co-occur','backbone_df','backbone_dc','largest_ccf','largest_ccc','old_fred'],help='Class of FactCheckGraph to process')
 	parser.add_argument('-kg','--kg', metavar='knowledgegraph type',type=str,choices=['dbpedia','wikidata'],help='DBPedia or Wikidata Graph')
 	args=parser.parse_args()

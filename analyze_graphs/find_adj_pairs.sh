@@ -1,14 +1,19 @@
-#PBS -k o
-#PBS -l nodes=1:ppn=1,vmem=64gb,walltime=0:15:00
-#PBS -M zoher.kachwala@gmail.com
-#PBS -m abe
-#PBS -N find_adj_pairs
-#PBS -j oe
+#!/bin/bash
+
+#SBATCH -J find_adj_pairs
+#SBATCH -p general
+#SBATCH -o find_adj_pairs_%j.txt
+#SBATCH -e find_adj_pairs_%j.err
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=zoher.kachwala@gmail.com
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --time=00:30:00
+
 source /N/u/zkachwal/Carbonate/miniconda3/etc/profile.d/conda.sh
 conda activate
-cd /gpfs/home/z/k/zkachwal/Carbonate/factcheckgraph/analyze_graphs/
+cd /gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph/analyze_graphs/
 # time python find_adj_pairs.py -fcg fred -kg dbpedia
-# time python find_adj_pairs.py -fcg backbone_df -kg dbpedia 
-# time python find_adj_pairs.py -fcg largest_ccf -kg dbpedia 
-# time python calculate_stats.py -gc kg -gt dbpedia
-time python find_adj_pairs.py -fcg old_fred -kg dbpedia 
+time python find_adj_pairs.py -fcg backbone_df -kg dbpedia 
+time python find_adj_pairs.py -fcg largest_ccf -kg dbpedia 
+# time python find_adj_pairs.py -fcg old_fred -kg dbpedia 

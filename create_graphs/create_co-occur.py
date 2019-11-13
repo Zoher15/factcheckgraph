@@ -27,10 +27,12 @@ def create_co_occur(rdf_path,graph_path,fcg_label):
 		claim_entities={}
 		claim_edges={}
 		entity_regex=re.compile(r'http:\/\/dbpedia\.org')
-		fcg_co=nx.Graph()
+		fcg_co=nx.MultiGraph()
 		for claim_ID in claim_IDs:
+			filename=os.path.join(rdf_path,"{}_claims".format(claim_type),"claim{}_co".format(str(claim_ID)))
 			claim_entities_set=set([])
 			claim_g=rdflib.Graph()
+			claim_nxg=nx.MultiGraph()
 			filename="claim{}.rdf".format(str(claim_ID))
 			try:
 				claim_g.parse(os.path.join(rdf_path,"{}_claims".format(claim_type),filename),format='application/rdf+xml')
@@ -47,7 +49,12 @@ def create_co_occur(rdf_path,graph_path,fcg_label):
 					pass
 			claim_entities[claim_ID]=list(claim_entities_set)
 			claim_edges[claim_ID]=list(combinations(claim_entities[claim_ID],2))
-			fcg_co.add_edges_from(claim_edges[claim_ID])
+			import pdb
+			pdb.set_trace()
+			for edge in claim_edges[claim_ID]:
+				claim_nxg.add_edge(edge[0],edge[1],claim_ID=claim_ID)
+			nx.write_edgelist(claim_nxg,filename+".edgelist")
+			fcg_co=nx.compose(fcg_co,claim_nxg)
 	fcg_path=os.path.join(graph_path,"co-occur",fcg_label)
 	os.makedirs(fcg_path, exist_ok=True)
 	nx.write_edgelist(fcg_co,os.path.join(fcg_path,"{}.edgelist".format(fcg_label)),data=False)
@@ -76,8 +83,8 @@ def create_co_occur(rdf_path,graph_path,fcg_label):
 
 if __name__== "__main__":
 	parser=argparse.ArgumentParser(description='Create co-cccur graph')
-	parser.add_argument('-r','--rdfpath', metavar='rdf path',type=str,help='Path to the rdf files parsed by FRED',default='/gpfs/home/z/k/zkachwal/Carbonate/factcheckgraph_data/rdf_files/')
-	parser.add_argument('-gp','--graphpath', metavar='graph path',type=str,help='Graph directory to store the graphs',default='/gpfs/home/z/k/zkachwal/Carbonate/factcheckgraph_data/graphs/')
+	parser.add_argument('-r','--rdfpath', metavar='rdf path',type=str,help='Path to the rdf files parsed by FRED',default='/gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph_data/rdf_files/')
+	parser.add_argument('-gp','--graphpath', metavar='graph path',type=str,help='Graph directory to store the graphs',default='/gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph_data/graphs/')
 	parser.add_argument('-ft','--fcgtype', metavar='FactCheckGraph type',type=str,choices=['tfcg_co','ffcg_co','ufcg_co'],help='True False or Union FactCheckGraph')
 	args=parser.parse_args()
 	create_co_occur(args.rdfpath,args.graphpath,args.fcgtype)

@@ -47,7 +47,7 @@ def create_backbone(graph_path,fcg_class,fcg_label,kg_type):
 
 if __name__== "__main__":
 	parser = argparse.ArgumentParser(description='Create Backbone Network using betweenness centrality')
-	parser.add_argument('-gp','--graphpath', metavar='graph path',type=str,help='Path to the graphs directory',default='/gpfs/home/z/k/zkachwal/Carbonate/factcheckgraph_data/graphs/')
+	parser.add_argument('-gp','--graphpath', metavar='graph path',type=str,help='Path to the graphs directory',default='/gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph_data/graphs/')
 	parser.add_argument('-fcg','--fcgclass', metavar='FactCheckGraph class',type=str,choices=['fred','co-occur'],help='FRED or Co-Occur')
 	parser.add_argument('-ft','--fcgtype', metavar='FactCheckGraph type',type=str,help='True False or Union FactCheckGraph')
 	parser.add_argument('-kg','--kgtype', metavar='KnowledgeGraph type',type=str,choices=['dbpedia','wikidata'],help='DBPedia or Wikidata')

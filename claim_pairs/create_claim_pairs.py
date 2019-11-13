@@ -88,9 +88,9 @@ def create_claim_scores(rdf_path,graph_path,pairs_path,kg_label):
 
 if __name__== "__main__":
 	parser=argparse.ArgumentParser(description='Create co-cccur graph')
-	parser.add_argument('-r','--rdfpath', metavar='rdf path',type=str,help='Path to the rdf files parsed by FRED',default='/gpfs/home/z/k/zkachwal/Carbonate/factcheckgraph_data/rdf_files/')
-	parser.add_argument('-gp','--graphpath', metavar='graph path',type=str,help='Graph directory to store the graphs',default='/gpfs/home/z/k/zkachwal/Carbonate/factcheckgraph_data/graphs/')
-	parser.add_argument('-pp','--pairspath', metavar='pairs path',type=str,help='True False or Union FactCheckGraph',default='/gpfs/home/z/k/zkachwal/Carbonate/factcheckgraph_data/claim_pairs/')
+	parser.add_argument('-r','--rdfpath', metavar='rdf path',type=str,help='Path to the rdf files parsed by FRED',default='/gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph_data/rdf_files/')
+	parser.add_argument('-gp','--graphpath', metavar='graph path',type=str,help='Graph directory to store the graphs',default='/gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph_data/graphs/')
+	parser.add_argument('-pp','--pairspath', metavar='pairs path',type=str,help='True False or Union FactCheckGraph',default='/gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph_data/claim_pairs/')
 	parser.add_argument('-kg','--kg', metavar='knowledgegraph type',type=str,choices=['dbpedia','wikidata'],help='DBPedia or Wikidata Graph')
 	args=parser.parse_args()
 	create_claim_scores(args.rdfpath,args.graphpath,args.pairspath,args.kg)

@@ -42,7 +42,7 @@ def create_largest_cc(graph_path,fcg_class,fcg_label):
 
 if __name__== "__main__":
 	parser = argparse.ArgumentParser(description='Create Largest Component Graph')
-	parser.add_argument('-gp','--graphpath', metavar='graph path',type=str,help='Path to the graphs directory',default='/gpfs/home/z/k/zkachwal/Carbonate/factcheckgraph_data/graphs/')
+	parser.add_argument('-gp','--graphpath', metavar='graph path',type=str,help='Path to the graphs directory',default='/gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph_data/graphs/')
 	parser.add_argument('-fcg','--fcgclass', metavar='FactCheckGraph class',type=str,help='Class of graph that already exists')
 	parser.add_argument('-ft','--fcgtype', metavar='FactCheckGraph type',type=str,help='True False or Union FactCheckGraph')
 	args=parser.parse_args()

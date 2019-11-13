@@ -1,0 +1,12 @@
+Traceback (most recent call last):
+  File "create_co-occur.py", line 83, in <module>
+    create_co_occur(args.rdfpath,args.graphpath,args.fcgtype)
+  File "create_co-occur.py", line 26, in create_co_occur
+    claim_IDs=np.load(os.path.join(rdf_path,"{}_claimID.npy".format(claim_type)))
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/numpy/lib/npyio.py", line 422, in load
+    fid = open(os_fspath(file), "rb")
+FileNotFoundError: [Errno 2] No such file or directory: '/gpfs/home/z/k/zkachwal/Carbonate/factcheckgraph_data/rdf_files/true_claimID.npy'
+
+real	1m25.292s
+user	0m0.808s
+sys	0m1.432s
