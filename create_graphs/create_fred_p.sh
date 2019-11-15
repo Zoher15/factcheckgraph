@@ -14,7 +14,7 @@ conda activate
 cd /gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph/create_graphs/
 time python create_fred.py -ft tfcg -p
 time python create_fred.py -ft ffcg -p
-time python create_fred.py -ft ufcg
+# time python create_fred.py -ft ufcg
 # time python create_backbone.py -fcg fred -ft tfcg -kg dbpedia
 # time python create_backbone.py -fcg fred -ft ffcg -kg dbpedia
 # time python create_backbone.py -fcg fred -ft ufcg -kg dbpedia

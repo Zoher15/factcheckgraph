@@ -20,6 +20,9 @@ import json
 import numpy as np
 import xml.sax
 import html
+from collections import ChainMap 
+from itertools import chain
+import multiprocessing as mp
 from urllib.parse import urlparse
 
 __author__='Misael Mongiovi, Andrea Giovanni Nuzzolese'
@@ -581,215 +584,84 @@ def checkFredFile(filename):
 	g=openFredGraph(filename)
 	checkFredGraph(g)
 
-def checkFredGraph(g):
-	claim_g=nx.Graph()
-	claim_g_m=nx.MultiGraph()
-	removed_edges=[]
-	contracted_edges=[]
-	# print("getNodes")
-	# for n in g.getNodes():
-	#	 print(n)
-
-	# print("getClassNodes")
-	# for n in g.getClassNodes():
-	#	 print(n)
-
-	# print("getInstanceNodes")
-	# for n in g.getInstanceNodes():
-	#	 print(n)
-
-	# print("getEventNodes")
-	# for n in g.getEventNodes():
-	#	 print(n)
-
-	# print("getSituationNodes")
-	# for n in g.getSituationNodes():
-	#	 print(n)
-
-	# print("getNamedEntityNodes")
-	# for n in g.getNamedEntityNodes():
-	#	 print(n)
-
-	# print("getQualityNodes")
-	# for n in g.getQualityNodes():
-	#	 print(n)
-
-	# print("getInfoNodes")
-	# ns=g.getInfoNodes()
-	# for n in ns:
-	#	 print(n, ns[n].Type, ns[n].FredType, ns[n].ResourceType)
-	regex_27=re.compile(r'^http:\/\/www\.ontologydesignpatterns\.org\/ont\/fred\/domain\.owl#%27.*')
-	regex_vndata=re.compile(r'^http:\/\/www\.ontologydesignpatterns\.org\/ont\/vn\/data\/(.*)')
+def checkClaimGraph(g):
+	regex_assoc=re.compile(r'^http:\/\/www\.ontologydesignpatterns\.org\/ont\/dul\/DUL\.owl#associatedWith$')
 	regex_freddata_low=re.compile(r'^http:\/\/www\.ontologydesignpatterns\.org\/ont\/fred\/domain\.owl#([a-z]*)_.*')
 	regex_freddata_upp=re.compile(r'^http:\/\/www\.ontologydesignpatterns\.org\/ont\/fred\/domain\.owl#([a-zA-Z]*)$')
-	regex_dbpedia=re.compile(r'^http:\/\/dbpedia\.org\/resource\/(.*)')
+	regex_27=re.compile(r'^http:\/\/www\.ontologydesignpatterns\.org\/ont\/fred\/domain\.owl#%27.*')
 	regex_dul=re.compile(r'^http:\/\/www\.ontologydesignpatterns\.org\/ont\/dul\/DUL\.owl#(.*)')
+	regex_quant=re.compile(r'^http:\/\/www\.ontologydesignpatterns\.org\/ont\/fred\/quantifiers\.owl#.*')
+	regex_vndata=re.compile(r'^http:\/\/www\.ontologydesignpatterns\.org\/ont\/vn\/data\/(.*)')
+	regex_dbpedia=re.compile(r'^http:\/\/dbpedia\.org\/resource\/(.*)')
 	regex_owl=re.compile(r'^http:\/\/www\.w3\.org\/2002\/07\/owl#(.*)')
 	regex_schema=re.compile(r'^http:\/\/schema\.org\/(.*)')
-	regex_quant=re.compile(r'^http:\/\/www\.ontologydesignpatterns\.org\/ont\/fred\/quantifiers\.owl#.*')
-	regex_assoc=re.compile(r'^http:\/\/www\.ontologydesignpatterns\.org\/ont\/dul\/DUL\.owl#associatedWith$')
-	# print("getEdges")
+	claim_g=nx.Graph()
+	edges2remove={}
+	edges2remove['assoc']={}
+	edges2remove['assoc']['1']=[]
+	edges2remove['assoc']['2']=[]
+	edges2remove['assoc']['3']=[]
+	edges2remove['assoc']['4']=[]
+	edges2remove['misc']=[]
+	edges2remove['ideq']={}
+	edges2remove['ideq']['1']=[]
+	edges2remove['ideq']['2']=[]
+	edges2contract={}
+	edges2contract['ideq']={}
+	edges2contract['ideq']['1']=[]
+	edges2contract['ideq']['2']=[]
+	edges2contract['type']={}
+	edges2contract['type']['1']=[]
+	edges2contract['type']['2']=[]
+	edges2contract['type']['3']=[]
 	for (a,b,c) in g.getEdges():
+		claim_g.add_edge(a,c,label=b)
 		a_urlparse=urlparse(a)
 		c_urlparse=urlparse(c)
 		if regex_assoc.match(b):
-			#To removed triples like ['http://www.ontologydesignpatterns.org/ont/fred/domain.owl#drop_1', 'http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#associatedWith','http://www.ontologydesignpatterns.org/ont/fred/domain.owl#drop_2']
+			# To removed triples like ['http://www.ontologydesignpatterns.org/ont/fred/domain.owl#drop_1', 'http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#associatedWith','http://www.ontologydesignpatterns.org/ont/fred/domain.owl#drop_2']
 			if regex_freddata_low.match(a) and regex_freddata_low.match(c):
 				if regex_freddata_low.match(a)[1]==regex_freddata_low.match(c)[1]:
-					removed_edges.append((a,b,c))
+					edges2remove['assoc']['1'].append((a,b,c))
 			elif regex_freddata_low.match(a) and regex_freddata_upp.match(c):
 				if regex_freddata_low.match(a)[1]==regex_freddata_upp.match(c)[1].lower():
-					removed_edges.append((a,b,c))
+					edges2remove['assoc']['2'].append((a,b,c))
 			elif regex_freddata_low.match(c) and regex_freddata_upp.match(a):
 				if regex_freddata_low.match(c)[1]==regex_freddata_upp.match(a)[1].lower():
-					removed_edges.append((a,b,c))
+					edges2remove['assoc']['3'].append((a,b,c))
+			else:
+				edges2remove['assoc']['4'].append((a,b,c))
 		elif regex_quant.match(b) or regex_27.match(a) or regex_27.match(c) or regex_dul.match(a) or regex_dul.match(c) or a==c or (a_urlparse.netloc=='' and a_urlparse.scheme=='') or (c_urlparse.netloc=='' and c_urlparse.scheme==''):
-			removed_edges.append((a,b,c))
-		else:
-			claim_g.add_edge(a,c,label=b)
-			claim_g_m.add_edge(a,c,label=b)
-		# print(a,b,c)
-	# print("getEdgeMotif(EdgeMotif.Role)")
-	# for (a,b,c) in g.getEdgeMotif(EdgeMotif.Role):
-	#	 print(a,b,c)
-
-	# print("getEdgeMotif(EdgeMotif.Identity)")
-	# for (a,b,c) in g.getEdgeMotif(EdgeMotif.Identity):
-	#	 print(a,b,c)
-
-	# print("getEdgeMotif(EdgeMotif.Type)")
-	# for (a,b,c) in g.getEdgeMotif(EdgeMotif.Type):
-	#	 print(a,b,c)
-
-	# print("getEdgeMotif(EdgeMotif.Property)")
-	# for (a,b,c) in g.getEdgeMotif(EdgeMotif.Property):
-	#	 print(a,b,c)
-
-	# print("getPathMotif(PathMotif.Type)")
-
+			edges2remove['misc'].append((a,b,c))
 	#Merges edges like ['http://www.ontologydesignpatterns.org/ont/fred/domain.owl#million_1','http://www.w3.org/1999/02/22-rdf-syntax-ns#type','http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Million']
 	for (a,b) in g.getPathMotif(PathMotif.Type):
-		if claim_g.has_edge(a,b):
-			if regex_freddata_low.match(a)!=None and regex_freddata_upp.match(b)!=None:
-				if regex_freddata_low.match(a)[1] in regex_freddata_upp.match(b)[1].lower():
-					import pdb
-					pdb.set_trace()
-					claim_g=nx.contracted_edge(claim_g,(b, a),self_loops=False)
-					claim_g_m=nx.contracted_edge(claim_g_m,(b, a),self_loops=False)
-					contracted_edges.append((b,a))
-			elif regex_freddata_low.match(b)!=None and regex_freddata_upp.match(a)!=None:
-				if regex_freddata_low.match(b)[1] in regex_freddata_upp.match(a)[1].lower():
-					claim_g=nx.contracted_edge(claim_g,(a, b),self_loops=False)
-					claim_g_m=nx.contracted_edge(claim_g_m,(a, b),self_loops=False)
-					contracted_edges.append((a,b))
-			elif regex_freddata_low.match(a)!=None and regex_owl.match(b)!=None:
-				if regex_freddata_low.match(a)[1] in regex_owl.match(b)[1].lower():
-					claim_g=nx.contracted_edge(claim_g,(b, a),self_loops=False)
-					claim_g_m=nx.contracted_edge(claim_g_m,(b, a),self_loops=False)
-					contracted_edges.append((b,a))
-			elif regex_freddata_low.match(b)!=None and regex_owl.match(a)!=None:
-				if regex_freddata_low.match(b)[1] in regex_owl.match(a)[1].lower():
-					claim_g=nx.contracted_edge(claim_g,(a, b),self_loops=False)
-					claim_g_m=nx.contracted_edge(claim_g_m,(a, b),self_loops=False)
-					contracted_edges.append((a,b))
-			elif regex_schema.match(a) or regex_schema.match(b):
-				removed_edges.append((a,b))
-				claim_g.remove_edge(a,b)
-				claim_g_m.remove_edge(a,b)
+		if regex_freddata_low.match(a)!=None and regex_freddata_upp.match(b)!=None:
+			if regex_freddata_low.match(a)[1] in regex_freddata_upp.match(b)[1].lower():
+				edges2contract['type']['1'].append((b,a))
+		elif regex_freddata_low.match(b)!=None and regex_freddata_upp.match(a)!=None:
+			if regex_freddata_low.match(b)[1] in regex_freddata_upp.match(a)[1].lower():
+				edges2contract['type']['2'].append((a,b))
+		elif regex_freddata_low.match(a)!=None and regex_owl.match(b)!=None:
+			if regex_freddata_low.match(a)[1] in regex_owl.match(b)[1].lower():
+				edges2contract['type']['3'].append((b,a))
+		elif regex_freddata_low.match(b)!=None and regex_owl.match(a)!=None:
+			if regex_freddata_low.match(b)[1] in regex_owl.match(a)[1].lower():
+				edges2contract['type']['4'].append((a,b))
+		elif regex_schema.match(a) or regex_schema.match(b):
+			edges2remove.append((a,b))
 
-
-	# print("getEdgeMotif(EdgeMotif.SubClass)")
-	# for (a,b,c) in g.getEdgeMotif(EdgeMotif.SubClass):
-	#	 print(a,b,c)
-
-	# print("getEdgeMotif(EdgeMotif.Equivalence)")
-	# for (a,b,c) in g.getEdgeMotif(EdgeMotif.Equivalence):
-	#	 print(a,b,c)
-
-	# print("getEdgeMotif(EdgeMotif.Modality)")
-	# for (a,b,c) in g.getEdgeMotif(EdgeMotif.Modality):
-	#	 print(a,b,c)
-
-	# print("getEdgeMotif(EdgeMotif.Negation)")
-	# for (a,b,c) in g.getEdgeMotif(EdgeMotif.Negation):
-	#	 print(a,b,c)
-
-	# print("getInfoEdges")
-	# es=g.getInfoEdges()
-	# for e in es:
-	#	 print(e, es[e].Type)
-
-	# print("getPathMotif(PathMotif.SubClass)")
-	# for (a,b) in g.getPathMotif(PathMotif.SubClass):
-	#	 print(a,b)
-
-	# print("getClusterMotif(ClusterMotif.Identity)")
-	# for cluster in g.getClusterMotif(ClusterMotif.Identity):
-	#	 print(cluster)
-
-	# print("getClusterMotif(ClusterMotif.Equivalence)")
-	# for cluster in g.getClusterMotif(ClusterMotif.Equivalence):
-	#	 print(cluster)
-
-	# print("getClusterMotif(ClusterMotif.IdentityEquivalence)")
 	for cluster in g.getClusterMotif(ClusterMotif.IdentityEquivalence):
-		# print(cluster)
 		a=list(cluster)[0]
 		b=list(cluster)[1]
-		if claim_g.has_edge(a,b):
-			if regex_vndata.match(a) or regex_dbpedia.match(a):
-				claim_g=nx.contracted_edge(claim_g,(a, b),self_loops=False)
-				claim_g_m=nx.contracted_edge(claim_g_m,(a, b),self_loops=False)
-				contracted_edges.append((a,b))
-			elif regex_vndata.match(b) or regex_dbpedia.match(b):
-				claim_g=nx.contracted_edge(claim_g,(b, a),self_loops=False)
-				claim_g_m=nx.contracted_edge(claim_g_m,(b, a),self_loops=False)
-				contracted_edges.append((a,b))
+		if regex_vndata.match(a) or regex_dbpedia.match(a):
+			edges2contract['ideq']['1'].append((a,b))
+		elif regex_vndata.match(b) or regex_dbpedia.match(b):
+			edges2contract['ideq']['1'].append((a,b))
+		else:
+			edges2contract['ideq']['2'].append((a,b))
+	return claim_g,edges2remove,edges2contract
 
-	# print("g.getNaryMotif(NaryMotif.Event)")
-	# motif_occurrences=g.getNaryMotif(NaryMotif.Event)
-	# for event in motif_occurrences:
-	#	 roles=motif_occurrences[event]
-	#	 print(event,"{", end=' ')
-	#	 for r in roles:
-	#		 print(r,":",roles[r],";", end=' ')
-	#	 print("}")
-
-	# print("g.getNaryMotif(NaryMotif.Situation)")
-	# motif_occurrences=g.getNaryMotif(NaryMotif.Situation)
-	# for situation in motif_occurrences:
-	#	 roles=motif_occurrences[situation]
-	#	 print(event,"{", end=' ')
-	#	 for r in roles:
-	#		 print(r,":",roles[r],";", end=' ')
-	#	 print("}")
-
-	# print("g.getNaryMotif(NaryMotif.OtherEvent)")
-	# motif_occurrences=g.getNaryMotif(NaryMotif.OtherEvent)
-	# for other_event in motif_occurrences:
-	#	 roles=motif_occurrences[other_event]
-	#	 print(event,"{", end=' ')
-	#	 for r in roles:
-	#		 print(r,":",roles[r],";", end=' ')
-	#	 print("}")
-
-	# print("g.getNaryMotif(NaryMotif.Concept)")
-	# motif_occurrences=g.getNaryMotif(NaryMotif.Concept)
-	# for concept in motif_occurrences:
-	#	 roles=motif_occurrences[concept]
-	#	 print(event,"{", end=' ')
-	#	 for r in roles:
-	#		 print(r,":",roles[r],";", end=' ')
-	#	 print("}")
-	claim_g.remove_nodes_from(list(nx.isolates(claim_g)))
-	claim_g_m.remove_nodes_from(list(nx.isolates(claim_g_m)))
-	return claim_g,claim_g_m,removed_edges,contracted_edges
-
-def fredParse(rdf_path,fcg_path,fcg_label,init):
-	claim_types={"tfcg":"true","ffcg":"false"}
-	claim_type=claim_types[fcg_label]
-	#Reading claims csv 
-	claims=pd.read_csv(os.path.join(rdf_path,"{}_claims.csv".format(claim_type)),index_col=0)
+def fredParse(claims_path,fcg_path,fcg_label,claim_type,claims,init,end):
 	key="Bearer 56a28f54-7918-3fdd-9d6f-850f13bd4041"
 	errorclaimid=[]
 	#fred starts
@@ -798,19 +670,9 @@ def fredParse(rdf_path,fcg_path,fcg_label,init):
 	daysec=86400
 	minsec=60
 	fcg=nx.Graph()
-	fcg_m=nx.MultiGraph()
 	rdf=rdflib.Graph()
-	fcg_prune_claims={}
-	claims_path=os.path.join(rdf_path,"{}_claims".format(claim_type))
-	if init>0:
-		try:
-			rdf.parse(os.path.join(claims_path,"{}_claims.rdf".format(claim_type)), format='application/rdf+xml')
-			with codecs.open(os.path.join(claims_path,"{}_claims_prune_data.json".format(claim_type)),"r","utf-8") as f:
-				fcg_prune_claims=json.loads(f.read())
-			fcg=nx.read_edgelist(os.path.join(fcg_path,"{}.edgelist".format(fcg_label)),comments="@")
-		except:
-			raise Exception("Previous claims not found, initial index cannot be greater than 0")
-	for i in range(init,len(claims)):
+	clean_claims={}
+	for i in range(init,end):
 		dif=abs(time.time()-start)
 		diff=abs(daysec-dif)
 		while True:
@@ -826,42 +688,24 @@ def fredParse(rdf_path,fcg_path,fcg_label,init):
 				if "You have exceeded your quota" not in r.text and "Runtime Error" not in r.text and "Service Unavailable" not in r.text:
 					if r.status_code in range(100,500) and r.text:
 						g=openFredGraph(filename+".rdf")
-						claim_g,claim_g_m,removed_edges,contracted_edges=checkFredGraph(g)
+						claim_g,edges2remove,edges2contract=checkClaimGraph(g)
 						#store pruning data
-						fcg_prune_claims[str(claim_ID)]={}
-						fcg_prune_claims[str(claim_ID)]['removed_edges']=removed_edges
-						fcg_prune_claims[str(claim_ID)]['contracted_edges']=contracted_edges
+						clean_claims[str(claim_ID)]={}
+						clean_claims[str(claim_ID)]['edges2remove']=edges2remove
+						clean_claims[str(claim_ID)]['edges2contract']=edges2contract
 						#write pruning data
-						with codecs.open(os.path.join(rdf_path,"{}_claims_prune_data.json".format(claim_type)),"w","utf-8") as f:
-							f.write(json.dumps(fcg_prune_claims,ensure_ascii=False))
+						with codecs.open(filename+"_clean.json","w","utf-8") as f:
+							f.write(json.dumps(clean_claims[str(claim_ID)],ensure_ascii=False))
 						#write claim graph as edgelist and graphml
 						nx.write_edgelist(claim_g,filename+".edgelist")
-						nx.write_edgelist(claim_g_m,filename+"_m.edgelist")
 						claim_g=nx.read_edgelist(filename+".edgelist",comments="@")
-						claim_g_m=nx.read_edgelist(filename+"_m.edgelist",comments="@")
 						nx.write_graphml(claim_g,filename+".graphml",prettyprint=True)
-						nx.write_graphml(claim_g_m,filename+"_m.graphml",prettyprint=True)
 						#plot claim graph
 						# plotFredGraph(claim_g,filename+".png")
-						#aggregating claim graph in rdf
-						rdf.parse(filename+".rdf",format='application/rdf+xml')
-						#writing aggregated rdf
-						rdf.serialize(destination=os.path.join(rdf_path,"{}_claims.rdf".format(claim_type)), format='application/rdf+xml')
-						#aggregating claim graph in networkx
-						fcg=nx.compose(fcg,claim_g)
-						fcg_m=nx.compose(fcg_m,claim_g_m)
 						#making directory if it does not exist
 						os.makedirs(fcg_path, exist_ok=True)
-						#writing aggregated networkx graphs as edgelist and graphml
-						nx.write_edgelist(fcg,os.path.join(fcg_path,"{}.edgelist".format(fcg_label)))
-						nx.write_edgelist(fcg_m,os.path.join(fcg_path,"{}_m.edgelist".format(fcg_label)))
-						fcg=nx.read_edgelist(os.path.join(fcg_path,"{}.edgelist".format(fcg_label)),comments="@")
-						fcg_m=nx.read_edgelist(os.path.join(fcg_path,"{}_m.edgelist".format(fcg_label)),comments="@")
-						nx.write_graphml(fcg,os.path.join(fcg_path,"{}.graphml".format(fcg_label)),prettyprint=True)
-						nx.write_graphml(fcg,os.path.join(fcg_path,"{}_m.graphml".format(fcg_label)),prettyprint=True)
 					else:
 						errorclaimid.append(filename.split("/")[-1].strip(".rdf"))
-						np.save(os.path.join(rdf_path,"{}_error_claimID.npy".format(fcg_label)),errorclaimid)
 					break
 				else:
 					diff2=min(abs(minsec-dif2),60)
@@ -872,33 +716,16 @@ def fredParse(rdf_path,fcg_path,fcg_label,init):
 				print("Exception Occurred")
 				errorclaimid.append(claim_ID)
 				break
-	rdf.serialize(destination=os.path.join(claims_path,"{}_claims.rdf".format(claim_type)), format='application/rdf+xml')
-	with codecs.open(os.path.join(claims_path,"{}_claims_prune_data.json".format(claim_type)),"w","utf-8") as f:
-		f.write(json.dumps(fcg_prune_claims,ensure_ascii=False))
-	nx.write_edgelist(fcg,os.path.join(fcg_path,"{}.edgelist".format(fcg_label)))
+	return errorclaimid,clean_claims
 
-def passiveFredParse(rdf_path,fcg_path,fcg_label,init):
-	claim_types={"tfcg":"true","ffcg":"false"}
-	claim_type=claim_types[fcg_label]
-	#Reading claims csv 
-	claims=pd.read_csv(os.path.join(rdf_path,"{}_claims.csv".format(claim_type)),index_col=0)
-	key="Bearer 56a28f54-7918-3fdd-9d6f-850f13bd4041"
+def passiveFredParse(index,claims_path,fcg_path,fcg_label,claim_type,claim_IDs,init,end):
+	end=min(end,len(claim_IDs))
+	#Reading claim_IDs
 	errorclaimid=[]
-	fcg=nx.Graph()
-	fcg_m=nx.MultiGraph()
 	rdf=rdflib.Graph()
-	fcg_prune_claims={}
-	claims_path=os.path.join(rdf_path,"{}_claims".format(claim_type))
-	if init>0:
-		try:
-			rdf.parse(os.path.join(claims_path,"{}_claims.rdf".format(claim_type)), format='application/rdf+xml')
-			with codecs.open(os.path.join(claims_path,"{}_claims_prune_data.json".format(claim_type)),"r","utf-8") as f:
-				fcg_prune_claims=json.loads(f.read())
-			fcg=nx.read_edgelist(os.path.join(fcg_path,"{}.edgelist".format(fcg_label)),comments="@")
-		except:
-			raise Exception("Previous claims not found, initial index cannot be greater than 0")
-	for i in [226]:#range(init,len(claims)):
-		claim_ID=226#claims.iloc[i]['claimID']
+	clean_claims={}
+	for i in range(init,end):
+		claim_ID=claim_IDs[i]
 		filename=os.path.join(claims_path,"claim{}".format(str(claim_ID)))
 		try:
 			g=openFredGraph(filename+".rdf")
@@ -906,48 +733,63 @@ def passiveFredParse(rdf_path,fcg_path,fcg_label,init):
 			print("Exception Occurred")
 			errorclaimid.append(claim_ID)
 			continue
-		claim_g,claim_g_m,removed_edges,contracted_edges=checkFredGraph(g)
+		claim_g,edges2remove,edges2contract=checkClaimGraph(g)
 		#store pruning data
-		fcg_prune_claims[str(claim_ID)]={}
-		fcg_prune_claims[str(claim_ID)]['removed_edges']=removed_edges
-		fcg_prune_claims[str(claim_ID)]['contracted_edges']=contracted_edges
-		import pdb
-		pdb.set_trace()
+		clean_claims[str(claim_ID)]={}
+		clean_claims[str(claim_ID)]['edges2remove']=edges2remove
+		clean_claims[str(claim_ID)]['edges2contract']=edges2contract
 		#write pruning data
-		with codecs.open(os.path.join(rdf_path,"{}_claims_prune_data.json".format(claim_type)),"w","utf-8") as f:
-			f.write(json.dumps(fcg_prune_claims,ensure_ascii=False))
+		with codecs.open(filename+"_clean.json","w","utf-8") as f:
+			f.write(json.dumps(clean_claims[str(claim_ID)],ensure_ascii=False))
 		#write claim graph as edgelist and graphml
 		nx.write_edgelist(claim_g,filename+".edgelist")
-		nx.write_edgelist(claim_g_m,filename+"_m.edgelist")
 		claim_g=nx.read_edgelist(filename+".edgelist",comments="@")
-		claim_g_m=nx.read_edgelist(filename+"_m.edgelist",comments="@")
 		nx.write_graphml(claim_g,filename+".graphml",prettyprint=True)
-		nx.write_graphml(claim_g_m,filename+"_m.graphml",prettyprint=True)
 		#plot claim graph
 		# plotFredGraph(claim_g,filename+".png")
-		#aggregating claim graph in rdf
-		rdf.parse(filename+".rdf",format='application/rdf+xml')
-		#writing aggregated rdf
-		rdf.serialize(destination=os.path.join(rdf_path,"{}_claims.rdf".format(claim_type)), format='application/rdf+xml')
-		#aggregating claim graph in networkx
-		fcg=nx.compose(fcg,claim_g)
-		fcg_m=nx.compose(fcg_m,claim_g_m)
-		#making directory if it does not exist
-		os.makedirs(fcg_path, exist_ok=True)
-		#writing aggregated networkx graphs as edgelist and graphml
-		nx.write_edgelist(fcg,os.path.join(fcg_path,"{}.edgelist".format(fcg_label)))
-		nx.write_edgelist(fcg_m,os.path.join(fcg_path,"{}_m.edgelist".format(fcg_label)))
-		fcg=nx.read_edgelist(os.path.join(fcg_path,"{}.edgelist".format(fcg_label)),comments="@")
-		fcg_m=nx.read_edgelist(os.path.join(fcg_path,"{}_m.edgelist".format(fcg_label)),comments="@")
-		nx.write_graphml(fcg,os.path.join(fcg_path,"{}.graphml".format(fcg_label)),prettyprint=True)
-		nx.write_graphml(fcg,os.path.join(fcg_path,"{}_m.graphml".format(fcg_label)),prettyprint=True)
-	np.save(os.path.join(rdf_path,"{}_error_claimID.npy".format(fcg_label)),errorclaimid)
-	rdf.serialize(destination=os.path.join(claims_path,"{}_claims.rdf".format(claim_type)), format='application/rdf+xml')
-	with codecs.open(os.path.join(claims_path,"{}_claims_prune_data.json".format(claim_type)),"w","utf-8") as f:
-		f.write(json.dumps(fcg_prune_claims,ensure_ascii=False))
-	nx.write_edgelist(fcg,os.path.join(fcg_path,"{}.edgelist".format(fcg_label)))
+	return index,errorclaimid,clean_claims
 
-def createFred(rdf_path,graph_path,fcg_label,init,passive):
+# fcg_path=os.path.join(graph_path,"fred",fcg_label)
+# fcg=nx.read_edgelist(os.path.join(fcg_path,"{}.edgelist".format(fcg_label)),comments="@")
+# #Saving graph as graphml
+# nx.write_graphml(fcg,os.path.join(fcg_path,"{}.graphml".format(fcg_label)),prettyprint=True)
+# os.makedirs(os.path.join(fcg_path,"data"),exist_ok=True)
+# write_path=os.path.join(fcg_path,"data",fcg_label)
+# nodes=list(fcg.nodes)
+# edges=list(fcg.edges)
+# #Save Nodes
+# with codecs.open(write_path+"_nodes.txt","w","utf-8") as f:
+# 	for node in nodes:
+# 		f.write(str(node)+"\n")
+# #Save Entities
+# entity_regex=re.compile(r'http:\/\/dbpedia\.org')
+# entities=np.asarray([node for node in nodes if entity_regex.match(node)])
+# with codecs.open(write_path+"_entities.txt","w","utf-8") as f:
+# 	for entity in entities:
+# 		f.write(str(entity)+"\n")
+# #Save node2ID dictionary
+# node2ID={node:i for i,node in enumerate(nodes)}
+# with codecs.open(write_path+"_node2ID.json","w","utf-8") as f:
+# 	f.write(json.dumps(node2ID,ensure_ascii=False))
+# #Save Edgelist ID
+# edgelistID=np.asarray([[int(node2ID[edge[0]]),int(node2ID[edge[1]]),1] for edge in edges])
+# np.save(write_path+"_edgelistID.npy",edgelistID)  
+# #aggregating claim graph in rdf
+# rdf.parse(filename+".rdf",format='application/rdf+xml')
+# #writing aggregated rdf
+# rdf.serialize(destination=os.path.join(rdf_path,"{}_claims.rdf".format(claim_type)), format='application/rdf+xml')
+# #aggregating claim graph in networkx
+# fcg=nx.compose(fcg,claim_g)
+# fcg_m=nx.compose(fcg_m,claim_g_m)
+# #writing aggregated networkx graphs as edgelist and graphml
+# nx.write_edgelist(fcg,os.path.join(fcg_path,"{}.edgelist".format(fcg_label)))
+# nx.write_edgelist(fcg_m,os.path.join(fcg_path,"{}_m.edgelist".format(fcg_label)))
+# fcg=nx.read_edgelist(os.path.join(fcg_path,"{}.edgelist".format(fcg_label)),comments="@")
+# fcg_m=nx.read_edgelist(os.path.join(fcg_path,"{}_m.edgelist".format(fcg_label)),comments="@",create_using=nx.MultiGraph)
+# nx.write_graphml(fcg,os.path.join(fcg_path,"{}.graphml".format(fcg_label)),prettyprint=True)
+# nx.write_graphml(fcg,os.path.join(fcg_path,"{}_m.graphml".format(fcg_label)),prettyprint=True)
+
+def createFred(rdf_path,graph_path,fcg_label,init,passive,cpu):
 	fcg_path=os.path.join(graph_path,"fred",fcg_label)
 	if fcg_label=="ufcg":
 		#Assumes that tfcg and ffcg exists
@@ -962,35 +804,27 @@ def createFred(rdf_path,graph_path,fcg_label,init,passive):
 		else:
 			print("Create tfcg and ffcg before attempting to create the union: ufcg")
 	else:
+ 		claim_types={"tfcg":"true","ffcg":"false"}
+		claim_type=claim_types[fcg_label]
+		claims_path=os.path.join(rdf_path,"{}_claims".format(claim_type))
 		if passive:
-			passiveFredParse(rdf_path,fcg_path,fcg_label,init)
+			claim_IDs=np.load(os.path.join(rdf_path,"{}_claimID.npy".format(claim_type)))
+			 if cpu:
+				n=int(len(claim_IDs)/cpu)+1
+		 		pool=mp.Pool(processes=cpu)
+				results=[pool.apply_async(passiveFredParse, args=(index,claims_path,fcg_path,fcg_label,claim_IDs,index*n,(index+1)*n)) for index in range(cpu)]
+				output=sorted([p.get() for p in results],key=lambda x:x[0])
+				errorclaimid=list(chain(*map(lambda x:x[1],output)))
+				clean_claims=dict(ChainMap(*map(lambda x:x[2],output)))
+			else:
+				#Reading claims csv 
+				index,errorclaimid,clean_claims=passiveFredParse(0,claims_path,fcg_path,fcg_label,init)
 		else:
-			fredParse(rdf_path,fcg_path,fcg_label,init)
-	fcg_path=os.path.join(graph_path,"fred",fcg_label)
-	fcg=nx.read_edgelist(os.path.join(fcg_path,"{}.edgelist".format(fcg_label)),comments="@")
-	#Saving graph as graphml
-	nx.write_graphml(fcg,os.path.join(fcg_path,"{}.graphml".format(fcg_label)),prettyprint=True)
-	os.makedirs(os.path.join(fcg_path,"data"),exist_ok=True)
-	write_path=os.path.join(fcg_path,"data",fcg_label)
-	nodes=list(fcg.nodes)
-	edges=list(fcg.edges)
-	#Save Nodes
-	with codecs.open(write_path+"_nodes.txt","w","utf-8") as f:
-		for node in nodes:
-			f.write(str(node)+"\n")
-	#Save Entities
-	entity_regex=re.compile(r'http:\/\/dbpedia\.org')
-	entities=np.asarray([node for node in nodes if entity_regex.match(node)])
-	with codecs.open(write_path+"_entities.txt","w","utf-8") as f:
-		for entity in entities:
-			f.write(str(entity)+"\n")
-	#Save node2ID dictionary
-	node2ID={node:i for i,node in enumerate(nodes)}
-	with codecs.open(write_path+"_node2ID.json","w","utf-8") as f:
-		f.write(json.dumps(node2ID,ensure_ascii=False))
-	#Save Edgelist ID
-	edgelistID=np.asarray([[int(node2ID[edge[0]]),int(node2ID[edge[1]]),1] for edge in edges])
-	np.save(write_path+"_edgelistID.npy",edgelistID)  
+			claims=pd.read_csv(os.path.join(rdf_path,"{}_claims.csv".format(claim_type)),index_col=0)
+			errorclaimid,clean_claims=fredParse(rdf_path,fcg_path,fcg_label,claim_type,claims,init,end)
+		np.save(os.path.join(claims_path,"{}_error_claimID.npy".format(fcg_label)),errorclaimid)
+		with codecs.open(os.path.join(claims_path,"{}claims_clean.json".format(claim_type)),"w","utf-8") as f:
+			f.write(json.dumps(clean_claims,ensure_ascii=False))
 
 def plotFredGraph(claim_g,filename):
 	plt.figure()
@@ -1010,5 +844,6 @@ if __name__== "__main__":
 	parser.add_argument('-ft','--fcgtype', metavar='FactCheckGraph type',type=str,choices=['tfcg','ffcg','ufcg'],help='True False or Union FactCheckGraph')
 	parser.add_argument('-i','--init', metavar='Index Start',type=int,help='Index number of claims to start from',default=0)
 	parser.add_argument('-p','--passive',action='store_true',help='Passive or not',default=False)
+	parser.add_argument('-cpu','--cpu',metavar='Number of CPUs',type=int,help='Number of CPUs available',default=1)
 	args=parser.parse_args()
-	createFred(args.rdfpath,args.graphpath,args.fcgtype,args.init,args.passive)
+	createFred(args.rdfpath,args.graphpath,args.fcgtype,args.init,args.passive,args.cpu)

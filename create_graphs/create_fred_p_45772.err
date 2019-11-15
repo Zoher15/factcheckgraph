@@ -1,0 +1,28 @@
+Traceback (most recent call last):
+  File "create_fred.py", line 1010, in <module>
+    createFred(args.rdfpath,args.graphpath,args.fcgtype,args.init,args.passive)
+  File "create_fred.py", line 962, in createFred
+    passiveFredParse(rdf_path,fcg_path,fcg_label,init)
+  File "create_fred.py", line 930, in passiveFredParse
+    fcg_m=nx.compose(fcg_m,claim_g_m)
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/networkx/algorithms/operators/binary.py", line 313, in compose
+    raise nx.NetworkXError('G and H must both be graphs or multigraphs.')
+networkx.exception.NetworkXError: G and H must both be graphs or multigraphs.
+
+real	2m1.954s
+user	0m2.984s
+sys	0m2.008s
+Traceback (most recent call last):
+  File "create_fred.py", line 1010, in <module>
+    createFred(args.rdfpath,args.graphpath,args.fcgtype,args.init,args.passive)
+  File "create_fred.py", line 962, in createFred
+    passiveFredParse(rdf_path,fcg_path,fcg_label,init)
+  File "create_fred.py", line 930, in passiveFredParse
+    fcg_m=nx.compose(fcg_m,claim_g_m)
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/networkx/algorithms/operators/binary.py", line 313, in compose
+    raise nx.NetworkXError('G and H must both be graphs or multigraphs.')
+networkx.exception.NetworkXError: G and H must both be graphs or multigraphs.
+
+real	2m12.469s
+user	0m3.064s
+sys	0m1.848s

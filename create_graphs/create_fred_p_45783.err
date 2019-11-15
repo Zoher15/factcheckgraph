@@ -1,0 +1,5 @@
+
+real	282m58.036s
+user	48m48.016s
+sys	0m42.128s
+slurmstepd: error: *** JOB 45783 ON nid00621 CANCELLED AT 2019-11-14T10:17:52 DUE TO TIME LIMIT ***

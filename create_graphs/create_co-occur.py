@@ -29,7 +29,6 @@ def create_co_occur(rdf_path,graph_path,fcg_label):
 		entity_regex=re.compile(r'http:\/\/dbpedia\.org')
 		fcg_co=nx.MultiGraph()
 		for claim_ID in claim_IDs:
-			filename=os.path.join(rdf_path,"{}_claims".format(claim_type),"claim{}_co".format(str(claim_ID)))
 			claim_entities_set=set([])
 			claim_g=rdflib.Graph()
 			claim_nxg=nx.MultiGraph()
@@ -49,15 +48,14 @@ def create_co_occur(rdf_path,graph_path,fcg_label):
 					pass
 			claim_entities[claim_ID]=list(claim_entities_set)
 			claim_edges[claim_ID]=list(combinations(claim_entities[claim_ID],2))
-			import pdb
-			pdb.set_trace()
 			for edge in claim_edges[claim_ID]:
 				claim_nxg.add_edge(edge[0],edge[1],claim_ID=claim_ID)
+			filename=os.path.join(rdf_path,"{}_claims".format(claim_type),"claim{}_co".format(str(claim_ID)))
 			nx.write_edgelist(claim_nxg,filename+".edgelist")
 			fcg_co=nx.compose(fcg_co,claim_nxg)
 	fcg_path=os.path.join(graph_path,"co-occur",fcg_label)
 	os.makedirs(fcg_path, exist_ok=True)
-	nx.write_edgelist(fcg_co,os.path.join(fcg_path,"{}.edgelist".format(fcg_label)),data=False)
+	nx.write_edgelist(fcg_co,os.path.join(fcg_path,"{}.edgelist".format(fcg_label)))
 	nx.write_graphml(fcg_co,os.path.join(fcg_path,"{}.graphml".format(fcg_label)),prettyprint=True)
 	os.makedirs(os.path.join(fcg_path,"data"),exist_ok=True)
 	write_path=os.path.join(fcg_path,"data",fcg_label)

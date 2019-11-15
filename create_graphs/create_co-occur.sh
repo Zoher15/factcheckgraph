@@ -1,14 +1,14 @@
 #!/bin/bash
 
-#SBATCH -J create_co-occur_tfcg
+#SBATCH -J create_co-occur
 #SBATCH -p general
-#SBATCH -o create_co-occur_tfcg_%j.txt
-#SBATCH -e create_co-occur_tfcg_%j.err
+#SBATCH -o create_co-occur_%j.txt
+#SBATCH -e create_co-occur_%j.err
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=zoher.kachwala@gmail.com
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
-#SBATCH --time=5:00:00
+#SBATCH --time=3:00:00
 
 source /N/u/zkachwal/Carbonate/miniconda3/etc/profile.d/conda.sh
 conda activate
