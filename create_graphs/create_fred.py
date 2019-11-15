@@ -606,6 +606,7 @@ def checkClaimGraph(g):
 	edges2remove['ideq']={}
 	edges2remove['ideq']['1']=[]
 	edges2remove['ideq']['2']=[]
+	edges2remove['type']=[]
 	edges2contract={}
 	edges2contract['ideq']={}
 	edges2contract['ideq']['1']=[]
@@ -614,6 +615,7 @@ def checkClaimGraph(g):
 	edges2contract['type']['1']=[]
 	edges2contract['type']['2']=[]
 	edges2contract['type']['3']=[]
+	edges2contract['type']['4']=[]
 	for (a,b,c) in g.getEdges():
 		claim_g.add_edge(a,c,label=b)
 		a_urlparse=urlparse(a)
@@ -648,7 +650,7 @@ def checkClaimGraph(g):
 			if regex_freddata_low.match(b)[1] in regex_owl.match(a)[1].lower():
 				edges2contract['type']['4'].append((a,b))
 		elif regex_schema.match(a) or regex_schema.match(b):
-			edges2remove.append((a,b))
+			edges2remove['type'].append((a,b))
 
 	for cluster in g.getClusterMotif(ClusterMotif.IdentityEquivalence):
 		a=list(cluster)[0]
@@ -661,7 +663,7 @@ def checkClaimGraph(g):
 			edges2contract['ideq']['2'].append((a,b))
 	return claim_g,edges2remove,edges2contract
 
-def fredParse(claims_path,fcg_path,fcg_label,claim_type,claims,init,end):
+def fredParse(claims_path,fcg_path,claims,init,end):
 	key="Bearer 56a28f54-7918-3fdd-9d6f-850f13bd4041"
 	errorclaimid=[]
 	#fred starts
@@ -718,7 +720,7 @@ def fredParse(claims_path,fcg_path,fcg_label,claim_type,claims,init,end):
 				break
 	return errorclaimid,clean_claims
 
-def passiveFredParse(index,claims_path,fcg_path,fcg_label,claim_type,claim_IDs,init,end):
+def passiveFredParse(index,claims_path,claim_IDs,init,end):
 	end=min(end,len(claim_IDs))
 	#Reading claim_IDs
 	errorclaimid=[]
@@ -804,15 +806,15 @@ def createFred(rdf_path,graph_path,fcg_label,init,passive,cpu):
 		else:
 			print("Create tfcg and ffcg before attempting to create the union: ufcg")
 	else:
- 		claim_types={"tfcg":"true","ffcg":"false"}
+		claim_types={"tfcg":"true","ffcg":"false"}
 		claim_type=claim_types[fcg_label]
 		claims_path=os.path.join(rdf_path,"{}_claims".format(claim_type))
 		if passive:
 			claim_IDs=np.load(os.path.join(rdf_path,"{}_claimID.npy".format(claim_type)))
-			 if cpu:
+			if cpu:
 				n=int(len(claim_IDs)/cpu)+1
-		 		pool=mp.Pool(processes=cpu)
-				results=[pool.apply_async(passiveFredParse, args=(index,claims_path,fcg_path,fcg_label,claim_IDs,index*n,(index+1)*n)) for index in range(cpu)]
+				pool=mp.Pool(processes=cpu)							
+				results=[pool.apply_async(passiveFredParse, args=(index,claims_path,claim_IDs,index*n,(index+1)*n)) for index in range(cpu)]
 				output=sorted([p.get() for p in results],key=lambda x:x[0])
 				errorclaimid=list(chain(*map(lambda x:x[1],output)))
 				clean_claims=dict(ChainMap(*map(lambda x:x[2],output)))
@@ -822,8 +824,8 @@ def createFred(rdf_path,graph_path,fcg_label,init,passive,cpu):
 		else:
 			claims=pd.read_csv(os.path.join(rdf_path,"{}_claims.csv".format(claim_type)),index_col=0)
 			errorclaimid,clean_claims=fredParse(rdf_path,fcg_path,fcg_label,claim_type,claims,init,end)
-		np.save(os.path.join(claims_path,"{}_error_claimID.npy".format(fcg_label)),errorclaimid)
-		with codecs.open(os.path.join(claims_path,"{}claims_clean.json".format(claim_type)),"w","utf-8") as f:
+		np.save(os.path.join(rdf_path,"{}_error_claimID.npy".format(fcg_label)),errorclaimid)
+		with codecs.open(os.path.join(rdf_path,"{}claims_clean.json".format(claim_type)),"w","utf-8") as f:
 			f.write(json.dumps(clean_claims,ensure_ascii=False))
 
 def plotFredGraph(claim_g,filename):

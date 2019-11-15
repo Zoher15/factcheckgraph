@@ -7,13 +7,13 @@
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=zoher.kachwala@gmail.com
 #SBATCH --nodes=1
-#SBATCH --ntasks-per-node=1
-#SBATCH --time=24:00:00
+#SBATCH --cpus-per-task=10
+#SBATCH --time=1:00:00
 source /N/u/zkachwal/Carbonate/miniconda3/etc/profile.d/conda.sh
 conda activate
 cd /gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph/create_graphs/
-time python create_fred.py -ft tfcg -p
-time python create_fred.py -ft ffcg -p
+time python create_fred.py -ft tfcg -p -cpu 10
+time python create_fred.py -ft ffcg -p -cpu 10
 # time python create_fred.py -ft ufcg
 # time python create_backbone.py -fcg fred -ft tfcg -kg dbpedia
 # time python create_backbone.py -fcg fred -ft ffcg -kg dbpedia
