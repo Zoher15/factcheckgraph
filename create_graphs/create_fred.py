@@ -24,6 +24,7 @@ from collections import ChainMap
 from itertools import chain
 import multiprocessing as mp
 from urllib.parse import urlparse
+from pprint import pprint
 
 __author__='Misael Mongiovi, Andrea Giovanni Nuzzolese'
 # Original script edited by Zoher Kachwala for FactCheckGraph
@@ -584,6 +585,7 @@ def checkFredFile(filename):
 	g=openFredGraph(filename)
 	checkFredGraph(g)
 
+
 def checkClaimGraph(g):
 	regex_assoc=re.compile(r'^http:\/\/www\.ontologydesignpatterns\.org\/ont\/dul\/DUL\.owl#associatedWith$')
 	regex_freddata_low=re.compile(r'^http:\/\/www\.ontologydesignpatterns\.org\/ont\/fred\/domain\.owl#([a-z]*)_.*')
@@ -603,9 +605,6 @@ def checkClaimGraph(g):
 	edges2remove['assoc']['3']=[]
 	edges2remove['assoc']['4']=[]
 	edges2remove['misc']=[]
-	edges2remove['ideq']={}
-	edges2remove['ideq']['1']=[]
-	edges2remove['ideq']['2']=[]
 	edges2remove['type']=[]
 	edges2contract={}
 	edges2contract['ideq']={}
@@ -751,47 +750,123 @@ def passiveFredParse(index,claims_path,claim_IDs,init,end):
 		# plotFredGraph(claim_g,filename+".png")
 	return index,errorclaimid,clean_claims
 
-# fcg_path=os.path.join(graph_path,"fred",fcg_label)
-# fcg=nx.read_edgelist(os.path.join(fcg_path,"{}.edgelist".format(fcg_label)),comments="@")
-# #Saving graph as graphml
-# nx.write_graphml(fcg,os.path.join(fcg_path,"{}.graphml".format(fcg_label)),prettyprint=True)
-# os.makedirs(os.path.join(fcg_path,"data"),exist_ok=True)
-# write_path=os.path.join(fcg_path,"data",fcg_label)
-# nodes=list(fcg.nodes)
-# edges=list(fcg.edges)
-# #Save Nodes
-# with codecs.open(write_path+"_nodes.txt","w","utf-8") as f:
-# 	for node in nodes:
-# 		f.write(str(node)+"\n")
-# #Save Entities
-# entity_regex=re.compile(r'http:\/\/dbpedia\.org')
-# entities=np.asarray([node for node in nodes if entity_regex.match(node)])
-# with codecs.open(write_path+"_entities.txt","w","utf-8") as f:
-# 	for entity in entities:
-# 		f.write(str(entity)+"\n")
-# #Save node2ID dictionary
-# node2ID={node:i for i,node in enumerate(nodes)}
-# with codecs.open(write_path+"_node2ID.json","w","utf-8") as f:
-# 	f.write(json.dumps(node2ID,ensure_ascii=False))
-# #Save Edgelist ID
-# edgelistID=np.asarray([[int(node2ID[edge[0]]),int(node2ID[edge[1]]),1] for edge in edges])
-# np.save(write_path+"_edgelistID.npy",edgelistID)  
-# #aggregating claim graph in rdf
-# rdf.parse(filename+".rdf",format='application/rdf+xml')
-# #writing aggregated rdf
-# rdf.serialize(destination=os.path.join(rdf_path,"{}_claims.rdf".format(claim_type)), format='application/rdf+xml')
-# #aggregating claim graph in networkx
-# fcg=nx.compose(fcg,claim_g)
-# fcg_m=nx.compose(fcg_m,claim_g_m)
-# #writing aggregated networkx graphs as edgelist and graphml
-# nx.write_edgelist(fcg,os.path.join(fcg_path,"{}.edgelist".format(fcg_label)))
-# nx.write_edgelist(fcg_m,os.path.join(fcg_path,"{}_m.edgelist".format(fcg_label)))
-# fcg=nx.read_edgelist(os.path.join(fcg_path,"{}.edgelist".format(fcg_label)),comments="@")
-# fcg_m=nx.read_edgelist(os.path.join(fcg_path,"{}_m.edgelist".format(fcg_label)),comments="@",create_using=nx.MultiGraph)
-# nx.write_graphml(fcg,os.path.join(fcg_path,"{}.graphml".format(fcg_label)),prettyprint=True)
-# nx.write_graphml(fcg,os.path.join(fcg_path,"{}_m.graphml".format(fcg_label)),prettyprint=True)
+def cleanClaimGraph(claim_g,clean_claims):
+	edges2remove=[]
+	for key in clean_claims['edges2remove'].keys():
+		if type(clean_claims['edges2remove'][key])==dict:
+			for key2 in clean_claims['edges2remove'][key].keys():
+				edges2remove+=clean_claims['edges2remove'][key][key2]
+		else:
+			edges2remove+=clean_claims['edges2remove'][key]
+	edges2remove=list(map(lambda x:tuple([x[0],x[2]]) if len(x)==3 else tuple(x),edges2remove))
+	claim_g.remove_edges_from(edges2remove)
+	for key in clean_claims['edges2contract'].keys():
+		for key2 in clean_claims['edges2contract'][key].keys():
+			if key=='ideq' and key2=='2':
+				pass
+			else:
+				for edge in clean_claims['edges2contract'][key][key2]:
+					if claim_g.has_edge(edge[0],edge[1]):
+						claim_g=nx.contracted_edge(claim_g,(edge[0],edge[1]),self_loops=False)
+	return claim_g
 
-def createFred(rdf_path,graph_path,fcg_label,init,passive,cpu):
+def compileClaimGraph1(index,claims_path,claim_IDs,clean_claims,init,end):
+	end=min(end,len(claim_IDs))
+	fcg=nx.Graph()
+	for claim_ID in claim_IDs[init:end]:
+		filename=os.path.join(claims_path,"claim{}".format(str(claim_ID)))
+		claim_g=nx.read_edgelist(filename+".edgelist",comments="@")
+		claim_g=cleanClaimGraph(claim_g,clean_claims[str(claim_ID)])
+		fcg=nx.compose(fcg,claim_g)
+	return index,fcg
+
+def compileClaimGraph2(index,claims_path,claim_IDs,clean_claims,init,end):
+	end=min(end,len(claim_IDs))
+	fcg=nx.Graph()
+	for claim_ID in claim_IDs[init:end]:
+		filename=os.path.join(claims_path,"claim{}".format(str(claim_ID)))
+		claim_g=nx.read_edgelist(filename+".edgelist",comments="@")
+		fcg=nx.compose(fcg,claim_g)
+	return index,fcg
+
+def compileClaimGraph3(claims_path,claim_IDs,clean_claims):
+	fcg=nx.Graph()
+	for claim_ID in claim_IDs:
+		filename=os.path.join(claims_path,"claim{}".format(str(claim_ID)))
+		claim_g=nx.read_edgelist(filename+".edgelist",comments="@")
+		fcg=nx.compose(fcg,claim_g)
+		fcg=cleanClaimGraph(fcg,clean_claims[str(claim_ID)])
+	return fcg
+
+def compile_clean(rdf_path,clean_claims,claim_type):
+	master_clean={}
+	master_clean['edges2remove']={}
+	master_clean['edges2remove']['assoc']={}
+	master_clean['edges2remove']['assoc']['1']=[]
+	master_clean['edges2remove']['assoc']['2']=[]
+	master_clean['edges2remove']['assoc']['3']=[]
+	master_clean['edges2remove']['assoc']['4']=[]
+	master_clean['edges2remove']['ideq']={}
+	master_clean['edges2remove']['ideq']['1']=[]
+	master_clean['edges2remove']['ideq']['2']=[]
+	master_clean['edges2remove']['misc']=[]
+	master_clean['edges2remove']['type']=[]
+	master_clean['edges2contract']={}
+	master_clean['edges2contract']['ideq']={}
+	master_clean['edges2contract']['ideq']['1']=[]
+	master_clean['edges2contract']['ideq']['2']=[]
+	master_clean['edges2contract']['type']={}
+	master_clean['edges2contract']['type']['1']=[]
+	master_clean['edges2contract']['type']['2']=[]
+	master_clean['edges2contract']['type']['3']=[]
+	master_clean['edges2contract']['type']['4']=[]
+	with codecs.open(os.path.join(rdf_path,"{}claims_clean.txt".format(claim_type)),"w","utf-8") as f: 
+		pprint(clean_claims,stream=f)
+	for clean_claim in clean_claims.values():
+		for key in clean_claim.keys():
+			for key2 in clean_claim[key].keys():
+				if type(clean_claim[key][key2])==dict:
+					for key3 in clean_claim[key][key2].keys():
+						master_clean[key][key2][key3]+=clean_claim[key][key2][key3]
+				else:
+					master_clean[key][key2]+=clean_claim[key][key2]
+	with codecs.open(os.path.join(rdf_path,"{}master_clean.txt".format(claim_type)),"w","utf-8") as f: 
+		pprint(master_clean,stream=f)
+	with codecs.open(os.path.join(rdf_path,"{}master_clean.json".format(claim_type)),"w","utf-8") as f:
+		f.write(json.dumps(master_clean,ensure_ascii=False))
+	return master_clean
+	
+def saveFred(fcg,graph_path,fcg_label):
+	fcg_path=os.path.join(graph_path,"fred",fcg_label)
+	os.makedirs(fcg_path, exist_ok=True)
+	#writing aggregated networkx graphs as edgelist and graphml
+	nx.write_edgelist(fcg,os.path.join(fcg_path,"{}.edgelist".format(fcg_label)))
+	fcg=nx.read_edgelist(os.path.join(fcg_path,"{}.edgelist".format(fcg_label)),comments="@")
+	#Saving graph as graphml
+	nx.write_graphml(fcg,os.path.join(fcg_path,"{}.graphml".format(fcg_label)),prettyprint=True)
+	os.makedirs(os.path.join(fcg_path,"data"),exist_ok=True)
+	write_path=os.path.join(fcg_path,"data",fcg_label)
+	nodes=list(fcg.nodes)
+	edges=list(fcg.edges)
+	#Save Nodes
+	with codecs.open(write_path+"_nodes.txt","w","utf-8") as f:
+		for node in nodes:
+			f.write(str(node)+"\n")
+	#Save Entities
+	entity_regex=re.compile(r'http:\/\/dbpedia\.org')
+	entities=np.asarray([node for node in nodes if entity_regex.match(node)])
+	with codecs.open(write_path+"_entities.txt","w","utf-8") as f:
+		for entity in entities:
+			f.write(str(entity)+"\n")
+	#Save node2ID dictionary
+	node2ID={node:i for i,node in enumerate(nodes)}
+	with codecs.open(write_path+"_node2ID.json","w","utf-8") as f:
+		f.write(json.dumps(node2ID,ensure_ascii=False))
+	#Save Edgelist ID
+	edgelistID=np.asarray([[int(node2ID[edge[0]]),int(node2ID[edge[1]]),1] for edge in edges])
+	np.save(write_path+"_edgelistID.npy",edgelistID)  
+
+def createFred(rdf_path,graph_path,fcg_label,init,passive,cpu,compilefred):
 	fcg_path=os.path.join(graph_path,"fred",fcg_label)
 	if fcg_label=="ufcg":
 		#Assumes that tfcg and ffcg exists
@@ -809,9 +884,28 @@ def createFred(rdf_path,graph_path,fcg_label,init,passive,cpu):
 		claim_types={"tfcg":"true","ffcg":"false"}
 		claim_type=claim_types[fcg_label]
 		claims_path=os.path.join(rdf_path,"{}_claims".format(claim_type))
-		if passive:
-			claim_IDs=np.load(os.path.join(rdf_path,"{}_claimID.npy".format(claim_type)))
-			if cpu:
+		claim_IDs=np.load(os.path.join(rdf_path,"{}_claimID.npy".format(claim_type)))
+		claims=pd.read_csv(os.path.join(rdf_path,"{}_claims.csv".format(claim_type)),index_col=0)
+		if compilefred:
+			with codecs.open(os.path.join(rdf_path,"{}claims_clean.json".format(claim_type)),"r","utf-8") as f: 
+				clean_claims=json.loads(f.read())
+			if compilefred==1 or compilefred==2:
+				n=int(len(claim_IDs)/cpu)+1
+				pool=mp.Pool(processes=cpu)							
+				results=[pool.apply_async(eval("compileClaimGraph"+str(compilefred)), args=(index,claims_path,claim_IDs,clean_claims,index*n,(index+1)*n)) for index in range(cpu)]
+				output=sorted([p.get() for p in results],key=lambda x:x[0])
+				fcgs=list(map(lambda x:x[1],output))
+				master_fcg=nx.Graph()
+				for fcg in fcgs:
+					master_fcg=nx.compose(master_fcg,fcg)
+				if compilefred==2:
+					master_clean=compile_clean(rdf_path,clean_claims,claim_type)
+					master_fcg=cleanClaimGraph(master_fcg,master_clean)
+			elif compilefred==3:
+				master_fcg=compileClaimGraph3(claims_path,claim_IDs,clean_claims)
+			saveFred(master_fcg,graph_path,fcg_label+str(compilefred))
+		else:
+			if passive:
 				n=int(len(claim_IDs)/cpu)+1
 				pool=mp.Pool(processes=cpu)							
 				results=[pool.apply_async(passiveFredParse, args=(index,claims_path,claim_IDs,index*n,(index+1)*n)) for index in range(cpu)]
@@ -819,14 +913,10 @@ def createFred(rdf_path,graph_path,fcg_label,init,passive,cpu):
 				errorclaimid=list(chain(*map(lambda x:x[1],output)))
 				clean_claims=dict(ChainMap(*map(lambda x:x[2],output)))
 			else:
-				#Reading claims csv 
-				index,errorclaimid,clean_claims=passiveFredParse(0,claims_path,fcg_path,fcg_label,init)
-		else:
-			claims=pd.read_csv(os.path.join(rdf_path,"{}_claims.csv".format(claim_type)),index_col=0)
-			errorclaimid,clean_claims=fredParse(rdf_path,fcg_path,fcg_label,claim_type,claims,init,end)
-		np.save(os.path.join(rdf_path,"{}_error_claimID.npy".format(fcg_label)),errorclaimid)
-		with codecs.open(os.path.join(rdf_path,"{}claims_clean.json".format(claim_type)),"w","utf-8") as f:
-			f.write(json.dumps(clean_claims,ensure_ascii=False))
+				errorclaimid,clean_claims=fredParse(rdf_path,fcg_path,fcg_label,claim_type,claims,init,end)
+			np.save(os.path.join(rdf_path,"{}_error_claimID.npy".format(fcg_label)),errorclaimid)
+			with codecs.open(os.path.join(rdf_path,"{}claims_clean.json".format(claim_type)),"w","utf-8") as f:
+				f.write(json.dumps(clean_claims,ensure_ascii=False))
 
 def plotFredGraph(claim_g,filename):
 	plt.figure()
@@ -847,5 +937,10 @@ if __name__== "__main__":
 	parser.add_argument('-i','--init', metavar='Index Start',type=int,help='Index number of claims to start from',default=0)
 	parser.add_argument('-p','--passive',action='store_true',help='Passive or not',default=False)
 	parser.add_argument('-cpu','--cpu',metavar='Number of CPUs',type=int,help='Number of CPUs available',default=1)
+	parser.add_argument('-cf','--compilefred',metavar='Compile method #',type=int,help='Number of compile method',default=None)
 	args=parser.parse_args()
-	createFred(args.rdfpath,args.graphpath,args.fcgtype,args.init,args.passive,args.cpu)
+	createFred(args.rdfpath,args.graphpath,args.fcgtype,args.init,args.passive,args.cpu,args.compilefred)
+
+
+
+
