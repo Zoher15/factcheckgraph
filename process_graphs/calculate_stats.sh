@@ -8,7 +8,7 @@
 #SBATCH --mail-user=zoher.kachwala@gmail.com
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
-#SBATCH --time=00:20:00
+#SBATCH --time=00:30:00
 
 source /N/u/zkachwal/Carbonate/miniconda3/etc/profile.d/conda.sh
 conda activate
@@ -17,6 +17,15 @@ cd /gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph/process_graphs/
 # time python calculate_stats.py -gc fred -gt tfcg
 # time python calculate_stats.py -gc fred -gt ffcg
 # time python calculate_stats.py -gc fred -gt ufcg
+time python calculate_stats.py -gc fred1 -gt tfcg1
+time python calculate_stats.py -gc fred1 -gt ffcg1
+time python calculate_stats.py -gc fred1 -gt ufcg1
+time python calculate_stats.py -gc fred2 -gt tfcg2
+time python calculate_stats.py -gc fred2 -gt ffcg2
+time python calculate_stats.py -gc fred2 -gt ufcg2
+time python calculate_stats.py -gc fred3 -gt tfcg3
+time python calculate_stats.py -gc fred3 -gt ffcg3
+time python calculate_stats.py -gc fred3 -gt ufcg3
 # time python calculate_stats.py -gc co-occur -gt tfcg_co
 # time python calculate_stats.py -gc co-occur -gt ffcg_co
 # time python calculate_stats.py -gc co-occur -gt ufcg_co
@@ -26,9 +35,9 @@ cd /gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph/process_graphs/
 # time python calculate_stats.py -gc backbone_dc -gt tfcg_bbdc
 # time python calculate_stats.py -gc backbone_dc -gt ffcg_bbdc
 # time python calculate_stats.py -gc backbone_dc -gt ufcg_bbdc
-time python calculate_stats.py -gc largest_ccf -gt tfcg_lgccf
-time python calculate_stats.py -gc largest_ccf -gt ffcg_lgccf
-time python calculate_stats.py -gc largest_ccf -gt ufcg_lgccf
+# time python calculate_stats.py -gc largest_ccf -gt tfcg_lgccf
+# time python calculate_stats.py -gc largest_ccf -gt ffcg_lgccf
+# time python calculate_stats.py -gc largest_ccf -gt ufcg_lgccf
 # time python calculate_stats.py -gc largest_ccc -gt tfcg_lgccc
 # time python calculate_stats.py -gc largest_ccc -gt ffcg_lgccc
 # time python calculate_stats.py -gc largest_ccc -gt ufcg_lgccc

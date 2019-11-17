@@ -14,6 +14,9 @@ source /N/u/zkachwal/Carbonate/miniconda3/etc/profile.d/conda.sh
 conda activate
 cd /gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph/analyze_graphs/
 # time python find_adj_pairs.py -fcg fred -kg dbpedia
-time python find_adj_pairs.py -fcg backbone_df -kg dbpedia 
-time python find_adj_pairs.py -fcg largest_ccf -kg dbpedia 
+time python find_adj_pairs.py -fcg fred1 -kg dbpedia
+time python find_adj_pairs.py -fcg fred2 -kg dbpedia
+time python find_adj_pairs.py -fcg fred3 -kg dbpedia
+# time python find_adj_pairs.py -fcg backbone_df -kg dbpedia 
+# time python find_adj_pairs.py -fcg largest_ccf -kg dbpedia 
 # time python find_adj_pairs.py -fcg old_fred -kg dbpedia 

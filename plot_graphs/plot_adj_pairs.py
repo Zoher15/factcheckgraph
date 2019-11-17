@@ -6,12 +6,12 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import os
-
+import datetime
 def plot_adj_pairs(graph_path,fcg_class,kg_label,sampled):
-	fcg_types={"fred":["tfcg","ffcg","ufcg"],"co-occur":["tfcg_co","ffcg_co","ufcg_co"],
+	fcg_types={"fred":["tfcg","ffcg","ufcg"],"fred1":["tfcg1","ffcg1","ufcg1"],"fred2":["tfcg2","ffcg2","ufcg2"],"fred3":["tfcg3","ffcg3","ufcg3"],"co-occur":["tfcg_co","ffcg_co","ufcg_co"],
 	"backbone_df":["tfcg_bbdf","ffcg_bbdf","ufcg_bbdf"],"backbone_dc":["tfcg_bbdc","ffcg_bbdc","ufcg_bbdc"],
 	"largest_ccf":["tfcg_lgccf","ffcg_lgccf","ufcg_lgccf"],"largest_ccc":["tfcg_lgccc","ffcg_lgccc","ufcg_lgccc"],
-	"old_fred":["tfcg_old","ffcg_old"]}
+	"old_fred":["tfcg_old","ffcg_old","ufcg_old"]}
 	fcg_labels=fcg_types[fcg_class]
 	fcg_path=os.path.join(graph_path,fcg_class)
 	plt.figure(figsize=(4.5, 4))
@@ -20,7 +20,7 @@ def plot_adj_pairs(graph_path,fcg_class,kg_label,sampled):
 	title="true(adj) vs false(non-adj) pairs {} {}".format(kg_label,fcg_class)
 	intersect_adj_ind=np.load(os.path.join(fcg_path,"intersect_adj_ind_{}_{}.npy".format(kg_label,fcg_class)))
 	intersect_nonadj_ind=np.load(os.path.join(fcg_path,"intersect_nonadj_ind_{}_{}.npy".format(kg_label,fcg_class)))
-	for fcg_label in fcg_labels[:2]:
+	for fcg_label in fcg_labels:
 		intersect_all=pd.read_json(os.path.join(fcg_path,fcg_label,"data","intersect_all_entityPairs_{}_{}_{}_IDs.json".format(kg_label,fcg_class,fcg_label)))
 		intersect_adj=intersect_all.iloc[intersect_adj_ind]
 		if sampled:
@@ -52,6 +52,8 @@ def plot_adj_pairs(graph_path,fcg_class,kg_label,sampled):
 	plt.tight_layout()
 	plot_path=os.path.join(fcg_path,"plots")
 	os.makedirs(plot_path,exist_ok=True)
+	x = datetime.datetime.now().strftime("%c")
+	title+=" "+x
 	plt.savefig(os.path.join(plot_path,title.replace(" ","_")+".png"))
 	plt.close()
 	plt.clf()
@@ -59,7 +61,7 @@ def plot_adj_pairs(graph_path,fcg_class,kg_label,sampled):
 if __name__== "__main__":
 	parser = argparse.ArgumentParser(description='Plotting true(adjacent) pairs vs false (non-adjacent)')
 	parser.add_argument('-gp','--graphpath', metavar='graph path',type=str,help='Path to the graph directory',default='/gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph_data/graphs/')
-	parser.add_argument('-fcg','--fcgclass', metavar='fcg class',type=str,choices=['fred','co-occur','backbone_df','backbone_dc','largest_ccf','largest_ccc','old_fred'],help='Class of FactCheckGraph to process')
+	parser.add_argument('-fcg','--fcgclass', metavar='fcg class',type=str,choices=['fred','fred1','fred2','fred3','co-occur','backbone_df','backbone_dc','largest_ccf','largest_ccc','old_fred'],help='Class of FactCheckGraph to process')
 	parser.add_argument('-kg','--kgtype', metavar='knowledgegraph type',type=str,choices=['dbpedia','wikidata'],help='DBPedia or Wikidata Graph')
 	parser.add_argument('-s','--sampled',action='store_true',help='Whether ROC is sampled or not',default=False)
 	args=parser.parse_args()

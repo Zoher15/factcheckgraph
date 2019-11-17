@@ -9,7 +9,7 @@ import codecs
 from itertools import combinations
 
 def find_intersect(graph_path,fcg_class,kg_label):
-	fcg_types={"fred":["tfcg","ffcg","ufcg"],"co-occur":["tfcg_co","ffcg_co","ufcg_co"],
+	fcg_types={"fred":["tfcg","ffcg","ufcg"],"fred1":["tfcg1","ffcg1","ufcg1"],"fred2":["tfcg2","ffcg2","ufcg2"],"fred3":["tfcg3","ffcg3","ufcg3"],"co-occur":["tfcg_co","ffcg_co","ufcg_co"],
 	"backbone_df":["tfcg_bbdf","ffcg_bbdf","ufcg_bbdf"],"backbone_dc":["tfcg_bbdc","ffcg_bbdc","ufcg_bbdc"],
 	"largest_ccf":["tfcg_lgccf","ffcg_lgccf","ufcg_lgccf"],"largest_ccc":["tfcg_lgccc","ffcg_lgccc","ufcg_lgccc"],
 	"old_fred":["tfcg_old","ffcg_old","ufcg_old"]}
@@ -48,7 +48,7 @@ def find_intersect(graph_path,fcg_class,kg_label):
 if __name__== "__main__":
 	parser = argparse.ArgumentParser(description='Find intersection of entities for graphs')
 	parser.add_argument('-gp','--graphpath', metavar='graph path',type=str,help='Path to the graph directory',default='/gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph_data/graphs/')
-	parser.add_argument('-fcg','--fcgclass', metavar='fcg class',type=str,choices=['fred','co-occur','backbone_df','backbone_dc','largest_ccf','largest_ccc','old_fred'],help='Class of FactCheckGraph to process')
+	parser.add_argument('-fcg','--fcgclass', metavar='fcg class',type=str,choices=['fred','fred1','fred2','fred3','co-occur','backbone_df','backbone_dc','largest_ccf','largest_ccc','old_fred'],help='Class of FactCheckGraph to process')
 	parser.add_argument('-kg','--kg', metavar='knowledgegraph type',type=str,choices=['dbpedia','wikidata'],help='DBPedia or Wikidata Graph')
 	args=parser.parse_args()
 	find_intersect(args.graphpath,args.fcgclass,args.kg)

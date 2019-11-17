@@ -585,7 +585,7 @@ def checkFredFile(filename):
 	g=openFredGraph(filename)
 	checkFredGraph(g)
 
-
+#function to check a claim and create dictionary of edges to contract and remove
 def checkClaimGraph(g):
 	regex_assoc=re.compile(r'^http:\/\/www\.ontologydesignpatterns\.org\/ont\/dul\/DUL\.owl#associatedWith$')
 	regex_freddata_low=re.compile(r'^http:\/\/www\.ontologydesignpatterns\.org\/ont\/fred\/domain\.owl#([a-z]*)_.*')
@@ -657,12 +657,13 @@ def checkClaimGraph(g):
 		if regex_vndata.match(a) or regex_dbpedia.match(a):
 			edges2contract['ideq']['1'].append((a,b))
 		elif regex_vndata.match(b) or regex_dbpedia.match(b):
-			edges2contract['ideq']['1'].append((a,b))
+			edges2contract['ideq']['1'].append((b,a))
 		else:
 			edges2contract['ideq']['2'].append((a,b))
 	return claim_g,edges2remove,edges2contract
 
-def fredParse(claims_path,fcg_path,claims,init,end):
+#fetch fred graph files from their API. slow and dependent on rate
+def fredParse(claims_path,claims,init,end):
 	key="Bearer 56a28f54-7918-3fdd-9d6f-850f13bd4041"
 	errorclaimid=[]
 	#fred starts
@@ -703,8 +704,6 @@ def fredParse(claims_path,fcg_path,claims,init,end):
 						nx.write_graphml(claim_g,filename+".graphml",prettyprint=True)
 						#plot claim graph
 						# plotFredGraph(claim_g,filename+".png")
-						#making directory if it does not exist
-						os.makedirs(fcg_path, exist_ok=True)
 					else:
 						errorclaimid.append(filename.split("/")[-1].strip(".rdf"))
 					break
@@ -719,6 +718,7 @@ def fredParse(claims_path,fcg_path,claims,init,end):
 				break
 	return errorclaimid,clean_claims
 
+#Function to passively parse existing fred rdf files
 def passiveFredParse(index,claims_path,claim_IDs,init,end):
 	end=min(end,len(claim_IDs))
 	#Reading claim_IDs
@@ -750,6 +750,7 @@ def passiveFredParse(index,claims_path,claim_IDs,init,end):
 		# plotFredGraph(claim_g,filename+".png")
 	return index,errorclaimid,clean_claims
 
+#Function to return a clean graph, depending on the edges to delete and contract
 def cleanClaimGraph(claim_g,clean_claims):
 	edges2remove=[]
 	for key in clean_claims['edges2remove'].keys():
@@ -768,36 +769,50 @@ def cleanClaimGraph(claim_g,clean_claims):
 				for edge in clean_claims['edges2contract'][key][key2]:
 					if claim_g.has_edge(edge[0],edge[1]):
 						claim_g=nx.contracted_edge(claim_g,(edge[0],edge[1]),self_loops=False)
+	claim_g.remove_nodes_from(list(nx.isolates(claim_g)))
 	return claim_g
 
+#Function to stitch/compile graphs in an iterative way. i.e clean individual graphs before unioning 
 def compileClaimGraph1(index,claims_path,claim_IDs,clean_claims,init,end):
 	end=min(end,len(claim_IDs))
 	fcg=nx.Graph()
 	for claim_ID in claim_IDs[init:end]:
 		filename=os.path.join(claims_path,"claim{}".format(str(claim_ID)))
-		claim_g=nx.read_edgelist(filename+".edgelist",comments="@")
+		try:
+			claim_g=nx.read_edgelist(filename+".edgelist",comments="@")
+		except:
+			continue
 		claim_g=cleanClaimGraph(claim_g,clean_claims[str(claim_ID)])
 		fcg=nx.compose(fcg,claim_g)
 	return index,fcg
 
+#Function to stitch/compile graphs in a one shot way. i.e clean entire graph after unioning 
 def compileClaimGraph2(index,claims_path,claim_IDs,clean_claims,init,end):
 	end=min(end,len(claim_IDs))
 	fcg=nx.Graph()
 	for claim_ID in claim_IDs[init:end]:
 		filename=os.path.join(claims_path,"claim{}".format(str(claim_ID)))
-		claim_g=nx.read_edgelist(filename+".edgelist",comments="@")
+		try:
+			claim_g=nx.read_edgelist(filename+".edgelist",comments="@")
+		except:
+			continue
 		fcg=nx.compose(fcg,claim_g)
 	return index,fcg
 
+#Function to stitch/compile graphs in a hybrid way. i.e clean entire graph after unioning with each claim graph
 def compileClaimGraph3(claims_path,claim_IDs,clean_claims):
 	fcg=nx.Graph()
 	for claim_ID in claim_IDs:
 		filename=os.path.join(claims_path,"claim{}".format(str(claim_ID)))
-		claim_g=nx.read_edgelist(filename+".edgelist",comments="@")
+		try:
+			claim_g=nx.read_edgelist(filename+".edgelist",comments="@")
+		except:
+			continue
 		fcg=nx.compose(fcg,claim_g)
 		fcg=cleanClaimGraph(fcg,clean_claims[str(claim_ID)])
 	return fcg
 
+#Function to aggregate the graph cleaning dictionary for the entire graph
 def compile_clean(rdf_path,clean_claims,claim_type):
 	master_clean={}
 	master_clean['edges2remove']={}
@@ -835,9 +850,10 @@ def compile_clean(rdf_path,clean_claims,claim_type):
 	with codecs.open(os.path.join(rdf_path,"{}master_clean.json".format(claim_type)),"w","utf-8") as f:
 		f.write(json.dumps(master_clean,ensure_ascii=False))
 	return master_clean
-	
-def saveFred(fcg,graph_path,fcg_label):
-	fcg_path=os.path.join(graph_path,"fred",fcg_label)
+
+#Function to save fred graph including its nodes, entities, node2ID dictionary and edgelistID (format needed by klinker)	
+def saveFred(fcg,graph_path,fcg_label,compilefred):
+	fcg_path=os.path.join(graph_path,"fred"+str(compilefred),fcg_label)
 	os.makedirs(fcg_path, exist_ok=True)
 	#writing aggregated networkx graphs as edgelist and graphml
 	nx.write_edgelist(fcg,os.path.join(fcg_path,"{}.edgelist".format(fcg_label)))
@@ -867,17 +883,18 @@ def saveFred(fcg,graph_path,fcg_label):
 	np.save(write_path+"_edgelistID.npy",edgelistID)  
 
 def createFred(rdf_path,graph_path,fcg_label,init,passive,cpu,compilefred):
-	fcg_path=os.path.join(graph_path,"fred",fcg_label)
+	fcg_path=os.path.join(graph_path,"fred"+str(compilefred),fcg_label+str(compilefred))
+	#If union of tfcg and ffcg wants to be created i.e ufcg
 	if fcg_label=="ufcg":
 		#Assumes that tfcg and ffcg exists
-		tfcg_path=os.path.join(graph_path,"fred","tfcg","tfcg.edgelist")
-		ffcg_path=os.path.join(graph_path,"fred","ffcg","ffcg.edgelist")
+		tfcg_path=os.path.join(graph_path,"fred"+str(compilefred),"tfcg"+str(compilefred),"tfcg{}.edgelist".format(str(compilefred)))
+		ffcg_path=os.path.join(graph_path,"fred"+str(compilefred),"ffcg"+str(compilefred),"ffcg{}.edgelist".format(str(compilefred)))
 		if os.path.exists(tfcg_path) and os.path.exists(ffcg_path):
 			tfcg=nx.read_edgelist(tfcg_path,comments="@")
 			ffcg=nx.read_edgelist(ffcg_path,comments="@")
 			ufcg=nx.compose(tfcg,ffcg)
 			os.makedirs(fcg_path, exist_ok=True)
-			nx.write_edgelist(ufcg,os.path.join(fcg_path,"ufcg.edgelist"))
+			saveFred(ufcg,graph_path,fcg_label+str(compilefred),compilefred)
 		else:
 			print("Create tfcg and ffcg before attempting to create the union: ufcg")
 	else:
@@ -886,7 +903,8 @@ def createFred(rdf_path,graph_path,fcg_label,init,passive,cpu,compilefred):
 		claims_path=os.path.join(rdf_path,"{}_claims".format(claim_type))
 		claim_IDs=np.load(os.path.join(rdf_path,"{}_claimID.npy".format(claim_type)))
 		claims=pd.read_csv(os.path.join(rdf_path,"{}_claims.csv".format(claim_type)),index_col=0)
-		if compilefred:
+		#compiling fred only i.e. stitching together the graph using the dictionary that stores edges to remove and contract i.e. clean_claims
+		if compilefred!=0:
 			with codecs.open(os.path.join(rdf_path,"{}claims_clean.json".format(claim_type)),"r","utf-8") as f: 
 				clean_claims=json.loads(f.read())
 			if compilefred==1 or compilefred==2:
@@ -903,8 +921,10 @@ def createFred(rdf_path,graph_path,fcg_label,init,passive,cpu,compilefred):
 					master_fcg=cleanClaimGraph(master_fcg,master_clean)
 			elif compilefred==3:
 				master_fcg=compileClaimGraph3(claims_path,claim_IDs,clean_claims)
-			saveFred(master_fcg,graph_path,fcg_label+str(compilefred))
+			saveFred(master_fcg,graph_path,fcg_label+str(compilefred),compilefred)
+		#else parsing the graph for each claim
 		else:
+			#passive: if graph rdf files have already been fetched from fred. Faster parallelizable
 			if passive:
 				n=int(len(claim_IDs)/cpu)+1
 				pool=mp.Pool(processes=cpu)							
@@ -912,12 +932,14 @@ def createFred(rdf_path,graph_path,fcg_label,init,passive,cpu,compilefred):
 				output=sorted([p.get() for p in results],key=lambda x:x[0])
 				errorclaimid=list(chain(*map(lambda x:x[1],output)))
 				clean_claims=dict(ChainMap(*map(lambda x:x[2],output)))
+			#if graph rdf files have not been fetched. Slower, dependent on rate limits
 			else:
-				errorclaimid,clean_claims=fredParse(rdf_path,fcg_path,fcg_label,claim_type,claims,init,end)
+				errorclaimid,clean_claims=fredParse(claims_path,claims,init,end)
 			np.save(os.path.join(rdf_path,"{}_error_claimID.npy".format(fcg_label)),errorclaimid)
 			with codecs.open(os.path.join(rdf_path,"{}claims_clean.json".format(claim_type)),"w","utf-8") as f:
 				f.write(json.dumps(clean_claims,ensure_ascii=False))
 
+#Function to plot a networkx graph
 def plotFredGraph(claim_g,filename):
 	plt.figure()
 	pos=nx.spring_layout(claim_g)
@@ -937,7 +959,7 @@ if __name__== "__main__":
 	parser.add_argument('-i','--init', metavar='Index Start',type=int,help='Index number of claims to start from',default=0)
 	parser.add_argument('-p','--passive',action='store_true',help='Passive or not',default=False)
 	parser.add_argument('-cpu','--cpu',metavar='Number of CPUs',type=int,help='Number of CPUs available',default=1)
-	parser.add_argument('-cf','--compilefred',metavar='Compile method #',type=int,help='Number of compile method',default=None)
+	parser.add_argument('-cf','--compilefred',metavar='Compile method #',type=int,help='Number of compile method',default=0)
 	args=parser.parse_args()
 	createFred(args.rdfpath,args.graphpath,args.fcgtype,args.init,args.passive,args.cpu,args.compilefred)
 
