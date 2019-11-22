@@ -1,0 +1,36 @@
+
+2019-11-19 18:12:54.884156:
+    metric: ultrametric
+    edges:  undirected
+    weight: logdegree
+    nodes:  ffcg3/data/ffcg3_nodes.txt
+    graph:  ffcg3/data/ffcg3_edgelistID.npy
+    input:  ffcg3/data/intersect_all_entityPairs_dbpedia_fred3_ffcg3_IDs_klformat.txt
+    output: ffcg3/data/intersect_all_entityPairs_dbpedia_fred3_ffcg3_IDs.json
+2019-11-19 18:12:54.933377: reading nodes from text file..
+2019-11-19 18:12:55.278504: reading graph from text file..
+2019-11-19 18:12:56.203140: reading input..
+2019-11-19 18:13:03.681068: launching pool of 48 workers.
+2019-11-19 18:47:32.866140: done
+
+2019-11-19 19:01:56.591975:
+    metric: ultrametric
+    edges:  undirected
+    weight: logdegree
+    nodes:  ufcg3/data/ufcg3_nodes.txt
+    graph:  ufcg3/data/ufcg3_edgelistID.npy
+    input:  ufcg3/data/intersect_all_entityPairs_dbpedia_fred3_ufcg3_IDs_klformat.txt
+    output: ufcg3/data/intersect_all_entityPairs_dbpedia_fred3_ufcg3_IDs.json
+2019-11-19 19:01:56.640268: reading nodes from text file..
+2019-11-19 19:01:57.347211: reading graph from text file..
+2019-11-19 19:01:58.293649: reading input..
+2019-11-19 19:02:03.887938: launching pool of 48 workers.
+2019-11-19 19:44:02.646407: done
+
+real	20m14.514s
+user	7m31.596s
+sys	0m18.992s
+
+real	10m36.952s
+user	1m46.196s
+sys	0m25.108s

@@ -613,55 +613,55 @@ def checkClaimGraph(g):
 	edges2contract['dbpediaequiv']=[]
 	edges2contract['dbpediassoc']=[]
 	for (a,b,c) in g.getEdges():
-		a_urlparse=urlparse(a)
-		c_urlparse=urlparse(c)
 		claim_g.add_edge(a,c,label=b)
-		#Delete '%27' edges
-		if regex_27.match(a) or regex_27.match(c):
-			edges2remove['%27'].append((a,c))
-		#Merging verbs like show_1 and show_2 with show
-		elif regex_type.match(b):
-			if regex_fredup.match(a) and (regex_fredup.match(a)[1].split("_")[0].lower()==c.split("\\")[-1].lower()):
-				edges2contract['type'].append((a,c))
-			elif regex_fredup.match(c) and (regex_fredup.match(c)[1].split("_")[0].lower()==a.split("\\")[-1].lower()):
-				edges2contract['type'].append((c,a))
-			elif regex_fred.match(a) and (regex_fred.match(a)[1].lower() in c.split("\\")[-1].lower()):
-				edges2contract['type'].append((a,c))
-			elif (regex_fred.match(c)) and (regex_fred.match(c)[1].lower() in a.split("\\")[-1].lower()):
-				edges2contract['type'].append((c,a))
-		#Merging verbs with their verbnet forms
-		elif regex_equiv.match(b) and (regex_vn.match(a) or regex_vn.match(c)):
-			if (regex_fredup.match(a) and regex_vn.match(c)) and (regex_fredup.match(a)[1].split("_")[0].lower() == regex_vn.match(c)[1].lower()):
-				edges2contract['vnequiv'].append((c,a))
-			elif (regex_fredup.match(c) and regex_vn.match(a)) and (regex_fredup.match(c)[1].split("_")[0].lower() == regex_vn.match(a)[1].lower()):
-				edges2contract['vnequiv'].append((a,c))
-		#Merging nodes with sameAs relationships
-		elif regex_sameas.match(b) (regex_dbpedia.match(a) or regex_dbpedia.match(c)):
-			if (regex_fredup.match(a) and regex_dbpedia.match(c)) and (regex_fredup.match(a)[1]!="Of" and regex_fredup.match(a)[1]!="Thing"):
-				edges2contract['dbpediasas'].append((c,a))
-			elif (regex_fredup.match(c) and regex_dbpedia.match(a)) and (regex_fredup.match(c)[1]!="Of" and regex_fredup.match(c)[1]!="Thing"):
-				edges2contract['dbpediasas'].append((a,c))
-		#Merging nodes with equivalentClass relationships
-		elif regex_equiv.match(b) and (regex_dbpedia.match(a) or regex_dbpedia.match(c)):
-			if (regex_fredup.match(a) and regex_dbpedia.match(c)) and (regex_fredup.match(a)[1]!="Of" and regex_fredup.match(a)[1]!="Thing"):
-				edges2contract['dbpediaequiv'].append((c,a))
-			elif (regex_fredup.match(c) and regex_dbpedia.match(a)) and (regex_fredup.match(c)[1]!="Of" and regex_fredup.match(c)[1]!="Thing"):
-				edges2contract['dbpediaequiv'].append((a,c))
-		#Merging nodes with associatedWith relationships
-		elif regex_assoc.match(b) and (regex_dbpedia.match(a) or regex_dbpedia.match(c)):
-			if (regex_fredup.match(a) and regex_dbpedia.match(c)) and (regex_fredup.match(a)[1]!="Of" and regex_fredup.match(a)[1]!="Thing") and (regex_fredup.match(a)[1].split("_")[0].lower() in regex_dbpedia.match(c)[1].lower()):
-				edges2contract['dbpediassoc'].append((c,a))
-			elif (regex_fredup.match(c) and regex_dbpedia.match(a)) and (regex_fredup.match(c)[1]!="Of" and regex_fredup.match(c)[1]!="Thing") and (regex_fredup.match(c)[1].split("_")[0].lower() in regex_dbpedia.match(a)[1].lower()):
-				edges2contract['dbpediassoc'].append((a,c))
-		#remove hasDeterminer 'The'
-		elif regex_det.match(b):
-			edges2remove['det'].append((a,c))
-		elif regex_data.match(a) or regex_data.match(c):
-			edges2remove['data'].append((a,c))
-		elif regex_prop.match(a) or regex_prop.match(c):
-			edges2remove['prop'].append((a,c))
-		elif (a_urlparse.netloc=='' and a_urlparse.scheme=='') or (c_urlparse.netloc=='' and c_urlparse.scheme==''):
-			edges2remove['url'].append((a,c))
+		# a_urlparse=urlparse(a)
+		# c_urlparse=urlparse(c)
+		# #Delete '%27' edges
+		# if regex_27.match(a) or regex_27.match(c):
+		# 	edges2remove['%27'].append((a,c))
+		# #Merging verbs like show_1 and show_2 with show
+		# elif regex_type.match(b):
+		# 	if regex_fredup.match(a) and (regex_fredup.match(a)[1].split("_")[0].lower()==c.split("\\")[-1].lower()):
+		# 		edges2contract['type'].append((a,c))
+		# 	elif regex_fredup.match(c) and (regex_fredup.match(c)[1].split("_")[0].lower()==a.split("\\")[-1].lower()):
+		# 		edges2contract['type'].append((c,a))
+		# 	elif regex_fred.match(a) and (regex_fred.match(a)[1].lower() in c.split("\\")[-1].lower()):
+		# 		edges2contract['type'].append((a,c))
+		# 	elif (regex_fred.match(c)) and (regex_fred.match(c)[1].lower() in a.split("\\")[-1].lower()):
+		# 		edges2contract['type'].append((c,a))
+		# #Merging verbs with their verbnet forms
+		# elif regex_equiv.match(b) and (regex_vn.match(a) or regex_vn.match(c)):
+		# 	if (regex_fredup.match(a) and regex_vn.match(c)) and (regex_fredup.match(a)[1].split("_")[0].lower() == regex_vn.match(c)[1].lower()):
+		# 		edges2contract['vnequiv'].append((c,a))
+		# 	elif (regex_fredup.match(c) and regex_vn.match(a)) and (regex_fredup.match(c)[1].split("_")[0].lower() == regex_vn.match(a)[1].lower()):
+		# 		edges2contract['vnequiv'].append((a,c))
+		# #Merging nodes with sameAs relationships
+		# elif regex_sameas.match(b) and (regex_dbpedia.match(a) or regex_dbpedia.match(c)):
+		# 	if (regex_fredup.match(a) and regex_dbpedia.match(c)) and (regex_fredup.match(a)[1]!="Of" and regex_fredup.match(a)[1]!="Thing"):
+		# 		edges2contract['dbpediasas'].append((c,a))
+		# 	elif (regex_fredup.match(c) and regex_dbpedia.match(a)) and (regex_fredup.match(c)[1]!="Of" and regex_fredup.match(c)[1]!="Thing"):
+		# 		edges2contract['dbpediasas'].append((a,c))
+		# #Merging nodes with equivalentClass relationships
+		# elif regex_equiv.match(b) and (regex_dbpedia.match(a) or regex_dbpedia.match(c)):
+		# 	if (regex_fredup.match(a) and regex_dbpedia.match(c)) and (regex_fredup.match(a)[1]!="Of" and regex_fredup.match(a)[1]!="Thing"):
+		# 		edges2contract['dbpediaequiv'].append((c,a))
+		# 	elif (regex_fredup.match(c) and regex_dbpedia.match(a)) and (regex_fredup.match(c)[1]!="Of" and regex_fredup.match(c)[1]!="Thing"):
+		# 		edges2contract['dbpediaequiv'].append((a,c))
+		# #Merging nodes with associatedWith relationships
+		# elif regex_assoc.match(b) and (regex_dbpedia.match(a) or regex_dbpedia.match(c)):
+		# 	if (regex_fredup.match(a) and regex_dbpedia.match(c)) and (regex_fredup.match(a)[1]!="Of" and regex_fredup.match(a)[1]!="Thing") and (regex_fredup.match(a)[1].split("_")[0].lower() in regex_dbpedia.match(c)[1].lower()):
+		# 		edges2contract['dbpediassoc'].append((c,a))
+		# 	elif (regex_fredup.match(c) and regex_dbpedia.match(a)) and (regex_fredup.match(c)[1]!="Of" and regex_fredup.match(c)[1]!="Thing") and (regex_fredup.match(c)[1].split("_")[0].lower() in regex_dbpedia.match(a)[1].lower()):
+		# 		edges2contract['dbpediassoc'].append((a,c))
+		# #remove hasDeterminer 'The'
+		# elif regex_det.match(b):
+		# 	edges2remove['det'].append((a,c))
+		# elif regex_data.match(a) or regex_data.match(c):
+		# 	edges2remove['data'].append((a,c))
+		# elif regex_prop.match(a) or regex_prop.match(c):
+		# 	edges2remove['prop'].append((a,c))
+		# elif (a_urlparse.netloc=='' and a_urlparse.scheme=='') or (c_urlparse.netloc=='' and c_urlparse.scheme==''):
+		# 	edges2remove['url'].append((a,c))
 	return claim_g,edges2remove,edges2contract
 
 #fetch fred graph files from their API. slow and dependent on rate
@@ -758,7 +758,7 @@ def cleanClaimGraph(claim_g,clean_claims):
 	edges2contract=clean_claims['edges2contract']
 	for edge in edges2remove['%27']:
 		if claim_g.has_edge(*edge):
-			claim_g.remove(*edge)
+			claim_g.remove_edge(*edge)
 	for edge in edges2contract['type']:
 		if claim_g.has_edge(*edge):
 			claim_g=nx.contracted_edge(claim_g,edge,self_loops=False)
@@ -776,16 +776,16 @@ def cleanClaimGraph(claim_g,clean_claims):
 			claim_g=nx.contracted_edge(claim_g,edge,self_loops=False)
 	for edge in edges2remove['det']:
 		if claim_g.has_edge(*edge):
-			claim_g.remove(*edge)
+			claim_g.remove_edge(*edge)
 	for edge in edges2remove['data']:
 		if claim_g.has_edge(*edge):
-			claim_g.remove(*edge)
+			claim_g.remove_edge(*edge)
 	for edge in edges2remove['prop']:
 		if claim_g.has_edge(*edge):
-			claim_g.remove(*edge)
+			claim_g.remove_edge(*edge)
 	for edge in edges2remove['url']:
 		if claim_g.has_edge(*edge):
-			claim_g.remove(*edge)
+			claim_g.remove_edge(*edge)
 	return claim_g
 
 #Function to stitch/compile graphs in an iterative way. i.e clean individual graphs before unioning 
@@ -838,7 +838,7 @@ def compile_clean(rdf_path,clean_claims,claim_type):
 	master_clean['edges2remove']['url']=[]
 	master_clean['edges2remove']['prop']=[]
 	master_clean['edges2remove']['data']=[]
-	master_clean['edges2contract']t['type']=[]
+	master_clean['edges2contract']['type']=[]
 	master_clean['edges2contract']['vnequiv']=[]
 	master_clean['edges2contract']['dbpediasas']=[]
 	master_clean['edges2contract']['dbpediaequiv']=[]

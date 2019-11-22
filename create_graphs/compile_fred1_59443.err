@@ -1,0 +1,28 @@
+
+python: can't open file 'compile_stats.py': [Errno 2] No such file or directory
+
+real	0m13.250s
+user	0m0.028s
+sys	0m0.040s
+
+2019-11-19 15:16:39.954055:
+    metric: ultrametric
+    edges:  undirected
+    weight: logdegree
+    nodes:  ufcg1/data/ufcg1_nodes.txt
+    graph:  ufcg1/data/ufcg1_edgelistID.npy
+    input:  ufcg1/data/intersect_all_entityPairs_dbpedia_fred1_ufcg1_IDs_klformat.txt
+    output: ufcg1/data/intersect_all_entityPairs_dbpedia_fred1_ufcg1_IDs.json
+2019-11-19 15:16:39.998270: reading nodes from text file..
+2019-11-19 15:16:40.512508: reading graph from text file..
+2019-11-19 15:16:41.831451: reading input..
+2019-11-19 15:16:47.845373: launching pool of 48 workers.
+2019-11-19 16:06:50.300187: done
+
+real	21m32.085s
+user	7m23.924s
+sys	0m19.760s
+
+real	10m57.692s
+user	1m56.084s
+sys	0m30.544s
