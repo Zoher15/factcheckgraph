@@ -1,0 +1,5 @@
+
+real	57m50.169s
+user	0m25.884s
+sys	0m16.372s
+slurmstepd: error: *** JOB 68880 ON nid00345 CANCELLED AT 2019-11-22T02:06:03 DUE TO TIME LIMIT ***

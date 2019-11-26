@@ -8,21 +8,21 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=48
-#SBATCH --time=5:00:00
+#SBATCH --time=7:00:00
 source /N/u/zkachwal/Carbonate/miniconda3/etc/profile.d/conda.sh
-# conda activate
-# cd /gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph/create_graphs/
-# time python create_fred.py -ft tfcg -cpu 48 -cf 2
-# time python create_fred.py -ft ffcg -cpu 48 -cf 2
-# time python create_fred.py -ft ufcg -cf 2
-# #find intersect
-# cd /gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph/process_graphs/
-# time python find_intersect.py -fcg fred2 -kg dbpedia
-# #calculate stats
-# time python calculate_stats.py -gc fred2 -gt tfcg2
-# time python calculate_stats.py -gc fred2 -gt ffcg2
-# time python calculate_stats.py -gc fred2 -gt ufcg2
-# time python compile_stats.py
+conda activate
+cd /gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph/create_graphs/
+time python create_fred.py -ft tfcg -cpu 48 -cf 2
+time python create_fred.py -ft ffcg -cpu 48 -cf 2
+time python create_fred.py -ft ufcg -cf 2
+#find intersect
+cd /gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph/process_graphs/
+time python find_intersect.py -fcg fred2 -kg dbpedia
+#calculate stats
+time python calculate_stats.py -gc fred2 -gt tfcg2
+time python calculate_stats.py -gc fred2 -gt ffcg2
+time python calculate_stats.py -gc fred2 -gt ufcg2
+time python compile_stats.py
 #klinker
 conda activate env-kl
 cd /gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph_data/graphs/fred2/
