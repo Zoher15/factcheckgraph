@@ -13,6 +13,7 @@
 # 	session.read_transaction(print_rels,'equivalentClass')
 import pandas as pd
 import re
+import sys
 import numpy as np
 import rdflib
 from rdflib import BNode, Literal
@@ -72,24 +73,25 @@ falseclaims=list(data.loc[falseind]['claimID'])
 # 	plt.savefig(filename)
 # 	plt.close()
 # 	plt.clf()
-for f in falseclaims:
+mode=sys.argv[1]
+for f in eval(mode+"claims"):
 	print(f)
 	g=rdflib.Graph()
 	# filename="5005"+".rdf"
 	filename=str(f)+".rdf"
 	try:
-		g.parse("C:/Users/zoya/Desktop/Zoher/factcheckgraph/rdf_files/false_claims/claim"+filename,format='application/rdf+xml')
+		g.parse("C:/Users/zoya/Desktop/Zoher/factcheckgraph/rdf_files/"+mode+"_claims/claim"+filename,format='application/rdf+xml')
 	except:
 		# continue
 		pass
 	for subject,predicate,obj in g:
 		g.add( (subject, RDF.type,Literal("claim"+filename.strip(".rdf"))) )
 		g.add( (obj, RDF.type,Literal("claim"+filename.strip(".rdf"))) )
-	g.serialize(destination="C:/Users/zoya/Desktop/Zoher/factcheckgraph/rdf_files/false_claims/"+filename, format='application/rdf+xml')
+	g.serialize(destination="C:/Users/zoya/Desktop/Zoher/factcheckgraph/rdf_files/"+mode+"_claims/"+filename, format='application/rdf+xml')
 	graph = Graph("bolt://127.0.0.1:7687",password="1234")
 	tx = graph.begin()
 	# tx.run("MATCH (n) DETACH DELETE n;")
-	print([record for record in tx.run("CALL semantics.importRDF('file:///C:/Users/zoya/Desktop/Zoher/factcheckgraph/rdf_files/false_claims/"+filename+"','RDF/XML', { shortenUrls: false, typesToLabels: false, commitSize: 100000 });")])
+	print([record for record in tx.run("CALL semantics.importRDF('file:///C:/Users/zoya/Desktop/Zoher/factcheckgraph/rdf_files/"+mode+"_claims/"+filename+"','RDF/XML', { shortenUrls: false, typesToLabels: false, commitSize: 100000 });")])
 	tx.run("MATCH (n) where exists(n.`http://www.w3.org/1999/02/22-rdf-syntax-ns#type`) set n.claim{}=True;".format(str(f)))
 	tx.run("MATCH (n) where exists(n.`http://www.w3.org/1999/02/22-rdf-syntax-ns#type`) remove n.`http://www.w3.org/1999/02/22-rdf-syntax-ns#type`;")
 	#1 Add prefix labels for colors

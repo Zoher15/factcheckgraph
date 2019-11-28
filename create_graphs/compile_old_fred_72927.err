@@ -1,0 +1,114 @@
+Traceback (most recent call last):
+  File "find_intersect.py", line 54, in <module>
+    find_intersect(args.graphpath,args.fcgclass,args.kg)
+  File "find_intersect.py", line 18, in find_intersect
+    tfcg_entities=np.loadtxt(os.path.join(fcg_path,fcg_labels[0],"data","{}_entities.txt".format(fcg_labels[0])),dtype='str',encoding='utf-8')
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/numpy/lib/npyio.py", line 962, in loadtxt
+    fh = np.lib._datasource.open(fname, 'rt', encoding=encoding)
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/numpy/lib/_datasource.py", line 266, in open
+    return ds.open(path, mode, encoding=encoding, newline=newline)
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/numpy/lib/_datasource.py", line 624, in open
+    raise IOError("%s not found." % path)
+OSError: /gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph_data/graphs/old_fred/tfcg_old/data/tfcg_old_entities.txt not found.
+
+real	0m59.426s
+user	0m0.628s
+sys	0m1.132s
+
+real	1m25.671s
+user	0m2.132s
+sys	0m1.236s
+
+real	1m5.938s
+user	0m5.844s
+sys	0m1.212s
+
+real	1m5.875s
+user	0m8.208s
+sys	0m1.280s
+
+real	0m53.540s
+user	0m0.944s
+sys	0m1.240s
+
+2019-11-26 12:13:07.967457:
+    metric: ultrametric
+    edges:  undirected
+    weight: logdegree
+    nodes:  tfcg_old/data/tfcg_old_nodes.txt
+    graph:  tfcg_old/data/tfcg_old_edgelistID.npy
+    input:  tfcg_old/data/intersect_all_entityPairs_dbpedia_old_fred_tfcg_old_IDs_klformat.txt
+    output: tfcg_old/data/intersect_all_entityPairs_dbpedia_old_fred_tfcg_old_IDs.json
+2019-11-26 12:13:07.968359: reading nodes from text file..
+Traceback (most recent call last):
+  File "/N/u/zkachwal/Carbonate/miniconda3/envs/env-kl/bin/klinker", line 11, in <module>
+    load_entry_point('knowledge-linker==0.1rc0', 'console_scripts', 'klinker')()
+  File "/N/u/zkachwal/Carbonate/miniconda3/envs/env-kl/lib/python2.7/site-packages/knowledge_linker/frontend/cmdline.py", line 39, in main
+    args.func(args)
+  File "/N/u/zkachwal/Carbonate/miniconda3/envs/env-kl/lib/python2.7/site-packages/knowledge_linker/frontend/linkpred.py", line 178, in main
+    with closing(open(ns.nodespath)) as f:
+IOError: [Errno 2] No such file or directory: 'tfcg_old/data/tfcg_old_nodes.txt'
+
+2019-11-26 12:13:34.206425:
+    metric: ultrametric
+    edges:  undirected
+    weight: logdegree
+    nodes:  ffcg_old/data/ffcg_old_nodes.txt
+    graph:  ffcg_old/data/ffcg_old_edgelistID.npy
+    input:  ffcg_old/data/intersect_all_entityPairs_dbpedia_old_fred_ffcg_old_IDs_klformat.txt
+    output: ffcg_old/data/intersect_all_entityPairs_dbpedia_old_fred_ffcg_old_IDs.json
+2019-11-26 12:13:34.207054: reading nodes from text file..
+Traceback (most recent call last):
+  File "/N/u/zkachwal/Carbonate/miniconda3/envs/env-kl/bin/klinker", line 11, in <module>
+    load_entry_point('knowledge-linker==0.1rc0', 'console_scripts', 'klinker')()
+  File "/N/u/zkachwal/Carbonate/miniconda3/envs/env-kl/lib/python2.7/site-packages/knowledge_linker/frontend/cmdline.py", line 39, in main
+    args.func(args)
+  File "/N/u/zkachwal/Carbonate/miniconda3/envs/env-kl/lib/python2.7/site-packages/knowledge_linker/frontend/linkpred.py", line 178, in main
+    with closing(open(ns.nodespath)) as f:
+IOError: [Errno 2] No such file or directory: 'ffcg_old/data/ffcg_old_nodes.txt'
+
+2019-11-26 12:14:00.132144:
+    metric: ultrametric
+    edges:  undirected
+    weight: logdegree
+    nodes:  ufcg_old/data/ufcg_old_nodes.txt
+    graph:  ufcg_old/data/ufcg_old_edgelistID.npy
+    input:  ufcg_old/data/intersect_all_entityPairs_dbpedia_old_fred_ufcg_old_IDs_klformat.txt
+    output: ufcg_old/data/intersect_all_entityPairs_dbpedia_old_fred_ufcg_old_IDs.json
+2019-11-26 12:14:00.132471: reading nodes from text file..
+Traceback (most recent call last):
+  File "/N/u/zkachwal/Carbonate/miniconda3/envs/env-kl/bin/klinker", line 11, in <module>
+    load_entry_point('knowledge-linker==0.1rc0', 'console_scripts', 'klinker')()
+  File "/N/u/zkachwal/Carbonate/miniconda3/envs/env-kl/lib/python2.7/site-packages/knowledge_linker/frontend/cmdline.py", line 39, in main
+    args.func(args)
+  File "/N/u/zkachwal/Carbonate/miniconda3/envs/env-kl/lib/python2.7/site-packages/knowledge_linker/frontend/linkpred.py", line 178, in main
+    with closing(open(ns.nodespath)) as f:
+IOError: [Errno 2] No such file or directory: 'ufcg_old/data/ufcg_old_nodes.txt'
+Traceback (most recent call last):
+  File "find_adj_pairs.py", line 51, in <module>
+    find_adj_pairs(args.graphpath,args.fcgclass,args.kgtype)
+  File "find_adj_pairs.py", line 11, in find_adj_pairs
+    intersect_all_pairs=np.loadtxt(intersect_path+"_all_entityPairs_{}_{}.txt".format(kg_label,fcg_class),dtype=str,encoding="utf-8")
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/numpy/lib/npyio.py", line 962, in loadtxt
+    fh = np.lib._datasource.open(fname, 'rt', encoding=encoding)
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/numpy/lib/_datasource.py", line 266, in open
+    return ds.open(path, mode, encoding=encoding, newline=newline)
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/numpy/lib/_datasource.py", line 624, in open
+    raise IOError("%s not found." % path)
+OSError: /gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph_data/graphs/old_fred/intersect_all_entityPairs_dbpedia_old_fred.txt not found.
+
+real	8m15.704s
+user	7m24.360s
+sys	0m17.808s
+Traceback (most recent call last):
+  File "plot_adj_pairs.py", line 68, in <module>
+    plot_adj_pairs(args.graphpath,args.fcgclass,args.kgtype,args.sampled)
+  File "plot_adj_pairs.py", line 21, in plot_adj_pairs
+    intersect_adj_ind=np.load(os.path.join(fcg_path,"intersect_adj_ind_{}_{}.npy".format(kg_label,fcg_class)))
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/numpy/lib/npyio.py", line 422, in load
+    fid = open(os_fspath(file), "rb")
+FileNotFoundError: [Errno 2] No such file or directory: '/gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph_data/graphs/old_fred/intersect_adj_ind_dbpedia_old_fred.npy'
+
+real	0m54.222s
+user	0m0.800s
+sys	0m1.192s

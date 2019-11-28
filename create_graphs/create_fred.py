@@ -898,6 +898,7 @@ def saveFred(fcg,graph_path,fcg_label,compilefred):
 	edgelistID=np.asarray([[int(node2ID[edge[0]]),int(node2ID[edge[1]]),1] for edge in edges])
 	np.save(write_path+"_edgelistID.npy",edgelistID)  
 
+
 def createFred(rdf_path,graph_path,fcg_label,init,passive,cpu,compilefred):
 	fcg_path=os.path.join(graph_path,"fred"+str(compilefred),fcg_label+str(compilefred))
 	#If union of tfcg and ffcg wants to be created i.e ufcg

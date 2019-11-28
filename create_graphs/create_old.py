@@ -6,7 +6,7 @@ import codecs
 import json
 import numpy as np
 
-def create_largest_cc(graph_path,fcg_class,fcg_label):
+def create_old(graph_path,fcg_class,fcg_label):
 	write_path=os.path.join(graph_path,fcg_class,fcg_label)
 	if fcg_label=="ufcg_old":
 		#Assumes that tfcg and ffcg exists
@@ -43,12 +43,12 @@ def create_largest_cc(graph_path,fcg_class,fcg_label):
 		f.write(json.dumps(node2ID,ensure_ascii=False))
 	#Save Edgelist ID
 	edgelistID=np.asarray([[node2ID[edge[0]],node2ID[edge[1]],1] for edge in edges])
-	np.save(data_path+"_edgelistID.npy",edgelistID)		
+	np.save(data_path+"_edgelistID.npy",edgelistID) 
 
 if __name__== "__main__":
 	parser = argparse.ArgumentParser(description='Create Largest Component Graph')
-	parser.add_argument('-gp','--graphpath', metavar='graph path',type=str,help='Path to the graphs directory',default='/gpfs/home/z/k/zkachwal/Carbonate/factcheckgraph_data/graphs/')
+	parser.add_argument('-gp','--graphpath', metavar='graph path',type=str,help='Path to the graphs directory',default='/gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph_data/graphs/')
 	parser.add_argument('-fcg','--fcgclass', metavar='FactCheckGraph class',type=str,help='Class of graph that already exists')
 	parser.add_argument('-ft','--fcgtype', metavar='FactCheckGraph type',type=str,help='True False or Union FactCheckGraph')
 	args=parser.parse_args()
-	create_largest_cc(args.graphpath,args.fcgclass,args.fcgtype)
+	create_old(args.graphpath,args.fcgclass,args.fcgtype)
