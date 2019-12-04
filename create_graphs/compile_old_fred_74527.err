@@ -1,0 +1,70 @@
+
+real	2m25.140s
+user	0m52.340s
+sys	0m8.904s
+
+real	0m34.925s
+user	0m1.940s
+sys	0m1.144s
+
+real	0m26.430s
+user	0m5.748s
+sys	0m1.128s
+
+real	0m25.670s
+user	0m8.124s
+sys	0m1.068s
+
+real	0m18.009s
+user	0m0.784s
+sys	0m0.972s
+
+2019-11-29 01:32:46.129499:
+    metric: ultrametric
+    edges:  undirected
+    weight: logdegree
+    nodes:  tfcg_old/data/tfcg_old_nodes.txt
+    graph:  tfcg_old/data/tfcg_old_edgelistID.npy
+    input:  tfcg_old/data/intersect_all_entityPairs_dbpedia_old_fred_tfcg_old_IDs_klformat.txt
+    output: tfcg_old/data/intersect_all_entityPairs_dbpedia_old_fred_tfcg_old_IDs.json
+2019-11-29 01:32:46.131085: reading nodes from text file..
+2019-11-29 01:32:46.223337: reading graph from text file..
+2019-11-29 01:32:46.511261: reading input..
+2019-11-29 01:32:47.264532: launching pool of 48 workers.
+2019-11-29 01:47:34.192524: done
+
+2019-11-29 01:49:25.977446:
+    metric: ultrametric
+    edges:  undirected
+    weight: logdegree
+    nodes:  ffcg_old/data/ffcg_old_nodes.txt
+    graph:  ffcg_old/data/ffcg_old_edgelistID.npy
+    input:  ffcg_old/data/intersect_all_entityPairs_dbpedia_old_fred_ffcg_old_IDs_klformat.txt
+    output: ffcg_old/data/intersect_all_entityPairs_dbpedia_old_fred_ffcg_old_IDs.json
+2019-11-29 01:49:25.977717: reading nodes from text file..
+2019-11-29 01:49:26.347441: reading graph from text file..
+2019-11-29 01:49:26.470439: reading input..
+2019-11-29 01:49:27.316055: launching pool of 48 workers.
+2019-11-29 02:26:03.866588: done
+
+2019-11-29 02:27:20.516840:
+    metric: ultrametric
+    edges:  undirected
+    weight: logdegree
+    nodes:  ufcg_old/data/ufcg_old_nodes.txt
+    graph:  ufcg_old/data/ufcg_old_edgelistID.npy
+    input:  ufcg_old/data/intersect_all_entityPairs_dbpedia_old_fred_ufcg_old_IDs_klformat.txt
+    output: ufcg_old/data/intersect_all_entityPairs_dbpedia_old_fred_ufcg_old_IDs.json
+2019-11-29 02:27:20.517134: reading nodes from text file..
+2019-11-29 02:27:20.643931: reading graph from text file..
+2019-11-29 02:27:20.786515: reading input..
+2019-11-29 02:27:21.772002: launching pool of 48 workers.
+2019-11-29 03:12:32.463915: done
+
+real	8m24.111s
+user	7m29.216s
+sys	0m17.420s
+
+real	2m51.204s
+user	1m45.476s
+sys	0m27.348s

@@ -255,8 +255,8 @@ uris_dict,dbpedia_uris=save_uris()
 edgelist,G=save_edgelist(uris_dict)
 degreelist=save_degree()
 stats(G)
-import pdb
-pdb.set_trace()
+# import pdb
+# pdb.set_trace()
 #If 1(Carbonate) dbpedia can be parsed and triples of interest can be found
 # if pc==1:
 # 	try:

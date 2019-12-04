@@ -27,9 +27,9 @@ print(data.groupby('fact_checkerID').count())
 trueregex=re.compile(r'(?i)^true|^correct$|^mostly true$|^geppetto checkmark$')
 falseregex=re.compile(r'(?i)^false|^mostly false|^pants on fire$|^four pinocchios$|^no\ |^no:|^distorts the facts|^wrong$')
 trueind=data['rating_name'].apply(lambda x:trueregex.match(x)!=None)
-trueclaims=list(data.loc[trueind]['claimID'])
 falseind=data['rating_name'].apply(lambda x:falseregex.match(x)!=None)
-falseclaims=list(data.loc[falseind]['claimID'])
+trueclaims=list(data.loc[trueind]['claimID'].unique())
+falseclaims=list(data.loc[falseind]['claimID'].unique())
 # print(len(falseclaims))
 # print(len(data))
 # graph = rdflib.Graph()
@@ -80,18 +80,18 @@ for f in eval(mode+"claims"):
 	# filename="5005"+".rdf"
 	filename=str(f)+".rdf"
 	try:
-		g.parse("C:/Users/zoya/Desktop/Zoher/factcheckgraph/rdf_files/"+mode+"_claims/claim"+filename,format='application/rdf+xml')
+		g.parse("C:/Users/zoya/Desktop/Zoher/factcheckgraph/rdf_files/"+filename,format='application/rdf+xml')
 	except:
 		# continue
 		pass
 	for subject,predicate,obj in g:
 		g.add( (subject, RDF.type,Literal("claim"+filename.strip(".rdf"))) )
 		g.add( (obj, RDF.type,Literal("claim"+filename.strip(".rdf"))) )
-	g.serialize(destination="C:/Users/zoya/Desktop/Zoher/factcheckgraph/rdf_files/"+mode+"_claims/"+filename, format='application/rdf+xml')
+	g.serialize(destination="C:/Users/zoya/Desktop/Zoher/factcheckgraph/rdf_files/claim"+filename, format='application/rdf+xml')
 	graph = Graph("bolt://127.0.0.1:7687",password="1234")
 	tx = graph.begin()
 	# tx.run("MATCH (n) DETACH DELETE n;")
-	print([record for record in tx.run("CALL semantics.importRDF('file:///C:/Users/zoya/Desktop/Zoher/factcheckgraph/rdf_files/"+mode+"_claims/"+filename+"','RDF/XML', { shortenUrls: false, typesToLabels: false, commitSize: 100000 });")])
+	print([record for record in tx.run("CALL semantics.importRDF('file:///C:/Users/zoya/Desktop/Zoher/factcheckgraph/rdf_files/claim"+filename+"','RDF/XML', { shortenUrls: false, typesToLabels: false, commitSize: 100000 });")])
 	tx.run("MATCH (n) where exists(n.`http://www.w3.org/1999/02/22-rdf-syntax-ns#type`) set n.claim{}=True;".format(str(f)))
 	tx.run("MATCH (n) where exists(n.`http://www.w3.org/1999/02/22-rdf-syntax-ns#type`) remove n.`http://www.w3.org/1999/02/22-rdf-syntax-ns#type`;")
 	#1 Add prefix labels for colors
@@ -142,9 +142,9 @@ for f in eval(mode+"claims"):
 	#5 merging nodes with associatedWith relationships
 	tx.run("MATCH (n:fred)-[r:`http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#associatedWith`]-(m:dbpedia) where not n.label_name='Of' and not n.label_name='Thing' and (toLower(split(n.label_name,'_')[0])=toLower(split(m.label_name,'_')[0])) with collect([n,m]) as events unwind events as event CALL apoc.refactor.mergeNodes([event[0],event[1]],{properties:'overwrite',mergeRels:true}) yield node return node;")
 	#delete self loops
+	tx.run("MATCH (n)-[r]-(n) delete r;")
 	#remove merged label_names
 	tx.run("MATCH (n:dbpedia) remove n:fred;")
-	tx.run("MATCH (n)-[r]-(n) delete r;")
 	#remove hasDeterminer 'The'
 	tx.run("MATCH (n)-[r:`http://www.ontologydesignpatterns.org/ont/fred/quantifiers.owl#hasDeterminer`]->(m) delete m,r")
 	#
@@ -152,14 +152,12 @@ for f in eval(mode+"claims"):
 	#
 	tx.run("MATCH (n{uri:'http://www.w3.org/2002/07/owl#DataTypeProperty'}) detach delete n")
 	#
+	tx.run("MATCH (n)-[r]-(n) delete r;")
+	# tx.run("MATCH (n) set n:"+"claim"+filename.strip(".rdf"))
+	tx.run("Match(n) where not n.uri starts with 'http://' detach delete (n)")
+	#
 	tx.commit()
 	print(tx.finished())
-tx = graph.begin()
-tx.run("MATCH (n)-[r]-(n) delete r;")
-# tx.run("MATCH (n) set n:"+"claim"+filename.strip(".rdf"))
-tx.run("Match(n) where not n.uri starts with 'http://' detach delete (n)")
-tx.commit()
-print(tx.finished())
 
 
 # g=rdflib.Graph()
