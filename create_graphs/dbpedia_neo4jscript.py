@@ -27,6 +27,7 @@ The goal of this script is the following:
 '''
 mode=sys.argv[1]
 pc=int(sys.argv[2])
+name=sys.argv[3]
 port={"TFCG":"7687","FFCG":"7687"}
 g=rdflib.Graph()
 graph = Graph("bolt://127.0.0.1:"+port[mode],password="1234")
@@ -122,8 +123,8 @@ def save_edgelist(uris_dict):
 		for line in triple_list:
 			G.add_edge(str(line['n']['uri']),str(line['m']['uri']),label=str(line['r']['uri']))
 			f.write("{} {} {}\n".format(str(line['n']['uri']),str(line['r']['uri']),str(line['m']['uri'])))
-	nx.write_edgelist(G,mode+".edgelist")
-	nx.write_graphml(G,mode+".graphml",prettyprint=True)
+	nx.write_edgelist(G,name+".edgelist")
+	nx.write_graphml(G,name+".graphml",prettyprint=True)
 	return edgelist,G
 #This function saves the dbpedia triples that we want to check as .txt
 #It also generates the same number of random triples that are not part of the above set. These are referred to as negative triples
