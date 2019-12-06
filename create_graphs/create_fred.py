@@ -698,6 +698,8 @@ def fredParse(claims_path,claims,init,end):
 				diff=abs(daysec-dif)
 				claim_ID=claims.iloc[i]['claimID']
 				sentence=html.unescape(claims.iloc[i]['claim_text']).replace("`","'")
+				sentence="'''{}'''".format(sentence)
+				print(sentence)
 				print("Index:",i,"Claim ID:",claim_ID," DayLim2Go:",round(diff),"MinLim2Go:",round(min(abs(minsec-dif2),60)))
 				filename=os.path.join(claims_path,"claim{}".format(str(claim_ID)))
 				r=getFredGraph(preprocessText(sentence),key,filename+".rdf")
@@ -719,6 +721,7 @@ def fredParse(claims_path,claims,init,end):
 						#plot claim graph
 						# plotFredGraph(claim_g,filename+".png")
 					else:
+						print("failed: "+str(claim_ID))
 						errorclaimid.append(filename.split("/")[-1].strip(".rdf"))
 					break
 				else:
@@ -951,10 +954,39 @@ def createFred(rdf_path,graph_path,fcg_label,init,passive,cpu,compilefred):
 				clean_claims=dict(ChainMap(*map(lambda x:x[2],output)))
 			#if graph rdf files have not been fetched. Slower, dependent on rate limits
 			else:
+				data=pd.read_csv(os.path.join(rdf_path,'claimreviews_db.csv'),index_col=0)
+				##Dropping non-str rows
+				filter=list(map(lambda x:type(x)!=str,data['rating_name']))
+				data.drop(data[filter].index,inplace=True)
+				#drop duplicates with the same claimID
+				data.drop_duplicates('claimID',keep='first',inplace=True)
+				#claimIDs that were weirdly dropped by the new pipeline and not the old for ffcg
+				focus=np.load(os.path.join(rdf_path,"focus_claimIDs.npy"))
+				claims_path=os.path.join(rdf_path,"{}_claims".format('false'))
+				claims=data.loc[data['claimID'].isin(focus)]
+				end=len(claims)
 				errorclaimid,clean_claims=fredParse(claims_path,claims,init,end)
-			np.save(os.path.join(rdf_path,"{}_error_claimID.npy".format(fcg_label)),errorclaimid)
-			with codecs.open(os.path.join(rdf_path,"{}claims_clean.json".format(claim_type)),"w","utf-8") as f:
-				f.write(json.dumps(clean_claims,indent=4,ensure_ascii=False))
+				print("Before focus:"+str(len(focus)))
+				print("After focus:"+str(len(errorclaimid)))
+				#claimIDs that were dropped by both pipelines for tfcg
+				t_error=np.load(os.path.join(rdf_path,"tfcg_errorsinboth.npy"))
+				claims_path=os.path.join(rdf_path,"{}_claims".format('true'))
+				claims=data.loc[data['claimID'].isin(t_error)]
+				end=len(claims)
+				errorclaimid,clean_claims=fredParse(claims_path,claims,init,end)
+				print("Before t_error:"+str(len(t_error)))
+				print("After t_error:"+str(len(errorclaimid)))
+				#claimIDs that were dropped by both pipelines for ffcg
+				f_error=np.load(os.path.join(rdf_path,"ffcg_errorsinboth.npy"))
+				claims_path=os.path.join(rdf_path,"{}_claims".format('false'))
+				claims=data.loc[data['claimID'].isin(f_error)]
+				end=len(claims)
+				errorclaimid,clean_claims=fredParse(claims_path,claims,init,end)
+				print("Before f_error:"+str(len(t_error)))
+				print("After f_error:"+str(len(errorclaimid)))
+			# np.save(os.path.join(rdf_path,"{}_error_claimID.npy".format(fcg_label)),errorclaimid)
+			# with codecs.open(os.path.join(rdf_path,"{}claims_clean.json".format(claim_type)),"w","utf-8") as f:
+			# 	f.write(json.dumps(clean_claims,indent=4,ensure_ascii=False))
 
 #Function to plot a networkx graph
 def plotFredGraph(claim_g,filename):

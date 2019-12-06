@@ -9,6 +9,8 @@ def separate_claims(file,rdf_path):
 	##Dropping non-str rows
 	filter=list(map(lambda x:type(x)!=str,data['rating_name']))
 	data.drop(data[filter].index,inplace=True)
+	#drop duplicates with the same claimID
+	data.drop_duplicates('claimID',keep='first',inplace=True)
 	print(data.groupby('fact_checkerID').count())
 	true_regex=re.compile(r'(?i)^true|^correct$|^mostly true$|^geppetto checkmark$')
 	false_regex=re.compile(r'(?i)^false|^mostly false|^pants on fire$|^four pinocchios$|^no\ |^no:|^distorts the facts|^wrong$')
@@ -20,12 +22,12 @@ def separate_claims(file,rdf_path):
 	np.save(os.path.join(rdf_path,"false_claimID.npy"),list(false_claims["claimID"]))
 	true_claims.to_csv(os.path.join(rdf_path,"true_claims.csv"))
 	false_claims.to_csv(os.path.join(rdf_path,"false_claims.csv"))
-	os.makedirs(os.path.join(rdf_path,"true claims"), exist_ok=True)
-	os.makedirs(os.path.join(rdf_path,"false claims"), exist_ok=True)
+	os.makedirs(os.path.join(rdf_path,"true_claims"), exist_ok=True)
+	os.makedirs(os.path.join(rdf_path,"false_claims"), exist_ok=True)
 
 if __name__== "__main__":
 	parser=argparse.ArgumentParser(description='Separate claims into True and False')
 	parser.add_argument('-f','--file', metavar='file name',type=str,help='Name of the csv file that stores the claim data',default='claimreviews_db.csv')
-	parser.add_argument('-rdf','--rdfpath', metavar='rdf path',type=str,help='RDF path to read the file and store the new files',default='/gpfs/home/z/k/zkachwal/Carbonate/factcheckgraph_data/rdf_files')
+	parser.add_argument('-rdf','--rdfpath', metavar='rdf path',type=str,help='RDF path to read the file and store the new files',default='/gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph_data/rdf_files')
 	args=parser.parse_args()
 	separate_claims(args.file,args.rdfpath)
