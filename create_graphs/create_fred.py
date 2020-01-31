@@ -961,13 +961,13 @@ def createFred(rdf_path,graph_path,fcg_label,init,passive,cpu,compilefred):
 				#drop duplicates with the same claimID
 				data.drop_duplicates('claimID',keep='first',inplace=True)
 				#claimIDs that were weirdly dropped by the new pipeline and not the old for ffcg
-				focus=np.load(os.path.join(rdf_path,"focus_claimIDs.npy"))
-				claims_path=os.path.join(rdf_path,"{}_claims".format('false'))
-				claims=data.loc[data['claimID'].isin(focus)]
-				end=len(claims)
-				errorclaimid,clean_claims=fredParse(claims_path,claims,init,end)
-				print("Before focus:"+str(len(focus)))
-				print("After focus:"+str(len(errorclaimid)))
+				# focus=np.load(os.path.join(rdf_path,"focus_claimIDs.npy"))
+				# claims_path=os.path.join(rdf_path,"{}_claims".format('false'))
+				# claims=data.loc[data['claimID'].isin(focus)]
+				# end=len(claims)
+				# errorclaimid,clean_claims=fredParse(claims_path,claims,init,end)
+				# print("Before focus:"+str(len(focus)))
+				# print("After focus:"+str(len(errorclaimid)))
 				#claimIDs that were dropped by both pipelines for tfcg
 				t_error=np.load(os.path.join(rdf_path,"tfcg_errorsinboth.npy"))
 				claims_path=os.path.join(rdf_path,"{}_claims".format('true'))
@@ -1011,7 +1011,3 @@ if __name__== "__main__":
 	parser.add_argument('-cf','--compilefred',metavar='Compile method #',type=int,help='Number of compile method',default=0)
 	args=parser.parse_args()
 	createFred(args.rdfpath,args.graphpath,args.fcgtype,args.init,args.passive,args.cpu,args.compilefred)
-
-
-
-

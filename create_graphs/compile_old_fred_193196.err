@@ -1,0 +1,118 @@
+Traceback (most recent call last):
+  File "create_old.py", line 54, in <module>
+    create_old(args.graphpath,args.fcgclass,args.fcgtype)
+  File "create_old.py", line 23, in create_old
+    fcg=nx.read_edgelist(os.path.join(write_path,"{}.edgelist".format(fcg_label)),comments="@")
+  File "</N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/decorator.py:decorator-gen-584>", line 2, in read_edgelist
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/networkx/utils/decorators.py", line 214, in _open_file
+    fobj = _dispatch_dict[ext](path, mode=mode)
+FileNotFoundError: [Errno 2] No such file or directory: '/gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph_data/graphs/old_fred/tfcg/tfcg.edgelist'
+
+real	0m2.573s
+user	0m0.276s
+sys	0m0.452s
+Traceback (most recent call last):
+  File "create_old.py", line 54, in <module>
+    create_old(args.graphpath,args.fcgclass,args.fcgtype)
+  File "create_old.py", line 23, in create_old
+    fcg=nx.read_edgelist(os.path.join(write_path,"{}.edgelist".format(fcg_label)),comments="@")
+  File "</N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/decorator.py:decorator-gen-584>", line 2, in read_edgelist
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/networkx/utils/decorators.py", line 214, in _open_file
+    fobj = _dispatch_dict[ext](path, mode=mode)
+FileNotFoundError: [Errno 2] No such file or directory: '/gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph_data/graphs/old_fred/ffcg/ffcg.edgelist'
+
+real	0m1.248s
+user	0m0.244s
+sys	0m0.380s
+Traceback (most recent call last):
+  File "create_old.py", line 54, in <module>
+    create_old(args.graphpath,args.fcgclass,args.fcgtype)
+  File "create_old.py", line 23, in create_old
+    fcg=nx.read_edgelist(os.path.join(write_path,"{}.edgelist".format(fcg_label)),comments="@")
+  File "</N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/decorator.py:decorator-gen-584>", line 2, in read_edgelist
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/networkx/utils/decorators.py", line 214, in _open_file
+    fobj = _dispatch_dict[ext](path, mode=mode)
+FileNotFoundError: [Errno 2] No such file or directory: '/gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph_data/graphs/old_fred/ufcg/ufcg.edgelist'
+
+real	0m1.206s
+user	0m0.204s
+sys	0m0.456s
+
+real	1m19.938s
+user	0m53.604s
+sys	0m8.256s
+
+real	0m5.820s
+user	0m1.952s
+sys	0m1.004s
+
+real	0m8.906s
+user	0m5.672s
+sys	0m1.120s
+Traceback (most recent call last):
+  File "calculate_stats.py", line 72, in <module>
+    calculate_stats(args.graphpath,args.graphclass,args.graphtype)
+  File "calculate_stats.py", line 17, in calculate_stats
+    G=nx.read_edgelist(read_path+".edgelist",comments="@")
+  File "</N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/decorator.py:decorator-gen-584>", line 2, in read_edgelist
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/networkx/utils/decorators.py", line 214, in _open_file
+    fobj = _dispatch_dict[ext](path, mode=mode)
+FileNotFoundError: [Errno 2] No such file or directory: '/gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph_data/graphs/old_fred/ufcg_old/ufcg_old.edgelist'
+
+real	0m3.444s
+user	0m0.564s
+sys	0m1.052s
+
+real	0m3.897s
+user	0m0.784s
+sys	0m1.112s
+
+2020-01-27 17:45:37.526302:
+    metric: ultrametric
+    edges:  undirected
+    weight: logdegree
+    nodes:  tfcg_old/data/tfcg_old_nodes.txt
+    graph:  tfcg_old/data/tfcg_old_edgelistID.npy
+    input:  tfcg_old/data/intersect_all_entityPairs_dbpedia_old_fred_tfcg_old_IDs_klformat.txt
+    output: tfcg_old/data/intersect_all_entityPairs_dbpedia_old_fred_tfcg_old_IDs.json
+2020-01-27 17:45:37.527418: reading nodes from text file..
+2020-01-27 17:45:37.538743: reading graph from text file..
+2020-01-27 17:45:37.610237: reading input..
+2020-01-27 17:45:38.230120: launching pool of 48 workers.
+2020-01-27 18:00:04.705335: done
+
+2020-01-27 18:01:25.902678:
+    metric: ultrametric
+    edges:  undirected
+    weight: logdegree
+    nodes:  ffcg_old/data/ffcg_old_nodes.txt
+    graph:  ffcg_old/data/ffcg_old_edgelistID.npy
+    input:  ffcg_old/data/intersect_all_entityPairs_dbpedia_old_fred_ffcg_old_IDs_klformat.txt
+    output: ffcg_old/data/intersect_all_entityPairs_dbpedia_old_fred_ffcg_old_IDs.json
+2020-01-27 18:01:25.904841: reading nodes from text file..
+2020-01-27 18:01:25.919798: reading graph from text file..
+2020-01-27 18:01:25.967475: reading input..
+2020-01-27 18:01:26.624105: launching pool of 48 workers.
+2020-01-27 18:37:11.970118: done
+
+2020-01-27 18:38:42.825082:
+    metric: ultrametric
+    edges:  undirected
+    weight: logdegree
+    nodes:  ufcg_old/data/ufcg_old_nodes.txt
+    graph:  ufcg_old/data/ufcg_old_edgelistID.npy
+    input:  ufcg_old/data/intersect_all_entityPairs_dbpedia_old_fred_ufcg_old_IDs_klformat.txt
+    output: ufcg_old/data/intersect_all_entityPairs_dbpedia_old_fred_ufcg_old_IDs.json
+2020-01-27 18:38:42.826430: reading nodes from text file..
+2020-01-27 18:38:42.844798: reading graph from text file..
+2020-01-27 18:38:42.898689: reading input..
+2020-01-27 18:38:43.523853: launching pool of 48 workers.
+2020-01-27 19:23:42.041666: done
+
+real	7m40.805s
+user	7m14.348s
+sys	0m17.416s
+
+real	1m13.972s
+user	1m45.768s
+sys	0m26.856s

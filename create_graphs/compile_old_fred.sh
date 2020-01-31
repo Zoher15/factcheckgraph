@@ -11,6 +11,11 @@
 #SBATCH --time=3:00:00
 source /N/u/zkachwal/Carbonate/miniconda3/etc/profile.d/conda.sh
 conda activate
+#create old
+cd /gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph/create_graphs/
+time python create_old.py -fcg old_fred -ft tfcg_old
+time python create_old.py -fcg old_fred -ft ffcg_old
+time python create_old.py -fcg old_fred -ft ufcg_old
 #find intersect
 cd /gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph/process_graphs/
 time python find_intersect.py -fcg old_fred -kg dbpedia

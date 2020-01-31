@@ -1,0 +1,104 @@
+
+real	0m42.380s
+user	0m18.916s
+sys	0m9.524s
+multiprocessing.pool.RemoteTraceback: 
+"""
+Traceback (most recent call last):
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/multiprocessing/pool.py", line 121, in worker
+    result = (True, func(*args, **kwds))
+  File "create_fred.py", line 816, in compileClaimGraph1
+    claim_g=cleanClaimGraph(claim_g,clean_claims[str(claim_ID)])
+KeyError: '8'
+"""
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "create_fred.py", line 1013, in <module>
+    createFred(args.rdfpath,args.graphpath,args.fcgtype,args.init,args.passive,args.cpu,args.compilefred)
+  File "create_fred.py", line 934, in createFred
+    output=sorted([p.get() for p in results],key=lambda x:x[0])
+  File "create_fred.py", line 934, in <listcomp>
+    output=sorted([p.get() for p in results],key=lambda x:x[0])
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/multiprocessing/pool.py", line 657, in get
+    raise self._value
+KeyError: '8'
+
+real	0m10.221s
+user	0m1.860s
+sys	0m2.288s
+
+real	0m17.987s
+user	0m7.268s
+sys	0m1.724s
+
+real	1m24.150s
+user	0m56.172s
+sys	0m9.004s
+
+real	0m6.347s
+user	0m1.788s
+sys	0m1.056s
+
+real	0m9.513s
+user	0m5.092s
+sys	0m1.064s
+
+real	0m11.013s
+user	0m6.540s
+sys	0m1.100s
+
+real	0m6.143s
+user	0m0.716s
+sys	0m1.044s
+
+2020-01-23 15:16:33.045251:
+    metric: ultrametric
+    edges:  undirected
+    weight: logdegree
+    nodes:  tfcg1/data/tfcg1_nodes.txt
+    graph:  tfcg1/data/tfcg1_edgelistID.npy
+    input:  tfcg1/data/intersect_all_entityPairs_dbpedia_fred1_tfcg1_IDs_klformat.txt
+    output: tfcg1/data/intersect_all_entityPairs_dbpedia_fred1_tfcg1_IDs.json
+2020-01-23 15:16:33.046060: reading nodes from text file..
+2020-01-23 15:16:33.055654: reading graph from text file..
+2020-01-23 15:16:33.215718: reading input..
+2020-01-23 15:16:33.915823: launching pool of 48 workers.
+2020-01-23 15:34:53.902899: done
+
+2020-01-23 15:35:59.059447:
+    metric: ultrametric
+    edges:  undirected
+    weight: logdegree
+    nodes:  ffcg1/data/ffcg1_nodes.txt
+    graph:  ffcg1/data/ffcg1_edgelistID.npy
+    input:  ffcg1/data/intersect_all_entityPairs_dbpedia_fred1_ffcg1_IDs_klformat.txt
+    output: ffcg1/data/intersect_all_entityPairs_dbpedia_fred1_ffcg1_IDs.json
+2020-01-23 15:35:59.060523: reading nodes from text file..
+2020-01-23 15:35:59.097472: reading graph from text file..
+2020-01-23 15:35:59.168072: reading input..
+2020-01-23 15:35:59.895219: launching pool of 48 workers.
+2020-01-23 16:16:32.518803: done
+
+2020-01-23 16:17:54.757272:
+    metric: ultrametric
+    edges:  undirected
+    weight: logdegree
+    nodes:  ufcg1/data/ufcg1_nodes.txt
+    graph:  ufcg1/data/ufcg1_edgelistID.npy
+    input:  ufcg1/data/intersect_all_entityPairs_dbpedia_fred1_ufcg1_IDs_klformat.txt
+    output: ufcg1/data/intersect_all_entityPairs_dbpedia_fred1_ufcg1_IDs.json
+2020-01-23 16:17:54.758242: reading nodes from text file..
+2020-01-23 16:17:54.777386: reading graph from text file..
+2020-01-23 16:17:54.833639: reading input..
+2020-01-23 16:17:55.654936: launching pool of 48 workers.
+2020-01-23 17:07:09.943126: done
+
+real	7m45.088s
+user	7m17.700s
+sys	0m17.988s
+
+real	1m26.747s
+user	1m52.340s
+sys	0m28.688s

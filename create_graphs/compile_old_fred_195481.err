@@ -1,0 +1,82 @@
+
+real	0m10.798s
+user	0m1.188s
+sys	0m0.468s
+
+real	0m5.932s
+user	0m2.896s
+sys	0m0.552s
+
+real	0m8.654s
+user	0m4.620s
+sys	0m0.552s
+
+real	1m21.927s
+user	0m52.740s
+sys	0m8.776s
+
+real	0m8.423s
+user	0m1.948s
+sys	0m1.036s
+
+real	0m9.096s
+user	0m5.716s
+sys	0m1.056s
+
+real	0m10.969s
+user	0m8.036s
+sys	0m0.980s
+
+real	0m4.480s
+user	0m0.700s
+sys	0m1.008s
+
+2020-01-28 22:14:47.694907:
+    metric: ultrametric
+    edges:  undirected
+    weight: logdegree
+    nodes:  tfcg_old/data/tfcg_old_nodes.txt
+    graph:  tfcg_old/data/tfcg_old_edgelistID.npy
+    input:  tfcg_old/data/intersect_all_entityPairs_dbpedia_old_fred_tfcg_old_IDs_klformat.txt
+    output: tfcg_old/data/intersect_all_entityPairs_dbpedia_old_fred_tfcg_old_IDs.json
+2020-01-28 22:14:47.695782: reading nodes from text file..
+2020-01-28 22:14:47.706731: reading graph from text file..
+2020-01-28 22:14:47.773017: reading input..
+2020-01-28 22:14:48.352126: launching pool of 48 workers.
+2020-01-28 22:29:04.610247: done
+
+2020-01-28 22:30:24.613424:
+    metric: ultrametric
+    edges:  undirected
+    weight: logdegree
+    nodes:  ffcg_old/data/ffcg_old_nodes.txt
+    graph:  ffcg_old/data/ffcg_old_edgelistID.npy
+    input:  ffcg_old/data/intersect_all_entityPairs_dbpedia_old_fred_ffcg_old_IDs_klformat.txt
+    output: ffcg_old/data/intersect_all_entityPairs_dbpedia_old_fred_ffcg_old_IDs.json
+2020-01-28 22:30:24.614292: reading nodes from text file..
+2020-01-28 22:30:24.627712: reading graph from text file..
+2020-01-28 22:30:24.674826: reading input..
+2020-01-28 22:30:25.313825: launching pool of 48 workers.
+2020-01-28 23:06:14.280415: done
+
+2020-01-28 23:07:40.195047:
+    metric: ultrametric
+    edges:  undirected
+    weight: logdegree
+    nodes:  ufcg_old/data/ufcg_old_nodes.txt
+    graph:  ufcg_old/data/ufcg_old_edgelistID.npy
+    input:  ufcg_old/data/intersect_all_entityPairs_dbpedia_old_fred_ufcg_old_IDs_klformat.txt
+    output: ufcg_old/data/intersect_all_entityPairs_dbpedia_old_fred_ufcg_old_IDs.json
+2020-01-28 23:07:40.196446: reading nodes from text file..
+2020-01-28 23:07:40.213057: reading graph from text file..
+2020-01-28 23:07:40.266648: reading input..
+2020-01-28 23:07:40.910847: launching pool of 48 workers.
+2020-01-28 23:52:04.427664: done
+
+real	7m46.900s
+user	7m19.776s
+sys	0m18.216s
+
+real	1m14.849s
+user	1m42.504s
+sys	0m27.524s

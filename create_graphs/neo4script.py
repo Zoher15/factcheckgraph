@@ -152,11 +152,17 @@ for f in eval(mode+"claims"):
 	#
 	tx.run("MATCH (n{uri:'http://www.w3.org/2002/07/owl#DataTypeProperty'}) detach delete n")
 	#
+	tx.run("MATCH (n)-[r]-(n) delete r;")
 	# tx.run("MATCH (n) set n:"+"claim"+filename.strip(".rdf"))
 	tx.run("Match(n) where not n.uri starts with 'http://' detach delete (n)")
 	tx.commit()
 	print(tx.finished())
-
+tx = graph.begin()
+tx.run("MATCH (n)-[r]-(n) delete r;")
+# tx.run("MATCH (n) set n:"+"claim"+filename.strip(".rdf"))
+tx.run("Match(n) where not n.uri starts with 'http://' detach delete (n)")
+tx.commit()
+print(tx.finished())
 
 # g=rdflib.Graph()
 # filename="1"+".rdf"
