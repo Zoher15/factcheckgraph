@@ -677,13 +677,7 @@ def checkClaimGraph(g):
 	return claim_g,nodes2remove,nodes2contract
 
 #fetch fred graph files from their API. slow and dependent on rate
-def fredParse():
-	rdf_path='/gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph_data/rdf_files/'
-	claims=pd.read_csv(os.path.join(rdf_path,'claimreviews_db.csv'),index_col=0)
-	claims=claims[claims['claimID'].isin([2033, 2459, 3025, 3302, 3322, 4408, 6209, 6238, 7483, 9608, 13012])]
-	claims_path=os.path.join(rdf_path,"{}_claims".format('false'))
-	init=0
-	end=len(claims)
+def fredParse(claims_path,claims,init,end):
 	key="Bearer 0d9d562e-a2aa-30df-90df-d52674f2e1f0"
 	errorclaimid=[]
 	#fred starts
@@ -704,8 +698,6 @@ def fredParse():
 				diff=abs(daysec-dif)
 				claim_ID=claims.iloc[i]['claimID']
 				sentence=html.unescape(claims.iloc[i]['claim_text']).replace("`","'")
-				sentence="'''{}'''".format(sentence)
-				print(sentence)
 				print("Index:",i,"Claim ID:",claim_ID," DayLim2Go:",round(diff),"MinLim2Go:",round(min(abs(minsec-dif2),60)))
 				filename=os.path.join(claims_path,"claim{}".format(str(claim_ID)))
 				r=getFredGraph(preprocessText(sentence),key,filename+".rdf")
@@ -727,7 +719,6 @@ def fredParse():
 						#plot claim graph
 						# plotFredGraph(claim_g,filename+".png")
 					else:
-						print("failed: "+str(claim_ID))
 						errorclaimid.append(filename.split("/")[-1].strip(".rdf"))
 					break
 				else:
@@ -750,6 +741,7 @@ def passiveFredParse(index,claims_path,claim_IDs,init,end):
 	clean_claims={}
 	for i in range(init,end):
 		claim_ID=claim_IDs[i]
+		# if claim_ID not in {2033, 2459, 3025, 3302, 3322, 4408, 6209, 6238, 7483, 9608, 13012}:
 		filename=os.path.join(claims_path,"claim{}".format(str(claim_ID)))
 		try:
 			g=openFredGraph(filename+".rdf")
@@ -960,39 +952,10 @@ def createFred(rdf_path,graph_path,fcg_label,init,passive,cpu,compilefred):
 				clean_claims=dict(ChainMap(*map(lambda x:x[2],output)))
 			#if graph rdf files have not been fetched. Slower, dependent on rate limits
 			else:
-				data=pd.read_csv(os.path.join(rdf_path,'claimreviews_db.csv'),index_col=0)
-				##Dropping non-str rows
-				filter=list(map(lambda x:type(x)!=str,data['rating_name']))
-				data.drop(data[filter].index,inplace=True)
-				#drop duplicates with the same claimID
-				data.drop_duplicates('claimID',keep='first',inplace=True)
-				#claimIDs that were weirdly dropped by the new pipeline and not the old for ffcg
-				# focus=np.load(os.path.join(rdf_path,"focus_claimIDs.npy"))
-				# claims_path=os.path.join(rdf_path,"{}_claims".format('false'))
-				# claims=data.loc[data['claimID'].isin(focus)]
-				# end=len(claims)
-				# errorclaimid,clean_claims=fredParse(claims_path,claims,init,end)
-				# print("Before focus:"+str(len(focus)))
-				# print("After focus:"+str(len(errorclaimid)))
-				#claimIDs that were dropped by both pipelines for tfcg
-				t_error=np.load(os.path.join(rdf_path,"tfcg_errorsinboth.npy"))
-				claims_path=os.path.join(rdf_path,"{}_claims".format('true'))
-				claims=data.loc[data['claimID'].isin(t_error)]
-				end=len(claims)
 				errorclaimid,clean_claims=fredParse(claims_path,claims,init,end)
-				print("Before t_error:"+str(len(t_error)))
-				print("After t_error:"+str(len(errorclaimid)))
-				#claimIDs that were dropped by both pipelines for ffcg
-				f_error=np.load(os.path.join(rdf_path,"ffcg_errorsinboth.npy"))
-				claims_path=os.path.join(rdf_path,"{}_claims".format('false'))
-				claims=data.loc[data['claimID'].isin(f_error)]
-				end=len(claims)
-				errorclaimid,clean_claims=fredParse(claims_path,claims,init,end)
-				print("Before f_error:"+str(len(t_error)))
-				print("After f_error:"+str(len(errorclaimid)))
-			# np.save(os.path.join(rdf_path,"{}_error_claimID.npy".format(fcg_label)),errorclaimid)
-			# with codecs.open(os.path.join(rdf_path,"{}claims_clean.json".format(claim_type)),"w","utf-8") as f:
-			# 	f.write(json.dumps(clean_claims,indent=4,ensure_ascii=False))
+			np.save(os.path.join(rdf_path,"{}_error_claimID.npy".format(fcg_label)),errorclaimid)
+			with codecs.open(os.path.join(rdf_path,"{}claims_clean.json".format(claim_type)),"w","utf-8") as f:
+				f.write(json.dumps(clean_claims,indent=4,ensure_ascii=False))
 
 #Function to plot a networkx graph
 def plotFredGraph(claim_g,filename):
@@ -1006,14 +969,18 @@ def plotFredGraph(claim_g,filename):
 	plt.close()
 	plt.clf()
 
-# if __name__== "__main__":
-# 	parser=argparse.ArgumentParser(description='Create fred graph')
-# 	parser.add_argument('-r','--rdfpath', metavar='rdf path',type=str,help='Path to the rdf files parsed by FRED',default='/gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph_data/rdf_files/')
-# 	parser.add_argument('-gp','--graphpath', metavar='graph path',type=str,help='Graph directory to store the graphs',default='/gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph_data/graphs/')
-# 	parser.add_argument('-ft','--fcgtype', metavar='FactCheckGraph type',type=str,choices=['tfcg','ffcg','ufcg'],help='True False or Union FactCheckGraph')
-# 	parser.add_argument('-i','--init', metavar='Index Start',type=int,help='Index number of claims to start from',default=0)
-# 	parser.add_argument('-p','--passive',action='store_true',help='Passive or not',default=False)
-# 	parser.add_argument('-cpu','--cpu',metavar='Number of CPUs',type=int,help='Number of CPUs available',default=1)
-# 	parser.add_argument('-cf','--compilefred',metavar='Compile method #',type=int,help='Number of compile method',default=0)
-# 	args=parser.parse_args()
-# 	createFred(args.rdfpath,args.graphpath,args.fcgtype,args.init,args.passive,args.cpu,args.compilefred)
+if __name__== "__main__":
+	parser=argparse.ArgumentParser(description='Create fred graph')
+	parser.add_argument('-r','--rdfpath', metavar='rdf path',type=str,help='Path to the rdf files parsed by FRED',default='/gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph_data/rdf_files/')
+	parser.add_argument('-gp','--graphpath', metavar='graph path',type=str,help='Graph directory to store the graphs',default='/gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph_data/graphs/')
+	parser.add_argument('-ft','--fcgtype', metavar='FactCheckGraph type',type=str,choices=['tfcg','ffcg','ufcg'],help='True False or Union FactCheckGraph')
+	parser.add_argument('-i','--init', metavar='Index Start',type=int,help='Index number of claims to start from',default=0)
+	parser.add_argument('-p','--passive',action='store_true',help='Passive or not',default=False)
+	parser.add_argument('-cpu','--cpu',metavar='Number of CPUs',type=int,help='Number of CPUs available',default=1)
+	parser.add_argument('-cf','--compilefred',metavar='Compile method #',type=int,help='Number of compile method',default=0)
+	args=parser.parse_args()
+	createFred(args.rdfpath,args.graphpath,args.fcgtype,args.init,args.passive,args.cpu,args.compilefred)
+
+
+
+
