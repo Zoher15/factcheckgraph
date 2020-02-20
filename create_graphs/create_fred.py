@@ -684,7 +684,7 @@ def fredParse():
 	claims_path=os.path.join(rdf_path,"{}_claims".format('false'))
 	init=0
 	end=len(claims)
-	key="Bearer 56a28f54-7918-3fdd-9d6f-850f13bd4041"
+	key="Bearer 0d9d562e-a2aa-30df-90df-d52674f2e1f0"
 	errorclaimid=[]
 	#fred starts
 	start=time.time()
