@@ -1,0 +1,27 @@
+rdf_path="/geode2/home/u110/zkachwal/BigRed3/factcheckgraph_data/covid19_rdf_files/all_claims"
+graph_path="/geode2/home/u110/zkachwal/BigRed3/factcheckgraph_data/graphs/covid19"
+claim_type="covid19"
+compilefred=1
+cpu=1
+claims_path=rdf_path
+claims=pd.read_csv(os.path.join(rdf_path,"{}_claims.csv".format(claim_type)))
+claim_IDs=claims['claimID'].tolist()
+if compilefred!=0:
+	with codecs.open(os.path.join(rdf_path,"{}claims_clean.json".format(claim_type)),"r","utf-8") as f: 
+		clean_claims=json.loads(f.read())
+	if compilefred==1 or compilefred==2:
+		# n=int(len(claims)/cpu)+1
+		# pool=mp.Pool(processes=cpu)							
+		# results=[pool.apply_async(eval("compileClaimGraph"+str(compilefred)), args=(index,claims_path,claim_IDs,clean_claims,index*n,(index+1)*n)) for index in range(cpu)]
+		# output=sorted([p.get() for p in results],key=lambda x:x[0])
+		# fcgs=list(map(lambda x:x[1],output))
+		# master_fcg=nx.Graph()
+		# for fcg in fcgs:
+		# 	master_fcg=nx.compose(master_fcg,fcg)
+		master_fcg=list(compileClaimGraph1(0,claims_path,claim_IDs,clean_claims,0,len(claims)+1))[1]
+		if compilefred==2:
+			master_clean=compile_clean(rdf_path,clean_claims,claim_type)
+			master_fcg=cleanClaimGraph(master_fcg,master_clean)
+	elif compilefred==3:
+		master_fcg=compileClaimGraph3(claims_path,claim_IDs,clean_claims)
+	saveFred(master_fcg,graph_path,claim_type+str(compilefred),compilefred)

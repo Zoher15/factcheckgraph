@@ -741,7 +741,6 @@ def passiveFredParse(index,claims_path,claim_IDs,init,end):
 	clean_claims={}
 	for i in range(init,end):
 		claim_ID=claim_IDs[i]
-		# if claim_ID not in {2033, 2459, 3025, 3302, 3322, 4408, 6209, 6238, 7483, 9608, 13012}:
 		filename=os.path.join(claims_path,"claim{}".format(str(claim_ID)))
 		try:
 			g=openFredGraph(filename+".rdf")
@@ -759,7 +758,11 @@ def passiveFredParse(index,claims_path,claim_IDs,init,end):
 			f.write(json.dumps(clean_claims[str(claim_ID)],indent=4,ensure_ascii=False))
 		#write claim graph as edgelist and graphml
 		nx.write_edgelist(claim_g,filename+".edgelist")
-		claim_g=nx.read_edgelist(filename+".edgelist",comments="@")
+		try:
+			claim_g=nx.read_edgelist(filename+".edgelist",comments="@")
+		except TypeError:
+			print(claim_ID)
+			break
 		nx.write_graphml(claim_g,filename+".graphml",prettyprint=True)
 		#plot claim graph
 		# plotFredGraph(claim_g,filename+".png")
@@ -799,7 +802,13 @@ def cleanClaimGraph(claim_g,clean_claims):
 	for node in nodes2remove['url']:
 		if claim_g.has_node(node):
 			claim_g.remove_node(node)
+	claim_g.remove_nodes_from(list(nx.isolates(claim_g)))
 	return claim_g
+
+#Function save individual claim graphs
+def saveClaimGraph(claim_g,filename,cf):
+	nx.write_edgelist(claim_g,filename+"_clean{}.edgelist".format(str(cf)))
+	plotFredGraph(claim_g,filename,cf)
 
 #Function to stitch/compile graphs in an iterative way. i.e clean individual graphs before unioning 
 def compileClaimGraph1(index,claims_path,claim_IDs,clean_claims,init,end):
@@ -812,6 +821,9 @@ def compileClaimGraph1(index,claims_path,claim_IDs,clean_claims,init,end):
 		except:
 			continue
 		claim_g=cleanClaimGraph(claim_g,clean_claims[str(claim_ID)])
+		import pdb
+		pdb.set_trace()
+		saveClaimGraph(claim_g,filename,1)
 		fcg=nx.compose(fcg,claim_g)
 	return index,fcg
 
@@ -958,28 +970,28 @@ def createFred(rdf_path,graph_path,fcg_label,init,passive,cpu,compilefred):
 				f.write(json.dumps(clean_claims,indent=4,ensure_ascii=False))
 
 #Function to plot a networkx graph
-def plotFredGraph(claim_g,filename):
+def plotFredGraph(claim_g,filename,cf):
 	plt.figure()
 	pos=nx.spring_layout(claim_g)
 	nx.draw(claim_g,pos,labels={node:node.split("/")[-1].split("#")[-1] for node in claim_g.nodes()},node_size=400)
 	edge_labels={(edge[0], edge[1]): edge[2]['label'].split("/")[-1].split("#")[-1] for edge in claim_g.edges(data=True)}
 	nx.draw_networkx_edge_labels(claim_g,pos,edge_labels)
 	plt.axis('off')
-	plt.savefig(filename)
+	plt.savefig(filename+"_clean"+str(cf))
 	plt.close()
 	plt.clf()
 
-if __name__== "__main__":
-	parser=argparse.ArgumentParser(description='Create fred graph')
-	parser.add_argument('-r','--rdfpath', metavar='rdf path',type=str,help='Path to the rdf files parsed by FRED',default='/gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph_data/rdf_files/')
-	parser.add_argument('-gp','--graphpath', metavar='graph path',type=str,help='Graph directory to store the graphs',default='/gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph_data/graphs/')
-	parser.add_argument('-ft','--fcgtype', metavar='FactCheckGraph type',type=str,choices=['tfcg','ffcg','ufcg'],help='True False or Union FactCheckGraph')
-	parser.add_argument('-i','--init', metavar='Index Start',type=int,help='Index number of claims to start from',default=0)
-	parser.add_argument('-p','--passive',action='store_true',help='Passive or not',default=False)
-	parser.add_argument('-cpu','--cpu',metavar='Number of CPUs',type=int,help='Number of CPUs available',default=1)
-	parser.add_argument('-cf','--compilefred',metavar='Compile method #',type=int,help='Number of compile method',default=0)
-	args=parser.parse_args()
-	createFred(args.rdfpath,args.graphpath,args.fcgtype,args.init,args.passive,args.cpu,args.compilefred)
+# if __name__== "__main__":
+# 	parser=argparse.ArgumentParser(description='Create fred graph')
+# 	parser.add_argument('-r','--rdfpath', metavar='rdf path',type=str,help='Path to the rdf files parsed by FRED',default='/gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph_data/rdf_files/')
+# 	parser.add_argument('-gp','--graphpath', metavar='graph path',type=str,help='Graph directory to store the graphs',default='/gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph_data/graphs/')
+# 	parser.add_argument('-ft','--fcgtype', metavar='FactCheckGraph type',type=str,choices=['tfcg','ffcg','ufcg'],help='True False or Union FactCheckGraph')
+# 	parser.add_argument('-i','--init', metavar='Index Start',type=int,help='Index number of claims to start from',default=0)
+# 	parser.add_argument('-p','--passive',action='store_true',help='Passive or not',default=False)
+# 	parser.add_argument('-cpu','--cpu',metavar='Number of CPUs',type=int,help='Number of CPUs available',default=1)
+# 	parser.add_argument('-cf','--compilefred',metavar='Compile method #',type=int,help='Number of compile method',default=0)
+# 	args=parser.parse_args()
+# 	createFred(args.rdfpath,args.graphpath,args.fcgtype,args.init,args.passive,args.cpu,args.compilefred)
 
 
 
