@@ -5,8 +5,6 @@ claims=pd.read_csv(os.path.join(rdf_path,"{}_claims.csv".format(claim_type)))
 init=0
 end=len(claims)
 index=0
-
-
 graph_path="/geode2/home/u110/zkachwal/BigRed3/factcheckgraph_data/graphs/covid19"
 compilefred=1
 cpu=1
