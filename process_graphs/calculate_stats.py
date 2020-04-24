@@ -29,7 +29,8 @@ def calculate_stats(graph_path,graph_class,g_label):
 	graph_stats.loc["Number of Entities",g_label]=len(list(entities))
 	graph_stats.loc["Number of Edges",g_label]=G.number_of_edges()
 	graph_stats.loc["Number of Connected Components",g_label]=len(list(nx.connected_components(G)))
-	largest_cc=max(nx.connected_component_subgraphs(G), key=len)
+	S=[G.subgraph(c).copy() for c in nx.connected_components(G)]
+	largest_cc=max(S, key=len)
 	largest_cc_entities=[entity for entity in largest_cc.nodes() if entity_regex.match(entity)]
 	graph_stats.loc["Largest Component Nodes",g_label]=len(largest_cc.nodes())
 	graph_stats.loc["Largest Component Entities",g_label]=len(largest_cc_entities)

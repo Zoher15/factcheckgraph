@@ -9,7 +9,7 @@ import networkx as nx
 from flufl.enum import Enum
 from rdflib import plugin
 import matplotlib
-matplotlib.use('Agg')
+matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import pandas as pd
 import codecs
@@ -25,6 +25,7 @@ from itertools import chain
 import multiprocessing as mp
 from urllib.parse import urlparse
 from pprint import pprint
+from flatten_dict import flatten as flatten_dict
 
 __author__='Misael Mongiovi, Andrea Giovanni Nuzzolese'
 # Original script edited by Zoher Kachwala for FactCheckGraph
@@ -586,18 +587,23 @@ def checkFredFile(filename):
 	checkFredGraph(g)
 
 #function to check a claim and create dictionary of edges to contract and remove
-def checkClaimGraph(g):
-	claim_g=nx.Graph()
+def checkClaimGraph(g,mode):
+	if mode=='rdf':
+		claim_g=nx.Graph()
+	elif mode=='nx':
+		claim_g=g
 	regex_27=re.compile(r'^http:\/\/www\.ontologydesignpatterns\.org\/ont\/fred\/domain\.owl#%27.*')
-	regex_det=re.compile(r'^http:\/\/www\.ontologydesignpatterns\.org\/ont\/fred\/quantifiers\.owl#hasDeterminer$')
+	regex_det=re.compile(r'^http:\/\/www\.ontologydesignpatterns\.org\/ont\/fred\/quantifiers\.owl.*$')
 	regex_data=re.compile(r'^http:\/\/www\.ontologydesignpatterns\.org\/ont\/dul\/DUL\.owl#hasDataValue$')
+	regex_event=re.compile(r'^http:\/\/www\.ontologydesignpatterns\.org\/ont\/dul\/DUL\.owl#Event.*')
 	regex_prop=re.compile(r'^http:\/\/www\.w3\.org\/2002\/07\/owl#DataTypeProperty$')
 	regex_sameas=re.compile(r'^http:\/\/www\.w3\.org\/2002\/07\/owl#sameAs$')
 	regex_equiv=re.compile(r'^http:\/\/www\.w3\.org\/2002\/07\/owl#equivalentClass$')
+	regex_sub=re.compile(r'^http:\/\/www\.w3\.org\/2000\/01\/rdf-schema#subClassOf$')
 	regex_assoc=re.compile(r'^http:\/\/www\.ontologydesignpatterns\.org\/ont\/dul\/DUL\.owl#associatedWith$')
 	regex_type=re.compile(r'^http:\/\/www\.w3\.org\/1999\/02\/22-rdf-syntax-ns#type$')
 	regex_fred=re.compile(r'^http:\/\/www\.ontologydesignpatterns\.org\/ont\/fred\/domain\.owl#([a-zA-Z]*)_.*')
-	regex_fredup=re.compile(r'^http:\/\/www\.ontologydesignpatterns\.org\/ont\/fred\/domain\.owl#(.*)')
+	regex_fredup=re.compile(r'^http:\/\/www\.ontologydesignpatterns\.org\/ont\/fred\/domain\.owl#([A-Z]+[a-zA-Z]*)')
 	regex_vn=re.compile(r'^http:\/\/www\.ontologydesignpatterns\.org\/ont\/vn\/data\/([a-zA-Z]*)_.*')
 	regex_dbpedia=re.compile(r'^http:\/\/dbpedia\.org\/resource\/(.*)')
 	regex_quant=re.compile(r'^http:\/\/www\.ontologydesignpatterns\.org\/ont\/fred\/quantifiers\.owl#.*')
@@ -609,12 +615,21 @@ def checkClaimGraph(g):
 	nodes2remove['prop']=[]
 	nodes2remove['data']=[]
 	nodes2contract['type']=[]
+	nodes2contract['sub']=[]
 	nodes2contract['vnequiv']=[]
 	nodes2contract['dbpediasas']=[]
 	nodes2contract['dbpediaequiv']=[]
 	nodes2contract['dbpediassoc']=[]
-	for (a,b,c) in g.getEdges():
-		claim_g.add_edge(a,c,label=b)
+	if mode=='rdf':
+		edge_list=g.getEdges()
+	elif mode=='nx':
+		edge_list=claim_g.edges.data('label', default='')
+	for (a,c,b) in edge_list:
+		if mode=='rdf':
+			t=c 
+			c=b 
+			b=t
+			claim_g.add_edge(a,c,label=b)
 		a_urlparse=urlparse(a)
 		c_urlparse=urlparse(c)
 		#Delete '%27' edges
@@ -623,20 +638,30 @@ def checkClaimGraph(g):
 		elif regex_27.match(c):
 			nodes2remove['%27'].append(c)
 		#Merging verbs like show_1 and show_2 with show
-		elif regex_type.match(b):
-			if regex_fredup.match(a) and (regex_fredup.match(a)[1].split("_")[0].lower()==c.split("\\")[-1].lower()):
-				nodes2contract['type'].append((a,c))
-			elif regex_fredup.match(c) and (regex_fredup.match(c)[1].split("_")[0].lower()==a.split("\\")[-1].lower()):
+		if regex_type.match(b):
+			if regex_fredup.match(a) and (regex_fredup.match(a)[1].split("_")[0].lower() == c.split("\\")[-1].lower()):
 				nodes2contract['type'].append((c,a))
-			elif regex_fred.match(a) and (regex_fred.match(a)[1].lower() in c.split("\\")[-1].lower()):
+			elif regex_fredup.match(c) and (regex_fredup.match(c)[1].split("_")[0].lower() == a.split("\\")[-1].lower()):
 				nodes2contract['type'].append((a,c))
-			elif (regex_fred.match(c)) and (regex_fred.match(c)[1].lower() in a.split("\\")[-1].lower()):
+			elif regex_fred.match(a) and (regex_fred.match(a)[1].lower() == c.split("\\")[-1].lower()):
+				nodes2contract['type'].append((a,c))
+			elif (regex_fred.match(c)) and (regex_fred.match(c)[1].lower() == a.split("\\")[-1].lower()):
 				nodes2contract['type'].append((c,a))
+		#Merging verbs like show_1 and show_2 with show for subclass predicates
+		elif regex_sub.match(b):
+			if regex_fredup.match(a) and (regex_fredup.match(a)[1].split("_")[0].lower() == c.split("\\")[-1].lower()):
+				nodes2contract['sub'].append((c,a))
+			elif regex_fredup.match(c) and (regex_fredup.match(c)[1].split("_")[0].lower() == a.split("\\")[-1].lower()):
+				nodes2contract['sub'].append((a,c))
+			elif regex_fred.match(a) and (regex_fred.match(a)[1].lower() == c.split("\\")[-1].lower()):
+				nodes2contract['sub'].append((a,c))
+			elif (regex_fred.match(c)) and (regex_fred.match(c)[1].lower() == a.split("\\")[-1].lower()):
+				nodes2contract['sub'].append((c,a))
 		#Merging verbs with their verbnet forms
 		elif regex_equiv.match(b) and (regex_vn.match(a) or regex_vn.match(c)):
-			if (regex_fredup.match(a) and regex_vn.match(c)) and (regex_fredup.match(a)[1].split("_")[0].lower() == regex_vn.match(c)[1].lower()):
+			if (regex_fredup.match(a) and regex_vn.match(c)) and (regex_fredup.match(a)[1].split("_")[0].lower() in regex_vn.match(c)[1].lower()):
 				nodes2contract['vnequiv'].append((c,a))
-			elif (regex_fredup.match(c) and regex_vn.match(a)) and (regex_fredup.match(c)[1].split("_")[0].lower() == regex_vn.match(a)[1].lower()):
+			elif (regex_fredup.match(c) and regex_vn.match(a)) and (regex_fredup.match(c)[1].split("_")[0].lower() in regex_vn.match(a)[1].lower()):
 				nodes2contract['vnequiv'].append((a,c))
 		#Merging nodes with sameAs relationships
 		elif regex_sameas.match(b) and (regex_dbpedia.match(a) or regex_dbpedia.match(c)):
@@ -662,9 +687,9 @@ def checkClaimGraph(g):
 				nodes2remove['det'].append(a)
 			elif regex_quant.match(c):
 				nodes2remove['det'].append(c)
-		elif regex_data.match(a):
+		elif regex_data.match(a) or regex_event.match(a):
 			nodes2remove['data'].append(a)
-		elif regex_data.match(c):
+		elif regex_data.match(c) or regex_event.match(c):
 			nodes2remove['data'].append(c)
 		elif regex_prop.match(a):
 			nodes2remove['prop'].append(a)
@@ -704,7 +729,7 @@ def fredParse(claims_path,claims,init,end):
 				if "You have exceeded your quota" not in r.text and "Runtime Error" not in r.text and "Service Unavailable" not in r.text:
 					if r.status_code in range(100,500) and r.text:
 						g=openFredGraph(filename+".rdf")
-						claim_g,nodes2remove,nodes2contract=checkClaimGraph(g)
+						claim_g,nodes2remove,nodes2contract=checkClaimGraph(g,'rdf')
 						#store pruning data
 						clean_claims[str(claim_ID)]={}
 						clean_claims[str(claim_ID)]['nodes2remove']=nodes2remove
@@ -748,7 +773,7 @@ def passiveFredParse(index,claims_path,claim_IDs,init,end):
 			print("Exception Occurred")
 			errorclaimid.append(claim_ID)
 			continue
-		claim_g,nodes2remove,nodes2contract=checkClaimGraph(g)
+		claim_g,nodes2remove,nodes2contract=checkClaimGraph(g,'rdf')
 		#store pruning data
 		clean_claims[str(claim_ID)]={}
 		clean_claims[str(claim_ID)]['nodes2remove']=nodes2remove
@@ -776,6 +801,9 @@ def cleanClaimGraph(claim_g,clean_claims):
 		if claim_g.has_node(node):
 			claim_g.remove_node(node)
 	for nodes in nodes2contract['type']:
+		if claim_g.has_node(nodes[0]) and claim_g.has_node(nodes[1]):
+			claim_g=nx.contracted_nodes(claim_g,nodes[0],nodes[1],self_loops=False)
+	for nodes in nodes2contract['sub']:
 		if claim_g.has_node(nodes[0]) and claim_g.has_node(nodes[1]):
 			claim_g=nx.contracted_nodes(claim_g,nodes[0],nodes[1],self_loops=False)
 	for nodes in nodes2contract['vnequiv']:
@@ -806,9 +834,11 @@ def cleanClaimGraph(claim_g,clean_claims):
 	return claim_g
 
 #Function save individual claim graphs
-def saveClaimGraph(claim_g,filename,cf):
-	nx.write_edgelist(claim_g,filename+"_clean{}.edgelist".format(str(cf)))
-	plotFredGraph(claim_g,filename,cf)
+def saveClaimGraph(claim_g,filename,cf,i):
+	nx.write_edgelist(claim_g,filename+"_clean{}.edgelist".format(str(cf)+'_'+str(i)))
+	claim_g=nx.read_edgelist(filename+"_clean{}.edgelist".format(str(cf)+'_'+str(i)),comments="@")
+	nx.write_graphml(claim_g,filename+"_clean{}.graphml".format(str(cf)+'_'+str(i)),prettyprint=True)
+	# plotFredGraph(claim_g,filename,cf)
 
 #Function to stitch/compile graphs in an iterative way. i.e clean individual graphs before unioning 
 def compileClaimGraph1(index,claims_path,claim_IDs,clean_claims,init,end):
@@ -821,9 +851,17 @@ def compileClaimGraph1(index,claims_path,claim_IDs,clean_claims,init,end):
 		except:
 			continue
 		claim_g=cleanClaimGraph(claim_g,clean_claims[str(claim_ID)])
-		import pdb
-		pdb.set_trace()
-		saveClaimGraph(claim_g,filename,1)
+		flatten = lambda l: [item for sublist in l for item in sublist]
+		while True:
+			claim_g,nodes2remove,nodes2contract=checkClaimGraph(claim_g,'nx')
+			clean_claims[str(claim_ID)]['nodes2remove']=nodes2remove
+			clean_claims[str(claim_ID)]['nodes2contract']=nodes2contract
+			if bool(flatten(flatten_dict(clean_claims[str(claim_ID)]).values()))==False:
+				break;
+			claim_g=cleanClaimGraph(claim_g,clean_claims[str(claim_ID)])
+			# import pdb
+			# pdb.set_trace()
+		# saveClaimGraph(claim_g,filename,1)
 		fcg=nx.compose(fcg,claim_g)
 	return index,fcg
 
