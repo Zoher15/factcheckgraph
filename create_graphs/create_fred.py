@@ -546,17 +546,17 @@ def plotFredGraph(claim_g,filename,cf):
 	plt.close()
 	plt.clf()
 
-# if __name__== "__main__":
-# 	parser=argparse.ArgumentParser(description='Create fred graph')
-# 	parser.add_argument('-r','--rdfpath', metavar='rdf path',type=str,help='Path to the rdf files parsed by FRED',default='/gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph_data/rdf_files/')
-# 	parser.add_argument('-gp','--graphpath', metavar='graph path',type=str,help='Graph directory to store the graphs',default='/gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph_data/graphs/')
-# 	parser.add_argument('-ft','--fcgtype', metavar='FactCheckGraph type',type=str,choices=['tfcg','ffcg','ufcg'],help='True False or Union FactCheckGraph')
-# 	parser.add_argument('-i','--init', metavar='Index Start',type=int,help='Index number of claims to start from',default=0)
-# 	parser.add_argument('-p','--passive',action='store_true',help='Passive or not',default=False)
-# 	parser.add_argument('-cpu','--cpu',metavar='Number of CPUs',type=int,help='Number of CPUs available',default=1)
-# 	parser.add_argument('-cf','--compilefred',metavar='Compile method #',type=int,help='Number of compile method',default=0)
-# 	args=parser.parse_args()
-# 	createFred(args.rdfpath,args.graphpath,args.fcgtype,args.init,args.passive,args.cpu,args.compilefred)
+if __name__== "__main__":
+	parser=argparse.ArgumentParser(description='Create fred graph')
+	parser.add_argument('-r','--rdfpath', metavar='rdf path',type=str,help='Path to the rdf files parsed by FRED',default='/gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph_data/rdf_files/')
+	parser.add_argument('-gp','--graphpath', metavar='graph path',type=str,help='Graph directory to store the graphs',default='/gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph_data/graphs/')
+	parser.add_argument('-ft','--fcgtype', metavar='FactCheckGraph type',type=str,choices=['tfcg','ffcg','ufcg'],help='True False or Union FactCheckGraph')
+	parser.add_argument('-i','--init', metavar='Index Start',type=int,help='Index number of claims to start from',default=0)
+	parser.add_argument('-p','--passive',action='store_true',help='Passive or not',default=False)
+	parser.add_argument('-cpu','--cpu',metavar='Number of CPUs',type=int,help='Number of CPUs available',default=1)
+	parser.add_argument('-cf','--compilefred',metavar='Compile method #',type=int,help='Number of compile method',default=0)
+	args=parser.parse_args()
+	createFred(args.rdfpath,args.graphpath,args.fcgtype,args.init,args.passive,args.cpu,args.compilefred)
 
 
 

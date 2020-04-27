@@ -21,7 +21,7 @@ def create_co_occur(rdf_path,graph_path,fcg_label):
 		else:
 			print("Create tfcg_co and ffcg_co before attempting to create the union: ufcg_co")     
 	else:
-		claim_types={"tfcg_co":"true","ffcg_co":"false"}
+		claim_types={"tfcg_co":"true","ffcg_co":"false","covid19":"covid19"}
 		claim_type=claim_types[fcg_label]
 		claim_IDs=np.load(os.path.join(rdf_path,"{}_claimID.npy".format(claim_type)))
 		claim_entities={}
@@ -39,6 +39,11 @@ def create_co_occur(rdf_path,graph_path,fcg_label):
 				pass
 			for triple in claim_g:
 				subject,predicate,obj=list(map(str,triple))
+				###FRED makes a mistake while resolving "novel coronavirus"
+				if claim_type=="covid19":
+					subject=subject.replace("Middle_East_respiratory_syndrome_coronavirus","Severe_acute_respiratory_syndrome_coronavirus_2")
+					obj=obj.replace("Middle_East_respiratory_syndrome_coronavirus","Severe_acute_respiratory_syndrome_coronavirus_2")
+				###########################################################
 				try:
 					if entity_regex.search(subject):
 						claim_entities_set.add(subject)
