@@ -230,7 +230,8 @@ def checkClaimGraph(g,mode):
 
 #fetch fred graph files from their API. slow and dependent on rate
 def fredParse(claims_path,claims,init,end):
-	key="Bearer 0d9d562e-a2aa-30df-90df-d52674f2e1f0"
+	key="Bearer a5c2a808-cc39-38e6-898d-84ab912b1e5d"
+	# key="Bearer 0d9d562e-a2aa-30df-90df-d52674f2e1f0"
 	errorclaimid=[]
 	#fred starts
 	start=time.time()
@@ -240,6 +241,7 @@ def fredParse(claims_path,claims,init,end):
 	fcg=nx.Graph()
 	rdf=rdflib.Graph()
 	clean_claims={}
+	os.makedirs(claims_path, exist_ok=True)
 	for i in range(init,end):
 		dif=abs(time.time()-start)
 		diff=abs(daysec-dif)
