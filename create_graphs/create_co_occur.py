@@ -46,9 +46,9 @@ def create_co_occur(rdf_path,graph_path,fcg_label):
 				###########################################################
 				try:
 					if entity_regex.search(subject):
-						claim_entities_set.add(subject)
+						claim_entities_set.add(subject.split("/")[-1])
 					if entity_regex.search(obj):
-						claim_entities_set.add(obj)
+						claim_entities_set.add(obj.split("/")[-1])
 				except KeyError:
 					pass
 			claim_entities[claim_ID]=list(claim_entities_set)
