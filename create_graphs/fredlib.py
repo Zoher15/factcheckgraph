@@ -198,8 +198,8 @@ class FredGraph:
         res = self.rdf.query(query)
         for el in res:
             node = el[0].strip()
-            cl = NodeType(el[1].value)
-            type = FredType(el[2].value)
+            cl = NodeType[el[1].value]
+            type = FredType[el[2].value]
             nodes[node] = FredNode(cl,type,getResource(node))
 
         #if not an event nor situation nor class
@@ -378,7 +378,7 @@ class FredGraph:
 
         res = self.rdf.query(query)
         for el in res:
-            edges[(el[0].strip(),el[1].strip(),el[2].strip())] = FredEdge(EdgeMotif(el[3].value))
+            edges[(el[0].strip(),el[1].strip(),el[2].strip())] = FredEdge(EdgeMotif[el[3].value])
         for e in self.getEdges():
             if e not in edges:
                 edges[e] = FredEdge(EdgeMotif.Property)
@@ -505,7 +505,7 @@ class FredGraph:
         results = self.rdf.query(query)
         motifocc = dict()
         for el in results:
-            if NaryMotif(el['type']) == motif:
+            if NaryMotif[el['type']] == motif:
                 motifocc[el['node'].strip()] = fillRoles(el)
 
         return motifocc
@@ -615,10 +615,17 @@ if __name__ == "__main__":
         print("\ngetClusterMotif(ClusterMotif.Identity)")
         for cluster in g.getClusterMotif(ClusterMotif.Identity):
             print(cluster)
-            a,b=cluster
-            a=a.split("/")[-1]
-            b=b.split("/")[-1]
-            print((a,b))
+            try:
+                a,b=cluster
+                a=a.split("/")[-1]
+                b=b.split("/")[-1]
+                print((a,b))
+            except ValueError:
+                a,b,c=cluster
+                a=a.split("/")[-1]
+                b=b.split("/")[-1]
+                c=c.split("/")[-1]
+                print((a,b,c))
 
         print("\ngetEdgeMotif(EdgeMotif.Equivalence)")
         for (a,b,c) in g.getEdgeMotif(EdgeMotif.Equivalence):
@@ -633,7 +640,7 @@ if __name__ == "__main__":
 
         print("\ngetEdgeMotif(EdgeMotif.Type)")
         for (a,b,c) in g.getEdgeMotif(EdgeMotif.Type):
-            print(a.split("/")[-1],b.split("/")[-1],c.split("/")[-1])
+            print(a,b,c)
 
         print("\ngetPathMotif(PathMotif.Type)")
         for (a,b) in g.getPathMotif(PathMotif.Type):
