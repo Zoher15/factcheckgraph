@@ -3,6 +3,8 @@ import numpy as np
 from newspaper import Article
 import argparse
 import re
+import nltk
+nltk.download('punkt')
 import os
 
 def parse_titles(row):
@@ -13,8 +15,8 @@ def parse_titles(row):
 		article.parse()
 		article.nlp()
 		row['title_text']=article.title
-		row['article_text']=article.text
-		row["keywords"]=article.keywords
+		# row['article_text']=article.text
+		row["keywords"]=str(article.keywords)
 		row["summary"]=article.summary
 	except:
 		print("Exception:",row['claimID'])
@@ -28,7 +30,7 @@ def extract_titles(file,rdf_path):
 	#drop duplicates with the same claimID
 	data.drop_duplicates('claimID',keep='first',inplace=True)
 	data["title_text"]=""
-	data["article_text"]=""
+	# data["article_text"]=""
 	data["keywords"]=""
 	data["summary"]=""
 	data=data.apply(parse_titles,axis=1)

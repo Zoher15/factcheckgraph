@@ -571,9 +571,9 @@ if __name__ == "__main__":
         checkFredGraph(g)
 
     def checkFredGraph(g):
-        print("\ngetNodes")
-        for n in g.getNodes():
-            print(n.split("/")[-1])
+        # print("\ngetNodes")
+        # for n in g.getNodes():
+        #     print(n.split("/")[-1])
 
         print("\ngetClassNodes")
         for n in g.getClassNodes():
@@ -602,31 +602,54 @@ if __name__ == "__main__":
         print("\ngetInfoNodes")
         ns = g.getInfoNodes()
         for n in ns:
-            print(n.split("/")[-1], ns[n].Type, ns[n].FredType, ns[n].ResourceType)
+            print(n.split("/")[-1], ns[n].Type, ns[n].FredType)
 
-        print("\ngetEdges")
-        for (a,b,c) in g.getEdges():
-            print(a.split("/")[-1],b.split("/")[-1],c.split("/")[-1])
-
-        print("\ngetEdgeMotif(EdgeMotif.Role)")
-        for (a,b,c) in g.getEdgeMotif(EdgeMotif.Role):
-            print(a.split("/")[-1],b.split("/")[-1],c.split("/")[-1])
+        # print("\ngetEdges")
+        # for (a,b,c) in g.getEdges():
+        #     print(a.split("/")[-1],b.split("/")[-1],c.split("/")[-1])
 
         print("\ngetEdgeMotif(EdgeMotif.Identity)")
         for (a,b,c) in g.getEdgeMotif(EdgeMotif.Identity):
             print(a.split("/")[-1],b.split("/")[-1],c.split("/")[-1])
 
+        print("\ngetClusterMotif(ClusterMotif.Identity)")
+        for cluster in g.getClusterMotif(ClusterMotif.Identity):
+            print(cluster)
+            a,b=cluster
+            a=a.split("/")[-1]
+            b=b.split("/")[-1]
+            print((a,b))
+
+        print("\ngetEdgeMotif(EdgeMotif.Equivalence)")
+        for (a,b,c) in g.getEdgeMotif(EdgeMotif.Equivalence):
+            print(a.split("/")[-1],b.split("/")[-1],c.split("/")[-1])
+
+        print("\ngetClusterMotif(ClusterMotif.Equivalence)")
+        for cluster in g.getClusterMotif(ClusterMotif.Equivalence):
+            a,b=cluster
+            a=a.split("/")[-1]
+            b=b.split("/")[-1]
+            print((a,b))
+
         print("\ngetEdgeMotif(EdgeMotif.Type)")
         for (a,b,c) in g.getEdgeMotif(EdgeMotif.Type):
+            print(a.split("/")[-1],b.split("/")[-1],c.split("/")[-1])
+
+        print("\ngetPathMotif(PathMotif.Type)")
+        for (a,b) in g.getPathMotif(PathMotif.Type):
+            print(a.split("/")[-1],b.split("/")[-1])
+
+        print("\ngetEdgeMotif(EdgeMotif.Role)")
+        for (a,b,c) in g.getEdgeMotif(EdgeMotif.Role):
             print(a.split("/")[-1],b.split("/")[-1],c.split("/")[-1])
 
         print("\ngetEdgeMotif(EdgeMotif.SubClass)")
         for (a,b,c) in g.getEdgeMotif(EdgeMotif.SubClass):
             print(a.split("/")[-1],b.split("/")[-1],c.split("/")[-1])
 
-        print("\ngetEdgeMotif(EdgeMotif.Equivalence)")
-        for (a,b,c) in g.getEdgeMotif(EdgeMotif.Equivalence):
-            print(a.split("/")[-1],b.split("/")[-1],c.split("/")[-1])
+        print("\ngetPathMotif(PathMotif.SubClass)")
+        for (a,b) in g.getPathMotif(PathMotif.SubClass):
+            print(a.split("/")[-1],b.split("/")[-1])
 
         print("\ngetEdgeMotif(EdgeMotif.Modality)")
         for (a,b,c) in g.getEdgeMotif(EdgeMotif.Modality):
@@ -640,6 +663,15 @@ if __name__ == "__main__":
         for (a,b,c) in g.getEdgeMotif(EdgeMotif.Property):
             print(a.split("/")[-1],b.split("/")[-1],c.split("/")[-1])
 
+        print("\ng.getNaryMotif(NaryMotif.Concept)")
+        motif_occurrences = g.getNaryMotif(NaryMotif.Concept)
+        for concept in motif_occurrences:
+            roles = motif_occurrences[concept]
+            print(concept.split("/")[-1],"{", end=' ')
+            for r in roles:
+                print(r,":",roles[r],";", end=' ')
+            print("}")
+
         print("\ngetInfoEdges")
         es = g.getInfoEdges()
         for e in es:
@@ -649,48 +681,26 @@ if __name__ == "__main__":
             c=c.split("/")[-1]
             print((a,b,c), es[e].Type)
 
-        print("\ngetPathMotif(PathMotif.Type)")
-        for (a,b) in g.getPathMotif(PathMotif.Type):
-            print(a.split("/")[-1],b.split("/")[-1])
-
-        print("\ngetPathMotif(PathMotif.SubClass)")
-        for (a,b) in g.getPathMotif(PathMotif.SubClass):
-            print(a.split("/")[-1],b.split("/")[-1])
-
-        print("\ngetClusterMotif(ClusterMotif.Identity)")
-        for cluster in g.getClusterMotif(ClusterMotif.Identity):
-            a,b=cluster
-            a=a.split("/")[-1]
-            b=b.split("/")[-1]
-            print((a,b))
-
-        print("\ngetClusterMotif(ClusterMotif.Equivalence)")
-        for cluster in g.getClusterMotif(ClusterMotif.Equivalence):
-            a,b=cluster
-            a=a.split("/")[-1]
-            b=b.split("/")[-1]
-            print((a,b))
-
-        print("\ngetClusterMotif(ClusterMotif.IdentityEquivalence)")
-        for cluster in g.getClusterMotif(ClusterMotif.IdentityEquivalence):
-            a,b=cluster
-            a=a.split("/")[-1]
-            b=b.split("/")[-1]
-            print((a,b))
-
-        print("\ng.getNaryMotif(NaryMotif.Event)")
-        motif_occurrences = g.getNaryMotif(NaryMotif.Event)
-        for event in motif_occurrences:
-            roles = motif_occurrences[event]
-            print(event.split("/")[-1],"{", end=' ')
-            for r in roles:
-                print(r,":",roles[r],";", end=' ')
-            print("}")
+        # print("\ngetClusterMotif(ClusterMotif.IdentityEquivalence)")
+        # for cluster in g.getClusterMotif(ClusterMotif.IdentityEquivalence):
+        #     a,b=cluster
+        #     a=a.split("/")[-1]
+        #     b=b.split("/")[-1]
+        #     print((a,b))
 
         print("\ng.getNaryMotif(NaryMotif.Situation)")
         motif_occurrences = g.getNaryMotif(NaryMotif.Situation)
         for situation in motif_occurrences:
             roles = motif_occurrences[situation]
+            print(event.split("/")[-1],"{", end=' ')
+            for r in roles:
+                print(r,":",roles[r],";", end=' ')
+            print("}")
+
+        print("\ng.getNaryMotif(NaryMotif.Event)")
+        motif_occurrences = g.getNaryMotif(NaryMotif.Event)
+        for event in motif_occurrences:
+            roles = motif_occurrences[event]
             print(event.split("/")[-1],"{", end=' ')
             for r in roles:
                 print(r,":",roles[r],";", end=' ')
@@ -705,14 +715,6 @@ if __name__ == "__main__":
                 print(r,":",roles[r],";", end=' ')
             print("}")
 
-        print("\ng.getNaryMotif(NaryMotif.Concept)")
-        motif_occurrences = g.getNaryMotif(NaryMotif.Concept)
-        for concept in motif_occurrences:
-            roles = motif_occurrences[concept]
-            print(concept.split("/")[-1],"{", end=' ')
-            for r in roles:
-                print(r,":",roles[r],";", end=' ')
-            print("}")
     s=sys.argv[1]
     g = checkFredSentence(s,"Bearer 0d9d562e-a2aa-30df-90df-d52674f2e1f0",'pippo.rdf')
 

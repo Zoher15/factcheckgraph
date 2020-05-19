@@ -8,7 +8,7 @@ import rdflib
 import codecs
 import json
 from itertools import combinations
-from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.metrics.pairwise import cosine_similarity,cosine_distances
 import multiprocessing as mp
 from collections import ChainMap 
 from itertools import chain
@@ -78,8 +78,10 @@ def create_weighted(p,rdf_path,graph_path,embed_path,claim_type):
 	claims=pd.read_csv(os.path.join(rdf_path,"{}_claims.csv".format(claim_type)))
 	claim_IDs=claims['claimID'].tolist()
 	claims_embed=pd.read_csv(os.path.join(embed_path,"{}_claims_embeddings.tsv".format(claim_type)),delimiter="\t",header=None).values
-	simil_p=cosine_similarity(p,claims_embed)[0]
+	simil_p=cosine_distances(p,claims_embed)[0]
 	#no negative similarity
+	import pdb
+	pdb.set_trace()
 	simil_p[simil_p<0]=0
 	fcg_path=os.path.join(graph_path,"co-occur",claim_type)
 	fcg_co=nx.read_edgelist(os.path.join(fcg_path,"{}.edgelist".format(claim_type)),comments="@",create_using=nx.MultiGraph)
@@ -244,5 +246,5 @@ if __name__== "__main__":
 	# embed_claims(args.rdfpath,"roberta-base-nli-stsb-mean-tokens",args.embedpath,"covid19")
 	# embed_claims(args.rdfpath,"roberta-base-nli-stsb-mean-tokens",args.embedpath,"covid19topics")
 	shortest_paths(args.rdfpath,args.graphpath,args.embedpath,"covid19","covid19topics")
-	create_ordered_paths(args.graphpath,"w")
-	create_ordered_paths(args.graphpath,"d")
+	# create_ordered_paths(args.graphpath,"w")
+	# create_ordered_paths(args.graphpath,"d")
