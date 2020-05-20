@@ -27,7 +27,7 @@ def separate_claims(file,rdf_path):
 
 if __name__== "__main__":
 	parser=argparse.ArgumentParser(description='Separate claims into True and False')
-	parser.add_argument('-f','--file', metavar='file name',type=str,help='Name of the csv file that stores the claim data',default='claimreviews_db.csv')
+	parser.add_argument('-f','--file', metavar='file name',type=str,help='Name of the csv file that stores the claim data',default='claims2.csv')
 	parser.add_argument('-rdf','--rdfpath', metavar='rdf path',type=str,help='RDF path to read the file and store the new files',default='/gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph_data/rdf_files')
 	args=parser.parse_args()
 	separate_claims(args.file,args.rdfpath)

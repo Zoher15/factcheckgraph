@@ -9,7 +9,7 @@ import networkx as nx
 from flufl.enum import Enum
 from rdflib import plugin
 import matplotlib
-matplotlib.use('TkAgg')
+# matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import pandas as pd
 import codecs
@@ -657,7 +657,6 @@ def checkClaimGraph(g):#,mode):
 	nodes2contract['subclass']=[]#keep left node
 	nodes2contract['equivalence']=[]#keep right node
 	nodes2contract['identity']=[]#keep right node
-	nodes2remove['property']=[]#removed determiner and quantifier edges
 	nodes2remove['%27']=[]
 	nodes2remove['det']=[]
 	nodes2remove['data']=[]
@@ -668,7 +667,7 @@ def checkClaimGraph(g):#,mode):
 	# 	edge_list=g.getEdges()
 	# elif mode=='nx':
 	# 	edge_list=claim_g.edges.data('label', default='')
-	edge_list= g.getInfoEdges()
+	edge_list=g.getInfoEdges()
 	for e in edge_list:
 		(a,b,c)=e
 		# if mode=='rdf':
@@ -700,21 +699,21 @@ def checkClaimGraph(g):#,mode):
 		elif regex_schema.match(c):
 			nodes2remove['schema'].append(c)
 		#Edges
-		if edge_list[e].type==EdgeMotif.Property:
+		if edge_list[e].Type==EdgeMotif.Property:
 			if regex_quant.match(a):
 				nodes2remove['det'].append(a)
 			elif regex_quant.match(c):
 				nodes2remove['det'].append(c)
-		elif edge_list[e].type==EdgeMotif.Type:
+		elif edge_list[e].Type==EdgeMotif.Type:
 			if regex_fred.match(a) and (regex_fred.match(a)[1].lower() in c.split("\\")[-1].lower()):
 				nodes2contract['type'].append((c,a))
 			elif (regex_fred.match(c)) and (regex_fred.match(c)[1].lower() in a.split("\\")[-1].lower()):
 				nodes2contract['type'].append((a,c))
-		elif edge_list[e].type==EdgeMotif.SubClass:
+		elif edge_list[e].Type==EdgeMotif.SubClass:
 			nodes2contract['subclass'].append((a,c))
-		elif edge_list[e].type==EdgeMotif.Equivalence:
+		elif edge_list[e].Type==EdgeMotif.Equivalence:
 			nodes2contract['equivalence'].append((c,a))
-		elif edge_list[e].type==EdgeMotif.Identity:
+		elif edge_list[e].Type==EdgeMotif.Identity:
 			nodes2contract['identity'].append((c,a))
 		# if regex_type.match(b):
 		# 	if (regex_fredup.match(a) and not regex_fred.match(c)) and (regex_fredup.match(a)[1].split("_")[0].lower() in c.split("\\")[-1].lower()):
@@ -762,9 +761,7 @@ def checkClaimGraph(g):#,mode):
 	return claim_g,nodes2remove,nodes2contract
 
 #fetch fred graph files from their API. slow and dependent on rate
-def fredParse(claims_path,claims,init,end):
-	key="Bearer a5c2a808-cc39-38e6-898d-84ab912b1e5d"
-	# key="Bearer 0d9d562e-a2aa-30df-90df-d52674f2e1f0"
+def fredParse(claims_path,claims,init,end,key):
 	errorclaimid=[]
 	#fred starts
 	start=time.time()
@@ -791,7 +788,7 @@ def fredParse(claims_path,claims,init,end):
 				if "You have exceeded your quota" not in r.text and "Runtime Error" not in r.text and "Service Unavailable" not in r.text:
 					if r.status_code in range(100,500) and r.text:
 						g=openFredGraph(filename+".rdf")
-						claim_g,nodes2remove,nodes2contract=checkClaimGraph(g,'rdf')
+						claim_g,nodes2remove,nodes2contract=checkClaimGraph(g)
 						#store pruning data
 						clean_claims[str(claim_ID)]={}
 						clean_claims[str(claim_ID)]['nodes2remove']=nodes2remove
@@ -835,7 +832,7 @@ def passiveFredParse(index,claims_path,claim_IDs,init,end):
 			print("Exception Occurred")
 			errorclaimid.append(claim_ID)
 			continue
-		claim_g,nodes2remove,nodes2contract=checkClaimGraph(g,'rdf')
+		claim_g,nodes2remove,nodes2contract=checkClaimGraph(g)
 		#store pruning data
 		clean_claims[str(claim_ID)]={}
 		clean_claims[str(claim_ID)]['nodes2remove']=nodes2remove
@@ -878,15 +875,17 @@ def cleanClaimGraph(claim_g,clean_claims):
 	for node in nodes2remove['schema']:
 		if claim_g.has_node(node):
 			claim_g.remove_node(node)
-	#edge contraction needs to be done inorder in a bfs fashion
+	#edge contraction needs to be done in a bfs fashion using topological sort
 	#creating a temporary bfs graph
 	temp_g=nx.DiGraph()
 	temp_g.add_edges_from(nodes2contract['type'])
 	temp_g.add_edges_from(nodes2contract['subclass'])
 	temp_g.add_edges_from(nodes2contract['equivalence'])
 	temp_g.add_edges_from(nodes2contract['identity'])
-	#contractings edges
-	for nodes in nx.edge_bfs(temp_g):
+	#topological sorted order of nodes
+	tsnodes=list(nx.topological_sort(temp_g))
+	#contractings edges from the leave nodes to the root
+	for nodes in list(nx.edge_bfs(temp_g,tsnodes))[::-1]:
 		if claim_g.has_node(nodes[0]) and claim_g.has_node(nodes[1]):
 			claim_g=nx.contracted_nodes(claim_g,nodes[0],nodes[1],self_loops=False)	
 	#removing isolates
@@ -900,6 +899,31 @@ def saveClaimGraph(claim_g,filename,cf,i):
 	nx.write_graphml(claim_g,filename+"_clean{}.graphml".format(str(cf)+'_'+str(i)),prettyprint=True)
 	# plotFredGraph(claim_g,filename,cf)
 
+# #Function to stitch/compile graphs in an iterative way. i.e clean individual graphs before unioning 
+# def compileClaimGraph1(index,claims_path,claim_IDs,clean_claims,init,end):
+# 	end=min(end,len(claim_IDs))
+# 	fcg=nx.Graph()
+# 	for claim_ID in claim_IDs[init:end]:
+# 		filename=os.path.join(claims_path,"claim{}".format(str(claim_ID)))
+# 		try:
+# 			claim_g=nx.read_edgelist(filename+".edgelist",comments="@")
+# 		except:
+# 			continue
+# 		claim_g=cleanClaimGraph(claim_g,clean_claims[str(claim_ID)])
+# 		flatten = lambda l: [item for sublist in l for item in sublist]
+# 		while True:
+# 			claim_g,nodes2remove,nodes2contract=checkClaimGraph(claim_g,'nx')
+# 			clean_claims[str(claim_ID)]['nodes2remove']=nodes2remove
+# 			clean_claims[str(claim_ID)]['nodes2contract']=nodes2contract
+# 			if bool(flatten(flatten_dict(clean_claims[str(claim_ID)]).values()))==False:
+# 				break;
+# 			claim_g=cleanClaimGraph(claim_g,clean_claims[str(claim_ID)])
+# 			# import pdb
+# 			# pdb.set_trace()
+# 		# saveClaimGraph(claim_g,filename,1)
+# 		fcg=nx.compose(fcg,claim_g)
+# 	return index,fcg
+
 #Function to stitch/compile graphs in an iterative way. i.e clean individual graphs before unioning 
 def compileClaimGraph1(index,claims_path,claim_IDs,clean_claims,init,end):
 	end=min(end,len(claim_IDs))
@@ -911,17 +935,7 @@ def compileClaimGraph1(index,claims_path,claim_IDs,clean_claims,init,end):
 		except:
 			continue
 		claim_g=cleanClaimGraph(claim_g,clean_claims[str(claim_ID)])
-		flatten = lambda l: [item for sublist in l for item in sublist]
-		while True:
-			claim_g,nodes2remove,nodes2contract=checkClaimGraph(claim_g,'nx')
-			clean_claims[str(claim_ID)]['nodes2remove']=nodes2remove
-			clean_claims[str(claim_ID)]['nodes2contract']=nodes2contract
-			if bool(flatten(flatten_dict(clean_claims[str(claim_ID)]).values()))==False:
-				break;
-			claim_g=cleanClaimGraph(claim_g,clean_claims[str(claim_ID)])
-			# import pdb
-			# pdb.set_trace()
-		# saveClaimGraph(claim_g,filename,1)
+		saveClaimGraph(claim_g,filename,1)
 		fcg=nx.compose(fcg,claim_g)
 	return index,fcg
 
@@ -1062,7 +1076,9 @@ def createFred(rdf_path,graph_path,fcg_label,init,passive,cpu,compilefred):
 				clean_claims=dict(ChainMap(*map(lambda x:x[2],output)))
 			#if graph rdf files have not been fetched. Slower, dependent on rate limits
 			else:
-				errorclaimid,clean_claims=fredParse(claims_path,claims,init,end)
+				keys={"tfcg":"Bearer a5c2a808-cc39-38e6-898d-84ab912b1e5d","ffcg":"Bearer 0d9d562e-a2aa-30df-90df-d52674f2e1f0"}
+				end=len(claims)
+				errorclaimid,clean_claims=fredParse(claims_path,claims,init,end,keys[fcg_label])
 			np.save(os.path.join(rdf_path,"{}_error_claimID.npy".format(fcg_label)),errorclaimid)
 			with codecs.open(os.path.join(rdf_path,"{}claims_clean.json".format(claim_type)),"w","utf-8") as f:
 				f.write(json.dumps(clean_claims,indent=4,ensure_ascii=False))

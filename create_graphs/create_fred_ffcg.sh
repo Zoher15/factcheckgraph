@@ -1,10 +1,15 @@
-#PBS -k o
-#PBS -l nodes=1:ppn=1,vmem=16gb,walltime=36:00:00
-#PBS -M zoher.kachwala@gmail.com
-#PBS -m abe
-#PBS -N create_fred_ffcg
-#PBS -j oe
+#!/bin/bash
+#SBATCH -J create_fred_ffcg
+#SBATCH -p general
+#SBATCH -o create_fred_ffcg_%j.txt
+#SBATCH -e create_fred_ffcg_%j.err
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=zoher.kachwala@gmail.com
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --cpus-per-task=1
+#SBATCH --time=36:00:00
 source /N/u/zkachwal/Carbonate/miniconda3/etc/profile.d/conda.sh
 conda activate
-cd /gpfs/home/z/k/zkachwal/Carbonate/factcheckgraph/create_graphs/
+cd /geode2/home/u110/zkachwal/BigRed3/factcheckgraph/create_graphs
 time python create_fred.py -ft ffcg
