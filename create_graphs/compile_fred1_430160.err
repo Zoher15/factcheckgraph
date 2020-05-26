@@ -1,0 +1,11 @@
+Traceback (most recent call last):
+  File "create_fred.py", line 1129, in <module>
+    createFred(args.rdfpath,args.graphpath,args.fcgtype,args.init,args.passive,args.cpu,args.compilefred)
+  File "create_fred.py", line 1087, in createFred
+    saveFred(master_fcg,graph_path,fcg_label+str(compilefred),compilefred)
+UnboundLocalError: local variable 'master_fcg' referenced before assignment
+
+real	1m55.664s
+user	1m23.012s
+sys	0m4.452s
+slurmstepd: error: *** JOB 430160 ON nid00011 CANCELLED AT 2020-05-22T13:29:43 ***

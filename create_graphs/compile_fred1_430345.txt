@@ -1,0 +1,247 @@
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+Exception Occurred
+#####################################
+Cycle Found!
+Degree of cycle nodes
+ {'http://www.ontologydesignpatterns.org/ont/fred/domain.owl#MinimumWageProposal': 4, 'http://www.ontologydesignpatterns.org/ont/fred/domain.owl#WageIncrease': 2}
+Node removed: http://www.ontologydesignpatterns.org/ont/fred/domain.owl#WageIncrease
+#####################################
+Cycle Found!
+Degree of cycle nodes
+ {'http://www.ontologydesignpatterns.org/ont/fred/domain.owl#There': 3, 'http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Attack': 2}
+Node removed: http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Attack
+#####################################
+Cycle Found!
+Degree of cycle nodes
+ {'http://www.ontologydesignpatterns.org/ont/fred/domain.owl#There': 3, 'http://www.ontologydesignpatterns.org/ont/fred/domain.owl#PercentMoreMurder': 2}
+Node removed: http://www.ontologydesignpatterns.org/ont/fred/domain.owl#PercentMoreMurder
+#####################################
+Cycle Found!
+Degree of cycle nodes
+ {'http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Past': 2, 'http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Administration': 2}
+Node removed: http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Past
+#####################################
+Cycle Found!
+Degree of cycle nodes
+ {'http://www.ontologydesignpatterns.org/ont/fred/domain.owl#TotalLunarEclipse': 2, 'http://www.ontologydesignpatterns.org/ont/fred/domain.owl#LunarEclipse': 7, 'http://www.ontologydesignpatterns.org/ont/fred/domain.owl#DurationTotalLunarEclipse': 4}
+Node removed: http://www.ontologydesignpatterns.org/ont/fred/domain.owl#TotalLunarEclipse
+#####################################
+Cycle Found!
+Degree of cycle nodes
+ {'http://www.ontologydesignpatterns.org/ont/fred/domain.owl#LongestDuration': 5, 'http://www.ontologydesignpatterns.org/ont/fred/domain.owl#LunarEclipse': 6}
+Node removed: http://www.ontologydesignpatterns.org/ont/fred/domain.owl#LongestDuration
+#####################################
+Cycle Found!
+Degree of cycle nodes
+ {'http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Collusion': 2, 'http://www.ontologydesignpatterns.org/ont/fred/domain.owl#There': 3}
+Node removed: http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Collusion
+#####################################
+Cycle Found!
+Degree of cycle nodes
+ {'http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Quarterback': 3, 'http://www.ontologydesignpatterns.org/ont/fred/domain.owl#OrganicVegan': 4}
+Node removed: http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Quarterback
+#####################################
+Cycle Found!
+Degree of cycle nodes
+ {'http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Air_forceCarrier': 4, 'http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Mobilization': 4}
+Node removed: http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Air_forceCarrier
+#####################################
+Cycle Found!
+Degree of cycle nodes
+ {'http://www.w3.org/2002/07/owl#Thing': 5}
+Node removed: http://www.w3.org/2002/07/owl#Thing
+#####################################
+Cycle Found!
+Degree of cycle nodes
+ {'http://www.ontologydesignpatterns.org/ont/fred/domain.owl#IllegalGift': 2, 'http://www.ontologydesignpatterns.org/ont/fred/domain.owl#RussianMansion': 3}
+Node removed: http://www.ontologydesignpatterns.org/ont/fred/domain.owl#IllegalGift
+#####################################
+Cycle Found!
+Degree of cycle nodes
+ {'http://www.w3.org/2002/07/owl#Thing': 3}
+Node removed: http://www.w3.org/2002/07/owl#Thing
+#####################################
+Cycle Found!
+Degree of cycle nodes
+ {'http://www.w3.org/2002/07/owl#Thing': 4}
+Node removed: http://www.w3.org/2002/07/owl#Thing
+#####################################
+Cycle Found!
+Degree of cycle nodes
+ {'http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Person': 5, 'http://www.ontologydesignpatterns.org/ont/fred/domain.owl#FirstPerson': 4}
+Node removed: http://www.ontologydesignpatterns.org/ont/fred/domain.owl#FirstPerson
+#####################################
+Cycle Found!
+Degree of cycle nodes
+ {'http://www.w3.org/2002/07/owl#Thing': 3}
+Node removed: http://www.w3.org/2002/07/owl#Thing
+#####################################
+Cycle Found!
+Degree of cycle nodes
+ {'http://www.w3.org/2002/07/owl#Thing': 2}
+Node removed: http://www.w3.org/2002/07/owl#Thing
+#####################################
+Cycle Found!
+Degree of cycle nodes
+ {'http://www.ontologydesignpatterns.org/ont/fred/domain.owl#MeaningfulLink': 4, 'http://www.ontologydesignpatterns.org/ont/fred/domain.owl#There': 3}
+Node removed: http://www.ontologydesignpatterns.org/ont/fred/domain.owl#There
+#####################################
+Cycle Found!
+Degree of cycle nodes
+ {'http://www.ontologydesignpatterns.org/ont/fred/domain.owl#MeteorShower': 2, 'http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Shower': 3}
+Node removed: http://www.ontologydesignpatterns.org/ont/fred/domain.owl#MeteorShower
+#####################################
+Cycle Found!
+Degree of cycle nodes
+ {'http://www.ontologydesignpatterns.org/ont/fred/domain.owl#PerfectMatch': 4, 'http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Sketch': 3}
+Node removed: http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Sketch

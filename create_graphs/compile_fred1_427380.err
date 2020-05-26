@@ -1,0 +1,44 @@
+Traceback (most recent call last):
+  File "create_fred.py", line 1110, in <module>
+    createFred(args.rdfpath,args.graphpath,args.fcgtype,args.init,args.passive,args.cpu,args.compilefred)
+  File "create_fred.py", line 1058, in createFred
+    output=sorted([p.get() for p in results],key=lambda x:x[0])
+  File "create_fred.py", line 1058, in <listcomp>
+    output=sorted([p.get() for p in results],key=lambda x:x[0])
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/multiprocessing/pool.py", line 657, in get
+    raise self._value
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/multiprocessing/pool.py", line 431, in _handle_tasks
+    put(task)
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/multiprocessing/connection.py", line 206, in send
+    self._send_bytes(_ForkingPickler.dumps(obj))
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/multiprocessing/reduction.py", line 51, in dumps
+    cls(buf, protocol).dump(obj)
+TypeError: can't pickle dict_keys objects
+
+real	0m7.680s
+user	0m1.452s
+sys	0m1.824s
+Traceback (most recent call last):
+  File "create_fred.py", line 1110, in <module>
+    createFred(args.rdfpath,args.graphpath,args.fcgtype,args.init,args.passive,args.cpu,args.compilefred)
+  File "create_fred.py", line 1058, in createFred
+    output=sorted([p.get() for p in results],key=lambda x:x[0])
+  File "create_fred.py", line 1058, in <listcomp>
+    output=sorted([p.get() for p in results],key=lambda x:x[0])
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/multiprocessing/pool.py", line 657, in get
+    raise self._value
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/multiprocessing/pool.py", line 431, in _handle_tasks
+    put(task)
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/multiprocessing/connection.py", line 206, in send
+    self._send_bytes(_ForkingPickler.dumps(obj))
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/multiprocessing/reduction.py", line 51, in dumps
+    cls(buf, protocol).dump(obj)
+TypeError: can't pickle dict_keys objects
+
+real	0m5.293s
+user	0m1.716s
+sys	0m1.920s
+
+real	0m9.772s
+user	0m5.940s
+sys	0m1.468s

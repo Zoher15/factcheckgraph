@@ -6,5 +6,5 @@
 #PBS -j oe
 source /N/u/zkachwal/Carbonate/miniconda3/etc/profile.d/conda.sh
 conda activate
-cd /gpfs/home/z/k/zkachwal/Carbonate/factcheckgraph/create_graphs/
+cd /geode2/home/u110/zkachwal/BigRed3/factcheckgraph/create_graphs/
 time python create_covid19.py

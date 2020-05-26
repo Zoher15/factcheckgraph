@@ -1,0 +1,30 @@
+#####################################
+Cycle Found!
+Degree of cycle nodes
+ {'http://www.ontologydesignpatterns.org/ont/fred/domain.owl#TotalLunarEclipse': 2, 'http://www.ontologydesignpatterns.org/ont/fred/domain.owl#LongestDuration': 4, 'http://www.ontologydesignpatterns.org/ont/fred/domain.owl#LunarEclipse': 7, 'http://www.ontologydesignpatterns.org/ont/fred/domain.owl#DurationTotalLunarEclipse': 4}
+Node removed: http://www.ontologydesignpatterns.org/ont/fred/domain.owl#TotalLunarEclipse
+#####################################
+Cycle Found!
+Degree of cycle nodes
+ {'http://www.ontologydesignpatterns.org/ont/fred/domain.owl#LongestDuration': 4, 'http://www.ontologydesignpatterns.org/ont/fred/domain.owl#LunarEclipse': 6}
+Node removed: http://www.ontologydesignpatterns.org/ont/fred/domain.owl#LongestDuration
+#####################################
+Cycle Found!
+Degree of cycle nodes
+ {'http://www.ontologydesignpatterns.org/ont/fred/domain.owl#PercentMoreMurder': 2, 'http://www.ontologydesignpatterns.org/ont/fred/domain.owl#There': 3}
+Node removed: http://www.ontologydesignpatterns.org/ont/fred/domain.owl#PercentMoreMurder
+#####################################
+Cycle Found!
+Degree of cycle nodes
+ {'http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Past': 2, 'http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Administration': 2}
+Node removed: http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Past
+#####################################
+Cycle Found!
+Degree of cycle nodes
+ {'http://www.ontologydesignpatterns.org/ont/fred/domain.owl#There': 3, 'http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Attack': 2}
+Node removed: http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Attack
+#####################################
+Cycle Found!
+Degree of cycle nodes
+ {'http://www.ontologydesignpatterns.org/ont/fred/domain.owl#WageIncrease': 2, 'http://www.ontologydesignpatterns.org/ont/fred/domain.owl#MinimumWageProposal': 4}
+Node removed: http://www.ontologydesignpatterns.org/ont/fred/domain.owl#WageIncrease

@@ -78,21 +78,19 @@ def create_weighted(p,rdf_path,graph_path,embed_path,claim_type):
 	claims=pd.read_csv(os.path.join(rdf_path,"{}_claims.csv".format(claim_type)))
 	claim_IDs=claims['claimID'].tolist()
 	claims_embed=pd.read_csv(os.path.join(embed_path,"{}_claims_embeddings.tsv".format(claim_type)),delimiter="\t",header=None).values
-	simil_p=cosine_distances(p,claims_embed)[0]
-	#no negative similarity
-	import pdb
-	pdb.set_trace()
-	simil_p[simil_p<0]=0
+	simil_p=cosine_similarity(p,claims_embed)[0]
+	#angular distance
+	simil_p=1-np.arccos(simil_p)/np.pi
 	fcg_path=os.path.join(graph_path,"co-occur",claim_type)
 	fcg_co=nx.read_edgelist(os.path.join(fcg_path,"{}.edgelist".format(claim_type)),comments="@",create_using=nx.MultiGraph)
 	#assigning weight by summing the log of adjacent nodes, and dividing by the similiarity of the claim with the target predicate
 	for u,v,k,claimID in fcg_co.edges.data('claim_ID',keys=True):
 		claimIX=claims[claims['claimID']==claimID].index[0]
-		uw=np.log2(fcg_co.degree(u))
-		vw=np.log2(fcg_co.degree(v))
+		uw=np.log10(fcg_co.degree(u))
+		vw=np.log10(fcg_co.degree(v))
 		if simil_p[claimIX]>0:
 			dist=float(1)/simil_p[claimIX]
-			weight=(uw+vw)*dist
+			weight=(uw+vw)*dist*0.5
 		else:
 			dist=np.inf
 			weight=np.inf
@@ -139,6 +137,7 @@ def create_ordered_paths(graph_path,mode):
 		with codecs.open(rw_path+"_{}.json".format(mode2),"w","utf-8") as f:
 			f.write(json.dumps(ordered_paths,indent=5,ensure_ascii=False))
 
+#Function to find node pairs in the source graph if they exist as edges in the target graph
 def source_target(rdf_path,graph_path,embed_path,source_claim_type,target_claim_type):
 	source_fcg_path=os.path.join(graph_path,"co-occur",source_claim_type)
 	source_path=os.path.join(graph_path,"co-occur",source_claim_type)
@@ -147,21 +146,25 @@ def source_target(rdf_path,graph_path,embed_path,source_claim_type,target_claim_
 	target_path=os.path.join(graph_path,"co-occur",target_claim_type)
 	target_fcg=nx.read_edgelist(os.path.join(target_fcg_path,"{}.edgelist".format(target_claim_type)),comments="@",create_using=nx.MultiGraph)
 	edges_of_interest={}
-	pairs_of_interest=[]
 	for edge in target_fcg.edges.data(keys=True):
 		u,v,k,data=edge
-		if not source_fcg.has_edge(u,v) and (u,v) not in pairs_of_interest and source_fcg.has_node(u) and source_fcg.has_node(v) and nx.has_path(source_fcg,u,v):
+		if source_fcg.has_node(u) and source_fcg.has_node(v) and nx.has_path(source_fcg,u,v):#and not source_fcg.has_edge(u,v) and 
 			try:
-				edges_of_interest[data['claim_ID']].append((u,v))
+				edges_of_interest[data['claim_ID']].add((u,v))
 			except KeyError:
-				edges_of_interest[data['claim_ID']]=[(u,v)]
-			pairs_of_interest.append((u,v))
-	return pairs_of_interest,edges_of_interest
+				edges_of_interest[data['claim_ID']]=set([(u,v)])
+	return edges_of_interest
 
+'''
+Function does the following
+1. Finds node pairs of interest from graph built through target claims by using the function source_target
+2. Creates a weighted source graph for each target claim using the function create_weighted
+3. Finds shortest path for each edge of interest in the target graph
+'''
 def shortest_paths(rdf_path,graph_path,embed_path,source_claim_type,target_claim_type):
 	write_path=os.path.join(graph_path,"co-occur","paths","paths")
 	source_fcg_path=os.path.join(graph_path,"co-occur",source_claim_type)
-	pairs_of_interest,edges_of_interest=source_target(rdf_path,graph_path,embed_path,source_claim_type,target_claim_type)
+	edges_of_interest=source_target(rdf_path,graph_path,embed_path,source_claim_type,target_claim_type)
 	#loading existing files
 	try:
 		with codecs.open(write_path+"_w.json","r","utf-8") as f:
@@ -170,9 +173,9 @@ def shortest_paths(rdf_path,graph_path,embed_path,source_claim_type,target_claim
 		paths_of_interest_w={}
 	try:
 		with codecs.open(write_path+"_d.json","r","utf-8") as f:
-			paths_of_interest_s=json.loads(f.read())
+			paths_of_interest_d=json.loads(f.read())
 	except FileNotFoundError:
-		paths_of_interest_s={}
+		paths_of_interest_d={}
 	claims=pd.read_csv(os.path.join(rdf_path,"{}_claims.csv".format(target_claim_type)))
 	source_claims=pd.read_csv(os.path.join(rdf_path,"{}_claims.csv".format(source_claim_type)))
 	claims_embed=pd.read_csv(os.path.join(embed_path,"{}_claims_embeddings.tsv".format(target_claim_type)),delimiter="\t",header=None).values
@@ -184,50 +187,52 @@ def shortest_paths(rdf_path,graph_path,embed_path,source_claim_type,target_claim
 		name=source_claim_type+"_"+str(claimID)
 		nx.write_edgelist(source_fcg,os.path.join(source_fcg_path,"{}.edgelist".format(name)))
 		paths_of_interest_w[claimID]={}
-		paths_of_interest_s[claimID]={}
+		paths_of_interest_d[claimID]={}
 		paths_of_interest_w[claimID]['target_claim']=chunkstring(claims[claims['claimID']==claimID]['claim_text'].values[0],100)
-		paths_of_interest_s[claimID]['target_claim']=chunkstring(claims[claims['claimID']==claimID]['claim_text'].values[0],100)
+		paths_of_interest_d[claimID]['target_claim']=chunkstring(claims[claims['claimID']==claimID]['claim_text'].values[0],100)
 		for edge in edges_of_interest[claimID]:
 			u,v=edge
 			######################Removing the log of source and target node from the incident edges
 			for e in source_fcg.edges(u):
 				if source_fcg.edges[e]['dist']<np.inf:
-					diff=source_fcg.edges[e]['dist']*np.log2(source_fcg.degree(u))
+					diff=source_fcg.edges[e]['dist']*np.log10(source_fcg.degree(u))*0.5
 					if source_fcg.edges[e]['weight']>diff:
 						source_fcg.edges[e]['weight']=source_fcg.edges[e]['weight']-diff
 					else:
+						print("Warning: diff>source weight")
 						source_fcg.edges[e]['weight']=0
 			for e in source_fcg.edges(v):
 				if source_fcg.edges[e]['dist']<np.inf:
-					diff=source_fcg.edges[e]['dist']*np.log2(source_fcg.degree(v))
+					diff=source_fcg.edges[e]['dist']*np.log10(source_fcg.degree(v))*0.5
 					if source_fcg.edges[e]['weight']>diff:
 						source_fcg.edges[e]['weight']=source_fcg.edges[e]['weight']-diff
 					else:
+						print("Warning: diff>source weight")
 						source_fcg.edges[e]['weight']=0
 			###############################################################
 			path_w=nx.shortest_path(source_fcg,source=u,target=v,weight='weight')
-			path_s=nx.shortest_path(source_fcg,source=u,target=v,weight='dist')
+			path_d=nx.shortest_path(source_fcg,source=u,target=v,weight='dist')
 			path_w_data={}
-			path_s_data={}
+			path_d_data={}
 			for i in range(len(path_w)-1):
 				data=source_fcg.edges[path_w[i],path_w[i+1]]
 				data['source_claim']=chunkstring(source_claims[source_claims['claimID']==data['claim_ID']]['claim_text'].values[0],75)
 				path_w_data[str((path_w[i],path_w[i+1]))]=data
-			for i in range(len(path_s)-1):
-				data=source_fcg.edges[path_s[i],path_s[i+1]]
+			for i in range(len(path_d)-1):
+				data=source_fcg.edges[path_d[i],path_d[i+1]]
 				data['source_claim']=chunkstring(source_claims[source_claims['claimID']==data['claim_ID']]['claim_text'].values[0],75)
-				path_s_data[str((path_s[i],path_s[i+1]))]=data
+				path_d_data[str((path_d[i],path_d[i+1]))]=data
 			w=round(aggregate_edge_data(path_w_data,'weight'),2)
 			d=round(aggregate_edge_data(path_w_data,'dist'),2)
 			paths_of_interest_w[claimID][str((u,v,w,d))]=path_w_data
-			w=round(aggregate_edge_data(path_s_data,'weight'),2)
-			d=round(aggregate_edge_data(path_s_data,'dist'),2)
-			paths_of_interest_s[claimID][str((u,v,w,d))]=path_s_data
+			w=round(aggregate_edge_data(path_d_data,'weight'),2)
+			d=round(aggregate_edge_data(path_d_data,'dist'),2)
+			paths_of_interest_d[claimID][str((u,v,w,d))]=path_d_data
 			source_fcg=source_fcg2.copy()
 		with codecs.open(write_path+"_w.json","w","utf-8") as f:
 			f.write(json.dumps(paths_of_interest_w,indent=5,ensure_ascii=False))
 		with codecs.open(write_path+"_d.json","w","utf-8") as f:
-			f.write(json.dumps(paths_of_interest_s,indent=5,ensure_ascii=False))
+			f.write(json.dumps(paths_of_interest_d,indent=5,ensure_ascii=False))
 
 if __name__== "__main__":
 	parser=argparse.ArgumentParser(description='Create co-cccur graph')
@@ -243,8 +248,8 @@ if __name__== "__main__":
 	# create_fred(args.rdfpath,args.fcgtype,args.passive,args.cpu)
 	# create_co_occur(args.rdfpath,args.graphpath,args.fcgtype)
 	# embed_claims(args.rdfpath,args.modelpath,args.embedpath,args.fcgtype)
-	# embed_claims(args.rdfpath,"roberta-base-nli-stsb-mean-tokens",args.embedpath,"covid19")
-	# embed_claims(args.rdfpath,"roberta-base-nli-stsb-mean-tokens",args.embedpath,"covid19topics")
+	embed_claims(args.rdfpath,"roberta-base-nli-stsb-mean-tokens",args.embedpath,"covid19")
+	embed_claims(args.rdfpath,"roberta-base-nli-stsb-mean-tokens",args.embedpath,"covid19topics")
 	shortest_paths(args.rdfpath,args.graphpath,args.embedpath,"covid19","covid19topics")
-	# create_ordered_paths(args.graphpath,"w")
-	# create_ordered_paths(args.graphpath,"d")
+	create_ordered_paths(args.graphpath,"w")
+	create_ordered_paths(args.graphpath,"d")

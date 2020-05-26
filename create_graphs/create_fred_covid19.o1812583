@@ -1,0 +1,30 @@
+create_covid19.py:83: RuntimeWarning: invalid value encountered in arccos
+  simil_p=1-np.arccos(simil_p)/np.pi
+create_covid19.py:83: RuntimeWarning: invalid value encountered in arccos
+  simil_p=1-np.arccos(simil_p)/np.pi
+Warning: diff>source weight
+Warning: diff>source weight
+Warning: diff>source weight
+Warning: diff>source weight
+Warning: diff>source weight
+Warning: diff>source weight
+Warning: diff>source weight
+Warning: diff>source weight
+Warning: diff>source weight
+Warning: diff>source weight
+Warning: diff>source weight
+Warning: diff>source weight
+Warning: diff>source weight
+Warning: diff>source weight
+Warning: diff>source weight
+Warning: diff>source weight
+Warning: diff>source weight
+Warning: diff>source weight
+Warning: diff>source weight
+Warning: diff>source weight
+Warning: diff>source weight
+Warning: diff>source weight
+
+real	50m31.849s
+user	46m19.387s
+sys	0m14.574s
