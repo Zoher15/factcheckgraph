@@ -1,0 +1,117 @@
+
+real	0m18.866s
+user	6m42.104s
+sys	0m37.032s
+
+real	0m57.547s
+user	24m40.288s
+sys	1m47.976s
+
+real	0m8.358s
+user	0m4.840s
+sys	0m1.356s
+
+real	0m41.626s
+user	0m33.548s
+sys	0m7.148s
+
+real	0m3.211s
+user	0m1.344s
+sys	0m0.744s
+
+real	0m5.270s
+user	0m3.720s
+sys	0m0.676s
+
+real	0m6.763s
+user	0m4.804s
+sys	0m0.836s
+
+real	0m2.611s
+user	0m0.636s
+sys	0m0.732s
+
+2020-05-25 22:43:53.684656:
+    metric: ultrametric
+    edges:  undirected
+    weight: logdegree
+    nodes:  tfcg1/data/tfcg1_nodes.txt
+    graph:  tfcg1/data/tfcg1_edgelistID.npy
+    input:  tfcg1/data/intersect_all_entityPairs_dbpedia_fred1_tfcg1_IDs_klformat.txt
+    output: tfcg1/data/intersect_all_entityPairs_dbpedia_fred1_tfcg1_IDs.json
+2020-05-25 22:43:53.686190: reading nodes from text file..
+2020-05-25 22:43:53.690906: reading graph from text file..
+2020-05-25 22:43:53.700999: reading input..
+2020-05-25 22:43:53.722459: launching pool of 48 workers.
+Traceback (most recent call last):
+  File "/N/u/zkachwal/Carbonate/miniconda3/envs/env-kl/bin/klinker", line 11, in <module>
+    load_entry_point('knowledge-linker==0.1rc0', 'console_scripts', 'klinker')()
+  File "/N/u/zkachwal/Carbonate/miniconda3/envs/env-kl/lib/python2.7/site-packages/knowledge_linker/frontend/cmdline.py", line 39, in main
+    args.func(args)
+  File "/N/u/zkachwal/Carbonate/miniconda3/envs/env-kl/lib/python2.7/site-packages/knowledge_linker/frontend/linkpred.py", line 215, in main
+    kind=ns.kind)
+  File "/N/u/zkachwal/Carbonate/miniconda3/envs/env-kl/lib/python2.7/site-packages/knowledge_linker/frontend/linkpred.py", line 147, in linkpred
+    D, paths, removed = zip(*data)
+ValueError: need more than 0 values to unpack
+
+2020-05-25 22:43:56.317817:
+    metric: ultrametric
+    edges:  undirected
+    weight: logdegree
+    nodes:  ffcg1/data/ffcg1_nodes.txt
+    graph:  ffcg1/data/ffcg1_edgelistID.npy
+    input:  ffcg1/data/intersect_all_entityPairs_dbpedia_fred1_ffcg1_IDs_klformat.txt
+    output: ffcg1/data/intersect_all_entityPairs_dbpedia_fred1_ffcg1_IDs.json
+2020-05-25 22:43:56.318774: reading nodes from text file..
+2020-05-25 22:43:56.322607: reading graph from text file..
+2020-05-25 22:43:56.360499: reading input..
+2020-05-25 22:43:56.383094: launching pool of 48 workers.
+Traceback (most recent call last):
+  File "/N/u/zkachwal/Carbonate/miniconda3/envs/env-kl/bin/klinker", line 11, in <module>
+    load_entry_point('knowledge-linker==0.1rc0', 'console_scripts', 'klinker')()
+  File "/N/u/zkachwal/Carbonate/miniconda3/envs/env-kl/lib/python2.7/site-packages/knowledge_linker/frontend/cmdline.py", line 39, in main
+    args.func(args)
+  File "/N/u/zkachwal/Carbonate/miniconda3/envs/env-kl/lib/python2.7/site-packages/knowledge_linker/frontend/linkpred.py", line 215, in main
+    kind=ns.kind)
+  File "/N/u/zkachwal/Carbonate/miniconda3/envs/env-kl/lib/python2.7/site-packages/knowledge_linker/frontend/linkpred.py", line 147, in linkpred
+    D, paths, removed = zip(*data)
+ValueError: need more than 0 values to unpack
+
+2020-05-25 22:43:58.988432:
+    metric: ultrametric
+    edges:  undirected
+    weight: logdegree
+    nodes:  ufcg1/data/ufcg1_nodes.txt
+    graph:  ufcg1/data/ufcg1_edgelistID.npy
+    input:  ufcg1/data/intersect_all_entityPairs_dbpedia_fred1_ufcg1_IDs_klformat.txt
+    output: ufcg1/data/intersect_all_entityPairs_dbpedia_fred1_ufcg1_IDs.json
+2020-05-25 22:43:58.989346: reading nodes from text file..
+2020-05-25 22:43:58.993345: reading graph from text file..
+2020-05-25 22:43:59.033065: reading input..
+2020-05-25 22:43:59.055540: launching pool of 48 workers.
+Traceback (most recent call last):
+  File "/N/u/zkachwal/Carbonate/miniconda3/envs/env-kl/bin/klinker", line 11, in <module>
+    load_entry_point('knowledge-linker==0.1rc0', 'console_scripts', 'klinker')()
+  File "/N/u/zkachwal/Carbonate/miniconda3/envs/env-kl/lib/python2.7/site-packages/knowledge_linker/frontend/cmdline.py", line 39, in main
+    args.func(args)
+  File "/N/u/zkachwal/Carbonate/miniconda3/envs/env-kl/lib/python2.7/site-packages/knowledge_linker/frontend/linkpred.py", line 215, in main
+    kind=ns.kind)
+  File "/N/u/zkachwal/Carbonate/miniconda3/envs/env-kl/lib/python2.7/site-packages/knowledge_linker/frontend/linkpred.py", line 147, in linkpred
+    D, paths, removed = zip(*data)
+ValueError: need more than 0 values to unpack
+find_adj_pairs.py:11: UserWarning: loadtxt: Empty input file: "/gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph_data/graphs/fred1/intersect_all_entityPairs_dbpedia_fred1.txt"
+  intersect_all_pairs=np.loadtxt(intersect_path+"_all_entityPairs_{}_{}.txt".format(kg_label,fcg_class),dtype=str,encoding="utf-8")
+Traceback (most recent call last):
+  File "find_adj_pairs.py", line 51, in <module>
+    find_adj_pairs(args.graphpath,args.fcgclass,args.kgtype)
+  File "find_adj_pairs.py", line 16, in find_adj_pairs
+    intersect_nonadj_pairs=intersect_all_pairs[intersect_nonadj_ind]
+IndexError: arrays used as indices must be of integer (or boolean) type
+
+real	8m1.458s
+user	7m33.936s
+sys	0m26.472s
+
+real	1m25.865s
+user	0m58.476s
+sys	0m25.796s

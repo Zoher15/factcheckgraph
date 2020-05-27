@@ -1,0 +1,60 @@
+
+real	0m18.990s
+user	6m40.816s
+sys	0m33.440s
+
+real	0m57.110s
+user	24m52.304s
+sys	1m37.524s
+
+real	0m8.302s
+user	0m4.904s
+sys	0m1.380s
+
+real	1m10.091s
+user	0m59.468s
+sys	0m9.392s
+
+real	0m3.283s
+user	0m1.364s
+sys	0m0.744s
+
+real	0m5.259s
+user	0m3.604s
+sys	0m0.768s
+
+real	0m6.919s
+user	0m4.972s
+sys	0m0.788s
+
+real	0m2.570s
+user	0m0.628s
+sys	0m0.760s
+
+2020-05-26 00:48:11.966776:
+    metric: ultrametric
+    edges:  undirected
+    weight: logdegree
+    nodes:  tfcg1/data/tfcg1_nodes.txt
+    graph:  tfcg1/data/tfcg1_edgelistID.npy
+    input:  tfcg1/data/intersect_all_entityPairs_dbpedia_fred1_tfcg1_IDs_klformat.txt
+    output: tfcg1/data/intersect_all_entityPairs_dbpedia_fred1_tfcg1_IDs.json
+2020-05-26 00:48:11.967727: reading nodes from text file..
+2020-05-26 00:48:11.971142: reading graph from text file..
+2020-05-26 00:48:11.979900: reading input..
+2020-05-26 00:48:12.668998: launching pool of 48 workers.
+2020-05-26 01:01:18.508117: done
+
+2020-05-26 01:01:30.458289:
+    metric: ultrametric
+    edges:  undirected
+    weight: logdegree
+    nodes:  ffcg1/data/ffcg1_nodes.txt
+    graph:  ffcg1/data/ffcg1_edgelistID.npy
+    input:  ffcg1/data/intersect_all_entityPairs_dbpedia_fred1_ffcg1_IDs_klformat.txt
+    output: ffcg1/data/intersect_all_entityPairs_dbpedia_fred1_ffcg1_IDs.json
+2020-05-26 01:01:30.459122: reading nodes from text file..
+2020-05-26 01:01:30.465942: reading graph from text file..
+2020-05-26 01:01:30.505143: reading input..
+2020-05-26 01:01:31.177207: launching pool of 48 workers.
+slurmstepd: error: *** JOB 437233 ON nid00137 CANCELLED AT 2020-05-26T01:15:35 DUE TO TIME LIMIT ***

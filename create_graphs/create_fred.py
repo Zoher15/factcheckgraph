@@ -653,13 +653,13 @@ def checkClaimGraph(g):#,mode):
 	nodes2contract['equivalence']=[]#keep right node
 	nodes2contract['identity']=[]#keep right node
 	nodes2contract['quality']=[]#keep left node
+	nodes2contract['num']=[]
 	nodes2remove['%27']=[]
 	nodes2remove['thing']=[]
 	nodes2remove['dul']=[]
 	nodes2remove['det']=[]
 	nodes2remove['data']=[]
 	nodes2remove['prop']=[]
-	nodes2remove['url']=[]
 	nodes2remove['schema']=[]#remove schema.org nodes
 	# if mode=='rdf':
 	# 	edge_list=g.getEdges()
@@ -683,10 +683,6 @@ def checkClaimGraph(g):#,mode):
 			nodes2remove['prop'].append(a)
 		elif regex_prop.match(c):
 			nodes2remove['prop'].append(c)
-		elif (a_urlparse.netloc=='' and a_urlparse.scheme==''):
-			nodes2remove['url'].append(a)
-		elif (c_urlparse.netloc=='' and c_urlparse.scheme==''):
-			nodes2remove['url'].append(c)
 		#Delete '%27' edges
 		elif regex_27.match(a):
 			nodes2remove['%27'].append(a)
@@ -713,13 +709,18 @@ def checkClaimGraph(g):#,mode):
 				nodes2remove['det'].append(a)
 			elif regex_quant.match(c):
 				nodes2remove['det'].append(c)
+			elif (a_urlparse.netloc=='' and a_urlparse.scheme==''):
+				nodes2contract['num'].append((c,a))
+			elif (c_urlparse.netloc=='' and c_urlparse.scheme==''):
+				nodes2contract['num'].append((a,c))
 		elif edge_list[e].Type==EdgeMotif.Type or regex_type.match(b):
 			if regex_fred.match(a) and (regex_fred.match(a)[1].lower() in c.split("\\")[-1].lower()):
 				nodes2contract['type'].append((c,a))
 			elif (regex_fred.match(c)) and (regex_fred.match(c)[1].lower() in a.split("\\")[-1].lower()):
 				nodes2contract['type'].append((a,c))
 		elif edge_list[e].Type==EdgeMotif.SubClass:
-			nodes2contract['subclass'].append((a,c))
+			if not regex_dul.match(c):
+				nodes2contract['subclass'].append((a,c))
 		elif edge_list[e].Type==EdgeMotif.Equivalence:
 			nodes2contract['equivalence'].append((c,a))
 		elif edge_list[e].Type==EdgeMotif.Identity:
@@ -893,7 +894,7 @@ def contractClaimGraph(claim_g,contract_edgelist):
 def cleanClaimGraph(claim_g,clean_claims):
 	nodes2remove=clean_claims['nodes2remove']
 	nodes2contract=clean_claims['nodes2contract']
-	contract_edgelist=nodes2contract['type']+nodes2contract['quality']+nodes2contract['subclass']+nodes2contract['equivalence']+nodes2contract['identity']
+	contract_edgelist=nodes2contract['type']+nodes2contract['quality']+nodes2contract['subclass']+nodes2contract['equivalence']+nodes2contract['identity']+nodes2contract['num']
 	claim_g=contractClaimGraph(claim_g,contract_edgelist)
 	'''
 	After contracting edges, sometimes the edge hasQuality now exists between two words like Related and RelatedAccount.
@@ -901,13 +902,14 @@ def cleanClaimGraph(claim_g,clean_claims):
 	Because this edge-to-be-contracted will not be detected by the function checkClaimGraph, we should do the contraction manually.
 	'''
 	contract_edgelist=[]
-	for u,v,d in claim_g.edges(data=True):
+	edgelist=list(claim_g.edges(data=True))
+	for u,v,d in edgelist:
 		if d['label']=='associatedWith' or d['label']=='hasQuality':
 			if u.split("/")[-1].split("#")[-1].lower() in v.split("/")[-1].split("#")[-1].lower() and 'fred' in nodelabel_mapper(u).split(":")[0]:
 				contract_edgelist.append((v,u))
 				print((nodelabel_mapper(v),nodelabel_mapper(u),d['label']))
 			elif v.split("/")[-1].split("#")[-1].lower() in u.split("/")[-1].split("#")[-1].lower() and 'fred' in nodelabel_mapper(v).split(":")[0]:
-				contract_edgelist.append((v,u))
+				contract_edgelist.append((u,v))
 				print((nodelabel_mapper(u),nodelabel_mapper(v),d['label']))
 	claim_g=contractClaimGraph(claim_g,contract_edgelist)
 	#remove nodes
@@ -921,9 +923,6 @@ def cleanClaimGraph(claim_g,clean_claims):
 		if claim_g.has_node(node):
 			claim_g.remove_node(node)
 	for node in nodes2remove['prop']:
-		if claim_g.has_node(node):
-			claim_g.remove_node(node)
-	for node in nodes2remove['url']:
 		if claim_g.has_node(node):
 			claim_g.remove_node(node)
 	for node in nodes2remove['schema']:
@@ -973,7 +972,6 @@ def saveClaimGraph(claim_g,filename,cf):
 
 #Function to stitch/compile graphs in an iterative way. i.e clean individual graphs before unioning 
 def compileClaimGraph1(index,claims_path,claim_IDs,clean_claims,init,end):
-	# random.shuffle(claim_IDs)
 	end=min(end,len(claim_IDs))
 	fcg=nx.Graph()
 	for claim_ID in claim_IDs[init:end]:
@@ -1020,15 +1018,18 @@ def compile_clean(rdf_path,clean_claims,claim_type):
 	master_clean['nodes2contract']={}
 	master_clean['nodes2remove']={}
 	master_clean['nodes2remove']['%27']=[]
+	master_clean['nodes2remove']['thing']=[]
+	master_clean['nodes2remove']['dul']=[]
 	master_clean['nodes2remove']['det']=[]
-	master_clean['nodes2remove']['url']=[]
-	master_clean['nodes2remove']['prop']=[]
 	master_clean['nodes2remove']['data']=[]
-	master_clean['nodes2contract']['type']=[]
-	master_clean['nodes2contract']['vnequiv']=[]
-	master_clean['nodes2contract']['dbpediasas']=[]
-	master_clean['nodes2contract']['dbpediaequiv']=[]
-	master_clean['nodes2contract']['dbpediassoc']=[]
+	master_clean['nodes2remove']['prop']=[]
+	master_clean['nodes2remove']['schema']=[]
+	master_clean['nodes2contract']['type']=[]#keep right node if left node has "_1"
+	master_clean['nodes2contract']['subclass']=[]#keep left node
+	master_clean['nodes2contract']['equivalence']=[]#keep right node
+	master_clean['nodes2contract']['identity']=[]#keep right node
+	master_clean['nodes2contract']['quality']=[]#keep left node
+	master_clean['nodes2contract']['num']=[]#keep left node
 	with codecs.open(os.path.join(rdf_path,"{}claims_clean.txt".format(claim_type)),"w","utf-8") as f: 
 		pprint(clean_claims,stream=f)
 	for clean_claim in clean_claims.values():
@@ -1059,7 +1060,7 @@ def saveFred(fcg,graph_path,fcg_label,compilefred):
 		for node in nodes:
 			f.write(str(node)+"\n")
 	#Save Entities
-	entity_regex=re.compile(r'http:\/\/dbpedia\.org')
+	entity_regex=re.compile(r'^db:.*')
 	entities=np.asarray([node for node in nodes if entity_regex.match(node)])
 	with codecs.open(write_path+"_entities.txt","w","utf-8") as f:
 		for entity in entities:
@@ -1070,8 +1071,7 @@ def saveFred(fcg,graph_path,fcg_label,compilefred):
 		f.write(json.dumps(node2ID,indent=4,ensure_ascii=False))
 	#Save Edgelist ID
 	edgelistID=np.asarray([[int(node2ID[edge[0]]),int(node2ID[edge[1]]),1] for edge in edges])
-	np.save(write_path+"_edgelistID.npy",edgelistID)  
-
+	np.save(write_path+"_edgelistID.npy",edgelistID)
 
 def createFred(rdf_path,graph_path,fcg_label,init,passive,cpu,compilefred):
 	fcg_path=os.path.join(graph_path,"fred"+str(compilefred),fcg_label+str(compilefred))
@@ -1100,20 +1100,24 @@ def createFred(rdf_path,graph_path,fcg_label,init,passive,cpu,compilefred):
 				clean_claims=json.loads(f.read())
 				claim_IDs=list(clean_claims.keys())
 			if compilefred==1 or compilefred==2:
-				n=int(len(claim_IDs)/cpu)+1
-				pool=mp.Pool(processes=cpu)		
-				# result=compileClaimGraph1(0,claims_path,claim_IDs,clean_claims,0,len(claim_IDs))					
-				results=[pool.apply_async(eval("compileClaimGraph"+str(compilefred)), args=(index,claims_path,claim_IDs,clean_claims,index*n,(index+1)*n)) for index in range(cpu)]
-				output=sorted([p.get() for p in results],key=lambda x:x[0])
-				fcgs=list(map(lambda x:x[1],output))
-				master_fcg=nx.Graph()
-				for fcg in fcgs:
-					master_fcg=nx.compose(master_fcg,fcg)
+				if cpu>1:
+					n=int(len(claim_IDs)/cpu)+1
+					pool=mp.Pool(processes=cpu)					
+					results=[pool.apply_async(eval("compileClaimGraph"+str(compilefred)), args=(index,claims_path,claim_IDs,clean_claims,index*n,(index+1)*n)) for index in range(cpu)]
+					output=sorted([p.get() for p in results],key=lambda x:x[0])
+					fcgs=list(map(lambda x:x[1],output))
+					master_fcg=nx.Graph()
+					for fcg in fcgs:
+						master_fcg=nx.compose(master_fcg,fcg)
+				else:
+					master_fcg=eval("compileClaimGraph"+str(compilefred)+"(0,claims_path,claim_IDs,clean_claims,0,"+str(len(claim_IDs))+")")
 				if compilefred==2:
 					master_clean=compile_clean(rdf_path,clean_claims,claim_type)
 					master_fcg=cleanClaimGraph(master_fcg,master_clean)
+					master_fcg=nx.relabel_nodes(master_fcg,lambda x:nodelabel_mapper(x))
 			elif compilefred==3:
 				master_fcg=compileClaimGraph3(claims_path,claim_IDs,clean_claims)
+				master_fcg=nx.relabel_nodes(master_fcg,lambda x:nodelabel_mapper(x))
 			saveFred(master_fcg,graph_path,fcg_label+str(compilefred),compilefred)
 		#else parsing the graph for each claim
 		else:

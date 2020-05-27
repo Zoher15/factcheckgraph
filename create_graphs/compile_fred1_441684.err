@@ -1,0 +1,82 @@
+
+real	0m19.871s
+user	6m1.084s
+sys	0m33.508s
+
+real	1m13.311s
+user	20m30.316s
+sys	1m28.396s
+
+real	0m8.528s
+user	0m4.600s
+sys	0m1.456s
+
+real	1m11.985s
+user	1m0.488s
+sys	0m9.824s
+
+real	0m3.417s
+user	0m1.308s
+sys	0m0.760s
+
+real	0m5.180s
+user	0m3.376s
+sys	0m0.756s
+
+real	0m6.834s
+user	0m4.828s
+sys	0m0.724s
+
+real	0m2.764s
+user	0m0.580s
+sys	0m0.808s
+
+2020-05-27 14:38:21.546224:
+    metric: ultrametric
+    edges:  undirected
+    weight: logdegree
+    nodes:  tfcg1/data/tfcg1_nodes.txt
+    graph:  tfcg1/data/tfcg1_edgelistID.npy
+    input:  tfcg1/data/intersect_all_entityPairs_dbpedia_fred1_tfcg1_IDs_klformat.txt
+    output: tfcg1/data/intersect_all_entityPairs_dbpedia_fred1_tfcg1_IDs.json
+2020-05-27 14:38:21.548333: reading nodes from text file..
+2020-05-27 14:38:21.552981: reading graph from text file..
+2020-05-27 14:38:21.562086: reading input..
+2020-05-27 14:38:22.295113: launching pool of 48 workers.
+2020-05-27 14:53:45.262143: done
+
+2020-05-27 14:53:59.066200:
+    metric: ultrametric
+    edges:  undirected
+    weight: logdegree
+    nodes:  ffcg1/data/ffcg1_nodes.txt
+    graph:  ffcg1/data/ffcg1_edgelistID.npy
+    input:  ffcg1/data/intersect_all_entityPairs_dbpedia_fred1_ffcg1_IDs_klformat.txt
+    output: ffcg1/data/intersect_all_entityPairs_dbpedia_fred1_ffcg1_IDs.json
+2020-05-27 14:53:59.067575: reading nodes from text file..
+2020-05-27 14:53:59.076134: reading graph from text file..
+2020-05-27 14:53:59.116486: reading input..
+2020-05-27 14:53:59.898715: launching pool of 48 workers.
+2020-05-27 15:31:27.400465: done
+
+2020-05-27 15:31:42.013026:
+    metric: ultrametric
+    edges:  undirected
+    weight: logdegree
+    nodes:  ufcg1/data/ufcg1_nodes.txt
+    graph:  ufcg1/data/ufcg1_edgelistID.npy
+    input:  ufcg1/data/intersect_all_entityPairs_dbpedia_fred1_ufcg1_IDs_klformat.txt
+    output: ufcg1/data/intersect_all_entityPairs_dbpedia_fred1_ufcg1_IDs.json
+2020-05-27 15:31:42.013954: reading nodes from text file..
+2020-05-27 15:31:42.021101: reading graph from text file..
+2020-05-27 15:31:42.063173: reading input..
+2020-05-27 15:31:42.790158: launching pool of 48 workers.
+2020-05-27 16:18:12.135949: done
+
+real	8m6.886s
+user	7m36.380s
+sys	0m28.424s
+
+real	1m0.769s
+user	0m46.716s
+sys	0m11.972s

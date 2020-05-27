@@ -46,9 +46,9 @@ def create_co_occur(rdf_path,graph_path,fcg_label):
 				###########################################################
 				try:
 					if entity_regex.search(subject):
-						claim_entities_set.add(subject.split("/")[-1])
+						claim_entities_set.add('db:'+subject.split("/")[-1].split("#")[-1])
 					if entity_regex.search(obj):
-						claim_entities_set.add(obj.split("/")[-1])
+						claim_entities_set.add('db:'+obj.split("/")[-1].split("#")[-1])
 				except KeyError:
 					pass
 			claim_entities[claim_ID]=list(claim_entities_set)
@@ -71,7 +71,7 @@ def create_co_occur(rdf_path,graph_path,fcg_label):
 		for node in nodes:
 			f.write(str(node)+"\n")
 	#Save Entities
-	entity_regex=re.compile(r'http:\/\/dbpedia\.org')
+	entity_regex=re.compile(r'db:')
 	entities=np.asarray([node for node in nodes if entity_regex.search(node)])
 	with codecs.open(write_path+"_entities.txt","w","utf-8") as f:
 		for entity in entities:

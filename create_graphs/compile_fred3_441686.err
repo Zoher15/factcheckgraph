@@ -1,0 +1,59 @@
+
+real	17m18.015s
+user	17m10.508s
+sys	0m2.532s
+
+real	222m41.917s
+user	222m18.176s
+sys	0m10.000s
+
+real	0m8.530s
+user	0m4.504s
+sys	0m1.372s
+
+real	1m10.910s
+user	1m0.260s
+sys	0m9.344s
+
+real	0m3.100s
+user	0m1.168s
+sys	0m0.768s
+
+real	0m5.120s
+user	0m3.480s
+sys	0m0.748s
+
+real	0m6.135s
+user	0m4.188s
+sys	0m0.804s
+
+real	0m2.560s
+user	0m0.592s
+sys	0m0.792s
+
+2020-05-27 18:46:56.904923:
+    metric: ultrametric
+    edges:  undirected
+    weight: logdegree
+    nodes:  tfcg3/data/tfcg3_nodes.txt
+    graph:  tfcg3/data/tfcg3_edgelistID.npy
+    input:  tfcg3/data/intersect_all_entityPairs_dbpedia_fred3_tfcg3_IDs_klformat.txt
+    output: tfcg3/data/intersect_all_entityPairs_dbpedia_fred3_tfcg3_IDs.json
+2020-05-27 18:46:56.905857: reading nodes from text file..
+2020-05-27 18:46:56.910646: reading graph from text file..
+2020-05-27 18:46:56.920270: reading input..
+2020-05-27 18:46:57.662221: launching pool of 48 workers.
+2020-05-27 19:01:11.478318: done
+
+2020-05-27 19:01:25.302202:
+    metric: ultrametric
+    edges:  undirected
+    weight: logdegree
+    nodes:  ffcg3/data/ffcg3_nodes.txt
+    graph:  ffcg3/data/ffcg3_edgelistID.npy
+    input:  ffcg3/data/intersect_all_entityPairs_dbpedia_fred3_ffcg3_IDs_klformat.txt
+    output: ffcg3/data/intersect_all_entityPairs_dbpedia_fred3_ffcg3_IDs.json
+2020-05-27 19:01:25.303117: reading nodes from text file..
+2020-05-27 19:01:25.310465: reading graph from text file..
+2020-05-27 19:01:25.350146: reading input..
+2020-05-27 19:01:26.068833: launching pool of 48 workers.
