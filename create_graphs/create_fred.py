@@ -28,6 +28,7 @@ import multiprocessing as mp
 from urllib.parse import urlparse
 from pprint import pprint
 from flatten_dict import flatten as flatten_dict
+import re
 
 __author__='Misael Mongiovi, Andrea Giovanni Nuzzolese'
 # Original script edited by Zoher Kachwala for FactCheckGraph

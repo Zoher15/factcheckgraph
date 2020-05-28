@@ -27,18 +27,24 @@ def create_co_occur(rdf_path,graph_path,fcg_label):
 		claim_entities={}
 		claim_edges={}
 		entity_regex=re.compile(r'http:\/\/dbpedia\.org')
+		# entity_regex=re.compile(r'db:')
 		fcg_co=nx.MultiGraph()
 		for claim_ID in claim_IDs:
 			claim_entities_set=set([])
-			claim_g=rdflib.Graph()
+			# claim_g=rdflib.Graph()
+			claim_g=nx.Graph()
 			claim_nxg=nx.MultiGraph()
-			filename="claim{}.rdf".format(str(claim_ID))
+			# filename="claim{}.rdf".format(str(claim_ID))
+			filename="claim{}.edgelist".format(str(claim_ID))
 			try:
-				claim_g.parse(os.path.join(rdf_path,"{}_claims".format(claim_type),filename),format='application/rdf+xml')
+				# claim_g.parse(os.path.join(rdf_path,"{}_claims".format(claim_type),filename),format='application/rdf+xml')
+				claim_g=nx.read_edgelist(os.path.join(rdf_path,"{}_claims".format(claim_type),filename),comments="@")
 			except:
 				pass
-			for triple in claim_g:
-				subject,predicate,obj=list(map(str,triple))
+			# for triple in claim_g:
+			for edge in claim_g.edges(data=True):
+				# subject,predicate,obj=list(map(str,triple))
+				subject,obj,d=edge
 				###FRED makes a mistake while resolving "novel coronavirus"
 				if "covid19" in claim_type:
 					subject=subject.replace("Middle_East_respiratory_syndrome_coronavirus","Severe_acute_respiratory_syndrome_coronavirus_2")

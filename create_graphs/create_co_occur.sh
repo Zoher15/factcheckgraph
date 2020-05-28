@@ -8,7 +8,7 @@
 #SBATCH --mail-user=zoher.kachwala@gmail.com
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
-#SBATCH --time=3:00:00
+#SBATCH --time=0:30:00
 
 source /N/u/zkachwal/Carbonate/miniconda3/etc/profile.d/conda.sh
 conda activate

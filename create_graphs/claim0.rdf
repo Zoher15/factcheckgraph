@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=ISO-8859-1"/>
+<title>Error 500 </title>
+</head>
+<body>
+<h2>HTTP ERROR: 500</h2>
+<p>Problem accessing /fred/. Reason:
+<pre>    javax.servlet.ServletException: org.apache.jena.riot.RiotException: [line: 1, col: 1 ] Out of place: [KEYWORD:Error]</pre></p>
+<hr /><i><small>Powered by Jetty://</small></i>
+</body>
+</html>

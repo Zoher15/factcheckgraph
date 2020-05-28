@@ -57,3 +57,26 @@ sys	0m0.792s
 2020-05-27 19:01:25.310465: reading graph from text file..
 2020-05-27 19:01:25.350146: reading input..
 2020-05-27 19:01:26.068833: launching pool of 48 workers.
+2020-05-27 19:36:09.256801: done
+
+2020-05-27 19:36:24.792121:
+    metric: ultrametric
+    edges:  undirected
+    weight: logdegree
+    nodes:  ufcg3/data/ufcg3_nodes.txt
+    graph:  ufcg3/data/ufcg3_edgelistID.npy
+    input:  ufcg3/data/intersect_all_entityPairs_dbpedia_fred3_ufcg3_IDs_klformat.txt
+    output: ufcg3/data/intersect_all_entityPairs_dbpedia_fred3_ufcg3_IDs.json
+2020-05-27 19:36:24.792839: reading nodes from text file..
+2020-05-27 19:36:24.798618: reading graph from text file..
+2020-05-27 19:36:24.840643: reading input..
+2020-05-27 19:36:25.591185: launching pool of 48 workers.
+2020-05-27 20:20:28.225669: done
+
+real	7m58.256s
+user	7m29.444s
+sys	0m27.552s
+
+real	1m1.316s
+user	0m47.128s
+sys	0m13.000s

@@ -5,6 +5,12 @@ from flufl.enum import Enum
 from rdflib import plugin
 from rdflib.serializer import Serializer
 from rdflib.plugins.memory import IOMemory
+import networkx as nx
+import requests
+import re
+from urllib.parse import urlparse
+import codecs
+import json
 
 __author__ = 'Misael Mongiovi, Andrea Giovanni Nuzzolese'
 
@@ -513,58 +519,12 @@ class FredGraph:
     def getCompactGraph(self):
         pass
 
-def preprocessText(text):
-    nt = text.replace("-"," ")
-    nt = nt.replace("#"," ")
-    nt = nt.replace(chr(96),"'") #`->'
-    nt = nt.replace("'nt "," not ")
-    nt = nt.replace("'ve "," have ")
-    nt = nt.replace(" what's "," what is ")
-    nt = nt.replace("What's ","What is ")
-    nt = nt.replace(" where's "," where is ")
-    nt = nt.replace("Where's ","Where is ")
-    nt = nt.replace(" how's "," how is ")
-    nt = nt.replace("How's ","How is ")
-    nt = nt.replace(" he's "," he is ")
-    nt = nt.replace(" she's "," she is ")
-    nt = nt.replace(" it's "," it is ")
-    nt = nt.replace("He's ","He is ")
-    nt = nt.replace("She's ","She is ")
-    nt = nt.replace("It's ","It is ")
-    nt = nt.replace("'d "," had ")
-    nt = nt.replace("'ll "," will ")
-    nt = nt.replace("'m "," am ")
-    nt = nt.replace(" ma'am "," madam ")
-    nt = nt.replace(" o'clock "," of the clock ")
-    nt = nt.replace(" 're "," are ")
-    nt = nt.replace(" y'all "," you all ")
-
-    nt = nt.strip()
-    if nt[len(nt)-1]!='.':
-        nt = nt + "."
-
-    return nt
-
-def getFredGraph(sentence,key,filename):
-    command_to_exec = "curl -G -X GET -H \"Accept: application/rdf+xml\" -H \"Authorization: Bearer " + key + "\" --data-urlencode text=\"" + sentence+ "\" -d semantic-subgraph=\"true\" http://wit.istc.cnr.it/stlab-tools/fred > " + filename
-    try:
-        os.system(command_to_exec)
-    except:
-        print("\nerror os running curl FRED")
-        sys.exit(1)
-
-    return openFredGraph(filename)
-
-def openFredGraph(filename):
-    rdf = rdflib.Graph()
-    rdf.parse(filename)
-    return FredGraph(rdf)
 
 if __name__ == "__main__":
     def checkFredSentence(sentence, key, graph):
         g = getFredGraph(preprocessText(sentence), key, graph)
-        #g = openFredGraph(graph)
         checkFredGraph(g)
+        return g
 
     def checkFredFile(filename):
         g = openFredGraph(filename)
@@ -722,6 +682,268 @@ if __name__ == "__main__":
                 print(r,":",roles[r],";", end=' ')
             print("}")
 
-    s=sys.argv[1]
-    g = checkFredSentence(s,"Bearer 0d9d562e-a2aa-30df-90df-d52674f2e1f0",'pippo.rdf')
+    def preprocessText(text):
+        nt = text.replace("-"," ")
+        nt = nt.replace("#"," ")
+        nt = nt.replace(chr(96),"'") #`->'
+        nt = nt.replace("'nt "," not ")
+        nt = nt.replace("'ve "," have ")
+        nt = nt.replace(" what's "," what is ")
+        nt = nt.replace("What's ","What is ")
+        nt = nt.replace(" where's "," where is ")
+        nt = nt.replace("Where's ","Where is ")
+        nt = nt.replace(" how's "," how is ")
+        nt = nt.replace("How's ","How is ")
+        nt = nt.replace(" he's "," he is ")
+        nt = nt.replace(" she's "," she is ")
+        nt = nt.replace(" it's "," it is ")
+        nt = nt.replace("He's ","He is ")
+        nt = nt.replace("She's ","She is ")
+        nt = nt.replace("It's ","It is ")
+        nt = nt.replace("'d "," had ")
+        nt = nt.replace("'ll "," will ")
+        nt = nt.replace("'m "," am ")
+        nt = nt.replace(" ma'am "," madam ")
+        nt = nt.replace(" o'clock "," of the clock ")
+        nt = nt.replace(" 're "," are ")
+        nt = nt.replace(" y'all "," you all ")
+
+        nt = nt.strip()
+        if nt[len(nt)-1]!='.':
+            nt = nt + "."
+        return nt
+
+    def nodelabel_mapper(text):
+        regex_vn=re.compile(r'^http:\/\/www\.ontologydesignpatterns\.org\/ont\/vn\/data\/([a-zA-Z]*)_.*')
+        regex_dbpedia=re.compile(r'^http:\/\/dbpedia\.org\/resource\/(.*)')
+        regex_quant=re.compile(r'^http:\/\/www\.ontologydesignpatterns\.org\/ont\/fred\/quantifiers\.owl#.*')
+        regex_schema=re.compile(r'^http:\/\/schema\.org.*')
+        regex_fred=re.compile(r'^http:\/\/www\.ontologydesignpatterns\.org\/ont\/fred\/domain\.owl#([a-zA-Z]*)_.*')
+        regex_fredup=re.compile(r'^http:\/\/www\.ontologydesignpatterns\.org\/ont\/fred\/domain\.owl#([A-Z]+[a-zA-Z]*)')
+        try:
+            d={
+            bool(regex_vn.match(text)):'vn:'+text.split("/")[-1].split("#")[-1],
+            bool(regex_dbpedia.match(text)):'db:'+text.split("/")[-1].split("#")[-1],
+            bool(regex_quant.match(text)):'quant:'+text.split("/")[-1].split("#")[-1],
+            bool(regex_schema.match(text)):'schema:'+text.split("/")[-1].split("#")[-1],
+            bool(regex_fred.match(text)):'fred:'+text.split("/")[-1].split("#")[-1],
+            bool(regex_fredup.match(text)):'fredup:'+text.split("/")[-1].split("#")[-1],
+            }
+            return d[True]
+        except KeyError:
+            return 'un:'+text.split("/")[-1].split("#")[-1]
+
+    #function to check a claim and create dictionary of edges to contract and remove
+    def checkClaimGraph(g):#,mode):
+        # if mode=='rdf':
+        #   claim_g=nx.Graph()
+        # elif mode=='nx':
+        #   claim_g=g
+        claim_g=nx.Graph()
+        regex_27=re.compile(r'^http:\/\/www\.ontologydesignpatterns\.org\/ont\/fred\/domain\.owl#%27.*')
+        regex_det=re.compile(r'^http:\/\/www\.ontologydesignpatterns\.org\/ont\/fred\/quantifiers\.owl.*$')
+        regex_data=re.compile(r'^http:\/\/www\.ontologydesignpatterns\.org\/ont\/dul\/DUL\.owl#hasDataValue$')
+        regex_quality=re.compile(r'^http:\/\/www\.ontologydesignpatterns\.org\/ont\/dul\/DUL\.owl#hasQuality$')
+        regex_event=re.compile(r'^http:\/\/www\.ontologydesignpatterns\.org\/ont\/dul\/DUL\.owl#Event.*')
+        regex_prop=re.compile(r'^http:\/\/www\.w3\.org\/2002\/07\/owl#DataTypeProperty$')
+        regex_sameas=re.compile(r'^http:\/\/www\.w3\.org\/2002\/07\/owl#sameAs$')
+        regex_equiv=re.compile(r'^http:\/\/www\.w3\.org\/2002\/07\/owl#equivalentClass$')
+        regex_sub=re.compile(r'^http:\/\/www\.w3\.org\/2000\/01\/rdf-schema#subClassOf$')
+        regex_assoc=re.compile(r'^http:\/\/www\.ontologydesignpatterns\.org\/ont\/dul\/DUL\.owl#associatedWith$')
+        regex_type=re.compile(r'^http:\/\/www\.w3\.org\/1999\/02\/22-rdf-syntax-ns#type$')
+        regex_fred=re.compile(r'^http:\/\/www\.ontologydesignpatterns\.org\/ont\/fred\/domain\.owl#([a-zA-Z]*)_.*')
+        regex_fredup=re.compile(r'^http:\/\/www\.ontologydesignpatterns\.org\/ont\/fred\/domain\.owl#([A-Z]+[a-zA-Z]*)')
+        regex_vn=re.compile(r'^http:\/\/www\.ontologydesignpatterns\.org\/ont\/vn\/data\/([a-zA-Z]*)_.*')
+        regex_dbpedia=re.compile(r'^http:\/\/dbpedia\.org\/resource\/(.*)')
+        regex_thing=re.compile(r'^http:\/\/www\.w3\.org\/2002\/07\/owl#Thing$')
+        regex_dul=re.compile(r'^http:\/\/www\.ontologydesignpatterns\.org\/ont\/dul\/DUL\.owl#(.*)')
+        regex_quant=re.compile(r'^http:\/\/www\.ontologydesignpatterns\.org\/ont\/fred\/quantifiers\.owl#.*')
+        regex_schema=re.compile(r'^http:\/\/schema\.org.*')
+        nodes2contract={}
+        nodes2remove={}
+        # nodes2remove['%27']=[]
+        # nodes2remove['det']=[]
+        # nodes2remove['url']=[]
+        # nodes2remove['prop']=[]
+        # nodes2remove['data']=[]
+        # nodes2contract['type']=[]
+        # nodes2contract['sub']=[]
+        # nodes2contract['vnequiv']=[]
+        # nodes2contract['dbpediasas']=[]
+        # nodes2contract['dbpediaequiv']=[]
+        # nodes2contract['dbpediassoc']=[]
+        #########################################################################################
+        nodes2contract['type']=[]#keep right node if left node has "_1"
+        nodes2contract['subclass']=[]#keep left node
+        nodes2contract['equivalence']=[]#keep right node
+        nodes2contract['identity']=[]#keep right node
+        nodes2contract['quality']=[]#keep left node
+        nodes2contract['num']=[]
+        nodes2remove['%27']=[]
+        nodes2remove['thing']=[]
+        nodes2remove['dul']=[]
+        nodes2remove['det']=[]
+        nodes2remove['data']=[]
+        nodes2remove['prop']=[]
+        nodes2remove['schema']=[]#remove schema.org nodes
+        # if mode=='rdf':
+        #   edge_list=g.getEdges()
+        # elif mode=='nx':
+        #   edge_list=claim_g.edges.data('label', default='')
+        edge_list=g.getInfoEdges()
+        for e in edge_list:
+            (a,b,c)=e
+            # if mode=='rdf':
+            #   t=c 
+            #   c=b 
+            #   b=t
+            claim_g.add_edge(a,c,label=b.split("/")[-1].split("#")[-1])
+            a_urlparse=urlparse(a)
+            c_urlparse=urlparse(c)
+            if regex_data.match(a):
+                nodes2remove['data'].append(a)
+            elif regex_data.match(c):
+                nodes2remove['data'].append(c)
+            elif regex_prop.match(a):
+                nodes2remove['prop'].append(a)
+            elif regex_prop.match(c):
+                nodes2remove['prop'].append(c)
+            #Delete '%27' edges
+            elif regex_27.match(a):
+                nodes2remove['%27'].append(a)
+            elif regex_27.match(c):
+                nodes2remove['%27'].append(c)
+            elif regex_schema.match(a):
+                nodes2remove['schema'].append(a)
+            elif regex_schema.match(c):
+                nodes2remove['schema'].append(c)
+            elif regex_dul.match(a):
+                nodes2remove['dul'].append(a)
+            elif regex_dul.match(c):
+                nodes2remove['dul'].append(c)
+            elif regex_thing.match(a):
+                nodes2remove['thing'].append(a)
+            elif regex_thing.match(c):
+                nodes2remove['thing'].append(c)
+            #Edges
+            if edge_list[e].Type==EdgeMotif.Property:
+                if regex_quality.match(b) and (regex_fredup.match(c) and regex_fredup.match(a)):
+                    if regex_fredup.match(c)[1].lower() in regex_fredup.match(a)[1].lower():
+                        nodes2contract['quality'].append((a,c))
+                elif regex_quant.match(a):
+                    nodes2remove['det'].append(a)
+                elif regex_quant.match(c):
+                    nodes2remove['det'].append(c)
+                elif (a_urlparse.netloc=='' and a_urlparse.scheme==''):
+                    nodes2contract['num'].append((c,a))
+                elif (c_urlparse.netloc=='' and c_urlparse.scheme==''):
+                    nodes2contract['num'].append((a,c))
+            elif edge_list[e].Type==EdgeMotif.Type or regex_type.match(b):
+                if regex_fred.match(a) and (regex_fred.match(a)[1].lower() in c.split("\\")[-1].lower()):
+                    nodes2contract['type'].append((c,a))
+                elif (regex_fred.match(c)) and (regex_fred.match(c)[1].lower() in a.split("\\")[-1].lower()):
+                    nodes2contract['type'].append((a,c))
+            elif edge_list[e].Type==EdgeMotif.SubClass:
+                if not regex_dul.match(c):
+                    nodes2contract['subclass'].append((a,c))
+            elif edge_list[e].Type==EdgeMotif.Equivalence:
+                nodes2contract['equivalence'].append((c,a))
+            elif edge_list[e].Type==EdgeMotif.Identity:
+                nodes2contract['identity'].append((c,a))
+            # if regex_type.match(b):
+            #   if (regex_fredup.match(a) and not regex_fred.match(c)) and (regex_fredup.match(a)[1].split("_")[0].lower() in c.split("\\")[-1].lower()):
+            #       nodes2contract['type'].append((c,a))
+            #   elif (regex_fredup.match(c) and not regex_fred.match(a)) and (regex_fredup.match(c)[1].split("_")[0].lower() in a.split("\\")[-1].lower()):
+            #       nodes2contract['type'].append((a,c))
+            #   elif regex_fred.match(a) and (regex_fred.match(a)[1].lower() in c.split("\\")[-1].lower()):
+            #       nodes2contract['type'].append((c,a))
+            #   elif (regex_fred.match(c)) and (regex_fred.match(c)[1].lower() in a.split("\\")[-1].lower()):
+            #       nodes2contract['type'].append((a,c))
+            # #Merging verbs like show_1 and show_2 with show for subclass predicates
+            # elif regex_sub.match(b):
+            #   if (regex_fredup.match(a) and not regex_fred.match(c)) and (regex_fredup.match(a)[1].split("_")[0].lower() in c.split("\\")[-1].lower()):
+            #       nodes2contract['sub'].append((c,a))
+            #   elif (regex_fredup.match(c) and not regex_fred.match(a)) and (regex_fredup.match(c)[1].split("_")[0].lower() in a.split("\\")[-1].lower()):
+            #       nodes2contract['sub'].append((a,c))
+            #   elif regex_fred.match(a) and (regex_fred.match(a)[1].lower() in c.split("\\")[-1].lower()):
+            #       nodes2contract['sub'].append((c,a))
+            #   elif (regex_fred.match(c)) and (regex_fred.match(c)[1].lower() in a.split("\\")[-1].lower()):
+            #       nodes2contract['sub'].append((a,c))
+            # #Merging verbs with their verbnet forms
+            # elif regex_equiv.match(b) and (regex_vn.match(a) or regex_vn.match(c)):
+            #   if (regex_fredup.match(a) and regex_vn.match(c)) and (regex_fredup.match(a)[1].split("_")[0].lower() in regex_vn.match(c)[1].lower()):
+            #       nodes2contract['vnequiv'].append((c,a))
+            #   elif (regex_fredup.match(c) and regex_vn.match(a)) and (regex_fredup.match(c)[1].split("_")[0].lower() in regex_vn.match(a)[1].lower()):
+            #       nodes2contract['vnequiv'].append((a,c))
+            # #Merging nodes with sameAs relationships
+            # elif regex_sameas.match(b) and (regex_dbpedia.match(a) or regex_dbpedia.match(c)):
+            #   if (regex_fredup.match(a) and regex_dbpedia.match(c)) and (regex_fredup.match(a)[1]!="Of" and regex_fredup.match(a)[1]!="Thing"):
+            #       nodes2contract['dbpediasas'].append((c,a))
+            #   elif (regex_fredup.match(c) and regex_dbpedia.match(a)) and (regex_fredup.match(c)[1]!="Of" and regex_fredup.match(c)[1]!="Thing"):
+            #       nodes2contract['dbpediasas'].append((a,c))
+            # #Merging nodes with equivalentClass relationships
+            # elif regex_equiv.match(b) and (regex_dbpedia.match(a) or regex_dbpedia.match(c)):
+            #   if (regex_fredup.match(a) and regex_dbpedia.match(c)) and (regex_fredup.match(a)[1]!="Of" and regex_fredup.match(a)[1]!="Thing"):
+            #       nodes2contract['dbpediaequiv'].append((c,a))
+            #   elif (regex_fredup.match(c) and regex_dbpedia.match(a)) and (regex_fredup.match(c)[1]!="Of" and regex_fredup.match(c)[1]!="Thing"):
+            #       nodes2contract['dbpediaequiv'].append((a,c))
+            # #Merging nodes with associatedWith relationships
+            # elif regex_assoc.match(b) and (regex_dbpedia.match(a) or regex_dbpedia.match(c)):
+            #   if (regex_fredup.match(a) and regex_dbpedia.match(c)) and (regex_fredup.match(a)[1]!="Of" and regex_fredup.match(a)[1]!="Thing") and (regex_fredup.match(a)[1].split("_")[0].lower() in regex_dbpedia.match(c)[1].lower()):
+            #       nodes2contract['dbpediassoc'].append((c,a))
+            #   elif (regex_fredup.match(c) and regex_dbpedia.match(a)) and (regex_fredup.match(c)[1]!="Of" and regex_fredup.match(c)[1]!="Thing") and (regex_fredup.match(c)[1].split("_")[0].lower() in regex_dbpedia.match(a)[1].lower()):
+            #       nodes2contract['dbpediassoc'].append((a,c))
+        return claim_g,nodes2remove,nodes2contract
+
+    # def getFredGraph(sentence,key,filename):
+    #     command_to_exec = "curl -G -X GET -H \"Accept: application/rdf+xml\" -H \"Authorization: Bearer " + key + "\" --data-urlencode text=\"" + sentence+ "\" -d semantic-subgraph=\"true\" http://wit.istc.cnr.it/stlab-tools/fred > " + filename
+    #     try:
+    #         os.system(command_to_exec)
+    #     except:
+    #         print("\nerror os running curl FRED")
+    #         sys.exit(1)
+
+    #     return openFredGraph(filename)
+    def getFredGraph(sentence,key,filename):
+        url="http://wit.istc.cnr.it/stlab-tools/fred"
+        header={"Accept":"application/rdf+xml","Authorization":key}
+        data={'text':sentence,'semantic-subgraph':True}
+        r=requests.get(url,params=data,headers=header)
+        with open(filename, "w") as f:
+            f.write("<?xml version='1.0' encoding='UTF-8'?>\n"+r.text)
+        # return openFredGraph(filename),r
+        return openFredGraph(filename)
+
+    def openFredGraph(filename):
+        rdf = rdflib.Graph()
+        rdf.parse(filename)
+        return FredGraph(rdf)
+
+    sentence=sys.argv[1]
+    claim_ID=int(sys.argv[2])
+    fcg_label=sys.argv[3]
+    mode=int(sys.argv[4])
+    rdf_path='/gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph_data/rdf_files/'
+    claim_types={"tfcg":os.path.join(rdf_path,"true_claims"),"ffcg":os.path.join(rdf_path,"false_claims"),"test":""}
+    claims_path=claim_types[fcg_label]
+    filename=os.path.join(claims_path,"claim{}".format(str(claim_ID)))
+    if mode==1:
+        print("saving")
+        g=checkFredSentence(preprocessText(sentence),"Bearer 0d9d562e-a2aa-30df-90df-d52674f2e1f0",filename+".rdf")
+        claim_g,nodes2remove,nodes2contract=checkClaimGraph(g)
+        clean_claims={}
+        clean_claims[str(claim_ID)]={}
+        clean_claims[str(claim_ID)]['nodes2remove']=nodes2remove
+        clean_claims[str(claim_ID)]['nodes2contract']=nodes2contract
+        #write pruning data
+        with codecs.open(filename+"_clean.json","w","utf-8") as f:
+            f.write(json.dumps(clean_claims[str(claim_ID)],indent=4,ensure_ascii=False))
+        #write claim graph as edgelist and graphml
+        nx.write_edgelist(claim_g,filename+".edgelist")
+        claim_g=nx.read_edgelist(filename+".edgelist",comments="@")
+        claim_g=nx.relabel_nodes(claim_g,lambda x:nodelabel_mapper(x))
+        nx.write_graphml(claim_g,filename+".graphml",prettyprint=True)
+    else:
+        g=checkFredSentence(preprocessText(sentence),"Bearer 0d9d562e-a2aa-30df-90df-d52674f2e1f0",filename+".rdf")
+    print(sentence)
 
