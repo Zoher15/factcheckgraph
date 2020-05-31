@@ -7,6 +7,7 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import os
 import datetime
+
 def plot_adj_pairs(graph_path,fcg_class,kg_label,sampled):
 	fcg_types={"fred":["tfcg","ffcg","ufcg"],"fred1":["tfcg1","ffcg1","ufcg1"],"fred2":["tfcg2","ffcg2","ufcg2"],"fred3":["tfcg3","ffcg3","ufcg3"],"co-occur":["tfcg_co","ffcg_co","ufcg_co"],
 	"backbone_df":["tfcg_bbdf","ffcg_bbdf","ufcg_bbdf"],"backbone_dc":["tfcg_bbdc","ffcg_bbdc","ufcg_bbdc"],
