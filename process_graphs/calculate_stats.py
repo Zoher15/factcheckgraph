@@ -14,8 +14,13 @@ def calculate_stats(graph_path,graph_class,g_label):
 	"Largest Component Edges","Average Degree","Kappa/Heterogenity Coefficient","Average Clustering Coefficient","Density","Average Shortest Path Length"]
 	graph_stats=pd.DataFrame(index=stats_index,columns=[g_label])
 	read_path=os.path.join(graph_path,graph_class,g_label,g_label)
-	G=nx.read_edgelist(read_path+".edgelist",comments="@")
-	entity_regex=re.compile(r'http:\/\/dbpedia\.org\/resource\/')
+	G=nx.read_edgelist(read_path+".edgelist",comments="@",create_using=nx.MultiGraph)
+	# G2=nx.read_edgelist(read_path+"1.edgelist",comments="@",create_using=nx.MultiGraph)
+	# g1e=set(list(map(lambda x:(sorted([x[0],x[1]])[0],sorted([x[0],x[1]])[1],x[2]['claim_ID']),list(G.edges(data=True)))))
+	# g2e=set(list(map(lambda x:(sorted([x[0],x[1]])[0],sorted([x[0],x[1]])[1],x[2]['claim_ID']),list(G2.edges(data=True)))))
+	# import pdb
+	# pdb.set_trace()
+	entity_regex=re.compile(r'db:')
 	nodes=G.nodes()
 	if graph_class=="kg":
 		entities=list(nodes)
@@ -39,7 +44,7 @@ def calculate_stats(graph_path,graph_class,g_label):
 	graph_stats.loc["Average Squared Degree",g_label]=avg_square_degree
 	kappa=avg_square_degree/np.square(avg_degree)
 	graph_stats.loc["Kappa/Heterogenity Coefficient",g_label]=kappa
-	graph_stats.loc["Average Clustering Coefficient",g_label]=nx.average_clustering(G)
+	# graph_stats.loc["Average Clustering Coefficient",g_label]=nx.average_clustering(G)
 	graph_stats.loc["Density",g_label]=nx.density(G)
 	# average path length calculation
 	# pathlengths=[]

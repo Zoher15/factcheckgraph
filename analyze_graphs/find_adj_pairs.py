@@ -9,7 +9,7 @@ def find_adj_pairs(graph_path,fcg_class,kg_label):
 	kg=nx.read_edgelist(os.path.join(graph_path,"kg",kg_label,"{}.edgelist".format(kg_label)),comments="@")
 	intersect_path=os.path.join(graph_path,fcg_class,"intersect")
 	intersect_all_pairs=np.loadtxt(intersect_path+"_all_entityPairs_{}_{}.txt".format(kg_label,fcg_class),dtype=str,encoding="utf-8")
-	intersect_adj=[tuple([i,pair]) for i,pair in enumerate(intersect_all_pairs) if kg.has_edge(*pair)]
+	intersect_adj=[tuple([i,pair]) for i,pair in enumerate(intersect_all_pairs) if kg.has_edge(*('http://dbpedia.org/resource/'+pair[0].split(':')[-1],'http://dbpedia.org/resource/'+pair[1].split(':')[-1]))]
 	intersect_adj_ind=np.asarray(list(map(lambda x:x[0],intersect_adj)))
 	intersect_adj_pairs=np.asarray(list(map(lambda x:x[1],intersect_adj)))
 	intersect_nonadj_ind=np.asarray(list(set(range(len(intersect_all_pairs)))-set(intersect_adj_ind)))

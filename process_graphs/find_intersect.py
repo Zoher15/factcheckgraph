@@ -18,6 +18,7 @@ def find_intersect(graph_path,fcg_class,kg_label):
 	tfcg_entities=np.loadtxt(os.path.join(fcg_path,fcg_labels[0],"data","{}_entities.txt".format(fcg_labels[0])),dtype='str',encoding='utf-8')
 	ffcg_entities=np.loadtxt(os.path.join(fcg_path,fcg_labels[1],"data","{}_entities.txt".format(fcg_labels[1])),dtype='str',encoding='utf-8')
 	kg_entities=np.loadtxt(os.path.join(graph_path,"kg",kg_label,"data","{}_entities.txt".format(kg_label)),dtype='str',encoding='utf-8')
+	kg_entities=map(lambda x:"db:"+x.split("/")[-1],kg_entities)
 	intersect_entities=np.asarray(list(set(tfcg_entities).intersection(set(ffcg_entities))))
 	intersect_entities=np.asarray(list(set(intersect_entities).intersection(set(kg_entities))))
 	#Saving entities
@@ -37,6 +38,7 @@ def find_intersect(graph_path,fcg_class,kg_label):
 			g_path_data=os.path.join(fcg_path,g_label,"data")
 		else:
 			g_path_data=os.path.join(graph_path,"kg",g_label,"data")
+			intersect_all_entityPairs_klformat=np.asarray([[np.nan,'http://dbpedia.org/resource/'+i[0].split(':')[-1],np.nan,np.nan,'http://dbpedia.org/resource/'+i[1].split(':')[-1],np.nan,np.nan] for i in intersect_all_entityPairs])
 		#Loading the node to ID dictionaries
 		with codecs.open(os.path.join(g_path_data,"{}_node2ID.json".format(g_label)),"r","utf-8") as f:
 			node2ID=json.loads(f.read())
