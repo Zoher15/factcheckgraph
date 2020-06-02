@@ -610,7 +610,7 @@ def nodelabel_mapper(text):
 		return 'un:'+text.split("/")[-1].split("#")[-1]
 
 #function to check a claim and create dictionary of edges to contract and remove
-def checkClaimGraph(g):#,mode):
+def checkClaimGraph(g,claim_ID):#,mode):
 	# if mode=='rdf':
 	# 	claim_g=nx.Graph()
 	# elif mode=='nx':
@@ -673,7 +673,7 @@ def checkClaimGraph(g):#,mode):
 		# 	t=c 
 		# 	c=b 
 		# 	b=t
-		claim_g.add_edge(a,c,label=b.split("/")[-1].split("#")[-1])
+		claim_g.add_edge(a,c,label=b.split("/")[-1].split("#")[-1],claim_ID=claim_ID)
 		a_urlparse=urlparse(a)
 		c_urlparse=urlparse(c)
 		if regex_data.match(a):
@@ -799,7 +799,7 @@ def fredParse(claims_path,claims,init,end,key):
 				if "You have exceeded your quota" not in r.text and "Runtime Error" not in r.text and "Service Unavailable" not in r.text:
 					if r.status_code in range(100,500) and r.text:
 						g=openFredGraph(filename+".rdf")
-						claim_g,nodes2remove,nodes2contract=checkClaimGraph(g)
+						claim_g,nodes2remove,nodes2contract=checkClaimGraph(g,claim_ID)
 						#store pruning data
 						clean_claims[str(claim_ID)]={}
 						clean_claims[str(claim_ID)]['nodes2remove']=nodes2remove
@@ -844,7 +844,7 @@ def passiveFredParse(index,claims_path,claim_IDs,init,end):
 			print("Exception Occurred")
 			errorclaimid.append(claim_ID)
 			continue
-		claim_g,nodes2remove,nodes2contract=checkClaimGraph(g)
+		claim_g,nodes2remove,nodes2contract=checkClaimGraph(g,claim_ID)
 		#store pruning data
 		clean_claims[str(claim_ID)]={}
 		clean_claims[str(claim_ID)]['nodes2remove']=nodes2remove
@@ -974,11 +974,11 @@ def saveClaimGraph(claim_g,filename,cf):
 #Function to stitch/compile graphs in an iterative way. i.e clean individual graphs before unioning 
 def compileClaimGraph1(index,claims_path,claim_IDs,clean_claims,init,end):
 	end=min(end,len(claim_IDs))
-	fcg=nx.Graph()
+	fcg=nx.MultiGraph()
 	for claim_ID in claim_IDs[init:end]:
 		filename=os.path.join(claims_path,"claim{}".format(str(claim_ID)))
 		try:
-			claim_g=nx.read_edgelist(filename+".edgelist",comments="@")
+			claim_g=nx.read_edgelist(filename+".edgelist",comments="@",create_using=nx.MultiGraph)
 		except:
 			continue
 		claim_g=cleanClaimGraph(claim_g,clean_claims[str(claim_ID)])
@@ -990,7 +990,7 @@ def compileClaimGraph1(index,claims_path,claim_IDs,clean_claims,init,end):
 #Function to stitch/compile graphs in a one shot way. i.e clean entire graph after unioning 
 def compileClaimGraph2(index,claims_path,claim_IDs,clean_claims,init,end):
 	end=min(end,len(claim_IDs))
-	fcg=nx.Graph()
+	fcg=nx.MultiGraph()
 	for claim_ID in claim_IDs[init:end]:
 		filename=os.path.join(claims_path,"claim{}".format(str(claim_ID)))
 		try:
@@ -1002,7 +1002,7 @@ def compileClaimGraph2(index,claims_path,claim_IDs,clean_claims,init,end):
 
 #Function to stitch/compile graphs in a hybrid way. i.e clean entire graph after unioning with each claim graph
 def compileClaimGraph3(claims_path,claim_IDs,clean_claims):
-	fcg=nx.Graph()
+	fcg=nx.MultiGraph()
 	for claim_ID in claim_IDs:
 		filename=os.path.join(claims_path,"claim{}".format(str(claim_ID)))
 		try:
@@ -1107,7 +1107,7 @@ def createFred(rdf_path,graph_path,fcg_label,init,passive,cpu,compilefred):
 					results=[pool.apply_async(eval("compileClaimGraph"+str(compilefred)), args=(index,claims_path,claim_IDs,clean_claims,index*n,(index+1)*n)) for index in range(cpu)]
 					output=sorted([p.get() for p in results],key=lambda x:x[0])
 					fcgs=list(map(lambda x:x[1],output))
-					master_fcg=nx.Graph()
+					master_fcg=nx.MultiGraph()
 					for fcg in fcgs:
 						master_fcg=nx.compose(master_fcg,fcg)
 				else:

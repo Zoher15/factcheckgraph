@@ -9,7 +9,7 @@ import codecs
 import json
 from itertools import combinations
 
-def create_co_occur(rdf_path,graph_path,fcg_label):
+def create_co_occur(rdf_path,graph_path,fcg_label,skipID):
 	if fcg_label=="ufcg_co":
 		#Assumes that TFCG_co and FFCG_co exists
 		tfcg_path=os.path.join(graph_path,"co-occur","tfcg_co","tfcg_co.edgelist")
@@ -23,7 +23,9 @@ def create_co_occur(rdf_path,graph_path,fcg_label):
 	else:
 		claim_types={"tfcg_co":"true","ffcg_co":"false","covid19":"covid19","covid19topics":"covid19topics"}
 		claim_type=claim_types[fcg_label]
-		claim_IDs=np.load(os.path.join(rdf_path,"{}_claimID.npy".format(claim_type)))
+		claim_IDs=list(np.load(os.path.join(rdf_path,"{}_claimID.npy".format(claim_type))))
+		if skipID>0:
+			claim_IDs.remove(skipID)
 		claim_entities={}
 		claim_edges={}
 		entity_regex=re.compile(r'http:\/\/dbpedia\.org')
@@ -65,35 +67,41 @@ def create_co_occur(rdf_path,graph_path,fcg_label):
 			nx.write_edgelist(claim_nxg,filename+".edgelist")
 			fcg_co.add_edges_from(claim_nxg.edges.data())
 	fcg_path=os.path.join(graph_path,"co-occur",fcg_label)
-	os.makedirs(fcg_path, exist_ok=True)
-	nx.write_edgelist(fcg_co,os.path.join(fcg_path,"{}.edgelist".format(fcg_label)))
-	nx.write_graphml(fcg_co,os.path.join(fcg_path,"{}.graphml".format(fcg_label)),prettyprint=True)
-	os.makedirs(os.path.join(fcg_path,"data"),exist_ok=True)
-	write_path=os.path.join(fcg_path,"data",fcg_label)
-	nodes=list(fcg_co.nodes)
-	edges=list(fcg_co.edges)
-	#Save Nodes
-	with codecs.open(write_path+"_nodes.txt","w","utf-8") as f:
-		for node in nodes:
-			f.write(str(node)+"\n")
-	#Save Entities
-	entity_regex=re.compile(r'db:')
-	entities=np.asarray([node for node in nodes if entity_regex.search(node)])
-	with codecs.open(write_path+"_entities.txt","w","utf-8") as f:
-		for entity in entities:
-			f.write(str(entity)+"\n")
-	#Save node2ID dictionary
-	node2ID={node:i for i,node in enumerate(nodes)}
-	with codecs.open(write_path+"_node2ID.json","w","utf-8") as f:
-		f.write(json.dumps(node2ID,ensure_ascii=False))
-	#Save Edgelist ID
-	edgelistID=np.asarray([[node2ID[edge[0]],node2ID[edge[1]],1] for edge in edges])
-	np.save(write_path+"_edgelistID.npy",edgelistID)
+	if skipID>0:
+		fcg_path=os.path.join(fcg_path,"graphs3")
+		os.makedirs(fcg_path, exist_ok=True)
+		nx.write_edgelist(fcg_co,os.path.join(fcg_path,"{}.edgelist".format(fcg_label+"-"+str(skipID))))
+	else:
+		os.makedirs(fcg_path, exist_ok=True)
+		nx.write_edgelist(fcg_co,os.path.join(fcg_path,"{}.edgelist".format(fcg_label)))
+		nx.write_graphml(fcg_co,os.path.join(fcg_path,"{}.graphml".format(fcg_label)),prettyprint=True)
+		os.makedirs(os.path.join(fcg_path,"data"),exist_ok=True)
+		write_path=os.path.join(fcg_path,"data",fcg_label)
+		nodes=list(fcg_co.nodes)
+		edges=list(fcg_co.edges)
+		#Save Nodes
+		with codecs.open(write_path+"_nodes.txt","w","utf-8") as f:
+			for node in nodes:
+				f.write(str(node)+"\n")
+		#Save Entities
+		entity_regex=re.compile(r'db:')
+		entities=np.asarray([node for node in nodes if entity_regex.search(node)])
+		with codecs.open(write_path+"_entities.txt","w","utf-8") as f:
+			for entity in entities:
+				f.write(str(entity)+"\n")
+		#Save node2ID dictionary
+		node2ID={node:i for i,node in enumerate(nodes)}
+		with codecs.open(write_path+"_node2ID.json","w","utf-8") as f:
+			f.write(json.dumps(node2ID,ensure_ascii=False))
+		#Save Edgelist ID
+		edgelistID=np.asarray([[node2ID[edge[0]],node2ID[edge[1]],1] for edge in edges])
+		np.save(write_path+"_edgelistID.npy",edgelistID)
 
 if __name__== "__main__":
 	parser=argparse.ArgumentParser(description='Create co-cccur graph')
 	parser.add_argument('-r','--rdfpath', metavar='rdf path',type=str,help='Path to the rdf files parsed by FRED',default='/gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph_data/rdf_files/')
 	parser.add_argument('-gp','--graphpath', metavar='graph path',type=str,help='Graph directory to store the graphs',default='/gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph_data/graphs/')
 	parser.add_argument('-ft','--fcgtype', metavar='FactCheckGraph type',type=str,choices=['tfcg_co','ffcg_co','ufcg_co'],help='True False or Union FactCheckGraph')
+	parser.add_argument('-si','--skipID', metavar='claimID to skip',type=int,help='Claim ID to skip while creation',default=0)
 	args=parser.parse_args()
-	create_co_occur(args.rdfpath,args.graphpath,args.fcgtype)
+	create_co_occur(args.rdfpath,args.graphpath,args.fcgtype,args.skipID)
