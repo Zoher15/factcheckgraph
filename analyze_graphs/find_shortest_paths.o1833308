@@ -1,0 +1,15 @@
+Traceback (most recent call last):
+  File "find_shortest_paths.py", line 372, in <module>
+    shortest_paths(args.rdfpath,args.modelpath,args.graphpath,args.embedpath,"tfcg",args.fcgtype,args.fcgclass)
+  File "find_shortest_paths.py", line 283, in shortest_paths
+    edges_of_interest=source_target(rdf_path,graph_path,embed_path,source_fcg_type,target_fcg_type,fcg_class)
+  File "find_shortest_paths.py", line 212, in source_target
+    target_fcg=nx.read_edgelist(os.path.join(target_fcg_path,"{}.edgelist".format(target_fcg_type)),comments="@",create_using=nx.MultiGraph)
+  File "<decorator-gen-618>", line 2, in read_edgelist
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/networkx/utils/decorators.py", line 214, in _open_file
+    fobj = _dispatch_dict[ext](path, mode=mode)
+FileNotFoundError: [Errno 2] No such file or directory: '/geode2/home/u110/zkachwal/BigRed3/factcheckgraph_data/graphs/co_occur/ffcg_co_co/ffcg_co_co.edgelist'
+
+real	0m9.193s
+user	0m3.277s
+sys	0m1.076s

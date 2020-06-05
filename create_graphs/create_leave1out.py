@@ -1,77 +1,53 @@
-import networkx as nx
-import numpy as np
 import os
+import pandas as pd
+import multiprocessing as mp
+import numpy as np
+import networkx as nx
+import sys
 import argparse
+import os
 
-def create_ntrue_1false(graph_path,rdf_path):
-	write_path=os.path.join(graph_path,"ntrue_1false")
-	os.makedirs(write_path,exist_ok=True)
-	tfcg=nx.read_edgelist(os.path.join(graph_path,"fred","tfcg","tfcg.edgelist"),comments="@")
-	tfcg=max(nx.connected_component_subgraphs(tfcg), key=len)
-	tfcg_avsp=nx.average_shortest_path_length(tfcg)
-	claim_IDs=np.load(os.path.join(rdf_path,"false_claimID.npy"))
-	falseclaim_avsp_d=np.asarray([])
-	unused_false_claims=np.asarray([])
-	notfound_false_claims=np.asarray([])
-	for claim_ID in claim_IDs:
-		try:
-			falseclaim_g=nx.read_edgelist(os.path.join(rdf_path,"false_claims","claim{}.edgelist".format(claim_ID)),comments="@")
-		except FileNotFoundError:
-			notfound_false_claims.append(claim_ID)
-			continue
-		ntrue_1false=nx.compose(tfcg,falseclaim_g)
-		if nx.is_connected(ntrue_1false) and len(falseclaim_g.edges())>0:
-			file_path=os.path.join(write_path,"tfcg_+claim"+claim_ID)
-			os.makedirs(file_path,exist_ok=True)
-			nx.write_edgelist(ntrue_1false,os.path.join(file_path,"tfcg_+claim{}.edgelist".format(claim_ID)))
-			nx.write_graphml(ntrue_1false,os.path.join(file_path,"tfcg_+claim{}.graphml".format(claim_ID)),prettyprint=True)
-			falseclaim_avsp_d.append(tfcg_avsp-nx.average_shortest_path_length(ntrue_1false))
-		else:
-			unused_false_claims.append(claim_ID)
-	np.save(os.path.join(write_path,"falseclaim_avsp_d.npy"),falseclaim_avsp_d)
-	np.save(os.path.join(write_path,"unused_false_claims.npy"),unused_false_claims)
-	np.save(os.path.join(write_path,"notfound_false_claims.npy"),notfound_false_claims)
-
-def create_ntrue_1true(graph_path,rdf_path):
-	write_path=os.path.join(graph_path,"ntrue_1true")
-	os.makedirs(write_path,exist_ok=True)
-	ntrue_1true=nx.read_edgelist(os.path.join(graph_path,"fred","tfcg","tfcg.edgelist"),comments="@")
-	claim_IDs=np.load(os.path.join(rdf_path,"true_claimID.npy"))
-	trueclaim_avsp_d=np.asarray([])
-	unused_true_claims=np.asarray([])
-	notfound_true_claims=np.asarray([])
-	for claim_ID2 in np.delete(claim_IDs,i):
-		try:
-			trueclaim_g=nx.read_edgelist(os.path.join(rdf_path,"true_claims","claim{}.edgelist".format(claim_ID2)),comments="@")
-	for i,claim_ID in enumerate(claim_IDs):
-		ntrue=nx.Graph()
-		for claim_ID2 in np.delete(claim_IDs,i):
+def compose_graphs(claims_path,fcg_path,suffix,claim_IDs,claim_IDs2remove):
+	for skipID in claim_IDs2remove:
+		temp_claim_IDs=claim_IDs.copy()
+		temp_claim_IDs.remove(skipID)
+		fcg=nx.MultiGraph()
+		for claim_ID in temp_claim_IDs:
+			filename=os.path.join(claims_path,"claim{}".format(str(claim_ID))+"_"+suffix)
 			try:
-				trueclaim_g=nx.read_edgelist(os.path.join(rdf_path,"true_claims","claim{}.edgelist".format(claim_ID2)),comments="@")
-			ntrue=nx.compose(ntrue,trueclaim_g)
-		ntrue=max(nx.connected_component_subgraphs(ntrue), key=len)
-		ntrue_avsp=nx.average_shortest_path_length(ntrue)
-		file_path=os.path.join(write_path,"tfcg_-claim"+claim_ID)
-		os.makedirs(file_path,exist_ok=True)
-		nx.write_edgelist(ntrue,os.path.join(file_path,"tfcg_-claim{}.edgelist".format(claim_ID)))
-		nx.write_graphml(ntrue,os.path.join(file_path,"tfcg_-claim{}.graphml".format(claim_ID)),prettyprint=True)
-		trueclaim_g=nx.read_edgelist(os.path.join(rdf_path,"true_claims","claim{}.edgelist".format(claim_ID)),comments="@")
-		ntrue_1true=nx.compose(ntrue,trueclaim_g)
-		if nx.is_connected(ntrue_1true) and len(trueclaim_g.edges())>0:
-			trueclaim_avsp_d.append(nx.average_shortest_path_length(ntrue_1true)-ntrue_avsp)
-		else:
-			discon_true_claims.append(claim_ID)
-	np.save(os.path.join(write_path,"trueclaim_avsp_d.npy"),trueclaim_avsp_d)
-	np.save(os.path.join(write_path,"unused_true_claims.npy"),discon_true_claims)
-	np.save(os.path.join(write_path,"notfound_true_claims.npy"),notfound_true_claims)
+				claim_g=nx.read_edgelist(filename+".edgelist",comments="@",create_using=nx.MultiGraph)
+			except:
+				continue
+			fcg=nx.compose(fcg,claim_g)
+		nx.write_edgelist(fcg,fcg_path+"-"+str(skipID)+".edgelist")
+
+def create_leave1out(rdf_path,graph_path,fcg_class,fcg_label,cpu):
+	claim_types={"tfcg_co":"true","ffcg_co":"false","tfcg":"true","ffcg":"false"}
+	claim_type=claim_types[fcg_label]
+	claim_IDs=list(np.load(os.path.join(rdf_path,"{}_claimID.npy".format(claim_type))))
+	suffix={"tfcg_co":"co","ffcg_co":"co","tfcg":"clean","ffcg":"clean"}
+	fcg_path=os.path.join(graph_path,fcg_class,fcg_label,"leave1out")
+	os.makedirs(fcg_path,exist_ok=True)
+	claims_path=os.path.join(rdf_path,"{}_claims".format(claim_type))
+	n=int(len(claim_IDs)/cpu)+1
+	if cpu>1:
+		pool=mp.Pool(processes=cpu)
+		results=[pool.apply_async(compose_graphs, args=(claims_path,os.path.join(fcg_path,fcg_label),suffix[fcg_label],claim_IDs,claim_IDs[index*n:(index+1)*n])) for index in range(cpu)]
+		output=[p.get() for p in results]
+	else:
+		pool=mp.Pool(processes=cpu)
+		compose_graphs(claims_path,os.path.join(fcg_path,fcg_label),suffix[fcg_label],claim_IDs,claim_IDs[0:n])
 
 if __name__== "__main__":
-	parser=argparse.ArgumentParser(description='Create leave one out graphs')
-	parser.add_argument('-r','--rdfpath', metavar='rdf path',type=str,help='Path to the rdf files parsed by FRED',default='/gpfs/home/z/k/zkachwal/Carbonate/factcheckgraph_data/rdf_files/')
-	parser.add_argument('-gp','--graphpath', metavar='graph path',type=str,help='Graph directory to store the graphs',default='/gpfs/home/z/k/zkachwal/Carbonate/factcheckgraph_data/graphs/')
-	parser.add_argument('-m','--mode', metavar='mode',type=str,choices=['true','false'],help='True or False Mode')
+	parser=argparse.ArgumentParser(description='Create fred graph')
+	parser.add_argument('-r','--rdfpath', metavar='rdf path',type=str,help='Path to the rdf files parsed by FRED',default='/gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph_data/rdf_files/')
+	parser.add_argument('-gp','--graphpath', metavar='graph path',type=str,help='Graph directory to store the graphs',default='/gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph_data/graphs/')
+	parser.add_argument('-fc','--fcgclass', metavar='FactCheckGraph Class',type=str,choices=['fred','co_occur'],help='Class of factcheckgraph to process')
+	parser.add_argument('-ft','--fcgtype', metavar='FactCheckGraph type',type=str,help='True False or Union FactCheckGraph')
+	parser.add_argument('-cpu','--cpu',metavar='Number of CPUs',type=int,help='Number of CPUs available',default=1)
 	args=parser.parse_args()
-	if args.mode=='false':
-		create_ntrue_1false(args.graphpath,args.rdfpath)
-	elif args.mode=='true':
-		create_ntrue_1true(args.graphpath,args.rdfpath)
+	create_leave1out(args.rdfpath,args.graphpath,args.fcgclass,args.fcgtype,args.cpu)
+
+
+
+

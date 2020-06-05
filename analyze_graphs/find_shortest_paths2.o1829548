@@ -1,0 +1,12 @@
+
+real	245m11.052s
+user	239m36.184s
+sys	4m12.326s
+Traceback (most recent call last):
+  File "find_shortest_paths.py", line 307, in <module>
+    shortest_paths(args.rdfpath,args.modelpath,args.graphpath,args.embedpath,"tfcg",args.fcgtype,args.mode)
+AttributeError: 'Namespace' object has no attribute 'mode'
+
+real	0m8.071s
+user	0m2.289s
+sys	0m1.063s

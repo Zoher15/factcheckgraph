@@ -940,10 +940,10 @@ def cleanClaimGraph(claim_g,clean_claims):
 	return claim_g
 
 #Function save individual claim graphs
-def saveClaimGraph(claim_g,filename,cf):
-	nx.write_edgelist(claim_g,filename+"_clean{}.edgelist".format(str(cf)))
-	claim_g=nx.read_edgelist(filename+"_clean{}.edgelist".format(str(cf)),comments="@")
-	nx.write_graphml(claim_g,filename+"_clean{}.graphml".format(str(cf)),prettyprint=True)
+def saveClaimGraph(claim_g,filename):
+	nx.write_edgelist(claim_g,filename+"_clean.edgelist")
+	claim_g=nx.read_edgelist(filename+"_clean.edgelist",comments="@",create_using=nx.MultiGraph)
+	nx.write_graphml(claim_g,filename+"_clean.graphml",prettyprint=True)
 	plotFredGraph(claim_g,filename+"_clean")
 
 # #Function to stitch/compile graphs in an iterative way. i.e clean individual graphs before unioning 
@@ -967,7 +967,7 @@ def saveClaimGraph(claim_g,filename,cf):
 # 			claim_g=cleanClaimGraph(claim_g,clean_claims[str(claim_ID)])
 # 			# import pdb
 # 			# pdb.set_trace()
-# 		# saveClaimGraph(claim_g,filename,1)
+# 		# saveClaimGraph(claim_g,filename)
 # 		fcg=nx.compose(fcg,claim_g)
 # 	return index,fcg
 
@@ -983,7 +983,7 @@ def compileClaimGraph1(index,claims_path,claim_IDs,clean_claims,init,end):
 			continue
 		claim_g=cleanClaimGraph(claim_g,clean_claims[str(claim_ID)])
 		claim_g=nx.relabel_nodes(claim_g,lambda x:nodelabel_mapper(x))
-		saveClaimGraph(claim_g,filename,1)
+		saveClaimGraph(claim_g,filename)
 		fcg=nx.compose(fcg,claim_g)
 	return index,fcg
 
@@ -1044,8 +1044,8 @@ def compile_clean(rdf_path,clean_claims,claim_type):
 	return master_clean
 
 #Function to save fred graph including its nodes, entities, node2ID dictionary and edgelistID (format needed by klinker)	
-def saveFred(fcg,graph_path,fcg_label,compilefred):
-	fcg_path=os.path.join(graph_path,"fred"+str(compilefred),fcg_label)
+def saveFred(fcg,graph_path,fcg_label):
+	fcg_path=os.path.join(graph_path,"fred",fcg_label)
 	os.makedirs(fcg_path, exist_ok=True)
 	#writing aggregated networkx graphs as edgelist and graphml
 	nx.write_edgelist(fcg,os.path.join(fcg_path,"{}.edgelist".format(fcg_label)))
@@ -1074,27 +1074,28 @@ def saveFred(fcg,graph_path,fcg_label,compilefred):
 	edgelistID=np.asarray([[int(node2ID[edge[0]]),int(node2ID[edge[1]]),1] for edge in edges])
 	np.save(write_path+"_edgelistID.npy",edgelistID)
 
-def createFred(rdf_path,graph_path,fcg_label,init,passive,cpu,compilefred):
-	fcg_path=os.path.join(graph_path,"fred"+str(compilefred),fcg_label+str(compilefred))
+def createFred(rdf_path,graph_path,fcg_label,init,passive,cpu,compilefred,skipID):
+	fcg_path=os.path.join(graph_path,"fred",fcg_label)
 	#If union of tfcg and ffcg wants to be created i.e ufcg
 	if fcg_label=="ufcg":
 		#Assumes that tfcg and ffcg exists
-		tfcg_path=os.path.join(graph_path,"fred"+str(compilefred),"tfcg"+str(compilefred),"tfcg{}.edgelist".format(str(compilefred)))
-		ffcg_path=os.path.join(graph_path,"fred"+str(compilefred),"ffcg"+str(compilefred),"ffcg{}.edgelist".format(str(compilefred)))
+		tfcg_path=os.path.join(graph_path,"fred","tfcg","tfcg.edgelist")
+		ffcg_path=os.path.join(graph_path,"fred","ffcg","ffcg.edgelist")
 		if os.path.exists(tfcg_path) and os.path.exists(ffcg_path):
 			tfcg=nx.read_edgelist(tfcg_path,comments="@")
 			ffcg=nx.read_edgelist(ffcg_path,comments="@")
 			ufcg=nx.compose(tfcg,ffcg)
 			os.makedirs(fcg_path, exist_ok=True)
-			saveFred(ufcg,graph_path,fcg_label+str(compilefred),compilefred)
+			saveFred(ufcg,graph_path,fcg_label)
 		else:
 			print("Create tfcg and ffcg before attempting to create the union: ufcg")
 	else:
 		claim_types={"tfcg":"true","ffcg":"false"}
 		claim_type=claim_types[fcg_label]
 		claims_path=os.path.join(rdf_path,"{}_claims".format(claim_type))
-		claim_IDs=np.load(os.path.join(rdf_path,"{}_claimID.npy".format(claim_type)))
-		claims=pd.read_csv(os.path.join(rdf_path,"{}_claims.csv".format(claim_type)),index_col=0)
+		claim_IDs=list(np.load(os.path.join(rdf_path,"{}_claimID.npy".format(claim_type))))
+		if skipID>0:
+			claim_IDs.remove(skipID)
 		#compiling fred only i.e. stitching together the graph using the dictionary that stores edges to remove and contract i.e. clean_claims
 		if compilefred!=0:
 			with codecs.open(os.path.join(rdf_path,"{}claims_clean.json".format(claim_type)),"r","utf-8") as f: 
@@ -1119,10 +1120,16 @@ def createFred(rdf_path,graph_path,fcg_label,init,passive,cpu,compilefred):
 			elif compilefred==3:
 				master_fcg=compileClaimGraph3(claims_path,claim_IDs,clean_claims)
 				master_fcg=nx.relabel_nodes(master_fcg,lambda x:nodelabel_mapper(x))
-			saveFred(master_fcg,graph_path,fcg_label+str(compilefred),compilefred)
+			if skipID>0:
+				fcg_path=os.path.join(fcg_path,"graphs3")
+				os.makedirs(fcg_path, exist_ok=True)
+				nx.write_edgelist(master_fcg,os.path.join(fcg_path,"{}.edgelist".format(fcg_label+"-"+str(skipID))))
+			else:
+				saveFred(master_fcg,graph_path,fcg_label)
 		#else parsing the graph for each claim
 		else:
 			#passive: if graph rdf files have already been fetched from fred. Faster parallelizable
+			claims=pd.read_csv(os.path.join(rdf_path,"{}_claims.csv".format(claim_type)),index_col=0)
 			if passive:
 				n=int(len(claim_IDs)/cpu)+1
 				if cpu>1:
@@ -1163,8 +1170,9 @@ if __name__== "__main__":
 	parser.add_argument('-p','--passive',action='store_true',help='Passive or not',default=False)
 	parser.add_argument('-cpu','--cpu',metavar='Number of CPUs',type=int,help='Number of CPUs available',default=1)
 	parser.add_argument('-cf','--compilefred',metavar='Compile method #',type=int,help='Number of compile method',default=0)
+	parser.add_argument('-si','--skipID', metavar='claimID to skip',type=int,help='Claim ID to skip while creation',default=0)
 	args=parser.parse_args()
-	createFred(args.rdfpath,args.graphpath,args.fcgtype,args.init,args.passive,args.cpu,args.compilefred)
+	createFred(args.rdfpath,args.graphpath,args.fcgtype,args.init,args.passive,args.cpu,args.compilefred,args.skipID)
 
 
 

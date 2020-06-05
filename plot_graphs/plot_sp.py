@@ -31,7 +31,7 @@ def aggregate_weights(claim_D,mode,mode2):
 	return eval("{}(edge_weights)".format(mode))
 
 def plot_sp(graph_path):
-	embed={'roberta-base-nli-stsb-mean-tokens':'e1','roberta-base-nli-stsb-mean-tokens-2020-05-27_19-01-27':'e2'}
+	embed={'roberta-base-nli-stsb-mean-tokens':'e1','claims-roberta-base-nli-stsb-mean-tokens-2020-05-27_19-01-27':'e2'}
 	mode={'d':'d1','w':'d2'}
 	aggmode={'sum':'a1','mean':'a2','max':'a3','min':'a4'}
 	plt.figure(figsize=(9, 8))

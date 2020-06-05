@@ -1,11 +1,16 @@
-#PBS -k o
-#PBS -l nodes=1:ppn=1,vmem=16gb,walltime=3:00:00
-#PBS -M zoher.kachwala@gmail.com
-#PBS -m abe
-#PBS -N create_leave1out
-#PBS -j oe
+#!/bin/bash
+#SBATCH -J create_leave1out
+#SBATCH -p general
+#SBATCH -o create_leave1out_%j.txt
+#SBATCH -e create_leave1out_%j.err
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=zoher.kachwala@gmail.com
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --cpus-per-task=48
+#SBATCH --time=4:00:00
 source /N/u/zkachwal/Carbonate/miniconda3/etc/profile.d/conda.sh
 conda activate
-cd /gpfs/home/z/k/zkachwal/Carbonate/factcheckgraph/create_graphs/
-time python create_leave1out.py -m false
-time python create_leave1out.py -m true
+cd /geode2/home/u110/zkachwal/BigRed3/factcheckgraph/create_graphs/
+time python create_leave1out.py -fc fred -ft tfcg -cpu 48
+time python create_leave1out.py -fc co_occur -ft tfcg_co -cpu 48
