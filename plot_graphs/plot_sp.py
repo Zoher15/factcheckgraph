@@ -1,10 +1,11 @@
 import argparse
 import pandas as pd
 import numpy as np 
+import seaborn as sns
 from sklearn import metrics
 import json
 import matplotlib
-matplotlib.use('Agg')
+matplotlib.use('Qt5Agg')
 import matplotlib.pyplot as plt
 import os
 import datetime
@@ -30,27 +31,28 @@ def aggregate_weights(claim_D,mode,mode2):
 			edge_weights.append(eval(mode2))
 	return eval("{}(edge_weights)".format(mode))
 
-def plot_sp(graph_path):
+def plot_roc(graph_path,fcg_class):
+	tfcg_types={"co_occur":"tfcg_co","fred":"tfcg"}
 	embed={'roberta-base-nli-stsb-mean-tokens':'e1','claims-roberta-base-nli-stsb-mean-tokens-2020-05-27_19-01-27':'e2'}
 	mode={'d':'d1','w':'d2'}
-	aggmode={'sum':'a1','mean':'a2','max':'a3','min':'a4'}
+	aggmode={'mean':'a2','max':'a3','min':'a4'}
 	plt.figure(figsize=(9, 8))
 	lw=2
 	plt.plot([0, 1], [0, 1],color='navy',lw=lw,linestyle='--')
-	title="shortest path setence embedded paths"
-	read_path=os.path.join(graph_path,"co-occur","paths","tfcg_co")
-	plot_path=os.path.join(graph_path,"co-occur","plots")
+	title="{} shortest path setence embedded paths".format(fcg_class)
+	read_path=os.path.join(graph_path,fcg_class,"paths",tfcg_types[fcg_class])
+	plot_path=os.path.join(graph_path,fcg_class,"plots")
 	for e in list(embed.keys()):
 		for d in list(mode.keys()):
 			for a in list(aggmode.keys()):
-				with codecs.open(os.path.join(read_path+"_true_"+e,"paths_{}.json".format(d)),"r","utf-8") as f: 
+				with codecs.open(os.path.join(read_path+"_true_({})".format(e),"paths_{}.json".format(d)),"r","utf-8") as f: 
 					true_paths=json.loads(f.read())
-				with codecs.open(os.path.join(read_path+"_false_"+e,"paths_{}.json".format(d)),"r","utf-8") as f: 
+				with codecs.open(os.path.join(read_path+"_false_({})".format(e),"paths_{}.json".format(d)),"r","utf-8") as f: 
 					false_paths=json.loads(f.read())
 				true_scores=list(map(lambda t:aggregate_weights(t[1],a,d),true_paths.items()))
 				false_scores=list(map(lambda t:aggregate_weights(t[1],a,d),false_paths.items()))
-				true_y=[1 for i in range(len(true_scores))]
-				false_y=[0 for i in range(len(false_scores))]
+				true_y=[0 for i in range(len(true_scores))]
+				false_y=[1 for i in range(len(false_scores))]
 				y=true_y+false_y
 				scores=true_scores+false_scores
 				fpr,tpr,thresholds=metrics.roc_curve(y,scores, pos_label=1)
@@ -66,8 +68,10 @@ def plot_sp(graph_path):
 	# fpr,tpr,thresholds=metrics.roc_curve(y,scores, pos_label=1)
 	# plt.plot(fpr,tpr,lw=lw,label=kg_label+' (%0.2f) '%metrics.auc(fpr,tpr))
 	#Setting figure parameters
-	plt.xlabel('true positive rate')
-	plt.ylabel('false positive rate')
+	# plt.xlabel('true positive rate')
+	# plt.ylabel('false positive rate')
+	plt.xlabel('True Positive Rate')
+	plt.ylabel('False Positive Rate')
 	plt.legend(loc="lower right")
 	plt.title(title)
 	plt.tight_layout()
@@ -78,8 +82,46 @@ def plot_sp(graph_path):
 	plt.close()
 	plt.clf()
 
+def plot_dist(graph_path,fcg_class):
+	tfcg_types={"co_occur":"tfcg_co","fred":"tfcg"}
+	embed={'roberta-base-nli-stsb-mean-tokens':'e1','claims-roberta-base-nli-stsb-mean-tokens-2020-05-27_19-01-27':'e2'}
+	mode={'d':'d1','w':'d2'}
+	aggmode={'mean':'a2','max':'a3','min':'a4'}
+	read_path=os.path.join(graph_path,fcg_class,"paths",tfcg_types[fcg_class])
+	plot_path=os.path.join(graph_path,fcg_class,"plots")
+	for e in list(embed.keys()):
+		for d in list(mode.keys()):
+			for a in list(aggmode.keys()):
+				label=embed[e]+mode[d]+aggmode[a]
+				plt.figure(figsize=(9, 8))
+				title="{} shortest path setence embedded paths".format(fcg_class+"_"+label)
+				with codecs.open(os.path.join(read_path+"_true_({})".format(e),"paths_{}.json".format(d)),"r","utf-8") as f: 
+					true_paths=json.loads(f.read())
+				with codecs.open(os.path.join(read_path+"_false_({})".format(e),"paths_{}.json".format(d)),"r","utf-8") as f: 
+					false_paths=json.loads(f.read())
+				true_scores=list(map(lambda t:aggregate_weights(t[1],a,d),true_paths.items()))
+				false_scores=list(map(lambda t:aggregate_weights(t[1],a,d),false_paths.items()))
+				sns.distplot(true_scores,hist=False,kde=True,kde_kws={'linewidth': 3},label="true_"+label)
+				sns.distplot(false_scores,hist=False,kde=True,kde_kws={'linewidth': 3},label="false_"+label)
+				plt.xlabel('Scores')
+				plt.ylabel('Density')
+				plt.legend(loc="upper right")
+				plt.title(title)
+				plt.tight_layout()
+				os.makedirs(plot_path,exist_ok=True)
+				x = datetime.datetime.now().strftime("%c")
+				title+=" "+x
+				plt.savefig(os.path.join(plot_path,title.replace(" ","_")+".png"))
+				plt.close()
+				plt.clf()
+
 if __name__== "__main__":
 	parser = argparse.ArgumentParser(description='Plotting true(adjacent) pairs vs false (non-adjacent)')
 	parser.add_argument('-gp','--graphpath', metavar='graph path',type=str,help='Path to the graph directory',default='/gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph_data/graphs/')
+	parser.add_argument('-fcg','--fcgclass', metavar='fcg class',type=str,help='Class of FactCheckGraph to process')
+	parser.add_argument('-pt','--plottype', metavar='plot type',type=str,choices=['roc','dist'],help='Class of graph to plot')
 	args=parser.parse_args()
-	plot_sp(args.graphpath)
+	if args.plottype=='roc':
+		plot_roc(args.graphpath,args.fcgclass)
+	elif args.plottype=='dist':
+		plot_dist(args.graphpath,args.fcgclass)

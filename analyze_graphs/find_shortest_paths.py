@@ -15,10 +15,11 @@ from itertools import chain
 from sentence_transformers import SentenceTransformer
 from collections import OrderedDict
 from statistics import mean
+from collections import ChainMap
 import sys
-sys.path.insert(1, '/geode2/home/u110/zkachwal/BigRed3/factcheckgraph/create_graphs')
-from create_fred import *
-from create_co_occur import *
+# sys.path.insert(1, '/geode2/home/u110/zkachwal/BigRed3/factcheckgraph/create_graphs')
+# from create_fred import *
+# from create_co_occur import *
 import csv
 
 def chunkstring(string,length):
@@ -194,7 +195,7 @@ def create_ordered_paths(write_path,mode):
 			f.write(json.dumps(ordered_paths,indent=5,ensure_ascii=False))
 
 #Function to find node pairs in the source graph if they exist as edges in the target graph
-def source_target(rdf_path,graph_path,embed_path,source_fcg_type,target_fcg_type,fcg_class):
+def find_edges_of_interest(rdf_path,graph_path,embed_path,source_fcg_type,target_fcg_type,fcg_class):
 	suffix={"co_occur":"_co","fred":"_co"}
 	if target_fcg_type in source_fcg_type:
 		fcg_type,target_claimID=source_fcg_type.split('-')
@@ -243,51 +244,15 @@ def source_target(rdf_path,graph_path,embed_path,source_fcg_type,target_fcg_type
 	# 				edges_of_interest[target_claimID]=set([(u,v)])
 	return edges_of_interest
 
-'''
-Function does the following
-1. Finds node pairs of interest from graph built through target claims by using the function source_target
-2. Creates a weighted source graph for each target claim using the function create_weighted
-3. Finds shortest path for each edge of interest in the target graph
-'''
-def shortest_paths(rdf_path,model_path,graph_path,embed_path,source_fcg_type,target_fcg_type,fcg_class):
-	fcg_types={'co_occur':{'tfcg':'tfcg_co','ffcg':'ffcg_co'},'fred':{'tfcg':'tfcg','ffcg':'ffcg'}}
-	source_fcg_type=fcg_types[fcg_class][source_fcg_type]
-	target_fcg_type=fcg_types[fcg_class][target_fcg_type]
-	claim_types={'tfcg_co':'true','ffcg_co':'false','tfcg':'true','ffcg':'false'}
-	source_claim_type=claim_types[source_fcg_type]
-	target_claim_type=claim_types[target_fcg_type]
-	#path to store the shortest paths
-	write_path=os.path.join(graph_path,fcg_class,"paths",source_fcg_type+"_"+target_claim_type+"_({})".format(model_path.split("/")[-1]))
-	os.makedirs(write_path,exist_ok=True)
-	write_path=os.path.join(write_path,"paths")
-	#path to store the weghted graphs
-	writegraph_path=os.path.join(graph_path,"weighted","graphs_"+fcg_class+"_"+source_fcg_type+"_"+target_claim_type+"_({})".format(model_path.split("/")[-1]))
-	os.makedirs(writegraph_path,exist_ok=True)
-	#path for the graph that is being used to fact-check
-	source_fcg_path=os.path.join(graph_path,fcg_class,source_fcg_type)
-	#loading existing path files
+
+def find_paths_of_interest(index,rdf_path,graph_path,embed_path,model_path,claimIDs,fcg_class,source_fcg_type,target_fcg_type,source_claim_type,target_claim_type,source_claims,target_claims,edges_of_interest,target_claims_embed,writegraph_path):
 	paths_of_interest_w={}
 	paths_of_interest_d={}
-	#loading claims
-	source_claims=pd.read_csv(os.path.join(rdf_path,"{}_claims.csv".format(source_claim_type)))
-	target_claims=pd.read_csv(os.path.join(rdf_path,"{}_claims.csv".format(target_claim_type)))
-	#loading target claim embeddings
-	try:
-		target_claims_embed=pd.read_csv(os.path.join(embed_path,target_claim_type+"_claims_embeddings_({}).tsv".format(model_path.split("/")[-1])),delimiter="\t",header=None).values
-	except FileNotFoundError:
-		embed_claims(rdf_path,model_path,embed_path,target_claim_type)
-		target_claims_embed=pd.read_csv(os.path.join(embed_path,target_claim_type+"_claims_embeddings_({}).tsv".format(model_path.split("/")[-1])),delimiter="\t",header=None).values
-	#limiting claimIDs to edges of interest if both graphs are different
-	if source_fcg_type==target_fcg_type:
-		claimIDs=source_claims['claimID'].tolist()
-	else:
-		edges_of_interest=source_target(rdf_path,graph_path,embed_path,source_fcg_type,target_fcg_type,fcg_class)
-		claimIDs=list(edges_of_interest.keys())
 	#iterating throuhg the claimIDs of interest
 	for claimID in claimIDs:
 		if source_fcg_type==target_fcg_type:
 			#checking if the source graph (without the given claim), has edges of interest. If not, we skip the claim .i.e continue in the for loop
-			edges_of_interest=source_target(rdf_path,graph_path,embed_path,source_fcg_type+'-'+str(claimID),target_fcg_type,fcg_class)
+			edges_of_interest=find_edges_of_interest(rdf_path,graph_path,embed_path,source_fcg_type+'-'+str(claimID),target_fcg_type,fcg_class)
 			if claimID not in set(list(edges_of_interest.keys())):
 				continue
 		#getting index of claim
@@ -350,11 +315,60 @@ def shortest_paths(rdf_path,model_path,graph_path,embed_path,source_fcg_type,tar
 			d=round(aggregate_edge_data(path_d_data,'dist'),2)
 			paths_of_interest_d[claimID][str((u,v,w,d))]=path_d_data
 			source_fcg=source_fcg2
-		#storing the weighted and distance path files for obeservation
-		with codecs.open(write_path+"_w.json","w","utf-8") as f:
-			f.write(json.dumps(paths_of_interest_w,indent=5,ensure_ascii=False))
-		with codecs.open(write_path+"_d.json","w","utf-8") as f:
-			f.write(json.dumps(paths_of_interest_d,indent=5,ensure_ascii=False))
+	return index,paths_of_interest_w,paths_of_interest_d
+'''
+Function does the following
+1. Finds node pairs of interest from graph built through target claims by using the function find_edges_of_interest
+2. Creates a weighted source graph for each target claim using the function create_weighted
+3. Finds shortest path for each edge of interest in the target graph
+'''
+def find_shortest_paths(rdf_path,model_path,graph_path,embed_path,source_fcg_type,target_fcg_type,fcg_class,cpu):
+	fcg_types={'co_occur':{'tfcg':'tfcg_co','ffcg':'ffcg_co'},'fred':{'tfcg':'tfcg','ffcg':'ffcg'}}
+	source_fcg_type=fcg_types[fcg_class][source_fcg_type]
+	target_fcg_type=fcg_types[fcg_class][target_fcg_type]
+	claim_types={'tfcg_co':'true','ffcg_co':'false','tfcg':'true','ffcg':'false'}
+	source_claim_type=claim_types[source_fcg_type]
+	target_claim_type=claim_types[target_fcg_type]
+	#path to store the shortest paths
+	write_path=os.path.join(graph_path,fcg_class,"paths",source_fcg_type+"_"+target_claim_type+"_({})".format(model_path.split("/")[-1]))
+	os.makedirs(write_path,exist_ok=True)
+	write_path=os.path.join(write_path,"paths")
+	#path to store the weghted graphs
+	writegraph_path=os.path.join(graph_path,"weighted","graphs_"+fcg_class+"_"+source_fcg_type+"_"+target_claim_type+"_({})".format(model_path.split("/")[-1]))
+	os.makedirs(writegraph_path,exist_ok=True)
+	#path for the graph that is being used to fact-check
+	source_fcg_path=os.path.join(graph_path,fcg_class,source_fcg_type)
+	#loading claims
+	source_claims=pd.read_csv(os.path.join(rdf_path,"{}_claims.csv".format(source_claim_type)))
+	target_claims=pd.read_csv(os.path.join(rdf_path,"{}_claims.csv".format(target_claim_type)))
+	#loading target claim embeddings
+	try:
+		target_claims_embed=pd.read_csv(os.path.join(embed_path,target_claim_type+"_claims_embeddings_({}).tsv".format(model_path.split("/")[-1])),delimiter="\t",header=None).values
+	except FileNotFoundError:
+		embed_claims(rdf_path,model_path,embed_path,target_claim_type)
+		target_claims_embed=pd.read_csv(os.path.join(embed_path,target_claim_type+"_claims_embeddings_({}).tsv".format(model_path.split("/")[-1])),delimiter="\t",header=None).values
+	#limiting claimIDs to edges of interest if both graphs are different
+	if source_fcg_type==target_fcg_type:
+		edges_of_interest={}
+		claimIDs=source_claims['claimID'].tolist()
+	else:
+		edges_of_interest=find_edges_of_interest(rdf_path,graph_path,embed_path,source_fcg_type,target_fcg_type,fcg_class)
+		claimIDs=list(edges_of_interest.keys())
+	#finding paths of interest
+	n=int(len(claimIDs)/cpu)+1
+	if cpu>1:
+		pool=mp.Pool(processes=cpu)
+		results=[pool.apply_async(find_paths_of_interest, args=(index,rdf_path,graph_path,embed_path,model_path,claimIDs[index*n:(index+1)*n],fcg_class,source_fcg_type,target_fcg_type,source_claim_type,target_claim_type,source_claims,target_claims,edges_of_interest,target_claims_embed,writegraph_path)) for index in range(cpu)]
+		output=sorted([p.get() for p in results],key=lambda x:x[0])
+		paths_of_interest_w=dict(ChainMap(*map(lambda x:x[1],output)))
+		paths_of_interest_d=dict(ChainMap(*map(lambda x:x[2],output)))
+	else:
+		index,paths_of_interest_w,paths_of_interest_d=find_paths_of_interest(0,rdf_path,graph_path,embed_path,model_path,claimIDs[0:n],fcg_class,source_fcg_type,target_fcg_type,source_claim_type,target_claim_type,source_claims,target_claims,edges_of_interest,target_claims_embed,writegraph_path)
+	#storing the weighted and distance path files for obeservation
+	with codecs.open(write_path+"_w.json","w","utf-8") as f:
+		f.write(json.dumps(paths_of_interest_w,indent=5,ensure_ascii=False))
+	with codecs.open(write_path+"_d.json","w","utf-8") as f:
+		f.write(json.dumps(paths_of_interest_d,indent=5,ensure_ascii=False))
 	create_ordered_paths(write_path,"w")
 	create_ordered_paths(write_path,"d")
 
@@ -364,10 +378,9 @@ if __name__== "__main__":
 	parser.add_argument('-gp','--graphpath', metavar='graph path',type=str,help='Graph directory to store the graphs',default="/geode2/home/u110/zkachwal/BigRed3/factcheckgraph_data/graphs/")
 	parser.add_argument('-mp','--modelpath', metavar='model path',type=str,help='Model directory to load the model',default="/geode2/home/u110/zkachwal/BigRed3/factcheckgraph_data/models/claims-relatedness-model/claims-roberta-base-nli-stsb-mean-tokens-2020-05-27_19-01-27")
 	parser.add_argument('-ep','--embedpath', metavar='embed path',type=str,help='Model directory to save and load embeddings',default="/geode2/home/u110/zkachwal/BigRed3/factcheckgraph_data/embeddings")
-	parser.add_argument('-p','--passive',action='store_true',help='Passive or not',default=False)
 	parser.add_argument('-ft','--fcgtype', metavar='FactCheckGraph type',type=str,choices=['tfcg','ffcg','tfcg_co','ffcg_co','ufcg','covid19'],help='True/False/Union/Covid19 FactCheckGraph')
 	parser.add_argument('-fc','--fcgclass', metavar='FactCheckGraph class',type=str,choices=['co_occur','fred'])
 	parser.add_argument('-cpu','--cpu',metavar='Number of CPUs',type=int,help='Number of CPUs available',default=1)
 	args=parser.parse_args()
 	# embed_claims(args.rdfpath,"roberta-base-nli-stsb-mean-tokens",args.embedpath,args.fcgtype)
-	shortest_paths(args.rdfpath,args.modelpath,args.graphpath,args.embedpath,"tfcg",args.fcgtype,args.fcgclass)
+	find_shortest_paths(args.rdfpath,args.modelpath,args.graphpath,args.embedpath,"tfcg",args.fcgtype,args.fcgclass,args.cpu)

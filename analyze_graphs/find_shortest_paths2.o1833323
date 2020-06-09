@@ -1,7 +1,17 @@
 
-real	246m47.211s
-user	212m56.770s
-sys	2m48.927s
+real	220m22.385s
+user	217m23.066s
+sys	2m17.355s
+find_shortest_paths.py:105: RuntimeWarning: invalid value encountered in arccos
+  simil_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:105: RuntimeWarning: invalid value encountered in arccos
+  simil_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:105: RuntimeWarning: invalid value encountered in arccos
+  simil_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:105: RuntimeWarning: invalid value encountered in arccos
+  simil_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:105: RuntimeWarning: invalid value encountered in arccos
+  simil_p=np.arccos(simil_p)/np.pi
 find_shortest_paths.py:105: RuntimeWarning: invalid value encountered in arccos
   simil_p=np.arccos(simil_p)/np.pi
 find_shortest_paths.py:105: RuntimeWarning: invalid value encountered in arccos
@@ -637,6 +647,6 @@ find_shortest_paths.py:105: RuntimeWarning: invalid value encountered in arccos
 find_shortest_paths.py:105: RuntimeWarning: invalid value encountered in arccos
   simil_p=np.arccos(simil_p)/np.pi
 
-real	67m9.672s
-user	55m6.723s
-sys	0m31.568s
+real	62m6.048s
+user	54m44.336s
+sys	0m22.262s
