@@ -1,0 +1,5 @@
+
+real	173m1.659s
+user	2502m25.952s
+sys	28m20.668s
+slurmstepd: error: *** JOB 480387 ON nid00490 CANCELLED AT 2020-06-10T22:32:30 DUE TO TIME LIMIT ***

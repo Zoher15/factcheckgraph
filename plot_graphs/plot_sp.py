@@ -5,7 +5,7 @@ import seaborn as sns
 from sklearn import metrics
 import json
 import matplotlib
-matplotlib.use('Qt5Agg')
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import os
 import datetime

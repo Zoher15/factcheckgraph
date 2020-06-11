@@ -1,0 +1,2 @@
+slurmstepd: error: Detected 1 oom-kill event(s) in step 480419.batch cgroup. Some of your processes may have been killed by the cgroup out-of-memory handler.
+slurmstepd: error: get_exit_code task 0 died by signal: 9

@@ -1,0 +1,36 @@
+multiprocessing.pool.RemoteTraceback: 
+"""
+Traceback (most recent call last):
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/multiprocessing/pool.py", line 121, in worker
+    result = (True, func(*args, **kwds))
+  File "find_shortest_paths.py", line 287, in find_paths_of_interest
+    path_w=nx.shortest_path(source_fcg,source=u,target=v,weight='weight')
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/networkx/algorithms/shortest_paths/generic.py", line 172, in shortest_path
+    paths = nx.dijkstra_path(G, source, target, weight)
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/networkx/algorithms/shortest_paths/weighted.py", line 167, in dijkstra_path
+    weight=weight)
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/networkx/algorithms/shortest_paths/weighted.py", line 480, in single_source_dijkstra
+    weight=weight)
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/networkx/algorithms/shortest_paths/weighted.py", line 740, in multi_source_dijkstra
+    cutoff=cutoff, target=target)
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/networkx/algorithms/shortest_paths/weighted.py", line 846, in _dijkstra_multisource
+    'negative weights?')
+ValueError: ('Contradictory paths found:', 'negative weights?')
+"""
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "find_shortest_paths.py", line 382, in <module>
+    find_shortest_paths(args.rdfpath,args.modelpath,args.graphpath,args.embedpath,"tfcg",args.fcgtype,args.fcgclass,args.graphtype,args.cpu)
+  File "find_shortest_paths.py", line 357, in find_shortest_paths
+    output=sorted([p.get() for p in results],key=lambda x:x[0])
+  File "find_shortest_paths.py", line 357, in <listcomp>
+    output=sorted([p.get() for p in results],key=lambda x:x[0])
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/multiprocessing/pool.py", line 657, in get
+    raise self._value
+ValueError: ('Contradictory paths found:', 'negative weights?')
+
+real	1m14.614s
+user	49m57.456s
+sys	0m36.772s
