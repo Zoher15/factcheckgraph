@@ -49,10 +49,10 @@ def plot_roc(graph_path,fcg_class):
 					true_paths=json.loads(f.read())
 				with codecs.open(os.path.join(read_path+"_false_({})".format(e),"paths_{}.json".format(d)),"r","utf-8") as f: 
 					false_paths=json.loads(f.read())
-				true_scores=list(map(lambda t:aggregate_weights(t[1],a,d),true_paths.items()))
-				false_scores=list(map(lambda t:aggregate_weights(t[1],a,d),false_paths.items()))
-				true_y=[0 for i in range(len(true_scores))]
-				false_y=[1 for i in range(len(false_scores))]
+				true_scores=[float(1)/aggregate_weights(t[1],a,d) if aggregate_weights(t[1],a,d)>0 else 1000 for t in true_paths.items()]
+				false_scores=[float(1)/aggregate_weights(t[1],a,d) if aggregate_weights(t[1],a,d)>0 else 1000 for t in false_paths.items()]
+				true_y=[1 for i in range(len(true_scores))]
+				false_y=[0 for i in range(len(false_scores))]
 				y=true_y+false_y
 				scores=true_scores+false_scores
 				fpr,tpr,thresholds=metrics.roc_curve(y,scores, pos_label=1)

@@ -14,6 +14,7 @@ from sentence_transformers import SentenceTransformer
 import sys
 import datetime
 import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 # sys.path.insert(1, '/geode2/home/u110/zkachwal/BigRed3/factcheckgraph/create_graphs')
 # from create_fred import *
@@ -63,8 +64,10 @@ def find_baseline(rdf_path,model_path,embed_path,cpu):
 	plt.figure(figsize=(9, 8))
 	lw=2
 	plt.plot([0, 1], [0, 1],color='navy',lw=lw,linestyle='--')
-	true_y=[0 for i in range(len(true_true))]
-	false_y=[1 for i in range(len(false_false))]
+	true0_y=[0 for i in range(len(true_true))]
+	true1_y=[1 for i in range(len(true_true))]
+	false0_y=[0 for i in range(len(false_false))]
+	false1_y=[1 for i in range(len(false_false))]
 
 	title="Baseline using angular distance of claims"
 
@@ -73,10 +76,10 @@ def find_baseline(rdf_path,model_path,embed_path,cpu):
 	false_false_mean=np.apply_along_axis(np.nanmean,1,false_false)
 	true_false_false_mean=np.apply_along_axis(np.nanmean,0,true_false)
 
-	fpr,tpr,thresholds=metrics.roc_curve(true_y+false_y,list(true_true_mean)+list(true_false_false_mean), pos_label=1)
+	fpr,tpr,thresholds=metrics.roc_curve(true0_y+false1_y,list(true_true_mean)+list(true_false_false_mean), pos_label=1)
 	plt.plot(fpr,tpr,lw=lw,label='true claims mean (%0.2f) '%metrics.auc(fpr,tpr))
 
-	fpr,tpr,thresholds=metrics.roc_curve(true_y+false_y,list(true_false_true_mean)+list(false_false_mean), pos_label=1)
+	fpr,tpr,thresholds=metrics.roc_curve(true1_y+false0_y,list(true_false_true_mean)+list(false_false_mean), pos_label=1)
 	plt.plot(fpr,tpr,lw=lw,label='false claims mean (%0.2f) '%metrics.auc(fpr,tpr))
 
 	true_true_min=np.apply_along_axis(np.nanmin,1,true_true)
@@ -84,10 +87,10 @@ def find_baseline(rdf_path,model_path,embed_path,cpu):
 	false_false_min=np.apply_along_axis(np.nanmin,1,false_false)
 	true_false_false_min=np.apply_along_axis(np.nanmin,0,true_false)
 
-	fpr,tpr,thresholds=metrics.roc_curve(true_y+false_y,list(true_true_min)+list(true_false_false_min), pos_label=1)
+	fpr,tpr,thresholds=metrics.roc_curve(true0_y+false1_y,list(true_true_min)+list(true_false_false_min), pos_label=1)
 	plt.plot(fpr,tpr,lw=lw,label='true claims min (%0.2f) '%metrics.auc(fpr,tpr))
 
-	fpr,tpr,thresholds=metrics.roc_curve(true_y+false_y,list(true_false_true_min)+list(false_false_min), pos_label=1)
+	fpr,tpr,thresholds=metrics.roc_curve(true1_y+false0_y,list(true_false_true_min)+list(false_false_min), pos_label=1)
 	plt.plot(fpr,tpr,lw=lw,label='false claims min (%0.2f) '%metrics.auc(fpr,tpr))
 
 	true_true_max=np.apply_along_axis(np.nanmax,1,true_true)
@@ -95,10 +98,10 @@ def find_baseline(rdf_path,model_path,embed_path,cpu):
 	false_false_max=np.apply_along_axis(np.nanmax,1,false_false)
 	true_false_false_max=np.apply_along_axis(np.nanmax,0,true_false)
 
-	fpr,tpr,thresholds=metrics.roc_curve(true_y+false_y,list(true_true_max)+list(true_false_false_max), pos_label=1)
+	fpr,tpr,thresholds=metrics.roc_curve(true0_y+false1_y,list(true_true_max)+list(true_false_false_max), pos_label=1)
 	plt.plot(fpr,tpr,lw=lw,label='true claims max (%0.2f) '%metrics.auc(fpr,tpr))
 
-	fpr,tpr,thresholds=metrics.roc_curve(true_y+false_y,list(true_false_true_max)+list(false_false_max), pos_label=1)
+	fpr,tpr,thresholds=metrics.roc_curve(true1_y+false0_y,list(true_false_true_max)+list(false_false_max), pos_label=1)
 	plt.plot(fpr,tpr,lw=lw,label='false claims max (%0.2f) '%metrics.auc(fpr,tpr))
 
 	plt.xlabel('True Positive Rate')

@@ -103,33 +103,30 @@ def create_weighted(p,rdf_path,model_path,graph_path,embed_path,claim_type,fcg_t
 			claims_embed=pd.read_csv(os.path.join(embed_path,claim_type+"_claims_embeddings_({}).tsv".format(model_path.split("/")[-1])),delimiter="\t",header=None).values
 		simil_p=cosine_similarity(p,claims_embed)[0]
 		#angular distance
-		simil_p=np.arccos(simil_p)/np.pi
+		dist_p=np.arccos(simil_p)/np.pi
 		fcg_co=nx.read_edgelist(os.path.join(fcg_path,"{}.edgelist".format(fcg_type)),comments="@",create_using=nx.MultiGraph)
+		temp_fcg_co=nx.MultiDiGraph()
+		temp_fcg_co.add_edges_from(list(fcg_co.edges.data(keys=True)))
+		temp_fcg_co.add_edges_from(list(map(lambda x:(x[1],x[0],x[2],x[3]),list(fcg_co.edges.data(keys=True)))))
+		fcg_co=temp_fcg_co.copy()
 		#assigning weight by summing the log of adjacent nodes, and dividing by the similiarity of the claim with the target predicate
 		for u,v,k,claimID in fcg_co.edges.data('claim_ID',keys=True):
 			claimIX=claims[claims['claimID']==claimID].index[0]
-			uw=np.log10(fcg_co.degree(u))
+			# uw=np.log10(fcg_co.degree(u))
 			vw=np.log10(fcg_co.degree(v))
-			# if simil_p[claimIX]>0:
-			dist=simil_p[claimIX]
-			weight=(uw+vw)*dist*0.5
-			# else:
-			# 	dist=np.inf
-			# 	weight=np.inf
+			dist=dist_p[claimIX]
+			weight=dist*(vw)#+uw)*0.5
 			fcg_co.edges[u,v,k]['dist']=dist
 			fcg_co.edges[u,v,k]['weight']=weight
-		fcg_co2=nx.Graph()
+		fcg_co2=nx.DiGraph()
 		for u,v,k,data in fcg_co.edges.data(keys=True):
 			if not fcg_co2.has_edge(u,v):
-				if len(fcg_co.get_edge_data(u,v))==1:
-					fcg_co2.add_edge(u,v)
-					fcg_co2.edges[u,v].update(data)
-				else:
+				fcg_co2.add_edge(u,v)
+				if len(fcg_co.get_edge_data(u,v))>1:
 					datalist=fcg_co.get_edge_data(u,v)
-					fcg_co2.add_edge(u,v)
 					#finding the data dict among all the multiedges between u and v with the min distance
 					data=min(fcg_co.get_edge_data(u,v).items(), key=lambda x:x[1]['dist'])[1]
-					fcg_co2.edges[u,v].update(data)
+				fcg_co2.edges[u,v].update(data)
 		return fcg_co2
 	elif fcg_class=='fred':
 		try:
@@ -141,30 +138,31 @@ def create_weighted(p,rdf_path,model_path,graph_path,embed_path,claim_type,fcg_t
 			nodes_labels=pd.read_csv(os.path.join(embed_path,fcg_type.split('-')[0]+"_nodes_embeddings_labels_({}).tsv".format(model_path.split("/")[-1])),delimiter="\t")
 		simil_p=cosine_similarity(p,nodes_embed)[0]
 		#angular distance
-		simil_p=np.arccos(simil_p)/np.pi
+		dist_p=np.arccos(simil_p)/np.pi
 		fcg=nx.read_edgelist(os.path.join(fcg_path,"{}.edgelist".format(fcg_type)),comments="@",create_using=nx.MultiGraph)
+		temp_fcg=nx.MultiDiGraph()
+		temp_fcg.add_edges_from(list(fcg.edges.data(keys=True)))
+		temp_fcg.add_edges_from(list(map(lambda x:(x[1],x[0],x[2],x[3]),list(fcg.edges.data(keys=True)))))
+		fcg=temp_fcg.copy()
 		#assigning weight by summing the log of adjacent nodes, and dividing by the similiarity of the claim with the target predicate
 		for u,v,k in fcg.edges(keys=True):
-			uIX=nodes_labels[nodes_labels['node_label']==u].index[0]
+			# uIX=nodes_labels[nodes_labels['node_label']==u].index[0]
 			vIX=nodes_labels[nodes_labels['node_label']==v].index[0]
-			uw=np.log10(fcg.degree(u))
+			# uw=np.log10(fcg.degree(u))
 			vw=np.log10(fcg.degree(v))
-			dist=simil_p[uIX]+simil_p[vIX]
-			weight=(uw+vw)*dist*0.5
+			dist=dist_p[vIX]#+dist_p[uIX]
+			weight=dist*(vw)#+uw)*0.5
 			fcg.edges[u,v,k]['dist']=dist
 			fcg.edges[u,v,k]['weight']=weight
-		fcg2=nx.Graph()
+		fcg2=nx.DiGraph()
 		for u,v,k,data in fcg.edges.data(keys=True):
 			if not fcg2.has_edge(u,v):
-				if len(fcg.get_edge_data(u,v))==1:
-					fcg2.add_edge(u,v)
-					fcg2.edges[u,v].update(data)
-				else:
+				fcg2.add_edge(u,v)
+				if len(fcg.get_edge_data(u,v))>1:
 					datalist=fcg.get_edge_data(u,v)
-					fcg2.add_edge(u,v)
 					#finding the data dict among all the multiedges between u and v with the min distance
 					data=min(fcg.get_edge_data(u,v).items(), key=lambda x:x[1]['dist'])[1]
-					fcg2.edges[u,v].update(data)
+				fcg2.edges[u,v].update(data)
 		return fcg2
 
 def aggregate_edge_data(evalues,mode):
@@ -266,7 +264,7 @@ def find_paths_of_interest(index,rdf_path,graph_path,embed_path,model_path,claim
 		else:
 			source_fcg=create_weighted(p,rdf_path,model_path,graph_path,embed_path,source_claim_type,source_fcg_type,fcg_class)
 			name=source_fcg_type+"_"+target_claim_type+str(claimID)
-		nx.write_edgelist(source_fcg,os.path.join(writegraph_path,"{}.edgelist".format(name)))
+		# nx.write_edgelist(source_fcg,os.path.join(writegraph_path,"{}.edgelist".format(name)))
 		paths_of_interest_w[claimID]={}
 		paths_of_interest_d[claimID]={}
 		paths_of_interest_w[claimID]['target_claim']=chunkstring(target_claims[target_claims['claimID']==claimID]['claim_text'].values[0],100)
@@ -275,26 +273,23 @@ def find_paths_of_interest(index,rdf_path,graph_path,embed_path,model_path,claim
 		for every edge of interest, all edges connected to the source u and target v are reweighted by removing their log(degree)
 		source_fcg2 acts as a temporary copy so that every edge, the graph can be reassigned to its original
 		'''
-		source_fcg2=source_fcg.copy()
+		# source_fcg2=source_fcg.copy()
 		for edge in edges_of_interest[claimID]:
 			u,v=edge
 			######################Removing the log of source and target node from the incident edges
-			for e in source_fcg.edges(u):
-				if source_fcg.edges[e]['dist']<np.inf:
-					diff=source_fcg.edges[e]['dist']*np.log10(source_fcg.degree(u))*0.5
-					if source_fcg.edges[e]['weight']>diff:
-						source_fcg.edges[e]['weight']=source_fcg.edges[e]['weight']-diff
-					else:
-						# print("Warning: diff>source weight")
-						source_fcg.edges[e]['weight']=0
-			for e in source_fcg.edges(v):
-				if source_fcg.edges[e]['dist']<np.inf:
-					diff=source_fcg.edges[e]['dist']*np.log10(source_fcg.degree(v))*0.5
-					if source_fcg.edges[e]['weight']>diff:
-						source_fcg.edges[e]['weight']=source_fcg.edges[e]['weight']-diff
-					else:
-						# print("Warning: diff>source weight")
-						source_fcg.edges[e]['weight']=0
+			# if fcg_class=='co_occur':
+			# 	for e in source_fcg.edges(u):
+			# 		diff=source_fcg.edges[e]['dist']*np.log10(source_fcg.degree(u))*0.5
+			# 		source_fcg.edges[e]['weight']=source_fcg.edges[e]['weight']-diff
+			# 	for e in source_fcg.edges(v):
+			# 		diff=source_fcg.edges[e]['dist']*np.log10(source_fcg.degree(v))*0.5
+			# 		source_fcg.edges[e]['weight']=source_fcg.edges[e]['weight']-diff
+			if fcg_class=='fred':
+				for e in source_fcg.in_edges(v,data=True):
+					data=e[2]
+					data['dist']=0
+					data['weight']=0
+					source_fcg.edges[e[0],e[1]].update(data)
 			###############################################################
 			path_w=nx.shortest_path(source_fcg,source=u,target=v,weight='weight')
 			path_d=nx.shortest_path(source_fcg,source=u,target=v,weight='dist')
@@ -303,18 +298,26 @@ def find_paths_of_interest(index,rdf_path,graph_path,embed_path,model_path,claim
 			for i in range(len(path_w)-1):
 				data=source_fcg.edges[path_w[i],path_w[i+1]]
 				data['source_claim']=chunkstring(source_claims[source_claims['claimID']==data['claim_ID']]['claim_text'].values[0],75)
+				# if i==len(path_w)-2:
+				# 	data['dist']=0
+				# 	data['weight']=0
 				path_w_data[str((path_w[i],path_w[i+1]))]=data
+			###################################################################
 			for i in range(len(path_d)-1):
 				data=source_fcg.edges[path_d[i],path_d[i+1]]
 				data['source_claim']=chunkstring(source_claims[source_claims['claimID']==data['claim_ID']]['claim_text'].values[0],75)
+				# if i==len(path_d)-2:
+				# 	data['dist']=0
+				# 	data['weight']=0
 				path_d_data[str((path_d[i],path_d[i+1]))]=data
-			w=round(aggregate_edge_data(path_w_data,'weight'),2)
-			d=round(aggregate_edge_data(path_w_data,'dist'),2)
+			###################################################################
+			w=round(aggregate_edge_data(path_w_data,'weight'),3)
+			d=round(aggregate_edge_data(path_w_data,'dist'),3)
 			paths_of_interest_w[claimID][str((u,v,w,d))]=path_w_data
-			w=round(aggregate_edge_data(path_d_data,'weight'),2)
-			d=round(aggregate_edge_data(path_d_data,'dist'),2)
+			w=round(aggregate_edge_data(path_d_data,'weight'),3)
+			d=round(aggregate_edge_data(path_d_data,'dist'),3)
 			paths_of_interest_d[claimID][str((u,v,w,d))]=path_d_data
-			source_fcg=source_fcg2
+			# source_fcg=source_fcg2
 	return index,paths_of_interest_w,paths_of_interest_d
 '''
 Function does the following

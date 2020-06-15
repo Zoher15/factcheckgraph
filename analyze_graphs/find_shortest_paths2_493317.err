@@ -1,0 +1,638 @@
+
+real	14m8.335s
+user	638m17.280s
+sys	15m11.916s
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+find_shortest_paths.py:106: RuntimeWarning: invalid value encountered in arccos
+  dist_p=np.arccos(simil_p)/np.pi
+
+real	4m21.671s
+user	163m18.728s
+sys	4m52.196s

@@ -937,6 +937,9 @@ def cleanClaimGraph(claim_g,clean_claims):
 			claim_g.remove_node(node)
 	#removing isolates
 	claim_g.remove_nodes_from(list(nx.isolates(claim_g)))
+	situation_node='http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Situation'
+	if claim_g.has_node(situation_node):
+		claim_g.remove_node(situation_node)
 	return claim_g
 
 #Function save individual claim graphs
