@@ -217,7 +217,7 @@ def find_edges_of_interest(rdf_path,graph_path,embed_path,source_fcg_type,target
 	It has to be the paths between entities (which do not contain other entities)
 	'''
 	edges=[]
-	# if fcg_class=='co_occur':
+	###################################################################################
 	edges=target_fcg.edges.data(keys=True)
 	for edge in edges:
 		u,v,k,data=edge
@@ -226,20 +226,6 @@ def find_edges_of_interest(rdf_path,graph_path,embed_path,source_fcg_type,target
 				edges_of_interest[data['claim_ID']].add((u,v))
 			except KeyError:
 				edges_of_interest[data['claim_ID']]=set([(u,v)])
-	# else:
-	# 	nodes=list(target_fcg.nodes)
-	# 	entity_regex=re.compile(r'db:.*')
-	# 	entities=list(filter(lambda x:entity_regex.search(x),nodes))
-	# 	entitypairs=list(combinations(entities,2))
-	# 	#limiting edges to entity pairs that have a path between them in the target graph
-	# 	edges=list(filter(lambda x:nx.has_path(target_fcg,x[0],x[1]),entitypairs))
-	# 	for edge in edges:
-	# 		u,v=edge
-	# 		if source_fcg.has_node(u) and source_fcg.has_node(v) and nx.has_path(source_fcg,u,v):#and not source_fcg.has_edge(u,v) and 
-	# 			try:
-	# 				edges_of_interest[target_claimID].add((u,v))
-	# 			except KeyError:
-	# 				edges_of_interest[target_claimID]=set([(u,v)])
 	return edges_of_interest
 
 
@@ -264,7 +250,6 @@ def find_paths_of_interest(index,rdf_path,graph_path,embed_path,model_path,claim
 		else:
 			source_fcg=create_weighted(p,rdf_path,model_path,graph_path,embed_path,source_claim_type,source_fcg_type,fcg_class)
 			name=source_fcg_type+"_"+target_claim_type+str(claimID)
-		# nx.write_edgelist(source_fcg,os.path.join(writegraph_path,"{}.edgelist".format(name)))
 		paths_of_interest_w[claimID]={}
 		paths_of_interest_d[claimID]={}
 		paths_of_interest_w[claimID]['target_claim']=chunkstring(target_claims[target_claims['claimID']==claimID]['claim_text'].values[0],100)
@@ -273,18 +258,14 @@ def find_paths_of_interest(index,rdf_path,graph_path,embed_path,model_path,claim
 		for every edge of interest, all edges connected to the source u and target v are reweighted by removing their log(degree)
 		source_fcg2 acts as a temporary copy so that every edge, the graph can be reassigned to its original
 		'''
-		# source_fcg2=source_fcg.copy()
 		for edge in edges_of_interest[claimID]:
 			u,v=edge
-			######################Removing the log of source and target node from the incident edges
-			# if fcg_class=='co_occur':
-			# 	for e in source_fcg.edges(u):
-			# 		diff=source_fcg.edges[e]['dist']*np.log10(source_fcg.degree(u))*0.5
-			# 		source_fcg.edges[e]['weight']=source_fcg.edges[e]['weight']-diff
-			# 	for e in source_fcg.edges(v):
-			# 		diff=source_fcg.edges[e]['dist']*np.log10(source_fcg.degree(v))*0.5
-			# 		source_fcg.edges[e]['weight']=source_fcg.edges[e]['weight']-diff
-			if fcg_class=='fred':
+			if fcg_class=='co_occur':
+				for e in source_fcg.in_edges(v,data=True):
+					data=e[2]
+					data['weight']=data['dist']
+					source_fcg.edges[e[0],e[1]].update(data)
+			elif fcg_class=='fred':
 				for e in source_fcg.in_edges(v,data=True):
 					data=e[2]
 					data['dist']=0
@@ -298,17 +279,11 @@ def find_paths_of_interest(index,rdf_path,graph_path,embed_path,model_path,claim
 			for i in range(len(path_w)-1):
 				data=source_fcg.edges[path_w[i],path_w[i+1]]
 				data['source_claim']=chunkstring(source_claims[source_claims['claimID']==data['claim_ID']]['claim_text'].values[0],75)
-				# if i==len(path_w)-2:
-				# 	data['dist']=0
-				# 	data['weight']=0
 				path_w_data[str((path_w[i],path_w[i+1]))]=data
 			###################################################################
 			for i in range(len(path_d)-1):
 				data=source_fcg.edges[path_d[i],path_d[i+1]]
 				data['source_claim']=chunkstring(source_claims[source_claims['claimID']==data['claim_ID']]['claim_text'].values[0],75)
-				# if i==len(path_d)-2:
-				# 	data['dist']=0
-				# 	data['weight']=0
 				path_d_data[str((path_d[i],path_d[i+1]))]=data
 			###################################################################
 			w=round(aggregate_edge_data(path_w_data,'weight'),3)

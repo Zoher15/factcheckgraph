@@ -9,7 +9,7 @@
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=48
 #SBATCH --mem=24G
-#SBATCH --time=24:00:00
+#SBATCH --time=96:00:00
 source /N/u/zkachwal/Carbonate/miniconda3/etc/profile.d/conda.sh
 conda activate
 cd /geode2/home/u110/zkachwal/BigRed3/factcheckgraph/create_graphs/
