@@ -112,15 +112,15 @@ def create_weighted(p,rdf_path,model_path,graph_path,embed_path,claim_type,fcg_t
 	#assigning weight by summing the log of adjacent nodes, and dividing by the similiarity of the claim with the target predicate
 	for u,v,k,d in fcg.edges.data(keys=True):
 		if fcg_class=='co_occur':
-			claimID=d['claimID']
+			claimID=d['claim_ID']
 			claimIX=claims[claims['claimID']==claimID].index[0]
-			# uw=np.log10(fcg_co.degree(u))
-			vw=np.log10(fcg_co.degree(v))
+			# uw=np.log10(fcg.degree(u))
+			vw=np.log10(fcg.degree(v))
 			dist=dist_p[claimIX]
 			weight=dist*(vw)#+uw)*0.5
 		elif fcg_class=='fred':
-			# uIX=nodes_labels[nodes_labels['node_label']==u].index[0]
-			vIX=nodes_labels[nodes_labels['node_label']==v].index[0]
+			# uIX=labels[labels['node_label']==u].index[0]
+			vIX=labels[labels['node_label']==v].index[0]
 			# uw=np.log10(fcg.degree(u))
 			vw=np.log10(fcg.degree(v))
 			dist=dist_p[vIX]#+dist_p[uIX]
