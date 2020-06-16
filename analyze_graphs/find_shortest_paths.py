@@ -96,74 +96,48 @@ def create_weighted(p,rdf_path,model_path,graph_path,embed_path,claim_type,fcg_t
 	if fcg_class=='co_occur':
 		claims=pd.read_csv(os.path.join(rdf_path,"{}_claims.csv".format(claim_type)))
 		claim_IDs=claims['claimID'].tolist()
-		try:
-			claims_embed=pd.read_csv(os.path.join(embed_path,claim_type+"_claims_embeddings_({}).tsv".format(model_path.split("/")[-1])),delimiter="\t",header=None).values
-		except FileNotFoundError:
-			embed_claims(rdf_path,model_path,embed_path,claim_type)
-			claims_embed=pd.read_csv(os.path.join(embed_path,claim_type+"_claims_embeddings_({}).tsv".format(model_path.split("/")[-1])),delimiter="\t",header=None).values
-		simil_p=cosine_similarity(p,claims_embed)[0]
-		#angular distance
-		dist_p=np.arccos(simil_p)/np.pi
-		fcg_co=nx.read_edgelist(os.path.join(fcg_path,"{}.edgelist".format(fcg_type)),comments="@",create_using=nx.MultiGraph)
-		temp_fcg_co=nx.MultiDiGraph()
-		temp_fcg_co.add_edges_from(list(fcg_co.edges.data(keys=True)))
-		temp_fcg_co.add_edges_from(list(map(lambda x:(x[1],x[0],x[2],x[3]),list(fcg_co.edges.data(keys=True)))))
-		fcg_co=temp_fcg_co.copy()
-		#assigning weight by summing the log of adjacent nodes, and dividing by the similiarity of the claim with the target predicate
-		for u,v,k,claimID in fcg_co.edges.data('claim_ID',keys=True):
+		embed=pd.read_csv(os.path.join(embed_path,claim_type+"_claims_embeddings_({}).tsv".format(model_path.split("/")[-1])),delimiter="\t",header=None).values
+	elif fcg_class=='fred':
+		embed=pd.read_csv(os.path.join(embed_path,fcg_type.split('-')[0]+"_nodes_embeddings_({}).tsv".format(model_path.split("/")[-1])),delimiter="\t",header=None).values
+		labels=pd.read_csv(os.path.join(embed_path,fcg_type.split('-')[0]+"_nodes_embeddings_labels_({}).tsv".format(model_path.split("/")[-1])),delimiter="\t")
+	#cosine similarity
+	simil_p=cosine_similarity(p,embed)[0]
+	#normalized angular distance
+	dist_p=np.arccos(simil_p)/np.pi
+	fcg=nx.read_edgelist(os.path.join(fcg_path,"{}.edgelist".format(fcg_type)),comments="@",create_using=nx.MultiGraph)
+	temp_fcg=nx.MultiDiGraph()
+	temp_fcg.add_edges_from(list(fcg.edges.data(keys=True)))
+	temp_fcg.add_edges_from(list(map(lambda x:(x[1],x[0],x[2],x[3]),list(fcg.edges.data(keys=True)))))
+	fcg=temp_fcg.copy()
+	#assigning weight by summing the log of adjacent nodes, and dividing by the similiarity of the claim with the target predicate
+	for u,v,k,d in fcg.edges.data(keys=True):
+		if fcg_class=='co_occur':
+			claimID=d['claimID']
 			claimIX=claims[claims['claimID']==claimID].index[0]
 			# uw=np.log10(fcg_co.degree(u))
 			vw=np.log10(fcg_co.degree(v))
 			dist=dist_p[claimIX]
 			weight=dist*(vw)#+uw)*0.5
-			fcg_co.edges[u,v,k]['dist']=dist
-			fcg_co.edges[u,v,k]['weight']=weight
-		fcg_co2=nx.DiGraph()
-		for u,v,k,data in fcg_co.edges.data(keys=True):
-			if not fcg_co2.has_edge(u,v):
-				fcg_co2.add_edge(u,v)
-				if len(fcg_co.get_edge_data(u,v))>1:
-					datalist=fcg_co.get_edge_data(u,v)
-					#finding the data dict among all the multiedges between u and v with the min distance
-					data=min(fcg_co.get_edge_data(u,v).items(), key=lambda x:x[1]['dist'])[1]
-				fcg_co2.edges[u,v].update(data)
-		return fcg_co2
-	elif fcg_class=='fred':
-		try:
-			nodes_embed=pd.read_csv(os.path.join(embed_path,fcg_type.split('-')[0]+"_nodes_embeddings_({}).tsv".format(model_path.split("/")[-1])),delimiter="\t",header=None).values
-			nodes_labels=pd.read_csv(os.path.join(embed_path,fcg_type.split('-')[0]+"_nodes_embeddings_labels_({}).tsv".format(model_path.split("/")[-1])),delimiter="\t")
-		except FileNotFoundError:
-			embed_nodes(graph_path,model_path,embed_path,fcg_type.split('-')[0],fcg_class)
-			nodes_embed=pd.read_csv(os.path.join(embed_path,fcg_type.split('-')[0]+"_nodes_embeddings_({}).tsv".format(model_path.split("/")[-1])),delimiter="\t",header=None).values
-			nodes_labels=pd.read_csv(os.path.join(embed_path,fcg_type.split('-')[0]+"_nodes_embeddings_labels_({}).tsv".format(model_path.split("/")[-1])),delimiter="\t")
-		simil_p=cosine_similarity(p,nodes_embed)[0]
-		#angular distance
-		dist_p=np.arccos(simil_p)/np.pi
-		fcg=nx.read_edgelist(os.path.join(fcg_path,"{}.edgelist".format(fcg_type)),comments="@",create_using=nx.MultiGraph)
-		temp_fcg=nx.MultiDiGraph()
-		temp_fcg.add_edges_from(list(fcg.edges.data(keys=True)))
-		temp_fcg.add_edges_from(list(map(lambda x:(x[1],x[0],x[2],x[3]),list(fcg.edges.data(keys=True)))))
-		fcg=temp_fcg.copy()
-		#assigning weight by summing the log of adjacent nodes, and dividing by the similiarity of the claim with the target predicate
-		for u,v,k in fcg.edges(keys=True):
+		elif fcg_class=='fred':
 			# uIX=nodes_labels[nodes_labels['node_label']==u].index[0]
 			vIX=nodes_labels[nodes_labels['node_label']==v].index[0]
 			# uw=np.log10(fcg.degree(u))
 			vw=np.log10(fcg.degree(v))
 			dist=dist_p[vIX]#+dist_p[uIX]
 			weight=dist*(vw)#+uw)*0.5
-			fcg.edges[u,v,k]['dist']=dist
-			fcg.edges[u,v,k]['weight']=weight
-		fcg2=nx.DiGraph()
-		for u,v,k,data in fcg.edges.data(keys=True):
-			if not fcg2.has_edge(u,v):
-				fcg2.add_edge(u,v)
-				if len(fcg.get_edge_data(u,v))>1:
-					datalist=fcg.get_edge_data(u,v)
-					#finding the data dict among all the multiedges between u and v with the min distance
-					data=min(fcg.get_edge_data(u,v).items(), key=lambda x:x[1]['dist'])[1]
-				fcg2.edges[u,v].update(data)
-		return fcg2
+	fcg.edges[u,v,k]['dist']=dist
+	fcg.edges[u,v,k]['weight']=weight
+	#Removing multiedges, by selecting the shortest one
+	fcg2=nx.DiGraph()
+	for u,v,k,data in fcg.edges.data(keys=True):
+		if not fcg2.has_edge(u,v):
+			fcg2.add_edge(u,v)
+			if len(fcg.get_edge_data(u,v))>1:
+				datalist=fcg.get_edge_data(u,v)
+				#finding the data dict among all the multiedges between u and v with the min distance
+				data=min(fcg.get_edge_data(u,v).items(), key=lambda x:x[1]['dist'])[1]
+			fcg2.edges[u,v].update(data)
+	return fcg2
 
 def aggregate_edge_data(evalues,mode):
 	#mode can be dist or weight
@@ -256,18 +230,19 @@ def find_paths_of_interest(index,rdf_path,graph_path,embed_path,model_path,claim
 		paths_of_interest_d[claimID]['target_claim']=chunkstring(target_claims[target_claims['claimID']==claimID]['claim_text'].values[0],100)
 		'''
 		for every edge of interest, all edges connected to the source u and target v are reweighted by removing their log(degree)
-		source_fcg2 acts as a temporary copy so that every edge, the graph can be reassigned to its original
 		'''
 		for edge in edges_of_interest[claimID]:
 			u,v=edge
 			if fcg_class=='co_occur':
 				for e in source_fcg.in_edges(v,data=True):
 					data=e[2]
+					#removing the influence of the log of degree of target node v
 					data['weight']=data['dist']
 					source_fcg.edges[e[0],e[1]].update(data)
 			elif fcg_class=='fred':
 				for e in source_fcg.in_edges(v,data=True):
 					data=e[2]
+					#removing the influence of the log of degree and the distance of target node v
 					data['dist']=0
 					data['weight']=0
 					source_fcg.edges[e[0],e[1]].update(data)
@@ -302,10 +277,14 @@ Function does the following
 '''
 def find_shortest_paths(rdf_path,model_path,graph_path,embed_path,source_fcg_type,target_fcg_type,fcg_class,cpu):
 	fcg_types={'co_occur':{'tfcg':'tfcg_co','ffcg':'ffcg_co'},'fred':{'tfcg':'tfcg','ffcg':'ffcg'}}
+	#setting source fcg_type
 	source_fcg_type=fcg_types[fcg_class][source_fcg_type]
+	#setting target fcg_type
 	target_fcg_type=fcg_types[fcg_class][target_fcg_type]
 	claim_types={'tfcg_co':'true','ffcg_co':'false','tfcg':'true','ffcg':'false'}
+	#setting source claim_type
 	source_claim_type=claim_types[source_fcg_type]
+	#setting target claim_type
 	target_claim_type=claim_types[target_fcg_type]
 	#path to store the shortest paths
 	write_path=os.path.join(graph_path,fcg_class,"paths",source_fcg_type+"_"+target_claim_type+"_({})".format(model_path.split("/")[-1]))
@@ -342,7 +321,7 @@ def find_shortest_paths(rdf_path,model_path,graph_path,embed_path,source_fcg_typ
 		paths_of_interest_d=dict(ChainMap(*map(lambda x:x[2],output)))
 	else:
 		index,paths_of_interest_w,paths_of_interest_d=find_paths_of_interest(0,rdf_path,graph_path,embed_path,model_path,claimIDs[0:n],fcg_class,source_fcg_type,target_fcg_type,source_claim_type,target_claim_type,source_claims,target_claims,edges_of_interest,target_claims_embed,writegraph_path)
-	#storing the weighted and distance path files for obeservation
+	#storing the weighted and distance path files for observation
 	with codecs.open(write_path+"_w.json","w","utf-8") as f:
 		f.write(json.dumps(paths_of_interest_w,indent=5,ensure_ascii=False))
 	with codecs.open(write_path+"_d.json","w","utf-8") as f:
