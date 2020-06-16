@@ -228,24 +228,22 @@ def find_paths_of_interest(index,rdf_path,graph_path,embed_path,model_path,claim
 		paths_of_interest_d[claimID]={}
 		paths_of_interest_w[claimID]['target_claim']=chunkstring(target_claims[target_claims['claimID']==claimID]['claim_text'].values[0],100)
 		paths_of_interest_d[claimID]['target_claim']=chunkstring(target_claims[target_claims['claimID']==claimID]['claim_text'].values[0],100)
+		source_fcg2=source_fcg.copy()
 		'''
 		for every edge of interest, all edges connected to the source u and target v are reweighted by removing their log(degree)
 		'''
 		for edge in edges_of_interest[claimID]:
 			u,v=edge
-			if fcg_class=='co_occur':
-				for e in source_fcg.in_edges(v,data=True):
-					data=e[2]
+			for e in source_fcg.in_edges(v,data=True):
+				data=e[2]
+				if fcg_class=='co_occur':
 					#removing the influence of the log of degree of target node v
 					data['weight']=data['dist']
-					source_fcg.edges[e[0],e[1]].update(data)
-			elif fcg_class=='fred':
-				for e in source_fcg.in_edges(v,data=True):
-					data=e[2]
+				elif fcg_class=='fred':
 					#removing the influence of the log of degree and the distance of target node v
 					data['dist']=0
 					data['weight']=0
-					source_fcg.edges[e[0],e[1]].update(data)
+				source_fcg.edges[e[0],e[1]].update(data)
 			###############################################################
 			path_w=nx.shortest_path(source_fcg,source=u,target=v,weight='weight')
 			path_d=nx.shortest_path(source_fcg,source=u,target=v,weight='dist')
@@ -267,7 +265,7 @@ def find_paths_of_interest(index,rdf_path,graph_path,embed_path,model_path,claim
 			w=round(aggregate_edge_data(path_d_data,'weight'),3)
 			d=round(aggregate_edge_data(path_d_data,'dist'),3)
 			paths_of_interest_d[claimID][str((u,v,w,d))]=path_d_data
-			# source_fcg=source_fcg2
+			source_fcg=source_fcg2
 	return index,paths_of_interest_w,paths_of_interest_d
 '''
 Function does the following
