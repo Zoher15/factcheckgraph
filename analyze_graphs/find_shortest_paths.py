@@ -110,21 +110,18 @@ def create_weighted(p,rdf_path,model_path,graph_path,embed_path,claim_type,fcg_t
 	temp_fcg.add_edges_from(list(map(lambda x:(x[1],x[0],x[2],x[3]),list(fcg.edges.data(keys=True)))))
 	fcg=temp_fcg.copy()
 	#assigning weight by summing the log of adjacent nodes, and dividing by the similiarity of the claim with the target predicate
-	for u,v,k,d in fcg.edges.data(keys=True):
+	fcg_edges=fcg.edges.data(keys=True)
+	for u,v,k,d in fcg_edges:
 		if fcg_class=='co_occur':
 			claimID=d['claim_ID']
-			claimIX=claims[claims['claimID']==claimID].index[0]
-			# uw=np.log10(fcg.degree(u))
-			vw=np.log10(fcg.degree(v))
-			dist=dist_p[claimIX]
-			weight=dist*(vw)#+uw)*0.5
+			IX=claims[claims['claimID']==claimID].index[0]
 		elif fcg_class=='fred':
 			# uIX=labels[labels['node_label']==u].index[0]
-			vIX=labels[labels['node_label']==v].index[0]
-			# uw=np.log10(fcg.degree(u))
-			vw=np.log10(fcg.degree(v))
-			dist=dist_p[vIX]#+dist_p[uIX]
-			weight=dist*(vw)#+uw)*0.5
+			IX=labels[labels['node_label']==v].index[0]
+		# uw=np.log10(fcg.degree(u))
+		vw=np.log10(fcg.degree(v))
+		dist=dist_p[IX]#+dist_p[uIX]
+		weight=dist*(vw)#+uw)*0.5#weight=dist*(vw)#+uw)*0.5
 		fcg.edges[u,v,k]['dist']=dist
 		fcg.edges[u,v,k]['weight']=weight
 	#Removing multiedges, by selecting the shortest one
