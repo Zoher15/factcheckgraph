@@ -615,7 +615,7 @@ def checkClaimGraph(g,claim_ID):#,mode):
 	# 	claim_g=nx.Graph()
 	# elif mode=='nx':
 	# 	claim_g=g
-	claim_g=nx.Graph()
+	claim_g=nx.DiGraph()
 	regex_27=re.compile(r'^http:\/\/www\.ontologydesignpatterns\.org\/ont\/fred\/domain\.owl#%27.*')
 	regex_det=re.compile(r'^http:\/\/www\.ontologydesignpatterns\.org\/ont\/fred\/quantifiers\.owl.*$')
 	regex_data=re.compile(r'^http:\/\/www\.ontologydesignpatterns\.org\/ont\/dul\/DUL\.owl#hasDataValue$')
@@ -779,7 +779,6 @@ def fredParse(claims_path,claims,init,end,key):
 	start2=time.time()
 	daysec=86400
 	minsec=60
-	fcg=nx.Graph()
 	rdf=rdflib.Graph()
 	clean_claims={}
 	os.makedirs(claims_path, exist_ok=True)
@@ -945,7 +944,7 @@ def cleanClaimGraph(claim_g,clean_claims):
 #Function save individual claim graphs
 def saveClaimGraph(claim_g,filename):
 	nx.write_edgelist(claim_g,filename+"_clean.edgelist")
-	claim_g=nx.read_edgelist(filename+"_clean.edgelist",comments="@",create_using=nx.MultiGraph)
+	claim_g=nx.read_edgelist(filename+"_clean.edgelist",comments="@",create_using=nx.MultiDiGraph)
 	nx.write_graphml(claim_g,filename+"_clean.graphml",prettyprint=True)
 	plotFredGraph(claim_g,filename+"_clean")
 
@@ -977,11 +976,11 @@ def saveClaimGraph(claim_g,filename):
 #Function to stitch/compile graphs in an iterative way. i.e clean individual graphs before unioning 
 def compileClaimGraph1(index,claims_path,claim_IDs,clean_claims,init,end):
 	end=min(end,len(claim_IDs))
-	fcg=nx.MultiGraph()
+	fcg=nx.MultiDiGraph()
 	for claim_ID in claim_IDs[init:end]:
 		filename=os.path.join(claims_path,"claim{}".format(str(claim_ID)))
 		try:
-			claim_g=nx.read_edgelist(filename+".edgelist",comments="@",create_using=nx.MultiGraph)
+			claim_g=nx.read_edgelist(filename+".edgelist",comments="@",create_using=nx.MultiDiGraph)
 		except:
 			continue
 		claim_g=cleanClaimGraph(claim_g,clean_claims[str(claim_ID)])
@@ -993,7 +992,7 @@ def compileClaimGraph1(index,claims_path,claim_IDs,clean_claims,init,end):
 #Function to stitch/compile graphs in a one shot way. i.e clean entire graph after unioning 
 def compileClaimGraph2(index,claims_path,claim_IDs,clean_claims,init,end):
 	end=min(end,len(claim_IDs))
-	fcg=nx.MultiGraph()
+	fcg=nx.MultiDiGraph()
 	for claim_ID in claim_IDs[init:end]:
 		filename=os.path.join(claims_path,"claim{}".format(str(claim_ID)))
 		try:
@@ -1005,7 +1004,7 @@ def compileClaimGraph2(index,claims_path,claim_IDs,clean_claims,init,end):
 
 #Function to stitch/compile graphs in a hybrid way. i.e clean entire graph after unioning with each claim graph
 def compileClaimGraph3(claims_path,claim_IDs,clean_claims):
-	fcg=nx.MultiGraph()
+	fcg=nx.MultiDiGraph()
 	for claim_ID in claim_IDs:
 		filename=os.path.join(claims_path,"claim{}".format(str(claim_ID)))
 		try:
@@ -1111,7 +1110,7 @@ def createFred(rdf_path,graph_path,fcg_label,init,passive,cpu,compilefred,skipID
 					results=[pool.apply_async(eval("compileClaimGraph"+str(compilefred)), args=(index,claims_path,claim_IDs,clean_claims,index*n,(index+1)*n)) for index in range(cpu)]
 					output=sorted([p.get() for p in results],key=lambda x:x[0])
 					fcgs=list(map(lambda x:x[1],output))
-					master_fcg=nx.MultiGraph()
+					master_fcg=nx.MultiDiGraph()
 					for fcg in fcgs:
 						master_fcg=nx.compose(master_fcg,fcg)
 				else:

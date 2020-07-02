@@ -21,9 +21,9 @@ time python create_fred.py -ft ufcg -cf 1
 cd /gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph/process_graphs/
 # time python find_intersect.py -fcg fred1 -kg dbpedia
 #calculate stats
-time python calculate_stats.py -gc fred1 -gt tfcg1
-time python calculate_stats.py -gc fred1 -gt ffcg1
-time python calculate_stats.py -gc fred1 -gt ufcg1
+time python calculate_stats.py -gc fred -gt tfcg
+time python calculate_stats.py -gc fred -gt ffcg
+time python calculate_stats.py -gc fred -gt ufcg
 time python compile_stats.py
 #klinker
 # conda activate env-kl

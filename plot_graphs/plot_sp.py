@@ -5,8 +5,8 @@ import seaborn as sns
 from sklearn import metrics
 import json
 import matplotlib
-matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+matplotlib.use('Agg')
 import os
 import datetime
 import codecs
@@ -50,7 +50,9 @@ def plot_roc(graph_path,fcg_class):
 				with codecs.open(os.path.join(read_path+"_false_({})".format(e),"paths_{}.json".format(d)),"r","utf-8") as f: 
 					false_paths=json.loads(f.read())
 				true_scores=[float(1)/aggregate_weights(t[1],a,d) if aggregate_weights(t[1],a,d)>0 else 1000 for t in true_paths.items()]
+				# true_scores=[aggregate_weights(t[1],a,d) for t in true_paths.items()]
 				false_scores=[float(1)/aggregate_weights(t[1],a,d) if aggregate_weights(t[1],a,d)>0 else 1000 for t in false_paths.items()]
+				# false_scores=[aggregate_weights(t[1],a,d) for t in false_paths.items()]
 				true_y=[1 for i in range(len(true_scores))]
 				false_y=[0 for i in range(len(false_scores))]
 				y=true_y+false_y

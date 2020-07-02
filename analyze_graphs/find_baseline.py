@@ -6,6 +6,7 @@ import argparse
 import rdflib
 import codecs
 import json
+import seaborn as sns
 from sklearn import metrics
 from itertools import combinations
 from sklearn.metrics.pairwise import cosine_similarity,cosine_distances
@@ -55,9 +56,9 @@ def find_baseline(rdf_path,model_path,embed_path,cpu):
 	except FileNotFoundError:
 		embed_claims(rdf_path,model_path,embed_path,claim_type)
 		false_claims_embed=pd.read_csv(os.path.join(embed_path,"false_claims_embeddings_({}).tsv".format(model_path.split("/")[-1])),delimiter="\t",header=None).values
-	true_true=np.arccos(cosine_similarity(true_claims_embed,true_claims_embed))/np.pi
-	true_false=np.arccos(cosine_similarity(true_claims_embed,false_claims_embed))/np.pi
-	false_false=np.arccos(cosine_similarity(false_claims_embed,false_claims_embed))/np.pi
+	true_true=1-np.arccos(cosine_similarity(true_claims_embed,true_claims_embed))/np.pi
+	true_false=1-np.arccos(cosine_similarity(true_claims_embed,false_claims_embed))/np.pi
+	false_false=1-np.arccos(cosine_similarity(false_claims_embed,false_claims_embed))/np.pi
 	np.fill_diagonal(true_true,np.nan)
 	np.fill_diagonal(false_false,np.nan)
 
@@ -69,44 +70,64 @@ def find_baseline(rdf_path,model_path,embed_path,cpu):
 	false0_y=[0 for i in range(len(false_false))]
 	false1_y=[1 for i in range(len(false_false))]
 
-	title="Baseline using angular distance of claims"
+	title="Baseline using angular similarity of claims"
 
 	true_true_mean=np.apply_along_axis(np.nanmean,1,true_true)
 	true_false_true_mean=np.apply_along_axis(np.nanmean,1,true_false)
 	false_false_mean=np.apply_along_axis(np.nanmean,1,false_false)
 	true_false_false_mean=np.apply_along_axis(np.nanmean,0,true_false)
+	# Zoher's formula
+	# true_scores=(true_true_mean-true_false_true_mean)/((true_true_mean*len(true_true)+true_false_true_mean*len(false_false))/(len(true_true)+len(false_false)))
+	# false_scores=(true_false_false_mean-false_false_mean)/((true_false_false_mean*len(true_true)+false_false_mean*len(false_false))/(len(true_true)+len(false_false)))
+	# Fil's formula
+	true_scores=(true_true_mean*len(true_true)-true_false_true_mean*len(false_false))/(true_true_mean*len(true_true)+true_false_true_mean*len(false_false))
+	false_scores=(true_false_false_mean*len(true_true)-false_false_mean*len(false_false))/(true_false_false_mean*len(true_true)+false_false_mean*len(false_false))
+	#
+	fpr,tpr,thresholds=metrics.roc_curve(true1_y+false0_y,list(true_scores)+list(false_scores), pos_label=1)
+	plt.plot(fpr,tpr,lw=lw,label='scores (%0.2f) '%metrics.auc(fpr,tpr))
 
-	fpr,tpr,thresholds=metrics.roc_curve(true0_y+false1_y,list(true_true_mean)+list(true_false_false_mean), pos_label=1)
-	plt.plot(fpr,tpr,lw=lw,label='true claims mean (%0.2f) '%metrics.auc(fpr,tpr))
+	# fpr,tpr,thresholds=metrics.roc_curve(true1_y+false0_y,list(true_false_true_mean)+list(false_false_mean), pos_label=1)
+	# plt.plot(fpr,tpr,lw=lw,label='false claims mean (%0.2f) '%metrics.auc(fpr,tpr))
 
-	fpr,tpr,thresholds=metrics.roc_curve(true1_y+false0_y,list(true_false_true_mean)+list(false_false_mean), pos_label=1)
-	plt.plot(fpr,tpr,lw=lw,label='false claims mean (%0.2f) '%metrics.auc(fpr,tpr))
+	# true_true_min=np.apply_along_axis(np.nanmin,1,true_true)
+	# true_false_true_min=np.apply_along_axis(np.nanmin,1,true_false)
+	# false_false_min=np.apply_along_axis(np.nanmin,1,false_false)
+	# true_false_false_min=np.apply_along_axis(np.nanmin,0,true_false)
 
-	true_true_min=np.apply_along_axis(np.nanmin,1,true_true)
-	true_false_true_min=np.apply_along_axis(np.nanmin,1,true_false)
-	false_false_min=np.apply_along_axis(np.nanmin,1,false_false)
-	true_false_false_min=np.apply_along_axis(np.nanmin,0,true_false)
+	# fpr,tpr,thresholds=metrics.roc_curve(true0_y+false1_y,list(true_true_min)+list(true_false_false_min), pos_label=1)
+	# plt.plot(fpr,tpr,lw=lw,label='true claims min (%0.2f) '%metrics.auc(fpr,tpr))
 
-	fpr,tpr,thresholds=metrics.roc_curve(true0_y+false1_y,list(true_true_min)+list(true_false_false_min), pos_label=1)
-	plt.plot(fpr,tpr,lw=lw,label='true claims min (%0.2f) '%metrics.auc(fpr,tpr))
+	# fpr,tpr,thresholds=metrics.roc_curve(true1_y+false0_y,list(true_false_true_min)+list(false_false_min), pos_label=1)
+	# plt.plot(fpr,tpr,lw=lw,label='false claims min (%0.2f) '%metrics.auc(fpr,tpr))
 
-	fpr,tpr,thresholds=metrics.roc_curve(true1_y+false0_y,list(true_false_true_min)+list(false_false_min), pos_label=1)
-	plt.plot(fpr,tpr,lw=lw,label='false claims min (%0.2f) '%metrics.auc(fpr,tpr))
+	# true_true_max=np.apply_along_axis(np.nanmax,1,true_true)
+	# true_false_true_max=np.apply_along_axis(np.nanmax,1,true_false)
+	# false_false_max=np.apply_along_axis(np.nanmax,1,false_false)
+	# true_false_false_max=np.apply_along_axis(np.nanmax,0,true_false)
 
-	true_true_max=np.apply_along_axis(np.nanmax,1,true_true)
-	true_false_true_max=np.apply_along_axis(np.nanmax,1,true_false)
-	false_false_max=np.apply_along_axis(np.nanmax,1,false_false)
-	true_false_false_max=np.apply_along_axis(np.nanmax,0,true_false)
+	# fpr,tpr,thresholds=metrics.roc_curve(true0_y+false1_y,list(true_true_max)+list(true_false_false_max), pos_label=1)
+	# plt.plot(fpr,tpr,lw=lw,label='true claims max (%0.2f) '%metrics.auc(fpr,tpr))
 
-	fpr,tpr,thresholds=metrics.roc_curve(true0_y+false1_y,list(true_true_max)+list(true_false_false_max), pos_label=1)
-	plt.plot(fpr,tpr,lw=lw,label='true claims max (%0.2f) '%metrics.auc(fpr,tpr))
-
-	fpr,tpr,thresholds=metrics.roc_curve(true1_y+false0_y,list(true_false_true_max)+list(false_false_max), pos_label=1)
-	plt.plot(fpr,tpr,lw=lw,label='false claims max (%0.2f) '%metrics.auc(fpr,tpr))
+	# fpr,tpr,thresholds=metrics.roc_curve(true1_y+false0_y,list(true_false_true_max)+list(false_false_max), pos_label=1)
+	# plt.plot(fpr,tpr,lw=lw,label='false claims max (%0.2f) '%metrics.auc(fpr,tpr))
 
 	plt.xlabel('True Positive Rate')
 	plt.ylabel('False Positive Rate')
 	plt.legend(loc="lower right")
+	plt.title(title)
+	plt.tight_layout()
+	x = datetime.datetime.now().strftime("%c")
+	title+=" "+x
+	plt.savefig(os.path.join(embed_path,title.replace(" ","_")+".png"))
+	plt.close()
+	plt.clf()
+
+	plt.figure(figsize=(9, 8))
+	sns.distplot(true_scores,hist=False,kde=True,kde_kws={'linewidth': 3},label="true")
+	sns.distplot(false_scores,hist=False,kde=True,kde_kws={'linewidth': 3},label="false")
+	plt.xlabel('Scores')
+	plt.ylabel('Density')
+	plt.legend(loc="upper right")
 	plt.title(title)
 	plt.tight_layout()
 	x = datetime.datetime.now().strftime("%c")
