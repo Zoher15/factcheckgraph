@@ -193,11 +193,16 @@ def find_edges_of_interest(rdf_path,graph_path,embed_path,source_fcg_type,target
 	edges=target_fcg.edges.data(keys=True)
 	for edge in edges:
 		u,v,k,data=edge
-		if source_fcg.has_node(u) and source_fcg.has_node(v) and (nx.has_path(source_fcg,u,v) or nx.has_path(source_fcg,v,u)):#and not source_fcg.has_edge(u,v) and 
+		if source_fcg.has_node(u) and source_fcg.has_node(v) and nx.has_path(source_fcg,u,v):#and not source_fcg.has_edge(u,v) and 
 			try:
 				edges_of_interest[data['claim_ID']].add((u,v))
 			except KeyError:
 				edges_of_interest[data['claim_ID']]=set([(u,v)])
+		elif source_fcg.has_node(u) and source_fcg.has_node(v) and nx.has_path(source_fcg,v,u)
+			try:
+				edges_of_interest[data['claim_ID']].add((v,u))
+			except KeyError:
+				edges_of_interest[data['claim_ID']]=set([(v,u)])
 	return edges_of_interest
 
 
@@ -284,60 +289,58 @@ def find_paths_of_interest(index,rdf_path,graph_path,embed_path,model_path,claim
 			# 	source_fcg.edges[e[0],e[1]].update(data)
 			#################################################################################
 			path_d1=nx.shortest_path(source_fcg,source=u,target=v,weight='dist')
-			path_d2=nx.shortest_path(source_fcg,source=v,target=u,weight='dist')
+			# path_d2=nx.shortest_path(source_fcg,source=v,target=u,weight='dist')
 			path_d_data1={}
-			path_d_data2={}
+			# path_d_data2={}
 			#################################################################################
 			for i in range(len(path_d1)-1):
 				data=source_fcg.edges[path_d1[i],path_d1[i+1]]
 				data['source_claim']=chunkstring(source_claims[source_claims['claimID']==data['claim_ID']]['claim_text'].values[0],75)
 				path_d_data1[str((path_d1[i],path_d1[i+1]))]=data	
 			#################################################################################
-			for i in range(len(path_d2)-1):
-				data=source_fcg.edges[path_d2[i],path_d2[i+1]]
-				data['source_claim']=chunkstring(source_claims[source_claims['claimID']==data['claim_ID']]['claim_text'].values[0],75)
-				path_d_data2[str((path_d2[i],path_d2[i+1]))]=data		
+			# for i in range(len(path_d2)-1):
+			# 	data=source_fcg.edges[path_d2[i],path_d2[i+1]]
+			# 	data['source_claim']=chunkstring(source_claims[source_claims['claimID']==data['claim_ID']]['claim_text'].values[0],75)
+			# 	path_d_data2[str((path_d2[i],path_d2[i+1]))]=data		
 			#################################################################################
 			w1=round(aggregate_edge_data(path_d_data1,'weight'),3)
 			d1=round(aggregate_edge_data(path_d_data1,'dist'),3)
-			w2=round(aggregate_edge_data(path_d_data2,'weight'),3)
-			d2=round(aggregate_edge_data(path_d_data2,'dist'),3)
-			if d1<d2:
-				paths_of_interest_d[claimID][str((u,v,w1,d1))]=path_d_data1
-			else:
-				if d1==d2 and w1==w2:
-					zcount+=1
-				paths_of_interest_d[claimID][str((u,v,w2,d2))]=path_d_data2
+			# w2=round(aggregate_edge_data(path_d_data2,'weight'),3)
+			# d2=round(aggregate_edge_data(path_d_data2,'dist'),3)
+			# if d1<d2:
+			# 	paths_of_interest_d[claimID][str((u,v,w1,d1))]=path_d_data1
+			# else:
+			# 	if d1==d2 and w1==w2:
+			# 		zcount+=1
+			# 	paths_of_interest_d[claimID][str((u,v,w2,d2))]=path_d_data2
+			paths_of_interest_d[claimID][str((u,v,w1,d1))]=path_d_data1
 			#################################################################################
 			path_w1=nx.shortest_path(source_fcg,source=u,target=v,weight='weight')
-			path_w2=nx.shortest_path(source_fcg,source=v,target=u,weight='weight')
+			# path_w2=nx.shortest_path(source_fcg,source=v,target=u,weight='weight')
 			path_w_data1={}
-			path_w_data2={}
+			# path_w_data2={}
 			#################################################################################
 			for i in range(len(path_w1)-1):
 				data=source_fcg.edges[path_w1[i],path_w1[i+1]]
 				data['source_claim']=chunkstring(source_claims[source_claims['claimID']==data['claim_ID']]['claim_text'].values[0],75)
 				path_w_data1[str((path_w1[i],path_w1[i+1]))]=data	
 			#################################################################################
-			for i in range(len(path_w2)-1):
-				data=source_fcg.edges[path_w2[i],path_w2[i+1]]
-				data['source_claim']=chunkstring(source_claims[source_claims['claimID']==data['claim_ID']]['claim_text'].values[0],75)
-				path_w_data2[str((path_w2[i],path_w2[i+1]))]=data
+			# for i in range(len(path_w2)-1):
+			# 	data=source_fcg.edges[path_w2[i],path_w2[i+1]]
+			# 	data['source_claim']=chunkstring(source_claims[source_claims['claimID']==data['claim_ID']]['claim_text'].values[0],75)
+			# 	path_w_data2[str((path_w2[i],path_w2[i+1]))]=data
 			#################################################################################
 			w1=round(aggregate_edge_data(path_w_data1,'weight'),3)
-			w2=round(aggregate_edge_data(path_w_data2,'weight'),3)
 			d1=round(aggregate_edge_data(path_w_data1,'dist'),3)
-			d2=round(aggregate_edge_data(path_w_data2,'dist'),3)
-			if w1<w2:
-				paths_of_interest_w[claimID][str((u,v,w1,d1))]=path_w_data1
-			else:
-				paths_of_interest_w[claimID][str((u,v,w2,d2))]=path_w_data2
+			# w2=round(aggregate_edge_data(path_w_data2,'weight'),3)
+			# d2=round(aggregate_edge_data(path_w_data2,'dist'),3)
+			# if w1<w2:
+			# 	paths_of_interest_w[claimID][str((u,v,w1,d1))]=path_w_data1
+			# else:
+			# 	paths_of_interest_w[claimID][str((u,v,w2,d2))]=path_w_data2
+			paths_of_interest_w[claimID][str((u,v,w1,d1))]=path_w_data1
 			#################################################################################
 			source_fcg=source_fcg2
-		if zcount==z:
-			ccount+=1
-	if ccount==c:
-		print("We win")
 	return index,paths_of_interest_w,paths_of_interest_d
 '''
 Function does the following
