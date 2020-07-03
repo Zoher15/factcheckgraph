@@ -39,51 +39,12 @@ def chunkstring(string,length):
 			string=string[:loc]+"\n"+string[loc+1:]
 	return string.splitlines()
 
-def embed_claims(rdf_path,model_path,embed_path,claim_type):
-	os.makedirs(embed_path, exist_ok=True)
-	model = SentenceTransformer(model_path)
-	claims=pd.read_csv(os.path.join(rdf_path,"{}_claims.csv".format(claim_type)))
-	claims_list=list(claims['claim_text'])
-	claims_embeddings=model.encode(claims_list)
-	with open(os.path.join(embed_path,claim_type+'_claims_embeddings_({}).tsv'.format(model_path.split("/")[-1])),'w',newline='') as f:
-		for vector in claims_embeddings:
-			tsv_output=csv.writer(f,delimiter='\t')
-			tsv_output.writerow(vector)
-	with open(os.path.join(embed_path,claim_type+'_claims_embeddings_labels_({}).tsv'.format(model_path.split("/")[-1])),'w',newline='') as f:
-		vector=['claim_text','claimID','rating']
-		tsv_output=csv.writer(f,delimiter='\t')
-		tsv_output.writerow(vector)
-		for i in range(len(claims)):
-			vector=list((claims.iloc[i]['claim_text'],claims.iloc[i]['claimID'],claim_type))
-			tsv_output=csv.writer(f,delimiter='\t')
-			tsv_output.writerow(vector)
-
 def clean_node_labels(node_label):
 	node_label=node_label.split(':')[-1]
 	#regex to find words in strings like "IllegalAllien" and "Want_3210203" and "President_of_the_United_States"
 	regex_words=re.compile(r'([A-Z][a-z]*|[a-z]+)')
 	node_label=" ".join(regex_words.findall(node_label))
 	return node_label
-
-def embed_nodes(graph_path,model_path,embed_path,fcg_type,fcg_class):
-	os.makedirs(embed_path, exist_ok=True)
-	model = SentenceTransformer(model_path)
-	fcg=nx.read_edgelist(os.path.join(graph_path,fcg_class,fcg_type,"{}.edgelist".format(fcg_type)),comments="@",create_using=nx.MultiDiGraph)
-	nodes_list=list(fcg.nodes)
-	nodes_clean_list=list(map(clean_node_labels,nodes_list))
-	nodes_embeddings=model.encode(nodes_clean_list)
-	with open(os.path.join(embed_path,fcg_type+'_nodes_embeddings_({}).tsv'.format(model_path.split("/")[-1])),'w',newline='') as f:
-		for vector in nodes_embeddings:
-			tsv_output=csv.writer(f,delimiter='\t')
-			tsv_output.writerow(vector)
-	with open(os.path.join(embed_path,fcg_type+'_nodes_embeddings_labels_({}).tsv'.format(model_path.split("/")[-1])),'w',newline='') as f:
-		vector=['node_label','node_clean_label']
-		tsv_output=csv.writer(f,delimiter='\t')
-		tsv_output.writerow(vector)
-		for i in range(len(nodes_list)):
-			vector=list((nodes_list[i],nodes_clean_list[i]))
-			tsv_output=csv.writer(f,delimiter='\t')
-			tsv_output.writerow(vector)
 
 def create_weighted(p,rdf_path,model_path,graph_path,embed_path,claim_type,fcg_type,fcg_class):
 	#Creating fcg read path
@@ -104,10 +65,10 @@ def create_weighted(p,rdf_path,model_path,graph_path,embed_path,claim_type,fcg_t
 	simil_p=cosine_similarity(p,embed)[0]
 	#normalized angular distance
 	dist_p=np.arccos(simil_p)/np.pi
-	fcg=nx.read_edgelist(os.path.join(fcg_path,"{}.edgelist".format(fcg_type)),comments="@",create_using=nx.MultiDiGraph)
+	fcg=nx.read_edgelist(os.path.join(fcg_path,"{}.edgelist".format(fcg_type)),comments="@",create_using=nx.MultiGraph)
 	temp_fcg=nx.MultiDiGraph()
 	temp_fcg.add_edges_from(list(fcg.edges.data(keys=True)))
-	# temp_fcg.add_edges_from(list(map(lambda x:(x[1],x[0],x[2],x[3]),list(fcg.edges.data(keys=True)))))
+	temp_fcg.add_edges_from(list(map(lambda x:(x[1],x[0],x[2],x[3]),list(fcg.edges.data(keys=True)))))
 	fcg=temp_fcg.copy()
 	#assigning weight by summing the log of adjacent nodes, and dividing by the similiarity of the claim with the target predicate
 	fcg_edges=fcg.edges.data(keys=True)
@@ -180,8 +141,8 @@ def find_edges_of_interest(rdf_path,graph_path,embed_path,source_fcg_type,target
 		source_fcg_path=os.path.join(graph_path,fcg_class,source_fcg_type)
 		target_fcg_path=os.path.join(graph_path,"co_occur",target_fcg_type)
 	#loading source and target fcg
-	source_fcg=nx.read_edgelist(os.path.join(source_fcg_path,"{}.edgelist".format(source_fcg_type)),comments="@",create_using=nx.MultiDiGraph)
-	target_fcg=nx.read_edgelist(os.path.join(target_fcg_path,"{}.edgelist".format(target_fcg_type)),comments="@",create_using=nx.MultiDiGraph)
+	source_fcg=nx.read_edgelist(os.path.join(source_fcg_path,"{}.edgelist".format(source_fcg_type)),comments="@",create_using=nx.MultiGraph)
+	target_fcg=nx.read_edgelist(os.path.join(target_fcg_path,"{}.edgelist".format(target_fcg_type)),comments="@",create_using=nx.MultiGraph)
 	edges_of_interest={}
 	'''
 	If the graph is co-occurrence, then the target edges of interest are simply all the edges in the graph.
@@ -198,11 +159,11 @@ def find_edges_of_interest(rdf_path,graph_path,embed_path,source_fcg_type,target
 				edges_of_interest[data['claim_ID']].add((u,v))
 			except KeyError:
 				edges_of_interest[data['claim_ID']]=set([(u,v)])
-		elif source_fcg.has_node(u) and source_fcg.has_node(v) and nx.has_path(source_fcg,v,u)
-			try:
-				edges_of_interest[data['claim_ID']].add((v,u))
-			except KeyError:
-				edges_of_interest[data['claim_ID']]=set([(v,u)])
+		# elif source_fcg.has_node(u) and source_fcg.has_node(v) and nx.has_path(source_fcg,v,u):
+		# 	try:
+		# 		edges_of_interest[data['claim_ID']].add((v,u))
+		# 	except KeyError:
+		# 		edges_of_interest[data['claim_ID']]=set([(v,u)])
 	return edges_of_interest
 
 
@@ -210,8 +171,6 @@ def find_paths_of_interest(index,rdf_path,graph_path,embed_path,model_path,claim
 	paths_of_interest_w={}
 	paths_of_interest_d={}
 	#iterating throuhg the claimIDs of interest
-	c=len(claimIDs)
-	ccount=0
 	for claimID in claimIDs:
 		if source_fcg_type==target_fcg_type:
 			#checking if the source graph (without the given claim), has edges of interest. If not, we skip the claim .i.e continue in the for loop
@@ -289,56 +248,56 @@ def find_paths_of_interest(index,rdf_path,graph_path,embed_path,model_path,claim
 			# 	source_fcg.edges[e[0],e[1]].update(data)
 			#################################################################################
 			path_d1=nx.shortest_path(source_fcg,source=u,target=v,weight='dist')
-			# path_d2=nx.shortest_path(source_fcg,source=v,target=u,weight='dist')
+			path_d2=nx.shortest_path(source_fcg,source=v,target=u,weight='dist')
 			path_d_data1={}
-			# path_d_data2={}
+			path_d_data2={}
 			#################################################################################
 			for i in range(len(path_d1)-1):
 				data=source_fcg.edges[path_d1[i],path_d1[i+1]]
 				data['source_claim']=chunkstring(source_claims[source_claims['claimID']==data['claim_ID']]['claim_text'].values[0],75)
 				path_d_data1[str((path_d1[i],path_d1[i+1]))]=data	
 			#################################################################################
-			# for i in range(len(path_d2)-1):
-			# 	data=source_fcg.edges[path_d2[i],path_d2[i+1]]
-			# 	data['source_claim']=chunkstring(source_claims[source_claims['claimID']==data['claim_ID']]['claim_text'].values[0],75)
-			# 	path_d_data2[str((path_d2[i],path_d2[i+1]))]=data		
+			for i in range(len(path_d2)-1):
+				data=source_fcg.edges[path_d2[i],path_d2[i+1]]
+				data['source_claim']=chunkstring(source_claims[source_claims['claimID']==data['claim_ID']]['claim_text'].values[0],75)
+				path_d_data2[str((path_d2[i],path_d2[i+1]))]=data		
 			#################################################################################
 			w1=round(aggregate_edge_data(path_d_data1,'weight'),3)
 			d1=round(aggregate_edge_data(path_d_data1,'dist'),3)
-			# w2=round(aggregate_edge_data(path_d_data2,'weight'),3)
-			# d2=round(aggregate_edge_data(path_d_data2,'dist'),3)
-			# if d1<d2:
-			# 	paths_of_interest_d[claimID][str((u,v,w1,d1))]=path_d_data1
-			# else:
-			# 	if d1==d2 and w1==w2:
-			# 		zcount+=1
-			# 	paths_of_interest_d[claimID][str((u,v,w2,d2))]=path_d_data2
-			paths_of_interest_d[claimID][str((u,v,w1,d1))]=path_d_data1
+			w2=round(aggregate_edge_data(path_d_data2,'weight'),3)
+			d2=round(aggregate_edge_data(path_d_data2,'dist'),3)
+			if d1<d2:
+				paths_of_interest_d[claimID][str((u,v,w1,d1))]=path_d_data1
+			else:
+				if d1==d2 and w1==w2:
+					zcount+=1
+				paths_of_interest_d[claimID][str((u,v,w2,d2))]=path_d_data2
+			# paths_of_interest_d[claimID][str((u,v,w1,d1))]=path_d_data1
 			#################################################################################
 			path_w1=nx.shortest_path(source_fcg,source=u,target=v,weight='weight')
-			# path_w2=nx.shortest_path(source_fcg,source=v,target=u,weight='weight')
+			path_w2=nx.shortest_path(source_fcg,source=v,target=u,weight='weight')
 			path_w_data1={}
-			# path_w_data2={}
+			path_w_data2={}
 			#################################################################################
 			for i in range(len(path_w1)-1):
 				data=source_fcg.edges[path_w1[i],path_w1[i+1]]
 				data['source_claim']=chunkstring(source_claims[source_claims['claimID']==data['claim_ID']]['claim_text'].values[0],75)
 				path_w_data1[str((path_w1[i],path_w1[i+1]))]=data	
 			#################################################################################
-			# for i in range(len(path_w2)-1):
-			# 	data=source_fcg.edges[path_w2[i],path_w2[i+1]]
-			# 	data['source_claim']=chunkstring(source_claims[source_claims['claimID']==data['claim_ID']]['claim_text'].values[0],75)
-			# 	path_w_data2[str((path_w2[i],path_w2[i+1]))]=data
+			for i in range(len(path_w2)-1):
+				data=source_fcg.edges[path_w2[i],path_w2[i+1]]
+				data['source_claim']=chunkstring(source_claims[source_claims['claimID']==data['claim_ID']]['claim_text'].values[0],75)
+				path_w_data2[str((path_w2[i],path_w2[i+1]))]=data
 			#################################################################################
 			w1=round(aggregate_edge_data(path_w_data1,'weight'),3)
 			d1=round(aggregate_edge_data(path_w_data1,'dist'),3)
-			# w2=round(aggregate_edge_data(path_w_data2,'weight'),3)
-			# d2=round(aggregate_edge_data(path_w_data2,'dist'),3)
-			# if w1<w2:
-			# 	paths_of_interest_w[claimID][str((u,v,w1,d1))]=path_w_data1
-			# else:
-			# 	paths_of_interest_w[claimID][str((u,v,w2,d2))]=path_w_data2
-			paths_of_interest_w[claimID][str((u,v,w1,d1))]=path_w_data1
+			w2=round(aggregate_edge_data(path_w_data2,'weight'),3)
+			d2=round(aggregate_edge_data(path_w_data2,'dist'),3)
+			if w1<w2:
+				paths_of_interest_w[claimID][str((u,v,w1,d1))]=path_w_data1
+			else:
+				paths_of_interest_w[claimID][str((u,v,w2,d2))]=path_w_data2
+			# paths_of_interest_w[claimID][str((u,v,w1,d1))]=path_w_data1
 			#################################################################################
 			source_fcg=source_fcg2
 	return index,paths_of_interest_w,paths_of_interest_d
@@ -372,11 +331,7 @@ def find_shortest_paths(rdf_path,model_path,graph_path,embed_path,source_fcg_typ
 	source_claims=pd.read_csv(os.path.join(rdf_path,"{}_claims.csv".format(source_claim_type)))
 	target_claims=pd.read_csv(os.path.join(rdf_path,"{}_claims.csv".format(target_claim_type)))
 	#loading target claim embeddings
-	try:
-		target_claims_embed=pd.read_csv(os.path.join(embed_path,target_claim_type+"_claims_embeddings_({}).tsv".format(model_path.split("/")[-1])),delimiter="\t",header=None).values
-	except FileNotFoundError:
-		embed_claims(rdf_path,model_path,embed_path,target_claim_type)
-		target_claims_embed=pd.read_csv(os.path.join(embed_path,target_claim_type+"_claims_embeddings_({}).tsv".format(model_path.split("/")[-1])),delimiter="\t",header=None).values
+	target_claims_embed=pd.read_csv(os.path.join(embed_path,target_claim_type+"_claims_embeddings_({}).tsv".format(model_path.split("/")[-1])),delimiter="\t",header=None).values
 	#limiting claimIDs to edges of interest if both graphs are different
 	if source_fcg_type==target_fcg_type:
 		edges_of_interest={}
@@ -412,5 +367,4 @@ if __name__== "__main__":
 	parser.add_argument('-fc','--fcgclass', metavar='FactCheckGraph class',type=str,choices=['co_occur','fred'])
 	parser.add_argument('-cpu','--cpu',metavar='Number of CPUs',type=int,help='Number of CPUs available',default=1)
 	args=parser.parse_args()
-	# embed_claims(args.rdfpath,"roberta-base-nli-stsb-mean-tokens",args.embedpath,args.fcgtype)
 	find_shortest_paths(args.rdfpath,args.modelpath,args.graphpath,args.embedpath,"tfcg",args.fcgtype,args.fcgclass,args.cpu)

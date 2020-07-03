@@ -610,12 +610,12 @@ def nodelabel_mapper(text):
 		return 'un:'+text.split("/")[-1].split("#")[-1]
 
 #function to check a claim and create dictionary of edges to contract and remove
-def checkClaimGraph(g,claim_ID):#,mode):
+def checkClaimGraph(g,claim_ID,graph_type):#,mode):
 	# if mode=='rdf':
 	# 	claim_g=nx.Graph()
 	# elif mode=='nx':
 	# 	claim_g=g
-	claim_g=nx.DiGraph()
+	claim_g=eval(graph_type+'()')
 	regex_27=re.compile(r'^http:\/\/www\.ontologydesignpatterns\.org\/ont\/fred\/domain\.owl#%27.*')
 	regex_det=re.compile(r'^http:\/\/www\.ontologydesignpatterns\.org\/ont\/fred\/quantifiers\.owl.*$')
 	regex_data=re.compile(r'^http:\/\/www\.ontologydesignpatterns\.org\/ont\/dul\/DUL\.owl#hasDataValue$')
@@ -772,7 +772,7 @@ def checkClaimGraph(g,claim_ID):#,mode):
 	return claim_g,nodes2remove,nodes2contract
 
 #fetch fred graph files from their API. slow and dependent on rate
-def fredParse(claims_path,claims,init,end,key):
+def fredParse(claims_path,claims,init,end,key,graph_type):
 	errorclaimid=[]
 	#fred starts
 	start=time.time()
@@ -798,7 +798,7 @@ def fredParse(claims_path,claims,init,end,key):
 				if "You have exceeded your quota" not in r.text and "Runtime Error" not in r.text and "Service Unavailable" not in r.text:
 					if r.status_code in range(100,500) and r.text:
 						g=openFredGraph(filename+".rdf")
-						claim_g,nodes2remove,nodes2contract=checkClaimGraph(g,claim_ID)
+						claim_g,nodes2remove,nodes2contract=checkClaimGraph(g,claim_ID,graph_type)
 						#store pruning data
 						clean_claims[str(claim_ID)]={}
 						clean_claims[str(claim_ID)]['nodes2remove']=nodes2remove
@@ -828,7 +828,7 @@ def fredParse(claims_path,claims,init,end,key):
 	return errorclaimid,clean_claims
 
 #Function to passively parse existing fred rdf files
-def passiveFredParse(index,claims_path,claim_IDs,init,end):
+def passiveFredParse(index,claims_path,claim_IDs,init,end,graph_type):
 	end=min(end,len(claim_IDs))
 	#Reading claim_IDs
 	errorclaimid=[]
@@ -843,7 +843,7 @@ def passiveFredParse(index,claims_path,claim_IDs,init,end):
 			print("Exception Occurred")
 			errorclaimid.append(claim_ID)
 			continue
-		claim_g,nodes2remove,nodes2contract=checkClaimGraph(g,claim_ID)
+		claim_g,nodes2remove,nodes2contract=checkClaimGraph(g,claim_ID,graph_type)
 		#store pruning data
 		clean_claims[str(claim_ID)]={}
 		clean_claims[str(claim_ID)]['nodes2remove']=nodes2remove
@@ -942,9 +942,9 @@ def cleanClaimGraph(claim_g,clean_claims):
 	return claim_g
 
 #Function save individual claim graphs
-def saveClaimGraph(claim_g,filename):
+def saveClaimGraph(claim_g,filename,graph_type):
 	nx.write_edgelist(claim_g,filename+"_clean.edgelist")
-	claim_g=nx.read_edgelist(filename+"_clean.edgelist",comments="@",create_using=nx.MultiDiGraph)
+	claim_g=nx.read_edgelist(filename+"_clean.edgelist",comments="@",create_using=eval(graph_type))
 	nx.write_graphml(claim_g,filename+"_clean.graphml",prettyprint=True)
 	plotFredGraph(claim_g,filename+"_clean")
 
@@ -974,25 +974,25 @@ def saveClaimGraph(claim_g,filename):
 # 	return index,fcg
 
 #Function to stitch/compile graphs in an iterative way. i.e clean individual graphs before unioning 
-def compileClaimGraph1(index,claims_path,claim_IDs,clean_claims,init,end):
+def compileClaimGraph1(index,claims_path,claim_IDs,clean_claims,init,end,graph_type):
 	end=min(end,len(claim_IDs))
-	fcg=nx.MultiDiGraph()
+	fcg=eval(graph_type+'()')
 	for claim_ID in claim_IDs[init:end]:
 		filename=os.path.join(claims_path,"claim{}".format(str(claim_ID)))
 		try:
-			claim_g=nx.read_edgelist(filename+".edgelist",comments="@",create_using=nx.MultiDiGraph)
+			claim_g=nx.read_edgelist(filename+".edgelist",comments="@",create_using=eval(graph_type))
 		except:
 			continue
 		claim_g=cleanClaimGraph(claim_g,clean_claims[str(claim_ID)])
 		claim_g=nx.relabel_nodes(claim_g,lambda x:nodelabel_mapper(x))
-		saveClaimGraph(claim_g,filename)
+		saveClaimGraph(claim_g,filename,graph_type)
 		fcg=nx.compose(fcg,claim_g)
 	return index,fcg
 
 #Function to stitch/compile graphs in a one shot way. i.e clean entire graph after unioning 
-def compileClaimGraph2(index,claims_path,claim_IDs,clean_claims,init,end):
+def compileClaimGraph2(index,claims_path,claim_IDs,clean_claims,init,end,graph_type):
 	end=min(end,len(claim_IDs))
-	fcg=nx.MultiDiGraph()
+	fcg=eval(graph_type+'()')
 	for claim_ID in claim_IDs[init:end]:
 		filename=os.path.join(claims_path,"claim{}".format(str(claim_ID)))
 		try:
@@ -1003,8 +1003,8 @@ def compileClaimGraph2(index,claims_path,claim_IDs,clean_claims,init,end):
 	return index,fcg
 
 #Function to stitch/compile graphs in a hybrid way. i.e clean entire graph after unioning with each claim graph
-def compileClaimGraph3(claims_path,claim_IDs,clean_claims):
-	fcg=nx.MultiDiGraph()
+def compileClaimGraph3(claims_path,claim_IDs,clean_claims,graph_type):
+	fcg=eval(graph_type+'()')
 	for claim_ID in claim_IDs:
 		filename=os.path.join(claims_path,"claim{}".format(str(claim_ID)))
 		try:
@@ -1076,7 +1076,9 @@ def saveFred(fcg,graph_path,fcg_label):
 	edgelistID=np.asarray([[int(node2ID[edge[0]]),int(node2ID[edge[1]]),1] for edge in edges])
 	np.save(write_path+"_edgelistID.npy",edgelistID)
 
-def createFred(rdf_path,graph_path,fcg_label,init,passive,cpu,compilefred,skipID):
+def createFred(rdf_path,graph_path,graph_type,fcg_label,init,passive,cpu,compilefred,skipID):
+	multigraph_types={'undirected':'nx.MultiGraph','directed':'nx.MultiDiGraph'}
+	graph_types={'undirected':'nx.MultiGraph','directed':'nx.MultiDiGraph'}
 	fcg_path=os.path.join(graph_path,"fred",fcg_label)
 	#If union of tfcg and ffcg wants to be created i.e ufcg
 	if fcg_label=="ufcg":
@@ -1107,10 +1109,10 @@ def createFred(rdf_path,graph_path,fcg_label,init,passive,cpu,compilefred,skipID
 				if cpu>1:
 					n=int(len(claim_IDs)/cpu)+1
 					pool=mp.Pool(processes=cpu)					
-					results=[pool.apply_async(eval("compileClaimGraph"+str(compilefred)), args=(index,claims_path,claim_IDs,clean_claims,index*n,(index+1)*n)) for index in range(cpu)]
+					results=[pool.apply_async(eval("compileClaimGraph"+str(compilefred)), args=(index,claims_path,claim_IDs,clean_claims,index*n,(index+1)*n,multigraph_types[graph_type])) for index in range(cpu)]
 					output=sorted([p.get() for p in results],key=lambda x:x[0])
 					fcgs=list(map(lambda x:x[1],output))
-					master_fcg=nx.MultiDiGraph()
+					master_fcg=eval(multigraph_types[graph_type]+'()')
 					for fcg in fcgs:
 						master_fcg=nx.compose(master_fcg,fcg)
 				else:
@@ -1136,7 +1138,7 @@ def createFred(rdf_path,graph_path,fcg_label,init,passive,cpu,compilefred,skipID
 				n=int(len(claim_IDs)/cpu)+1
 				if cpu>1:
 					pool=mp.Pool(processes=cpu)						
-					results=[pool.apply_async(passiveFredParse, args=(index,claims_path,claim_IDs,index*n,(index+1)*n)) for index in range(cpu)]
+					results=[pool.apply_async(passiveFredParse, args=(index,claims_path,claim_IDs,index*n,(index+1)*n,graph_types[graph_type])) for index in range(cpu)]
 					output=sorted([p.get() for p in results],key=lambda x:x[0])
 					errorclaimid=list(chain(*map(lambda x:x[1],output)))
 					clean_claims=dict(ChainMap(*map(lambda x:x[2],output)))
@@ -1146,7 +1148,7 @@ def createFred(rdf_path,graph_path,fcg_label,init,passive,cpu,compilefred,skipID
 			else:
 				keys={"tfcg":"Bearer a5c2a808-cc39-38e6-898d-84ab912b1e5d","ffcg":"Bearer 0d9d562e-a2aa-30df-90df-d52674f2e1f0"}
 				end=len(claims)
-				errorclaimid,clean_claims=fredParse(claims_path,claims,init,end,keys[fcg_label])
+				errorclaimid,clean_claims=fredParse(claims_path,claims,init,end,keys[fcg_label],graph_types[graph_type])
 			np.save(os.path.join(rdf_path,"{}_error_claimID.npy".format(fcg_label)),errorclaimid)
 			with codecs.open(os.path.join(rdf_path,"{}claims_clean.json".format(claim_type)),"w","utf-8") as f:
 				f.write(json.dumps(clean_claims,indent=4,ensure_ascii=False))
@@ -1173,8 +1175,9 @@ if __name__== "__main__":
 	parser.add_argument('-cpu','--cpu',metavar='Number of CPUs',type=int,help='Number of CPUs available',default=1)
 	parser.add_argument('-cf','--compilefred',metavar='Compile method #',type=int,help='Number of compile method',default=0)
 	parser.add_argument('-si','--skipID', metavar='claimID to skip',type=int,help='Claim ID to skip while creation',default=0)
+	parser.add_argument('-gt','--graphtype', metavar='Graph Type Directed/Undirected',type=str,choices=['directed','undirected'])
 	args=parser.parse_args()
-	createFred(args.rdfpath,args.graphpath,args.fcgtype,args.init,args.passive,args.cpu,args.compilefred,args.skipID)
+	createFred(args.rdfpath,args.graphpath,args.graphtype,args.fcgtype,args.init,args.passive,args.cpu,args.compilefred,args.skipID)
 
 
 
