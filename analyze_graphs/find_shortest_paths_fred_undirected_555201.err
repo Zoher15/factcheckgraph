@@ -1,0 +1,60 @@
+multiprocessing.pool.RemoteTraceback: 
+"""
+Traceback (most recent call last):
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/multiprocessing/pool.py", line 121, in worker
+    result = (True, func(*args, **kwds))
+  File "find_shortest_paths.py", line 190, in find_paths_of_interest
+    source_fcg=create_weighted(p,rdf_path,model_path,graph_path,graph_type,embed_path,source_claim_type,source_fcg_type,fcg_class)
+  File "find_shortest_paths.py", line 83, in create_weighted
+    IX=labels[labels['node_label']==v].index[0]
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/pandas/core/indexes/base.py", line 3929, in __getitem__
+    return getitem(key)
+IndexError: index 0 is out of bounds for axis 0 with size 0
+"""
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "find_shortest_paths.py", line 377, in <module>
+    find_shortest_paths(args.rdfpath,args.modelpath,args.graphpath,graph_types[args.graphtype],args.embedpath,"tfcg",args.fcgtype,args.fcgclass,args.cpu)
+  File "find_shortest_paths.py", line 352, in find_shortest_paths
+    output=sorted([p.get() for p in results],key=lambda x:x[0])
+  File "find_shortest_paths.py", line 352, in <listcomp>
+    output=sorted([p.get() for p in results],key=lambda x:x[0])
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/multiprocessing/pool.py", line 657, in get
+    raise self._value
+IndexError: index 0 is out of bounds for axis 0 with size 0
+
+real	0m34.630s
+user	11m28.220s
+sys	0m51.416s
+multiprocessing.pool.RemoteTraceback: 
+"""
+Traceback (most recent call last):
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/multiprocessing/pool.py", line 121, in worker
+    result = (True, func(*args, **kwds))
+  File "find_shortest_paths.py", line 187, in find_paths_of_interest
+    source_fcg=create_weighted(p,rdf_path,model_path,graph_path,graph_type,embed_path,source_claim_type,source_fcg_type+'-'+str(claimID),fcg_class)
+  File "find_shortest_paths.py", line 83, in create_weighted
+    IX=labels[labels['node_label']==v].index[0]
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/pandas/core/indexes/base.py", line 3929, in __getitem__
+    return getitem(key)
+IndexError: index 0 is out of bounds for axis 0 with size 0
+"""
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "find_shortest_paths.py", line 377, in <module>
+    find_shortest_paths(args.rdfpath,args.modelpath,args.graphpath,graph_types[args.graphtype],args.embedpath,"tfcg",args.fcgtype,args.fcgclass,args.cpu)
+  File "find_shortest_paths.py", line 352, in find_shortest_paths
+    output=sorted([p.get() for p in results],key=lambda x:x[0])
+  File "find_shortest_paths.py", line 352, in <listcomp>
+    output=sorted([p.get() for p in results],key=lambda x:x[0])
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/multiprocessing/pool.py", line 657, in get
+    raise self._value
+IndexError: index 0 is out of bounds for axis 0 with size 0
+
+real	0m35.488s
+user	16m53.184s
+sys	0m35.288s

@@ -8,6 +8,7 @@ import codecs
 import json
 import seaborn as sns
 from sklearn import metrics
+from sklearn.neighbors import NearestNeighbors
 from itertools import combinations
 from sklearn.metrics.pairwise import cosine_similarity,cosine_distances
 import multiprocessing as mp
@@ -17,6 +18,8 @@ import datetime
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+from matplotlib.colors import ListedColormap
+from sklearn import neighbors, datasets
 # sys.path.insert(1, '/geode2/home/u110/zkachwal/BigRed3/factcheckgraph/create_graphs')
 # from create_fred import *
 # from create_co_occur import *
@@ -70,7 +73,7 @@ def find_baseline(rdf_path,model_path,embed_path,cpu):
 	false0_y=[0 for i in range(len(false_false))]
 	false1_y=[1 for i in range(len(false_false))]
 
-	title="Baseline using angular similarity of claims"
+	title="ROC Baseline using angular similarity of claims"
 
 	true_true_mean=np.apply_along_axis(np.nanmean,1,true_true)
 	true_false_true_mean=np.apply_along_axis(np.nanmean,1,true_false)
@@ -121,7 +124,7 @@ def find_baseline(rdf_path,model_path,embed_path,cpu):
 	plt.savefig(os.path.join(embed_path,title.replace(" ","_")+".png"))
 	plt.close()
 	plt.clf()
-
+	title=title.replace('ROC','KDE')
 	plt.figure(figsize=(9, 8))
 	sns.distplot(true_scores,hist=False,kde=True,kde_kws={'linewidth': 3},label="true")
 	sns.distplot(false_scores,hist=False,kde=True,kde_kws={'linewidth': 3},label="false")
@@ -136,6 +139,63 @@ def find_baseline(rdf_path,model_path,embed_path,cpu):
 	plt.close()
 	plt.clf()
 
+
+def find_knn(rdf_path,model_path,embed_path,cpu):
+	'''
+	To have an accurate baseline for future: 1. remove claims that do no exist in the fred graph
+	2. Remove claims that are near duplicates
+	'''
+	try:
+		true_claims_embed=pd.read_csv(os.path.join(embed_path,"true_claims_embeddings_({}).tsv".format(model_path.split("/")[-1])),delimiter="\t",header=None).values
+	except FileNotFoundError:
+		embed_claims(rdf_path,model_path,embed_path,claim_type)
+		true_claims_embed=pd.read_csv(os.path.join(embed_path,"true_claims_embeddings_({}).tsv".format(model_path.split("/")[-1])),delimiter="\t",header=None).values
+	try:
+		false_claims_embed=pd.read_csv(os.path.join(embed_path,"false_claims_embeddings_({}).tsv".format(model_path.split("/")[-1])),delimiter="\t",header=None).values
+	except FileNotFoundError:
+		embed_claims(rdf_path,model_path,embed_path,claim_type)
+		false_claims_embed=pd.read_csv(os.path.join(embed_path,"false_claims_embeddings_({}).tsv".format(model_path.split("/")[-1])),delimiter="\t",header=None).values
+	true_y=[1 for i in range(len(true_claims_embed))]
+	false_y=[0 for i in range(len(false_claims_embed))]
+	Y=np.array(true_y[:100]+false_y[:100])
+	X=np.concatenate((true_claims_embed[:100],false_claims_embed[:100]),axis=0)
+	n_neighbors = 5
+	X=np.arccos(cosine_similarity(X,X))/np.pi
+	np.fill_diagonal(X,np.nan)
+	X=np.argpartition(X,n_neighbors)[:,:n_neighbors]
+	Yh=np.apply_along_axis(lambda x:np.mean(Y[x]),1,X)
+	plt.figure(figsize=(9, 8))
+	lw=2
+	plt.plot([0, 1], [0, 1],color='navy',lw=lw,linestyle='--')
+	title="ROC KNN using angular similarity of claims K={}".format(n_neighbors)
+	fpr,tpr,thresholds=metrics.roc_curve(Y,Yh, pos_label=1)
+	plt.plot(fpr,tpr,lw=lw,label='scores (%0.2f) '%metrics.auc(fpr,tpr))
+	plt.xlabel('True Positive Rate')
+	plt.ylabel('False Positive Rate')
+	plt.legend(loc="lower right")
+	plt.title(title)
+	plt.tight_layout()
+	x = datetime.datetime.now().strftime("%c")
+	title+=" "+x
+	plt.savefig(os.path.join(embed_path,title.replace(" ","_")+".png"))
+	plt.close()
+	plt.clf()
+	title=title.replace('ROC','KDE')
+	plt.figure(figsize=(9, 8))
+	sns.distplot(Yh[Yh>=0.5],hist=False,kde=True,kde_kws={'linewidth': 3},label="true")
+	sns.distplot(Yh[Yh<0.5],hist=False,kde=True,kde_kws={'linewidth': 3},label="false")
+	plt.xlabel('Scores')
+	plt.ylabel('Density')
+	plt.legend(loc="upper right")
+	plt.title(title)
+	plt.tight_layout()
+	x = datetime.datetime.now().strftime("%c")
+	title+=" "+x
+	plt.savefig(os.path.join(embed_path,title.replace(" ","_")+".png"))
+	plt.close()
+	plt.clf()
+
+
 if __name__== "__main__":
 	parser=argparse.ArgumentParser(description='Find baseline')
 	parser.add_argument('-r','--rdfpath', metavar='rdf path',type=str,help='Path to the rdf files parsed by FRED',default="/geode2/home/u110/zkachwal/BigRed3/factcheckgraph_data/rdf_files/")
@@ -144,4 +204,5 @@ if __name__== "__main__":
 	parser.add_argument('-cpu','--cpu',metavar='Number of CPUs',type=int,help='Number of CPUs available',default=1)
 	args=parser.parse_args()
 	# embed_claims(args.rdfpath,"roberta-base-nli-stsb-mean-tokens",args.embedpath,args.fcgtype)
-	find_baseline(args.rdfpath,args.modelpath,args.embedpath,args.cpu)
+	# find_baseline(args.rdfpath,args.modelpath,args.embedpath,args.cpu)
+	find_knn(args.rdfpath,args.modelpath,args.embedpath,args.cpu)
