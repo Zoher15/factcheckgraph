@@ -144,8 +144,8 @@ def find_baseline(rdf_path,model_path,embed_path,cpu):
 	plt.clf()
 	title=title.replace('ROC','KDE')
 	plt.figure(figsize=(9, 8))
-	sns.distplot(true_scores,hist=False,kde=True,kde_kws={'linewidth': 3},label="true")
-	sns.distplot(false_scores,hist=False,kde=True,kde_kws={'linewidth': 3},label="false")
+	sns.distplot(true_scores,hist=True,kde=True,kde_kws={'linewidth': 3},label="true",norm_hist=True)
+	sns.distplot(false_scores,hist=True,kde=True,kde_kws={'linewidth': 3},label="false",norm_hist=True)
 	plt.xlabel('Scores')
 	plt.ylabel('Density')
 	plt.legend(loc="upper right")
@@ -157,46 +157,67 @@ def find_baseline(rdf_path,model_path,embed_path,cpu):
 	plt.close()
 	plt.clf()
 
-
 def find_knn(rdf_path,model_path,embed_path,cpu):
 	'''
 	To have an accurate baseline for future: 1. remove claims that do no exist in the fred graph
 	2. Remove claims that are near duplicates
 	'''
+	#load true claims
 	true_claims_embed=pd.read_csv(os.path.join(embed_path,"true_claims_embeddings_({}).tsv".format(model_path.split("/")[-1])),delimiter="\t",header=None).values
 	true_claims_labels=pd.read_csv(os.path.join(embed_path,"true_claims_embeddings_labels_({}).tsv".format(model_path.split("/")[-1])),delimiter="\t",header=None).values
 	false_claims_embed=pd.read_csv(os.path.join(embed_path,"false_claims_embeddings_({}).tsv".format(model_path.split("/")[-1])),delimiter="\t",header=None).values
 	false_claims_labels=pd.read_csv(os.path.join(embed_path,"false_claims_embeddings_labels_({}).tsv".format(model_path.split("/")[-1])),delimiter="\t",header=None).values
+	#set y labels
 	true_y=[1 for i in range(len(true_claims_embed))]
-	false_y=[0 for i in range(len(false_claims_embed))]
+	false_y=[-1 for i in range(len(false_claims_embed))]
 	Y=np.array(true_y+false_y)
+	#set x matrix
 	X=np.concatenate((true_claims_embed,false_claims_embed),axis=0)
-	n_neighbors = 5
+	n_neighbors = 2
+	#find pairwise cosine similarity
 	X=np.arccos(cosine_similarity(X,X))/np.pi
+	# data from claim labels: text, rating, claimID
 	Xlabels=np.concatenate((true_claims_labels[1:],false_claims_labels[1:]),axis=0)
 	np.fill_diagonal(X,np.nan)
+	#Finding n_neighbors
 	Xn=np.argpartition(X,n_neighbors)[:,:n_neighbors]
-	Yh=np.apply_along_axis(lambda x:np.mean(Y[x]),1,Xn)
+	# Yh=np.apply_along_axis(lambda x:np.mean(Y[x]),1,Xn)
+	#Intializing Yh to 0
+	Yh=np.array([float(0) for i in range(Xn.shape[0])])
+	#text in Xlabels
 	Xlabel=np.apply_along_axis(lambda x:Xlabels[x,0],1,Xn)
+	#claimID in Xlabels
 	XclaimID=np.apply_along_axis(lambda x:Xlabels[x,1],1,Xn)
+	#rating in Xlabels
 	Xrating=np.apply_along_axis(lambda x:Xlabels[x,2],1,Xn)
 	Xndict={}
 	for i in range(Xn.shape[0]):
 		text=chunkstring(Xlabels[i][0],100)
 		Xndict[i]={}
+		aggregate=0
 		for j in range(Xn.shape[1]):
-			Xndict[i][j]={}
+			Xndict[i][int(Xn[i,j])]={}
 			n_text=chunkstring(Xlabels[Xn[i,j]][0],100)
-			Xndict[i][j]={'n_text':n_text,'claimID':XclaimID[i,j],'rating':Xrating[i,j],'dist':round(X[i,Xn[i,j]],2)}
+			Xndict[i][Xn[i,j]]={'n_text':n_text,'claimID':XclaimID[i,j],'rating':Xrating[i,j],'dist':round(X[i,Xn[i,j]],2)}
+			aggregate+=Y[Xn[i,j]]*(1-X[i,Xn[i,j]])
 		Xndict[i]=OrderedDict(sorted(Xndict[i].items(), key=lambda t: t[1]['dist']))
+		Yh[i]=float(aggregate)/n_neighbors
 		Xndict[i]['text']=text
-	with codecs.open(os.path.join(embed_path,"knn{}.json".format(n_neighbors)),"w","utf-8") as f:
-		f.write(json.dumps(Xndict,indent=5,ensure_ascii=False))
+		Xndict[i]['predscore']=round(Yh[i],2)
+		Xndict[i]['score']=float(Y[i])
+	Xndict_1={t[0]:t[1] for t in Xndict.items() if t[1]['score']==1}
+	Xndict_0={t[0]:t[1] for t in Xndict.items() if t[1]['score']==-1}
+	Xndict_1=OrderedDict(sorted(Xndict_1.items(), key=lambda t:np.mean([x['dist'] for x in t[1].items() if type(x)==dict])))
+	Xndict_0=OrderedDict(sorted(Xndict_0.items(), key=lambda t:np.mean([x['dist'] for x in t[1].items() if type(x)==dict])))
+	with codecs.open(os.path.join(embed_path,"knn_1_{}.json".format(n_neighbors)),"w","utf-8") as f:
+		f.write(json.dumps(Xndict_1,indent=5,ensure_ascii=False))
+	with codecs.open(os.path.join(embed_path,"knn_0_{}.json".format(n_neighbors)),"w","utf-8") as f:
+		f.write(json.dumps(Xndict_0,indent=5,ensure_ascii=False))
 	plt.figure(figsize=(9, 8))
 	lw=2
 	plt.plot([0, 1], [0, 1],color='navy',lw=lw,linestyle='--')
 	title="ROC KNN using angular similarity of claims K={}".format(n_neighbors)
-	fpr,tpr,thresholds=metrics.roc_curve(Y,Yh, pos_label=1)
+	fpr,tpr,thresholds=metrics.roc_curve(Y,Yh,pos_label=1)
 	plt.plot(fpr,tpr,lw=lw,label='scores (%0.2f) '%metrics.auc(fpr,tpr))
 	plt.xlabel('True Positive Rate')
 	plt.ylabel('False Positive Rate')
@@ -210,8 +231,8 @@ def find_knn(rdf_path,model_path,embed_path,cpu):
 	plt.clf()
 	title=title.replace('ROC','KDE')
 	plt.figure(figsize=(9, 8))
-	sns.distplot(Yh[Yh>=0.5],hist=False,kde=True,kde_kws={'linewidth': 3},label="true")
-	sns.distplot(Yh[Yh<0.5],hist=False,kde=True,kde_kws={'linewidth': 3},label="false")
+	sns.distplot(Yh[Y==1],hist=True,kde=True,kde_kws={'linewidth': 3},label="true",norm_hist=True)
+	sns.distplot(Yh[Y==-1],hist=True,kde=True,kde_kws={'linewidth': 3},label="false",norm_hist=True)
 	plt.xlabel('Scores')
 	plt.ylabel('Density')
 	plt.legend(loc="upper right")
@@ -222,7 +243,6 @@ def find_knn(rdf_path,model_path,embed_path,cpu):
 	plt.savefig(os.path.join(embed_path,title.replace(" ","_")+".png"))
 	plt.close()
 	plt.clf()
-
 
 if __name__== "__main__":
 	parser=argparse.ArgumentParser(description='Find baseline')

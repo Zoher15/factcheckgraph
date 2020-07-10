@@ -1,0 +1,89 @@
+
+real	0m55.153s
+user	14m27.536s
+sys	0m12.608s
+
+real	1m26.006s
+user	48m28.276s
+sys	0m25.764s
+
+real	0m25.995s
+user	6m18.948s
+sys	0m31.420s
+
+real	1m6.539s
+user	24m9.332s
+sys	1m34.364s
+
+real	0m12.289s
+user	0m5.332s
+sys	0m1.624s
+
+real	0m5.689s
+user	0m1.436s
+sys	0m0.944s
+
+real	0m7.364s
+user	0m3.108s
+sys	0m1.020s
+
+real	0m8.017s
+user	0m3.784s
+sys	0m0.956s
+
+real	0m5.879s
+user	0m0.756s
+sys	0m0.952s
+
+real	149m10.230s
+user	6926m23.852s
+sys	30m54.168s
+
+real	51m34.021s
+user	2335m52.308s
+sys	27m9.668s
+
+real	4m20.679s
+user	54m42.188s
+sys	0m33.592s
+
+real	1m22.405s
+user	14m22.284s
+sys	0m11.580s
+
+real	4m31.146s
+user	65m17.044s
+sys	0m26.128s
+
+real	1m47.482s
+user	24m31.204s
+sys	0m11.532s
+
+real	4m14.119s
+user	54m52.940s
+sys	0m35.476s
+
+real	1m18.073s
+user	14m15.880s
+sys	0m10.356s
+
+real	4m26.581s
+user	64m19.328s
+sys	0m26.756s
+
+real	1m43.203s
+user	23m35.928s
+sys	0m10.268s
+
+real	56m43.629s
+user	2638m1.960s
+sys	22m39.836s
+
+real	16m49.647s
+user	664m38.292s
+sys	7m11.456s
+
+real	56m37.259s
+user	2634m59.136s
+sys	23m0.292s
+slurmstepd: error: *** JOB 563035 ON nid00873 CANCELLED AT 2020-07-09T19:55:15 DUE TO TIME LIMIT ***
