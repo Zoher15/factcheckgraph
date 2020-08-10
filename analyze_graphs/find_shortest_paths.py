@@ -178,6 +178,8 @@ def find_paths_of_interest(index,rdf_path,graph_path,graph_type,embed_path,model
 			edges_of_interest=find_edges_of_interest(rdf_path,graph_path,graph_type,embed_path,source_fcg_type+'-'+str(claimID),target_fcg_type,fcg_class)
 			if claimID not in set(list(edges_of_interest.keys())):
 				continue
+			claimIDs=list(edges_of_interest.keys())
+			np.save(os.path.join(graph_path,fcg_class,source_fcg_type,'leave1out','claimIDs_directed_'+source_fcg_type+'-'+str(claimID)+'.npy'),claimIDs)
 		#getting index of claim
 		claimIX=target_claims[target_claims['claimID']==claimID].index[0]
 		p=np.array([target_claims_embed[claimIX]])
@@ -344,6 +346,7 @@ def find_shortest_paths(rdf_path,model_path,graph_path,graph_type,embed_path,sou
 	else:
 		edges_of_interest=find_edges_of_interest(rdf_path,graph_path,graph_type,embed_path,source_fcg_type,target_fcg_type,fcg_class)
 		claimIDs=list(edges_of_interest.keys())
+		np.save(os.path.join(graph_path,fcg_class,source_fcg_type,'claimIDs_directed_'+source_fcg_type+'.npy'),claimIDs)
 	#finding paths of interest
 	n=int(len(claimIDs)/cpu)+1
 	if cpu>1:
