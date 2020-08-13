@@ -43,46 +43,32 @@ def chunkstring(string,length):
 			string=string[:loc]+"\n"+string[loc+1:]
 	return string.splitlines()
 
-def embed_claims(rdf_path,model_path,embed_path,claim_type):
-	os.makedirs(embed_path, exist_ok=True)
-	model = SentenceTransformer(model_path)
-	claims=pd.read_csv(os.path.join(rdf_path,"{}_claims.csv".format(claim_type)))
-	claims_list=list(claims['claim_text'])
-	claims_embeddings=model.encode(claims_list)
-	with open(os.path.join(embed_path,claim_type+'_claims_embeddings_({}).tsv'.format(model_path.split("/")[-1])),'w',newline='') as f:
-		for vector in claims_embeddings:
-			tsv_output=csv.writer(f,delimiter='\t')
-			tsv_output.writerow(vector)
-	with open(os.path.join(embed_path,claim_type+'_claims_embeddings_labels_({}).tsv'.format(model_path.split("/")[-1])),'w',newline='') as f:
-		vector=['claim_text','claimID','rating']
-		tsv_output=csv.writer(f,delimiter='\t')
-		tsv_output.writerow(vector)
-		for i in range(len(claims)):
-			vector=list((claims.iloc[i]['claim_text'],claims.iloc[i]['claimID'],claim_type))
-			tsv_output=csv.writer(f,delimiter='\t')
-			tsv_output.writerow(vector)
-
-def find_baseline(rdf_path,model_path,embed_path,cpu):
+def find_baseline(rdf_path,graph_path,model_path,embed_path,graph_type,fcg_class,cpu):
 	'''
 	To have an accurate baseline for future: 1. remove claims that do no exist in the fred graph
 	2. Remove claims that are near duplicates
 	'''
-	try:
-		true_claims_embed=pd.read_csv(os.path.join(embed_path,"true_claims_embeddings_({}).tsv".format(model_path.split("/")[-1])),delimiter="\t",header=None).values
-	except FileNotFoundError:
-		embed_claims(rdf_path,model_path,embed_path,claim_type)
-		true_claims_embed=pd.read_csv(os.path.join(embed_path,"true_claims_embeddings_({}).tsv".format(model_path.split("/")[-1])),delimiter="\t",header=None).values
-	try:
-		false_claims_embed=pd.read_csv(os.path.join(embed_path,"false_claims_embeddings_({}).tsv".format(model_path.split("/")[-1])),delimiter="\t",header=None).values
-	except FileNotFoundError:
-		embed_claims(rdf_path,model_path,embed_path,claim_type)
-		false_claims_embed=pd.read_csv(os.path.join(embed_path,"false_claims_embeddings_({}).tsv".format(model_path.split("/")[-1])),delimiter="\t",header=None).values
+	#load true and false claims
+	true_claims_embed=pd.read_csv(os.path.join(embed_path,"true_claims_embeddings_({}).tsv".format(model_path.split("/")[-1])),delimiter="\t",header=None).values
+	true_claims_labels=pd.read_csv(os.path.join(embed_path,"true_claims_embeddings_labels_({}).tsv".format(model_path.split("/")[-1])),delimiter="\t",header=None).values
+	false_claims_embed=pd.read_csv(os.path.join(embed_path,"false_claims_embeddings_({}).tsv".format(model_path.split("/")[-1])),delimiter="\t",header=None).values
+	false_claims_labels=pd.read_csv(os.path.join(embed_path,"false_claims_embeddings_labels_({}).tsv".format(model_path.split("/")[-1])),delimiter="\t",header=None).values
+	# if the baseline is for a directed fcg, we only choose the claimIDs used for finding paths in the directed fcg
+	if graph_type=='directed':
+		true_claimIDs=np.array(list(map(int,true_claims_labels[1:,1])))
+		false_claimIDs=np.array(list(map(int,false_claims_labels[1:,1])))
+		directed_tfcg_claimIDs=np.load(os.path.join(graph_path,fcg_class,'tfcg','claimIDs_directed_tfcg.npy'))
+		directed_ffcg_claimIDs=np.load(os.path.join(graph_path,fcg_class,'tfcg','claimIDs_directed_ffcg.npy'))
+		true_claimIDs=np.nonzero(np.isin(true_claimIDs,directed_tfcg_claimIDs,assume_unique=True))[0]
+		false_claimIDs=np.nonzero(np.isin(false_claimIDs,directed_ffcg_claimIDs,assume_unique=True))[0]
+		true_claims_embed=np.take(true_claims_embed,true_claimIDs,axis=0)
+		false_claims_embed=np.take(false_claims_embed,true_claimIDs,axis=0)
+	#Calculating angular distance
 	true_true=1-np.arccos(cosine_similarity(true_claims_embed,true_claims_embed))/np.pi
 	true_false=1-np.arccos(cosine_similarity(true_claims_embed,false_claims_embed))/np.pi
 	false_false=1-np.arccos(cosine_similarity(false_claims_embed,false_claims_embed))/np.pi
 	np.fill_diagonal(true_true,np.nan)
 	np.fill_diagonal(false_false,np.nan)
-
 	plt.figure(figsize=(9, 8))
 	lw=2
 	plt.plot([0, 1], [0, 1],color='navy',lw=lw,linestyle='--')
@@ -162,7 +148,7 @@ def find_knn(rdf_path,model_path,embed_path,cpu):
 	To have an accurate baseline for future: 1. remove claims that do no exist in the fred graph
 	2. Remove claims that are near duplicates
 	'''
-	#load true claims
+	#load true and false claims
 	true_claims_embed=pd.read_csv(os.path.join(embed_path,"true_claims_embeddings_({}).tsv".format(model_path.split("/")[-1])),delimiter="\t",header=None).values
 	true_claims_labels=pd.read_csv(os.path.join(embed_path,"true_claims_embeddings_labels_({}).tsv".format(model_path.split("/")[-1])),delimiter="\t",header=None).values
 	false_claims_embed=pd.read_csv(os.path.join(embed_path,"false_claims_embeddings_({}).tsv".format(model_path.split("/")[-1])),delimiter="\t",header=None).values
@@ -247,10 +233,13 @@ def find_knn(rdf_path,model_path,embed_path,cpu):
 if __name__== "__main__":
 	parser=argparse.ArgumentParser(description='Find baseline')
 	parser.add_argument('-r','--rdfpath', metavar='rdf path',type=str,help='Path to the rdf files parsed by FRED',default="/geode2/home/u110/zkachwal/BigRed3/factcheckgraph_data/rdf_files/")
+	parser.add_argument('-gp','--graphpath', metavar='graph path',type=str,help='Graph directory to store the graphs',default="/geode2/home/u110/zkachwal/BigRed3/factcheckgraph_data/graphs/")
 	parser.add_argument('-mp','--modelpath', metavar='model path',type=str,help='Model directory to load the model',default="/geode2/home/u110/zkachwal/BigRed3/factcheckgraph_data/models/claims-relatedness-model/claims-roberta-base-nli-stsb-mean-tokens-2020-05-27_19-01-27")
 	parser.add_argument('-ep','--embedpath', metavar='embed path',type=str,help='Model directory to save and load embeddings',default="/geode2/home/u110/zkachwal/BigRed3/factcheckgraph_data/embeddings")
+	parser.add_argument('-fcg','--fcgclass', metavar='FactCheckGraph class',type=str,choices=['co_occur','fred'])
+	parser.add_argument('-gt','--graphtype', metavar='Graph Type Directed/Undirected',type=str,choices=['directed','undirected'])
 	parser.add_argument('-cpu','--cpu',metavar='Number of CPUs',type=int,help='Number of CPUs available',default=1)
 	args=parser.parse_args()
 	# embed_claims(args.rdfpath,"roberta-base-nli-stsb-mean-tokens",args.embedpath,args.fcgtype)
-	# find_baseline(args.rdfpath,args.modelpath,args.embedpath,args.cpu)
-	find_knn(args.rdfpath,args.modelpath,args.embedpath,args.cpu)
+	find_baseline(args.rdfpath,args.graphpath,args.modelpath,args.embedpath,args.graphtype,args.fcgclass,args.cpu)
+	# find_knn(args.rdfpath,args.modelpath,args.embedpath,args.cpu,args.directed)

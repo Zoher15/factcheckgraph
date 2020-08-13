@@ -33,9 +33,9 @@ def aggregate_weights(claim_D,mode,mode2):
 
 def plot_roc(graph_path,fcg_class):
 	tfcg_types={"co_occur":"tfcg_co","fred":"tfcg"}
-	embed={'roberta-base-nli-stsb-mean-tokens':'e1','claims-roberta-base-nli-stsb-mean-tokens-2020-05-27_19-01-27':'e2'}
-	mode={'d':'d1','w':'d2'}
-	aggmode={'mean':'a2','max':'a3','min':'a4'}
+	embed={'roberta-base-nli-stsb-mean-tokens':'e1'}#,'claims-roberta-base-nli-stsb-mean-tokens-2020-05-27_19-01-27':'e2'}
+	mode={'w':'d2'}#'d':'d1'}
+	aggmode={'mean':'a2'}#,'max':'a3','min':'a4'}
 	plt.figure(figsize=(9, 8))
 	lw=2
 	plt.plot([0, 1], [0, 1],color='navy',lw=lw,linestyle='--')
@@ -86,9 +86,9 @@ def plot_roc(graph_path,fcg_class):
 
 def plot_dist(graph_path,fcg_class):
 	tfcg_types={"co_occur":"tfcg_co","fred":"tfcg"}
-	embed={'roberta-base-nli-stsb-mean-tokens':'e1','claims-roberta-base-nli-stsb-mean-tokens-2020-05-27_19-01-27':'e2'}
-	mode={'d':'d1','w':'d2'}
-	aggmode={'mean':'a2','max':'a3','min':'a4'}
+	embed={'roberta-base-nli-stsb-mean-tokens':'e1'}#,'claims-roberta-base-nli-stsb-mean-tokens-2020-05-27_19-01-27':'e2'}
+	mode={'w':'d2'}#'d':'d1'}
+	aggmode={'mean':'a2'}#,'max':'a3','min':'a4'}
 	read_path=os.path.join(graph_path,fcg_class,"paths",tfcg_types[fcg_class])
 	plot_path=os.path.join(graph_path,fcg_class,"plots")
 	for e in list(embed.keys()):
@@ -103,8 +103,8 @@ def plot_dist(graph_path,fcg_class):
 					false_paths=json.loads(f.read())
 				true_scores=list(map(lambda t:aggregate_weights(t[1],a,d),true_paths.items()))
 				false_scores=list(map(lambda t:aggregate_weights(t[1],a,d),false_paths.items()))
-				sns.distplot(true_scores,hist=False,kde=True,kde_kws={'linewidth': 3},label="true_"+label)
-				sns.distplot(false_scores,hist=False,kde=True,kde_kws={'linewidth': 3},label="false_"+label)
+				sns.distplot(true_scores,hist=True,kde=True,bins=np.arange(-1,11,0.5),kde_kws={'linewidth': 3},label="true_"+label)
+				sns.distplot(false_scores,hist=True,kde=True,bins=np.arange(-1,11,0.5),kde_kws={'linewidth': 3},label="false_"+label)
 				plt.xlabel('Scores')
 				plt.ylabel('Density')
 				plt.legend(loc="upper right")

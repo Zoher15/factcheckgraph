@@ -346,7 +346,7 @@ def find_shortest_paths(rdf_path,model_path,graph_path,graph_type,embed_path,sou
 	else:
 		edges_of_interest=find_edges_of_interest(rdf_path,graph_path,graph_type,embed_path,source_fcg_type,target_fcg_type,fcg_class)
 		claimIDs=list(edges_of_interest.keys())
-		np.save(os.path.join(graph_path,fcg_class,source_fcg_type,'claimIDs_directed_'+source_fcg_type+'.npy'),claimIDs)
+		np.save(os.path.join(graph_path,fcg_class,source_fcg_type,'claimIDs_directed_'+target_fcg_type+'.npy'),claimIDs)
 	#finding paths of interest
 	n=int(len(claimIDs)/cpu)+1
 	if cpu>1:
