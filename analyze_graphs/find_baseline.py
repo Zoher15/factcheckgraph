@@ -130,8 +130,14 @@ def find_baseline(rdf_path,graph_path,model_path,embed_path,graph_type,fcg_class
 	plt.clf()
 	title=title.replace('ROC','KDE')
 	plt.figure(figsize=(9, 8))
-	sns.distplot(true_scores,hist=True,kde=True,kde_kws={'linewidth': 3},label="true",norm_hist=True)
-	sns.distplot(false_scores,hist=True,kde=True,kde_kws={'linewidth': 3},label="false",norm_hist=True)
+	minscore=np.min(true_scores+false_scores)
+	maxscore=np.max(true_scores+false_scores)
+	intervalscore=float(maxscore-minscore)/20
+	print(intervalscore)
+	print(minscore)
+	print(maxscore)
+	sns.distplot(true_scores,hist=True,kde=True,bins=np.arange(minscore,maxscore+intervalscore,intervalscore),kde_kws={'linewidth': 3},label="true",norm_hist=True)
+	sns.distplot(false_scores,hist=True,kde=True,bins=np.arange(minscore,maxscore+intervalscore,intervalscore),kde_kws={'linewidth': 3},label="false",norm_hist=True)
 	plt.xlabel('Scores')
 	plt.ylabel('Density')
 	plt.legend(loc="upper right")
@@ -143,7 +149,7 @@ def find_baseline(rdf_path,graph_path,model_path,embed_path,graph_type,fcg_class
 	plt.close()
 	plt.clf()
 
-def find_knn(rdf_path,model_path,embed_path,cpu):
+def find_knn(rdf_path,graph_path,model_path,embed_path,graph_type,fcg_class,cpu,n_neighbors):
 	'''
 	To have an accurate baseline for future: 1. remove claims that do no exist in the fred graph
 	2. Remove claims that are near duplicates
@@ -153,13 +159,22 @@ def find_knn(rdf_path,model_path,embed_path,cpu):
 	true_claims_labels=pd.read_csv(os.path.join(embed_path,"true_claims_embeddings_labels_({}).tsv".format(model_path.split("/")[-1])),delimiter="\t",header=None).values
 	false_claims_embed=pd.read_csv(os.path.join(embed_path,"false_claims_embeddings_({}).tsv".format(model_path.split("/")[-1])),delimiter="\t",header=None).values
 	false_claims_labels=pd.read_csv(os.path.join(embed_path,"false_claims_embeddings_labels_({}).tsv".format(model_path.split("/")[-1])),delimiter="\t",header=None).values
+	# if the baseline is for a directed fcg, we only choose the claimIDs used for finding paths in the directed fcg
+	if graph_type=='directed':
+		true_claimIDs=np.array(list(map(int,true_claims_labels[1:,1])))
+		false_claimIDs=np.array(list(map(int,false_claims_labels[1:,1])))
+		directed_tfcg_claimIDs=np.load(os.path.join(graph_path,fcg_class,'tfcg','claimIDs_directed_tfcg.npy'))
+		directed_ffcg_claimIDs=np.load(os.path.join(graph_path,fcg_class,'tfcg','claimIDs_directed_ffcg.npy'))
+		true_claimIDs=np.nonzero(np.isin(true_claimIDs,directed_tfcg_claimIDs,assume_unique=True))[0]
+		false_claimIDs=np.nonzero(np.isin(false_claimIDs,directed_ffcg_claimIDs,assume_unique=True))[0]
+		true_claims_embed=np.take(true_claims_embed,true_claimIDs,axis=0)
+		false_claims_embed=np.take(false_claims_embed,true_claimIDs,axis=0)
 	#set y labels
 	true_y=[1 for i in range(len(true_claims_embed))]
 	false_y=[-1 for i in range(len(false_claims_embed))]
 	Y=np.array(true_y+false_y)
 	#set x matrix
 	X=np.concatenate((true_claims_embed,false_claims_embed),axis=0)
-	n_neighbors = 2
 	#find pairwise cosine similarity
 	X=np.arccos(cosine_similarity(X,X))/np.pi
 	# data from claim labels: text, rating, claimID
@@ -217,8 +232,14 @@ def find_knn(rdf_path,model_path,embed_path,cpu):
 	plt.clf()
 	title=title.replace('ROC','KDE')
 	plt.figure(figsize=(9, 8))
-	sns.distplot(Yh[Y==1],hist=True,kde=True,kde_kws={'linewidth': 3},label="true",norm_hist=True)
-	sns.distplot(Yh[Y==-1],hist=True,kde=True,kde_kws={'linewidth': 3},label="false",norm_hist=True)
+	minscore=np.min(Yh[Y==1]+Yh[Y==-1])
+	maxscore=np.max(Yh[Y==1]+Yh[Y==-1])
+	intervalscore=float(maxscore-minscore)/20
+	print(intervalscore)
+	print(minscore)
+	print(maxscore)
+	sns.distplot(Yh[Y==1],hist=True,kde=True,bins=np.arange(minscore,maxscore+intervalscore,intervalscore),kde_kws={'linewidth': 3},label="true",norm_hist=True)
+	sns.distplot(Yh[Y==-1],hist=True,kde=True,bins=np.arange(minscore,maxscore+intervalscore,intervalscore),kde_kws={'linewidth': 3},label="false",norm_hist=True)
 	plt.xlabel('Scores')
 	plt.ylabel('Density')
 	plt.legend(loc="upper right")
@@ -238,8 +259,12 @@ if __name__== "__main__":
 	parser.add_argument('-ep','--embedpath', metavar='embed path',type=str,help='Model directory to save and load embeddings',default="/geode2/home/u110/zkachwal/BigRed3/factcheckgraph_data/embeddings")
 	parser.add_argument('-fcg','--fcgclass', metavar='FactCheckGraph class',type=str,choices=['co_occur','fred'])
 	parser.add_argument('-gt','--graphtype', metavar='Graph Type Directed/Undirected',type=str,choices=['directed','undirected'])
+	parser.add_argument('-bt','--baselinetype', metavar='Baseline Type All neighbors or K NearestNeighbors',type=str,choices=['all','knn'])
 	parser.add_argument('-cpu','--cpu',metavar='Number of CPUs',type=int,help='Number of CPUs available',default=1)
+	parser.add_argument('-n','--neighbors',metavar='Number of Neighbors',type=int,help='Number of Neighbors for KNN',default=0)
 	args=parser.parse_args()
 	# embed_claims(args.rdfpath,"roberta-base-nli-stsb-mean-tokens",args.embedpath,args.fcgtype)
-	find_baseline(args.rdfpath,args.graphpath,args.modelpath,args.embedpath,args.graphtype,args.fcgclass,args.cpu)
-	# find_knn(args.rdfpath,args.modelpath,args.embedpath,args.cpu,args.directed)
+	if args.baselinetype=='all':
+		find_baseline(args.rdfpath,args.graphpath,args.modelpath,args.embedpath,args.graphtype,args.fcgclass,args.cpu)
+	elif args.baselinetype=='knn':
+		find_knn(args.rdfpath,args.graphpath,args.modelpath,args.embedpath,args.graphtype,args.fcgclass,args.cpu,args.neighbors)

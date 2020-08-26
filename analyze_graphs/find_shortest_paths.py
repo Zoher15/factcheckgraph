@@ -22,6 +22,14 @@ import sys
 # from create_co_occur import *
 import csv
 
+def cleanstring(string):
+	string=re.sub(r'([a-z]*:)','',string)
+	string=re.sub(r'([A-Z]*[a-z]+)_([A-Z]*[a-z]+)',r'\1 \2',string)
+	string=re.sub(r'(_[0-9]*)','',string)
+	string=re.sub(r'([A-Z][a-z]*)',r' \1',string)
+	string=string.replace("( ","(").replace("  "," ").strip()
+	return string
+
 def chunkstring(string,length):
 	chunks=int(len(string)/length)+1
 	offset=0
@@ -121,6 +129,8 @@ def create_ordered_paths(write_path,mode):
 	rw_path=write_path+"_{}".format(mode)
 	with codecs.open(rw_path+".json","r","utf-8") as f: 
 		paths_w=json.loads(f.read())
+	import pdb
+	pdb.set_trace()
 	for mode2 in ['sum','mean','max','min']:
 		ordered_paths=OrderedDict(sorted(paths_w.items(), key=lambda t: aggregate_weights(t[1],mode2,mode)))
 		with codecs.open(rw_path+"_{}.json".format(mode2),"w","utf-8") as f:
@@ -252,22 +262,28 @@ def find_paths_of_interest(index,rdf_path,graph_path,graph_type,embed_path,model
 			#################################################################################
 			path_d1=nx.shortest_path(source_fcg,source=u,target=v,weight='dist')
 			path_d_data1={}
+			path_d_formed_claim1=cleanstring(path_d1[0])
 			#################################################################################
 			for i in range(len(path_d1)-1):
 				data=source_fcg.edges[path_d1[i],path_d1[i+1]]
 				data['source_claim']=chunkstring(source_claims[source_claims['claimID']==data['claim_ID']]['claim_text'].values[0],75)
-				path_d_data1[str((path_d1[i],path_d1[i+1]))]=data	
+				path_d_data1[str((path_d1[i],path_d1[i+1]))]=data
+				path_d_formed_claim1=path_d_formed_claim1+" "+cleanstring(path_d1[i+1])
+			path_d_data1['formed_claim']=path_d_formed_claim1
 			#################################################################################
 			w1=round(aggregate_edge_data(path_d_data1,'weight'),3)
 			d1=round(aggregate_edge_data(path_d_data1,'dist'),3)
 			if graph_type=='nx.MultiGraph':
 				path_d2=nx.shortest_path(source_fcg,source=v,target=u,weight='dist')
 				path_d_data2={}
+				path_d_formed_claim2=cleanstring(path_d2[0])
 				#################################################################################
 				for i in range(len(path_d2)-1):
 					data=source_fcg.edges[path_d2[i],path_d2[i+1]]
 					data['source_claim']=chunkstring(source_claims[source_claims['claimID']==data['claim_ID']]['claim_text'].values[0],75)
-					path_d_data2[str((path_d2[i],path_d2[i+1]))]=data		
+					path_d_data2[str((path_d2[i],path_d2[i+1]))]=data
+					path_d_formed_claim2=path_d_formed_claim2+" "+cleanstring(path_d2[i+1])
+				path_d_data2['formed_claim']=path_d_formed_claim2
 				#################################################################################
 				w2=round(aggregate_edge_data(path_d_data2,'weight'),3)
 				d2=round(aggregate_edge_data(path_d_data2,'dist'),3)
@@ -279,23 +295,29 @@ def find_paths_of_interest(index,rdf_path,graph_path,graph_type,embed_path,model
 				paths_of_interest_d[claimID][str((u,v,w1,d1))]=path_d_data1
 			#################################################################################
 			path_w1=nx.shortest_path(source_fcg,source=u,target=v,weight='weight')
-			path_w_data1={}			
+			path_w_data1={}		
+			path_w_formed_claim1=cleanstring(path_w1[0])
 			#################################################################################
 			for i in range(len(path_w1)-1):
 				data=source_fcg.edges[path_w1[i],path_w1[i+1]]
 				data['source_claim']=chunkstring(source_claims[source_claims['claimID']==data['claim_ID']]['claim_text'].values[0],75)
-				path_w_data1[str((path_w1[i],path_w1[i+1]))]=data	
+				path_w_data1[str((path_w1[i],path_w1[i+1]))]=data
+				path_w_formed_claim1=path_w_formed_claim1+" "+cleanstring(path_w1[i+1])
+			path_w_data1['formed_claim']=path_w_formed_claim1
 			#################################################################################
 			w1=round(aggregate_edge_data(path_w_data1,'weight'),3)
 			d1=round(aggregate_edge_data(path_w_data1,'dist'),3)
 			if graph_type=='nx.MultiGraph':
 				path_w2=nx.shortest_path(source_fcg,source=v,target=u,weight='weight')
 				path_w_data2={}
+				path_w_formed_claim2=cleanstring(path_w2[0])
 				#################################################################################
 				for i in range(len(path_w2)-1):
 					data=source_fcg.edges[path_w2[i],path_w2[i+1]]
 					data['source_claim']=chunkstring(source_claims[source_claims['claimID']==data['claim_ID']]['claim_text'].values[0],75)
 					path_w_data2[str((path_w2[i],path_w2[i+1]))]=data
+					path_w_formed_claim2=path_w_formed_claim2+" "+cleanstring(path_w2[i+1])
+				path_w_data2['formed_claim']=path_w_formed_claim2
 				#################################################################################
 				w2=round(aggregate_edge_data(path_w_data2,'weight'),3)
 				d2=round(aggregate_edge_data(path_w_data2,'dist'),3)
@@ -365,16 +387,16 @@ def find_shortest_paths(rdf_path,model_path,graph_path,graph_type,embed_path,sou
 	create_ordered_paths(write_path,"w")
 	create_ordered_paths(write_path,"d")
 
-if __name__== "__main__":
-	parser=argparse.ArgumentParser(description='Find shortest paths on co-cccurrence graphs')
-	parser.add_argument('-r','--rdfpath', metavar='rdf path',type=str,help='Path to the rdf files parsed by FRED',default="/geode2/home/u110/zkachwal/BigRed3/factcheckgraph_data/rdf_files/")
-	parser.add_argument('-gp','--graphpath', metavar='graph path',type=str,help='Graph directory to store the graphs',default="/geode2/home/u110/zkachwal/BigRed3/factcheckgraph_data/graphs/")
-	parser.add_argument('-mp','--modelpath', metavar='model path',type=str,help='Model directory to load the model',default="/geode2/home/u110/zkachwal/BigRed3/factcheckgraph_data/models/claims-relatedness-model/claims-roberta-base-nli-stsb-mean-tokens-2020-05-27_19-01-27")
-	parser.add_argument('-ep','--embedpath', metavar='embed path',type=str,help='Model directory to save and load embeddings',default="/geode2/home/u110/zkachwal/BigRed3/factcheckgraph_data/embeddings")
-	parser.add_argument('-ft','--fcgtype', metavar='FactCheckGraph type',type=str,choices=['tfcg','ffcg','tfcg_co','ffcg_co','ufcg','covid19'],help='True/False/Union/Covid19 FactCheckGraph')
-	parser.add_argument('-fc','--fcgclass', metavar='FactCheckGraph class',type=str,choices=['co_occur','fred'])
-	parser.add_argument('-gt','--graphtype', metavar='Graph Type Directed/Undirected',type=str,choices=['directed','undirected'])
-	parser.add_argument('-cpu','--cpu',metavar='Number of CPUs',type=int,help='Number of CPUs available',default=1)
-	graph_types={'undirected':'nx.MultiGraph','directed':'nx.MultiDiGraph'}
-	args=parser.parse_args()
-	find_shortest_paths(args.rdfpath,args.modelpath,args.graphpath,graph_types[args.graphtype],args.embedpath,"tfcg",args.fcgtype,args.fcgclass,args.cpu)
+# if __name__== "__main__":
+# 	parser=argparse.ArgumentParser(description='Find shortest paths on co-cccurrence graphs')
+# 	parser.add_argument('-r','--rdfpath', metavar='rdf path',type=str,help='Path to the rdf files parsed by FRED',default="/geode2/home/u110/zkachwal/BigRed3/factcheckgraph_data/rdf_files/")
+# 	parser.add_argument('-gp','--graphpath', metavar='graph path',type=str,help='Graph directory to store the graphs',default="/geode2/home/u110/zkachwal/BigRed3/factcheckgraph_data/graphs/")
+# 	parser.add_argument('-mp','--modelpath', metavar='model path',type=str,help='Model directory to load the model',default="/geode2/home/u110/zkachwal/BigRed3/factcheckgraph_data/models/claims-relatedness-model/claims-roberta-base-nli-stsb-mean-tokens-2020-05-27_19-01-27")
+# 	parser.add_argument('-ep','--embedpath', metavar='embed path',type=str,help='Model directory to save and load embeddings',default="/geode2/home/u110/zkachwal/BigRed3/factcheckgraph_data/embeddings")
+# 	parser.add_argument('-ft','--fcgtype', metavar='FactCheckGraph type',type=str,choices=['tfcg','ffcg','tfcg_co','ffcg_co','ufcg','covid19'],help='True/False/Union/Covid19 FactCheckGraph')
+# 	parser.add_argument('-fc','--fcgclass', metavar='FactCheckGraph class',type=str,choices=['co_occur','fred'])
+# 	parser.add_argument('-gt','--graphtype', metavar='Graph Type Directed/Undirected',type=str,choices=['directed','undirected'])
+# 	parser.add_argument('-cpu','--cpu',metavar='Number of CPUs',type=int,help='Number of CPUs available',default=1)
+# 	graph_types={'undirected':'nx.MultiGraph','directed':'nx.MultiDiGraph'}
+# 	args=parser.parse_args()
+# 	find_shortest_paths(args.rdfpath,args.modelpath,args.graphpath,graph_types[args.graphtype],args.embedpath,"tfcg",args.fcgtype,args.fcgclass,args.cpu)
