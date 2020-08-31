@@ -45,14 +45,14 @@ def plot_roc(graph_path,fcg_class):
 	for e in list(embed.keys()):
 		for d in list(mode.keys()):
 			for a in list(aggmode.keys()):
-				with codecs.open(os.path.join(read_path+"_true_({})".format(e),"paths_{}.json".format(d)),"r","utf-8") as f: 
+				with codecs.open(os.path.join(read_path+"_true_({})".format(e),"paths_d.json"),"r","utf-8") as f: 
 					true_paths=json.loads(f.read())
-				with codecs.open(os.path.join(read_path+"_false_({})".format(e),"paths_{}.json".format(d)),"r","utf-8") as f: 
+				with codecs.open(os.path.join(read_path+"_false_({})".format(e),"paths_d.json"),"r","utf-8") as f: 
 					false_paths=json.loads(f.read())
-				true_scores=[float(1)/aggregate_weights(t[1],a,d) if aggregate_weights(t[1],a,d)>0 else 1000 for t in true_paths.items()]
-				# true_scores=[aggregate_weights(t[1],a,d) for t in true_paths.items()]
-				false_scores=[float(1)/aggregate_weights(t[1],a,d) if aggregate_weights(t[1],a,d)>0 else 1000 for t in false_paths.items()]
-				# false_scores=[aggregate_weights(t[1],a,d) for t in false_paths.items()]
+				true_scores=[float(1)/aggregate_weights(t[1],d,a) if aggregate_weights(t[1],d,a)>0 else 1000 for t in true_paths.items()]
+				# true_scores=[aggregate_weights(t[1],d,a) for t in true_paths.items()]
+				false_scores=[float(1)/aggregate_weights(t[1],d,a) if aggregate_weights(t[1],d,a)>0 else 1000 for t in false_paths.items()]
+				# false_scores=[aggregate_weights(t[1],d,a) for t in false_paths.items()]
 				true_y=[1 for i in range(len(true_scores))]
 				false_y=[0 for i in range(len(false_scores))]
 				y=true_y+false_y
@@ -97,12 +97,12 @@ def plot_dist(graph_path,fcg_class):
 				label=embed[e]+mode[d]+aggmode[a]
 				plt.figure(figsize=(9, 8))
 				title="{} shortest path setence embedded paths".format(fcg_class+"_"+label)
-				with codecs.open(os.path.join(read_path+"_true_({})".format(e),"paths_{}.json".format(d)),"r","utf-8") as f: 
+				with codecs.open(os.path.join(read_path+"_true_({})".format(e),"paths_d.json".format(d)),"r","utf-8") as f: 
 					true_paths=json.loads(f.read())
-				with codecs.open(os.path.join(read_path+"_false_({})".format(e),"paths_{}.json".format(d)),"r","utf-8") as f: 
+				with codecs.open(os.path.join(read_path+"_false_({})".format(e),"paths_d.json".format(d)),"r","utf-8") as f: 
 					false_paths=json.loads(f.read())
-				true_scores=list(map(lambda t:aggregate_weights(t[1],a,d),true_paths.items()))
-				false_scores=list(map(lambda t:aggregate_weights(t[1],a,d),false_paths.items()))
+				true_scores=list(map(lambda t:aggregate_weights(t[1],d,a),true_paths.items()))
+				false_scores=list(map(lambda t:aggregate_weights(t[1],d,a),false_paths.items()))
 				minscore=np.floor(min(true_scores+false_scores))
 				maxscore=np.ceil(max(true_scores+false_scores))
 				intervalscore=float(maxscore-minscore)/20

@@ -14,7 +14,7 @@ from scipy.spatial.distance import cosine
 def embed_formed_claims(rdf_path,graph_path,model_path,embed_path):
 	os.makedirs(embed_path, exist_ok=True)
 	model = SentenceTransformer(model_path)
-	for source_fcg_type in ['tfcg','ffcg']:
+	for source_fcg_type in ['tfcg']:
 		for target_claim_type in ['true','false']:
 			#loading claims
 			target_claims=pd.read_csv(os.path.join(rdf_path,"{}_claims.csv".format(target_claim_type)))
@@ -34,9 +34,9 @@ def embed_formed_claims(rdf_path,graph_path,model_path,embed_path):
 				dists=[round(np.arccos(1-cosine(ps[i],formed_claims_embed[i]))/np.pi,3) for i in range(len(formed_claims_keys))]
 				for i in range(len(formed_claims_keys)):
 					u,v,w,d=eval(formed_claims_keys[i][1])
-					new_key=str((u,v,w,d,dist[i]))
-					paths[formed_claims_keys[i][0]][new_key] = paths[formed_claims_keys[i][0]][formed_claims_keys[i][1]]
-				with codecs.open(write_path+"2.json","w","utf-8") as f: 
+					new_key=str((u,v,w,d,dists[i]))
+					paths[formed_claims_keys[i][0]][new_key] = paths[formed_claims_keys[i][0]].pop(formed_claims_keys[i][1])
+				with codecs.open(write_path+".json","w","utf-8") as f: 
 					f.write(json.dumps(paths,indent=5,ensure_ascii=False))
 
 if __name__== "__main__":
