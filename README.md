@@ -8,7 +8,7 @@ The graph creation is done by using a tool called FRED, which converts sentences
 Graph processing involves calculating the statistics of the graphs and finding intersects between graphs.
 
 ## Graph Analysis
-Graph analysis involves mining shortest paths using different metrics on the graphs for predicting the truth score of an unseen claim (unseen refers to a claim left out during the graph creation process).
+Graph analysis involves mining shortest paths using different centrality metrics on the graphs for predicting the truth score of an unseen claim (unseen refers to a claim left out during the graph creation process).
 
 ## Graph Plotting
 This plots the results of the scores collected from the graph analysis step using an ROC and the distribution using kernel density estimator with histograms.
