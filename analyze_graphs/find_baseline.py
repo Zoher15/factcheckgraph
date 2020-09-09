@@ -57,8 +57,8 @@ def find_baseline(rdf_path,graph_path,model_path,embed_path,graph_type,fcg_class
 	if graph_type=='directed':
 		true_claimIDs=np.array(list(map(int,true_claims_labels[1:,1])))
 		false_claimIDs=np.array(list(map(int,false_claims_labels[1:,1])))
-		directed_tfcg_claimIDs=np.load(os.path.join(graph_path,fcg_class,'tfcg','claimIDs_directed_tfcg.npy'))
-		directed_ffcg_claimIDs=np.load(os.path.join(graph_path,fcg_class,'tfcg','claimIDs_directed_ffcg.npy'))
+		directed_tfcg_claimIDs=np.load(os.path.join(graph_path,fcg_class,'tfcg','directed_tfcg_true_claimIDs.npy'))
+		directed_ffcg_claimIDs=np.load(os.path.join(graph_path,fcg_class,'tfcg','directed_tfcg_false_claimIDs.npy'))
 		true_claimIDs=np.nonzero(np.isin(true_claimIDs,directed_tfcg_claimIDs,assume_unique=True))[0]
 		false_claimIDs=np.nonzero(np.isin(false_claimIDs,directed_ffcg_claimIDs,assume_unique=True))[0]
 		true_claims_embed=np.take(true_claims_embed,true_claimIDs,axis=0)
@@ -69,6 +69,7 @@ def find_baseline(rdf_path,graph_path,model_path,embed_path,graph_type,fcg_class
 	false_false=1-np.arccos(cosine_similarity(false_claims_embed,false_claims_embed))/np.pi
 	np.fill_diagonal(true_true,np.nan)
 	np.fill_diagonal(false_false,np.nan)
+	##################################################################################ROC PLOT
 	plt.figure(figsize=(9, 8))
 	lw=2
 	plt.plot([0, 1], [0, 1],color='navy',lw=lw,linestyle='--')
@@ -87,8 +88,8 @@ def find_baseline(rdf_path,graph_path,model_path,embed_path,graph_type,fcg_class
 	# true_scores=(true_true_mean-true_false_true_mean)/((true_true_mean*len(true_true)+true_false_true_mean*len(false_false))/(len(true_true)+len(false_false)))
 	# false_scores=(true_false_false_mean-false_false_mean)/((true_false_false_mean*len(true_true)+false_false_mean*len(false_false))/(len(true_true)+len(false_false)))
 	# Fil's formula
-	true_scores=(true_true_mean*len(true_true)-true_false_true_mean*len(false_false))/(true_true_mean*len(true_true)+true_false_true_mean*len(false_false))
-	false_scores=(true_false_false_mean*len(true_true)-false_false_mean*len(false_false))/(true_false_false_mean*len(true_true)+false_false_mean*len(false_false))
+	true_scores=list((true_true_mean*len(true_true)-true_false_true_mean*len(false_false))/(true_true_mean*len(true_true)+true_false_true_mean*len(false_false)))
+	false_scores=list((true_false_false_mean*len(true_true)-false_false_mean*len(false_false))/(true_false_false_mean*len(true_true)+false_false_mean*len(false_false)))
 	#
 	fpr,tpr,thresholds=metrics.roc_curve(true1_y+false0_y,list(true_scores)+list(false_scores), pos_label=1)
 	plt.plot(fpr,tpr,lw=lw,label='scores (%0.2f) '%metrics.auc(fpr,tpr))
@@ -129,7 +130,9 @@ def find_baseline(rdf_path,graph_path,model_path,embed_path,graph_type,fcg_class
 	plt.close()
 	plt.clf()
 	title=title.replace('ROC','KDE')
+	##################################################################################KDE PLOT
 	plt.figure(figsize=(9, 8))
+	Yh=1-Yh
 	minscore=np.min(true_scores+false_scores)
 	maxscore=np.max(true_scores+false_scores)
 	intervalscore=float(maxscore-minscore)/20
@@ -138,7 +141,7 @@ def find_baseline(rdf_path,graph_path,model_path,embed_path,graph_type,fcg_class
 	print(maxscore)
 	sns.distplot(true_scores,hist=True,kde=True,bins=np.arange(minscore,maxscore+intervalscore,intervalscore),kde_kws={'linewidth': 3},label="true",norm_hist=True)
 	sns.distplot(false_scores,hist=True,kde=True,bins=np.arange(minscore,maxscore+intervalscore,intervalscore),kde_kws={'linewidth': 3},label="false",norm_hist=True)
-	plt.xlabel('Similarity Scores')
+	plt.xlabel('Distance Scores (lower is positive)')
 	plt.ylabel('Density')
 	plt.legend(loc="upper right")
 	plt.title(title)
@@ -163,8 +166,8 @@ def find_knn(rdf_path,graph_path,model_path,embed_path,graph_type,fcg_class,cpu,
 	if graph_type=='directed':
 		true_claimIDs=np.array(list(map(int,true_claims_labels[1:,1])))
 		false_claimIDs=np.array(list(map(int,false_claims_labels[1:,1])))
-		directed_tfcg_claimIDs=np.load(os.path.join(graph_path,fcg_class,'tfcg','claimIDs_directed_tfcg.npy'))
-		directed_ffcg_claimIDs=np.load(os.path.join(graph_path,fcg_class,'tfcg','claimIDs_directed_ffcg.npy'))
+		directed_tfcg_claimIDs=np.load(os.path.join(graph_path,fcg_class,'tfcg','directed_tfcg_true_claimIDs.npy'))
+		directed_ffcg_claimIDs=np.load(os.path.join(graph_path,fcg_class,'tfcg','directed_tfcg_false_claimIDs.npy'))
 		true_claimIDs=np.nonzero(np.isin(true_claimIDs,directed_tfcg_claimIDs,assume_unique=True))[0]
 		false_claimIDs=np.nonzero(np.isin(false_claimIDs,directed_ffcg_claimIDs,assume_unique=True))[0]
 		true_claims_embed=np.take(true_claims_embed,true_claimIDs,axis=0)
@@ -214,6 +217,7 @@ def find_knn(rdf_path,graph_path,model_path,embed_path,graph_type,fcg_class,cpu,
 		f.write(json.dumps(Xndict_1,indent=5,ensure_ascii=False))
 	with codecs.open(os.path.join(embed_path,"knn_0_{}.json".format(n_neighbors)),"w","utf-8") as f:
 		f.write(json.dumps(Xndict_0,indent=5,ensure_ascii=False))
+	##################################################################################ROC PLOT
 	plt.figure(figsize=(9, 8))
 	lw=2
 	plt.plot([0, 1], [0, 1],color='navy',lw=lw,linestyle='--')
@@ -230,17 +234,19 @@ def find_knn(rdf_path,graph_path,model_path,embed_path,graph_type,fcg_class,cpu,
 	plt.savefig(os.path.join(embed_path,title.replace(" ","_")+".png"))
 	plt.close()
 	plt.clf()
+	##################################################################################KDE PLOT
 	title=title.replace('ROC','KDE')
 	plt.figure(figsize=(9, 8))
-	minscore=np.min(Yh[Y==1]+Yh[Y==-1])
-	maxscore=np.max(Yh[Y==1]+Yh[Y==-1])
+	Yh=1-Yh
+	minscore=np.min(list(Yh[Y==1])+list(Yh[Y==-1]))
+	maxscore=np.max(list(Yh[Y==1])+list(Yh[Y==-1]))
 	intervalscore=float(maxscore-minscore)/20
 	print(intervalscore)
 	print(minscore)
 	print(maxscore)
 	sns.distplot(Yh[Y==1],hist=True,kde=True,bins=np.arange(minscore,maxscore+intervalscore,intervalscore),kde_kws={'linewidth': 3},label="true",norm_hist=True)
 	sns.distplot(Yh[Y==-1],hist=True,kde=True,bins=np.arange(minscore,maxscore+intervalscore,intervalscore),kde_kws={'linewidth': 3},label="false",norm_hist=True)
-	plt.xlabel('Similarity Scores')
+	plt.xlabel('Distance Scores (lower is positive)')
 	plt.ylabel('Density')
 	plt.legend(loc="upper right")
 	plt.title(title)
