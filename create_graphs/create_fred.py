@@ -22,6 +22,7 @@ import json
 import numpy as np
 import xml.sax
 import html
+from operator import itemgetter
 from collections import ChainMap 
 from itertools import chain
 import multiprocessing as mp
@@ -769,6 +770,8 @@ def checkClaimGraph(g,claim_ID,graph_type):#,mode):
 		# 		nodes2contract['dbpediassoc'].append((c,a))
 		# 	elif (regex_fredup.match(c) and regex_dbpedia.match(a)) and (regex_fredup.match(c)[1]!="Of" and regex_fredup.match(c)[1]!="Thing") and (regex_fredup.match(c)[1].split("_")[0].lower() in regex_dbpedia.match(a)[1].lower()):
 		# 		nodes2contract['dbpediassoc'].append((a,c))
+	nodes2remove={k:sorted(nodes2remove[k]) for k in nodes2remove.keys() if len(nodes2remove[k])>0}
+	nodes2contract={k:sorted(nodes2contract[k]) for k in nodes2contract.keys() if len(nodes2contract[k])>0}
 	return claim_g,nodes2remove,nodes2contract
 
 #fetch fred graph files from their API. slow and dependent on rate
@@ -894,7 +897,8 @@ def contractClaimGraph(claim_g,contract_edgelist):
 def cleanClaimGraph(claim_g,clean_claims):
 	nodes2remove=clean_claims['nodes2remove']
 	nodes2contract=clean_claims['nodes2contract']
-	contract_edgelist=nodes2contract['type']+nodes2contract['quality']+nodes2contract['subclass']+nodes2contract['equivalence']+nodes2contract['identity']+nodes2contract['num']
+	contract_edgelist=[edge for edgelist in nodes2contract.values() for edge in edgelist]
+	remove_nodelist=[node for nodelist in nodes2remove.values() for node in nodelist]
 	claim_g=contractClaimGraph(claim_g,contract_edgelist)
 	'''
 	After contracting edges, sometimes the edge hasQuality now exists between two words like Related and RelatedAccount.
@@ -913,25 +917,7 @@ def cleanClaimGraph(claim_g,clean_claims):
 				print((nodelabel_mapper(u),nodelabel_mapper(v),d['label']))
 	claim_g=contractClaimGraph(claim_g,contract_edgelist)
 	#remove nodes
-	for node in nodes2remove['%27']:
-		if claim_g.has_node(node):
-			claim_g.remove_node(node)
-	for node in nodes2remove['det']:
-		if claim_g.has_node(node):
-			claim_g.remove_node(node)
-	for node in nodes2remove['data']:
-		if claim_g.has_node(node):
-			claim_g.remove_node(node)
-	for node in nodes2remove['prop']:
-		if claim_g.has_node(node):
-			claim_g.remove_node(node)
-	for node in nodes2remove['schema']:
-		if claim_g.has_node(node):
-			claim_g.remove_node(node)
-	for node in nodes2remove['dul']:
-		if claim_g.has_node(node):
-			claim_g.remove_node(node)
-	for node in nodes2remove['thing']:
+	for node in remove_nodelist:
 		if claim_g.has_node(node):
 			claim_g.remove_node(node)
 	#removing isolates

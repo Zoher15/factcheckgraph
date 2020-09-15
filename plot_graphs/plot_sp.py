@@ -36,7 +36,7 @@ def plot_roc(graph_path,fcg_class):
 	tfcg_types={"co_occur":"tfcg_co","fred":"tfcg"}
 	embed={'roberta-base-nli-stsb-mean-tokens':'e1'}#,'claims-roberta-base-nli-stsb-mean-tokens-2020-05-27_19-01-27':'e2'}
 	mode={'w':'d1'}#,'d':'d2'}#,'f':'d3'}
-	aggmode={'min':'a2'}#,'mean':'a1'}#,'max':'a3'}
+	aggmode={'mean':'a1'}#,'min':'a2'}#,'max':'a3'}
 	plt.figure(figsize=(9, 8))
 	lw=2
 	plt.plot([0, 1], [0, 1],color='navy',lw=lw,linestyle='--')
@@ -51,22 +51,22 @@ def plot_roc(graph_path,fcg_class):
 				with codecs.open(os.path.join(read_path+"_false_({})".format(e),"paths_d.json"),"r","utf-8") as f: 
 					false_paths=json.loads(f.read())
 				###################################################################################################
-				true_directed_claimIDs=np.load(os.path.join(graph_path,fcg_class,tfcg_types[fcg_class],"directed_tfcg_true_claimIDs.npy"))
-				false_directed_claimIDs=np.load(os.path.join(graph_path,fcg_class,tfcg_types[fcg_class],"directed_tfcg_false_claimIDs.npy"))
-				non_true_directed_claimIDs=set(true_paths.keys())-set(true_directed_claimIDs)
-				non_false_directed_claimIDs=set(false_paths.keys())-set(false_directed_claimIDs)
+				# true_directed_claimIDs=np.load(os.path.join(graph_path,fcg_class,tfcg_types[fcg_class],"directed_tfcg_true_claimIDs.npy"))
+				# false_directed_claimIDs=np.load(os.path.join(graph_path,fcg_class,tfcg_types[fcg_class],"directed_tfcg_false_claimIDs.npy"))
+				# non_true_directed_claimIDs=set(true_paths.keys())-set(true_directed_claimIDs)
+				# non_false_directed_claimIDs=set(false_paths.keys())-set(false_directed_claimIDs)
 				# true_paths={key:true_paths[key] for key in true_directed_claimIDs}
 				# false_paths={key:false_paths[key] for key in false_directed_claimIDs}
 				# with codecs.open(os.path.join(read_path+"_true_({})".format(e),"paths_d_directed.json"),"w","utf-8") as f:
 				# 	f.write(json.dumps(true_paths,indent=5,ensure_ascii=False))
 				# with codecs.open(os.path.join(read_path+"_false_({})".format(e),"paths_d_directed.json"),"w","utf-8") as f:
 				# 	f.write(json.dumps(false_paths,indent=5,ensure_ascii=False))
-				true_paths={key:true_paths[key] for key in non_true_directed_claimIDs}
-				false_paths={key:false_paths[key] for key in non_false_directed_claimIDs}
-				with codecs.open(os.path.join(read_path+"_true_({})".format(e),"paths_d_full-directed.json"),"w","utf-8") as f:
-					f.write(json.dumps(true_paths,indent=5,ensure_ascii=False))
-				with codecs.open(os.path.join(read_path+"_false_({})".format(e),"paths_d_full-directed.json"),"w","utf-8") as f:
-					f.write(json.dumps(false_paths,indent=5,ensure_ascii=False))
+				# true_paths={key:true_paths[key] for key in non_true_directed_claimIDs}
+				# false_paths={key:false_paths[key] for key in non_false_directed_claimIDs}
+				# with codecs.open(os.path.join(read_path+"_true_({})".format(e),"paths_d_full-directed.json"),"w","utf-8") as f:
+				# 	f.write(json.dumps(true_paths,indent=5,ensure_ascii=False))
+				# with codecs.open(os.path.join(read_path+"_false_({})".format(e),"paths_d_full-directed.json"),"w","utf-8") as f:
+				# 	f.write(json.dumps(false_paths,indent=5,ensure_ascii=False))
 				###################################################################################################
 				true_scores=[float(1)/aggregate_weights(t[1],d,a) if aggregate_weights(t[1],d,a)>0 else 1000 for t in true_paths.items()]
 				false_scores=[float(1)/aggregate_weights(t[1],d,a) if aggregate_weights(t[1],d,a)>0 else 1000 for t in false_paths.items()]
@@ -107,7 +107,7 @@ def plot_dist(graph_path,fcg_class):
 	tfcg_types={"co_occur":"tfcg_co","fred":"tfcg"}
 	embed={'roberta-base-nli-stsb-mean-tokens':'e1'}#,'claims-roberta-base-nli-stsb-mean-tokens-2020-05-27_19-01-27':'e2'}
 	mode={'w':'d1'}#,'f':'d3'}#'d':'d1'}
-	aggmode={'min':'a2'}#,'mean':'a1'}#,'max':'a3'}
+	aggmode={'mean':'a1'}#,'min':'a2'}#,'max':'a3'}
 	read_path=os.path.join(graph_path,fcg_class,"paths",tfcg_types[fcg_class])
 	plot_path=os.path.join(graph_path,fcg_class,"plots")
 	for e in list(embed.keys()):
@@ -121,14 +121,14 @@ def plot_dist(graph_path,fcg_class):
 				with codecs.open(os.path.join(read_path+"_false_({})".format(e),"paths_{}.json".format(d)),"r","utf-8") as f: 
 					false_paths=json.loads(f.read())
 				###################################################################################################
-				true_directed_claimIDs=np.load(os.path.join(graph_path,fcg_class,tfcg_types[fcg_class],"directed_tfcg_true_claimIDs.npy"))
-				false_directed_claimIDs=np.load(os.path.join(graph_path,fcg_class,tfcg_types[fcg_class],"directed_tfcg_false_claimIDs.npy"))
-				non_true_directed_claimIDs=set(true_paths.keys())-set(true_directed_claimIDs)
-				non_false_directed_claimIDs=set(false_paths.keys())-set(false_directed_claimIDs)
+				# true_directed_claimIDs=np.load(os.path.join(graph_path,fcg_class,tfcg_types[fcg_class],"directed_tfcg_true_claimIDs.npy"))
+				# false_directed_claimIDs=np.load(os.path.join(graph_path,fcg_class,tfcg_types[fcg_class],"directed_tfcg_false_claimIDs.npy"))
+				# non_true_directed_claimIDs=set(true_paths.keys())-set(true_directed_claimIDs)
+				# non_false_directed_claimIDs=set(false_paths.keys())-set(false_directed_claimIDs)
 				# true_paths={key:true_paths[key] for key in true_directed_claimIDs}
 				# false_paths={key:false_paths[key] for key in false_directed_claimIDs}
-				true_paths={key:true_paths[key] for key in non_true_directed_claimIDs}
-				false_paths={key:false_paths[key] for key in non_false_directed_claimIDs}
+				# true_paths={key:true_paths[key] for key in non_true_directed_claimIDs}
+				# false_paths={key:false_paths[key] for key in non_false_directed_claimIDs}
 				###################################################################################################
 				true_scores=list(map(lambda t:aggregate_weights(t[1],d,a),true_paths.items()))
 				false_scores=list(map(lambda t:aggregate_weights(t[1],d,a),false_paths.items()))
@@ -140,7 +140,7 @@ def plot_dist(graph_path,fcg_class):
 				print(maxscore)
 				sns.distplot(true_scores,hist=True,kde=True,bins=np.arange(minscore,maxscore+intervalscore,intervalscore),kde_kws={'linewidth': 3},label="true_"+label)
 				sns.distplot(false_scores,hist=True,kde=True,bins=np.arange(minscore,maxscore+intervalscore,intervalscore),kde_kws={'linewidth': 3},label="false_"+label)
-				plt.xlabel('Distance')
+				plt.xlabel('Distance Scores (lower is positive)')
 				plt.ylabel('Density')
 				plt.legend(loc="upper right")
 				plt.title(title)

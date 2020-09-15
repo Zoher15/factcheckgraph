@@ -12,8 +12,8 @@
 source /N/u/zkachwal/Carbonate/miniconda3/etc/profile.d/conda.sh
 conda activate
 cd /gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph/create_graphs/
-time python create_fred.py -ft tfcg -p -cpu 48
-time python create_fred.py -ft ffcg -p -cpu 48
+time python create_fred.py -ft tfcg -cpu 48 -p -gt undirected
+time python create_fred.py -ft ffcg -cpu 48 -p -gt undirected
 # time python create_fred.py -ft ufcg
 # time python create_backbone.py -fcg fred -ft tfcg -kg dbpedia
 # time python create_backbone.py -fcg fred -ft ffcg -kg dbpedia
