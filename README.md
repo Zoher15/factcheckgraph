@@ -1,6 +1,8 @@
 # FactCheckGraph
 This project aims to explore automated fact-checking of real-world claims (annotated by fact-checkers) by creating semantic knowledge graphs from these claims and exploring different network centrality metrics to mine and predict a 'truth' score for unseen claims.
 
+This project aims to create knowledge graphs from the media for automated fact-checking of new headlines and claims. The data that the KG is constructed from, consists of real-world claims, annotated by fact-checkers as True or False. We calculate a truth score using this KG for new headlines and/or claims by using using different network centrality measures. 
+
 ## Graph Creation
 The graph creation is done by using a tool called FRED, which converts sentences to semantic graphs. Graph Creation for predicting the truth score for a claim is done by leaving the said claim out of graph creation.
 
