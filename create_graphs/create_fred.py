@@ -899,7 +899,7 @@ def cleanClaimGraph(claim_g,clean_claims):
 	nodes2contract=clean_claims['nodes2contract']
 	contract_edgelist=[edge for edgelist in nodes2contract.values() for edge in edgelist]
 	remove_nodelist=[node for nodelist in nodes2remove.values() for node in nodelist]
-	claim_g=contractClaimGraph(claim_g,contract_edgelist)
+	claim_g=contractClaimGraph(claim_g,sorted(contract_edgelist))
 	'''
 	After contracting edges, sometimes the edge hasQuality now exists between two words like Related and RelatedAccount.
 	This edge  Related-{hasQuality}-RelatedAccount is a result of the base contraction. This edge should be contracted.
@@ -915,7 +915,7 @@ def cleanClaimGraph(claim_g,clean_claims):
 			elif v.split("/")[-1].split("#")[-1].lower() in u.split("/")[-1].split("#")[-1].lower() and 'fred' in nodelabel_mapper(v).split(":")[0]:
 				contract_edgelist.append((u,v))
 				print((nodelabel_mapper(u),nodelabel_mapper(v),d['label']))
-	claim_g=contractClaimGraph(claim_g,contract_edgelist)
+	claim_g=contractClaimGraph(claim_g,sorted(contract_edgelist))
 	#remove nodes
 	for node in remove_nodelist:
 		if claim_g.has_node(node):

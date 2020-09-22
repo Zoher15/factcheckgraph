@@ -27,25 +27,25 @@ time python calculate_stats.py -gc fred -gt ffcg
 time python calculate_stats.py -gc fred -gt ufcg
 time python compile_stats.py
 ################################################################
-# leave1out
-cd /gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph/create_graphs/
-time python create_leave1out.py -fc fred -ft tfcg -cpu 48
-time python create_leave1out.py -fc co_occur -ft tfcg_co -cpu 48
-################################################################
-cd /geode2/home/u110/zkachwal/BigRed3/factcheckgraph/analyze_graphs/
-#embeddings
-# time python embed.py -ft ffcg -fc co_occur -gt directed
-# time python embed.py -ft tfcg -fc co_occur -gt directed
-# time python embed.py -ft ffcg -fc fred -gt directed
-# time python embed.py -ft tfcg -fc fred -gt directed
-time python embed.py -ft ffcg -fc co_occur -mp roberta-base-nli-stsb-mean-tokens -gt directed
-time python embed.py -ft tfcg -fc co_occur -mp roberta-base-nli-stsb-mean-tokens -gt directed
-time python embed.py -ft ffcg -fc fred -mp roberta-base-nli-stsb-mean-tokens -gt directed
-time python embed.py -ft tfcg -fc fred -mp roberta-base-nli-stsb-mean-tokens -gt directed
-################################################################
-#finding shortest paths
-# time python find_shortest_paths.py -ft ffcg -fc fred -cpu 48 -gt directed
-# time python find_shortest_paths.py -ft tfcg -fc fred -cpu 48 -gt directed
-#finding shortest paths 2
-time python find_shortest_paths.py -ft ffcg -mp roberta-base-nli-stsb-mean-tokens -fc fred -cpu 48 -gt directed
-time python find_shortest_paths.py -ft tfcg -mp roberta-base-nli-stsb-mean-tokens -fc fred -cpu 48 -gt directed
+# # leave1out
+# cd /gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph/create_graphs/
+# time python create_leave1out.py -fc fred -ft tfcg -cpu 48
+# time python create_leave1out.py -fc co_occur -ft tfcg_co -cpu 48
+# ################################################################
+# cd /geode2/home/u110/zkachwal/BigRed3/factcheckgraph/analyze_graphs/
+# #embeddings
+# # time python embed.py -ft ffcg -fc co_occur -gt directed
+# # time python embed.py -ft tfcg -fc co_occur -gt directed
+# # time python embed.py -ft ffcg -fc fred -gt directed
+# # time python embed.py -ft tfcg -fc fred -gt directed
+# time python embed.py -ft ffcg -fc co_occur -mp roberta-base-nli-stsb-mean-tokens -gt directed
+# time python embed.py -ft tfcg -fc co_occur -mp roberta-base-nli-stsb-mean-tokens -gt directed
+# time python embed.py -ft ffcg -fc fred -mp roberta-base-nli-stsb-mean-tokens -gt directed
+# time python embed.py -ft tfcg -fc fred -mp roberta-base-nli-stsb-mean-tokens -gt directed
+# ################################################################
+# #finding shortest paths
+# # time python find_shortest_paths.py -ft ffcg -fc fred -cpu 48 -gt directed
+# # time python find_shortest_paths.py -ft tfcg -fc fred -cpu 48 -gt directed
+# #finding shortest paths 2
+# time python find_shortest_paths.py -ft ffcg -mp roberta-base-nli-stsb-mean-tokens -fc fred -cpu 48 -gt directed
+# time python find_shortest_paths.py -ft tfcg -mp roberta-base-nli-stsb-mean-tokens -fc fred -cpu 48 -gt directed

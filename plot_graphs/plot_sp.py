@@ -32,7 +32,7 @@ def aggregate_weights(claim_D,mode,mode2):
 			edge_weights.append(eval(mode))
 	return eval("{}(edge_weights)".format(mode2))
 
-def plot_roc(graph_path,fcg_class):
+def plot_roc(graph_path,fcg_class,graph_type):
 	tfcg_types={"co_occur":"tfcg_co","fred":"tfcg"}
 	embed={'roberta-base-nli-stsb-mean-tokens':'e1'}#,'claims-roberta-base-nli-stsb-mean-tokens-2020-05-27_19-01-27':'e2'}
 	mode={'w':'d1'}#,'d':'d2'}#,'f':'d3'}
@@ -40,33 +40,25 @@ def plot_roc(graph_path,fcg_class):
 	plt.figure(figsize=(9, 8))
 	lw=2
 	plt.plot([0, 1], [0, 1],color='navy',lw=lw,linestyle='--')
-	title="ROC {} shortest path embedded paths".format(fcg_class)
+	title=graph_type+" ROC {} shortest path embedded paths".format(fcg_class)
 	read_path=os.path.join(graph_path,fcg_class,"paths",tfcg_types[fcg_class])
 	plot_path=os.path.join(graph_path,fcg_class,"plots")
 	for e in list(embed.keys()):
 		for d in list(mode.keys()):
 			for a in list(aggmode.keys()):
-				with codecs.open(os.path.join(read_path+"_true_({})".format(e),"paths_d.json"),"r","utf-8") as f: 
+				with codecs.open(os.path.join(read_path+"_true_({})".format(e),"paths_"+graph_type+"_"+d+".json"),"r","utf-8") as f: 
 					true_paths=json.loads(f.read())
-				with codecs.open(os.path.join(read_path+"_false_({})".format(e),"paths_d.json"),"r","utf-8") as f: 
+				with codecs.open(os.path.join(read_path+"_false_({})".format(e),"paths_"+graph_type+"_"+d+".json"),"r","utf-8") as f: 
 					false_paths=json.loads(f.read())
 				###################################################################################################
-				# true_directed_claimIDs=np.load(os.path.join(graph_path,fcg_class,tfcg_types[fcg_class],"directed_tfcg_true_claimIDs.npy"))
-				# false_directed_claimIDs=np.load(os.path.join(graph_path,fcg_class,tfcg_types[fcg_class],"directed_tfcg_false_claimIDs.npy"))
+				true_directed_claimIDs=np.load(os.path.join(read_path+"_true_({})".format(e),"paths_directed_"+d+"_claimIDs.npy"))
+				false_directed_claimIDs=np.load(os.path.join(read_path+"_false_({})".format(e),"paths_directed_"+d+"_claimIDs.npy"))
 				# non_true_directed_claimIDs=set(true_paths.keys())-set(true_directed_claimIDs)
 				# non_false_directed_claimIDs=set(false_paths.keys())-set(false_directed_claimIDs)
-				# true_paths={key:true_paths[key] for key in true_directed_claimIDs}
-				# false_paths={key:false_paths[key] for key in false_directed_claimIDs}
-				# with codecs.open(os.path.join(read_path+"_true_({})".format(e),"paths_d_directed.json"),"w","utf-8") as f:
-				# 	f.write(json.dumps(true_paths,indent=5,ensure_ascii=False))
-				# with codecs.open(os.path.join(read_path+"_false_({})".format(e),"paths_d_directed.json"),"w","utf-8") as f:
-				# 	f.write(json.dumps(false_paths,indent=5,ensure_ascii=False))
+				true_paths={key:true_paths[key] for key in true_directed_claimIDs}
+				false_paths={key:false_paths[key] for key in false_directed_claimIDs}
 				# true_paths={key:true_paths[key] for key in non_true_directed_claimIDs}
 				# false_paths={key:false_paths[key] for key in non_false_directed_claimIDs}
-				# with codecs.open(os.path.join(read_path+"_true_({})".format(e),"paths_d_full-directed.json"),"w","utf-8") as f:
-				# 	f.write(json.dumps(true_paths,indent=5,ensure_ascii=False))
-				# with codecs.open(os.path.join(read_path+"_false_({})".format(e),"paths_d_full-directed.json"),"w","utf-8") as f:
-				# 	f.write(json.dumps(false_paths,indent=5,ensure_ascii=False))
 				###################################################################################################
 				true_scores=[float(1)/aggregate_weights(t[1],d,a) if aggregate_weights(t[1],d,a)>0 else 1000 for t in true_paths.items()]
 				false_scores=[float(1)/aggregate_weights(t[1],d,a) if aggregate_weights(t[1],d,a)>0 else 1000 for t in false_paths.items()]
@@ -103,7 +95,7 @@ def plot_roc(graph_path,fcg_class):
 	plt.close()
 	plt.clf()
 
-def plot_dist(graph_path,fcg_class):
+def plot_dist(graph_path,fcg_class,graph_type):
 	tfcg_types={"co_occur":"tfcg_co","fred":"tfcg"}
 	embed={'roberta-base-nli-stsb-mean-tokens':'e1'}#,'claims-roberta-base-nli-stsb-mean-tokens-2020-05-27_19-01-27':'e2'}
 	mode={'w':'d1'}#,'f':'d3'}#'d':'d1'}
@@ -115,18 +107,18 @@ def plot_dist(graph_path,fcg_class):
 			for a in list(aggmode.keys()):
 				label=embed[e]+mode[d]+aggmode[a]
 				plt.figure(figsize=(9, 8))
-				title="Density Histogram {} shortest path setence embedded paths".format(fcg_class+"_"+label)
-				with codecs.open(os.path.join(read_path+"_true_({})".format(e),"paths_{}.json".format(d)),"r","utf-8") as f: 
+				title=graph_type+" density histogram {} shortest path setence embedded paths".format(fcg_class+"_"+label)
+				with codecs.open(os.path.join(read_path+"_true_({})".format(e),"paths_"+graph_type+"_"+d+".json"),"r","utf-8") as f: 
 					true_paths=json.loads(f.read())
-				with codecs.open(os.path.join(read_path+"_false_({})".format(e),"paths_{}.json".format(d)),"r","utf-8") as f: 
+				with codecs.open(os.path.join(read_path+"_false_({})".format(e),"paths_"+graph_type+"_"+d+".json"),"r","utf-8") as f: 
 					false_paths=json.loads(f.read())
 				###################################################################################################
-				# true_directed_claimIDs=np.load(os.path.join(graph_path,fcg_class,tfcg_types[fcg_class],"directed_tfcg_true_claimIDs.npy"))
-				# false_directed_claimIDs=np.load(os.path.join(graph_path,fcg_class,tfcg_types[fcg_class],"directed_tfcg_false_claimIDs.npy"))
+				true_directed_claimIDs=np.load(os.path.join(read_path+"_true_({})".format(e),"paths_directed_"+d+"_claimIDs.npy"))
+				false_directed_claimIDs=np.load(os.path.join(read_path+"_false_({})".format(e),"paths_directed_"+d+"_claimIDs.npy"))
 				# non_true_directed_claimIDs=set(true_paths.keys())-set(true_directed_claimIDs)
 				# non_false_directed_claimIDs=set(false_paths.keys())-set(false_directed_claimIDs)
-				# true_paths={key:true_paths[key] for key in true_directed_claimIDs}
-				# false_paths={key:false_paths[key] for key in false_directed_claimIDs}
+				true_paths={key:true_paths[key] for key in true_directed_claimIDs}
+				false_paths={key:false_paths[key] for key in false_directed_claimIDs}
 				# true_paths={key:true_paths[key] for key in non_true_directed_claimIDs}
 				# false_paths={key:false_paths[key] for key in non_false_directed_claimIDs}
 				###################################################################################################
@@ -152,13 +144,14 @@ def plot_dist(graph_path,fcg_class):
 				plt.close()
 				plt.clf()
 
-if __name__== "__main__":
-	parser = argparse.ArgumentParser(description='Plotting true(adjacent) pairs vs false (non-adjacent)')
-	parser.add_argument('-gp','--graphpath', metavar='graph path',type=str,help='Path to the graph directory',default='/gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph_data/graphs/')
-	parser.add_argument('-fcg','--fcgclass', metavar='fcg class',type=str,help='Class of FactCheckGraph to process')
-	parser.add_argument('-pt','--plottype', metavar='plot type',type=str,choices=['roc','dist'],help='Class of graph to plot')
-	args=parser.parse_args()
-	if args.plottype=='roc':
-		plot_roc(args.graphpath,args.fcgclass)
-	elif args.plottype=='dist':
-		plot_dist(args.graphpath,args.fcgclass)
+# if __name__== "__main__":
+# 	parser = argparse.ArgumentParser(description='Plotting true(adjacent) pairs vs false (non-adjacent)')
+# 	parser.add_argument('-gp','--graphpath', metavar='graph path',type=str,help='Path to the graph directory',default='/gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph_data/graphs/')
+# 	parser.add_argument('-fcg','--fcgclass', metavar='fcg class',type=str,help='Class of FactCheckGraph to process')
+# 	parser.add_argument('-pt','--plottype', metavar='plot type',type=str,choices=['roc','dist'],help='Class of graph to plot')
+# 	parser.add_argument('-gt','--graphtype', metavar='Graph Type Directed/Undirected',type=str,choices=['directed','undirected'])
+# 	args=parser.parse_args()
+# 	if args.plottype=='roc':
+# 		plot_roc(args.graphpath,args.fcgclass,args.graphtype)
+# 	elif args.plottype=='dist':
+# 		plot_dist(args.graphpath,args.fcgclass,args.graphtype)
