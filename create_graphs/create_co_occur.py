@@ -12,8 +12,8 @@ from itertools import combinations
 def create_co_occur(rdf_path,graph_path,fcg_label,skipID):
 	if fcg_label=="ufcg_co":
 		#Assumes that TFCG_co and FFCG_co exists
-		tfcg_path=os.path.join(graph_path,"co-occur","tfcg_co","tfcg_co.edgelist")
-		ffcg_path=os.path.join(graph_path,"co-occur","ffcg_co","ffcg_co.edgelist")
+		tfcg_path=os.path.join(graph_path,"co_occur","tfcg_co","tfcg_co.edgelist")
+		ffcg_path=os.path.join(graph_path,"co_occur","ffcg_co","ffcg_co.edgelist")
 		if os.path.exists(tfcg_path) and os.path.exists(ffcg_path):
 			tfcg=nx.read_edgelist(tfcg_path,comments="@")
 			ffcg=nx.read_edgelist(ffcg_path,comments="@")
@@ -66,7 +66,7 @@ def create_co_occur(rdf_path,graph_path,fcg_label,skipID):
 			filename=os.path.join(rdf_path,"{}_claims".format(claim_type),"claim{}_co".format(str(claim_ID)))
 			nx.write_edgelist(claim_nxg,filename+".edgelist")
 			fcg_co.add_edges_from(claim_nxg.edges.data())
-	fcg_path=os.path.join(graph_path,"co-occur",fcg_label)
+	fcg_path=os.path.join(graph_path,"co_occur",fcg_label)
 	if skipID>0:
 		fcg_path=os.path.join(fcg_path,"graphs3")
 		os.makedirs(fcg_path, exist_ok=True)

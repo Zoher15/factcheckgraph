@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#SBATCH -J create_co-occur
+#SBATCH -J create_co_occur
 #SBATCH -p general
 #SBATCH -o create_co_occur_%j.txt
 #SBATCH -e create_co_occur_%j.err
@@ -18,7 +18,7 @@ time python create_co_occur.py -ft ffcg_co
 time python create_co_occur.py -ft ufcg_co
 #calculate stats
 cd /gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph/process_graphs/
-time python calculate_stats.py -gc co-occur -gt tfcg_co
-time python calculate_stats.py -gc co-occur -gt ffcg_co
-time python calculate_stats.py -gc co-occur -gt ufcg_co
+time python calculate_stats.py -gc co_occur -gt tfcg_co
+time python calculate_stats.py -gc co_occur -gt ffcg_co
+time python calculate_stats.py -gc co_occur -gt ufcg_co
 time python compile_stats.py
