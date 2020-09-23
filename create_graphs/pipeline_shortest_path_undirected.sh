@@ -18,6 +18,9 @@ time python create_fred.py -ft ffcg -cpu 48 -p -gt undirected
 time python create_fred.py -ft tfcg -cpu 48 -cf 1 -gt undirected
 time python create_fred.py -ft ffcg -cpu 48 -cf 1 -gt undirected
 time python create_fred.py -ft ufcg -cf 1 -gt undirected
+time python calculate_stats.py -gc co-occur -gt tfcg_co
+time python calculate_stats.py -gc co-occur -gt ffcg_co
+time python calculate_stats.py -gc co-occur -gt ufcg_co
 # find intersect
 cd /gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph/process_graphs/
 time python find_intersect.py -fcg fred1 -kg dbpedia
@@ -25,6 +28,9 @@ time python find_intersect.py -fcg fred1 -kg dbpedia
 time python calculate_stats.py -gc fred -gt tfcg
 time python calculate_stats.py -gc fred -gt ffcg
 time python calculate_stats.py -gc fred -gt ufcg
+time python calculate_stats.py -gc co-occur -gt tfcg_co
+time python calculate_stats.py -gc co-occur -gt ffcg_co
+time python calculate_stats.py -gc co-occur -gt ufcg_co
 time python compile_stats.py
 ################################################################
 # leave1out
