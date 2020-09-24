@@ -1,0 +1,170 @@
+
+real	0m27.278s
+user	14m53.941s
+sys	0m8.693s
+
+real	1m19.549s
+user	50m19.774s
+sys	0m14.863s
+
+real	0m18.781s
+user	6m17.861s
+sys	0m19.855s
+
+real	0m58.580s
+user	24m1.120s
+sys	0m54.665s
+
+real	0m7.671s
+user	0m5.128s
+sys	0m0.753s
+
+real	0m8.219s
+user	0m2.325s
+sys	0m0.927s
+
+real	0m43.415s
+user	0m6.901s
+sys	0m2.133s
+
+real	0m3.015s
+user	0m1.505s
+sys	0m0.381s
+
+real	1m8.621s
+user	1m1.196s
+sys	0m6.121s
+
+real	0m2.694s
+user	0m1.309s
+sys	0m0.422s
+
+real	0m4.223s
+user	0m3.045s
+sys	0m0.408s
+
+real	0m4.893s
+user	0m3.605s
+sys	0m0.409s
+
+real	0m1.987s
+user	0m0.796s
+sys	0m0.404s
+
+real	0m2.702s
+user	0m1.410s
+sys	0m0.411s
+
+real	0m2.727s
+user	0m1.605s
+sys	0m0.352s
+
+real	0m1.896s
+user	0m0.549s
+sys	0m0.430s
+
+real	145m8.110s
+user	6754m56.282s
+sys	15m9.216s
+
+real	49m34.467s
+user	2279m35.944s
+sys	11m25.340s
+
+real	1m59.215s
+user	33m23.068s
+sys	0m22.982s
+
+real	0m35.135s
+user	8m59.589s
+sys	0m7.265s
+
+real	2m2.772s
+user	37m55.165s
+sys	0m21.890s
+
+real	0m51.781s
+user	14m31.427s
+sys	0m6.626s
+multiprocessing.pool.RemoteTraceback: 
+"""
+Traceback (most recent call last):
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/networkx/algorithms/shortest_paths/weighted.py", line 744, in multi_source_dijkstra
+    return (dist[target], paths[target])
+KeyError: 'db:President'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/multiprocessing/pool.py", line 121, in worker
+    result = (True, func(*args, **kwds))
+  File "find_shortest_paths.py", line 272, in find_paths_of_interest
+    path_d1=nx.shortest_path(source_fcg,source=u,target=v,weight='dist')
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/networkx/algorithms/shortest_paths/generic.py", line 172, in shortest_path
+    paths = nx.dijkstra_path(G, source, target, weight)
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/networkx/algorithms/shortest_paths/weighted.py", line 167, in dijkstra_path
+    weight=weight)
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/networkx/algorithms/shortest_paths/weighted.py", line 480, in single_source_dijkstra
+    weight=weight)
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/networkx/algorithms/shortest_paths/weighted.py", line 746, in multi_source_dijkstra
+    raise nx.NetworkXNoPath("No path to {}.".format(target))
+networkx.exception.NetworkXNoPath: No path to db:President.
+"""
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "find_shortest_paths.py", line 413, in <module>
+    find_shortest_paths(args.rdfpath,args.modelpath,args.graphpath,graph_types[args.graphtype],args.embedpath,"tfcg",args.fcgtype,args.fcgclass,args.cpu)
+  File "find_shortest_paths.py", line 385, in find_shortest_paths
+    output=sorted([p.get() for p in results],key=lambda x:x[0])
+  File "find_shortest_paths.py", line 385, in <listcomp>
+    output=sorted([p.get() for p in results],key=lambda x:x[0])
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/multiprocessing/pool.py", line 657, in get
+    raise self._value
+networkx.exception.NetworkXNoPath: No path to db:President.
+
+real	0m33.368s
+user	18m30.797s
+sys	0m37.274s
+multiprocessing.pool.RemoteTraceback: 
+"""
+Traceback (most recent call last):
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/networkx/algorithms/shortest_paths/weighted.py", line 744, in multi_source_dijkstra
+    return (dist[target], paths[target])
+KeyError: 'db:John_McCain'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/multiprocessing/pool.py", line 121, in worker
+    result = (True, func(*args, **kwds))
+  File "find_shortest_paths.py", line 272, in find_paths_of_interest
+    path_d1=nx.shortest_path(source_fcg,source=u,target=v,weight='dist')
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/networkx/algorithms/shortest_paths/generic.py", line 172, in shortest_path
+    paths = nx.dijkstra_path(G, source, target, weight)
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/networkx/algorithms/shortest_paths/weighted.py", line 167, in dijkstra_path
+    weight=weight)
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/networkx/algorithms/shortest_paths/weighted.py", line 480, in single_source_dijkstra
+    weight=weight)
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/networkx/algorithms/shortest_paths/weighted.py", line 746, in multi_source_dijkstra
+    raise nx.NetworkXNoPath("No path to {}.".format(target))
+networkx.exception.NetworkXNoPath: No path to db:John_McCain.
+"""
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "find_shortest_paths.py", line 413, in <module>
+    find_shortest_paths(args.rdfpath,args.modelpath,args.graphpath,graph_types[args.graphtype],args.embedpath,"tfcg",args.fcgtype,args.fcgclass,args.cpu)
+  File "find_shortest_paths.py", line 385, in find_shortest_paths
+    output=sorted([p.get() for p in results],key=lambda x:x[0])
+  File "find_shortest_paths.py", line 385, in <listcomp>
+    output=sorted([p.get() for p in results],key=lambda x:x[0])
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/multiprocessing/pool.py", line 657, in get
+    raise self._value
+networkx.exception.NetworkXNoPath: No path to db:John_McCain.
+
+real	0m31.858s
+user	19m58.809s
+sys	0m28.496s

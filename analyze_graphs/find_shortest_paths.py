@@ -77,7 +77,8 @@ def create_weighted(p,rdf_path,model_path,graph_path,graph_type,embed_path,claim
 	fcg=nx.read_edgelist(os.path.join(fcg_path,"{}.edgelist".format(fcg_type)),comments="@",create_using=eval(graph_type))
 	temp_fcg=nx.MultiDiGraph()
 	temp_fcg.add_edges_from(list(fcg.edges.data(keys=True)))
-	if graph_type=='nx.MultiDiGraph':
+	#if graph is undirected, add a reverse edge to the directed graph, to simulate undirectedness
+	if graph_type=='nx.MultiGraph':
 		temp_fcg.add_edges_from(list(map(lambda x:(x[1],x[0],x[2],x[3]),list(fcg.edges.data(keys=True)))))
 	fcg=temp_fcg.copy()
 	#assigning weight by summing the log of adjacent nodes, and dividing by the similiarity of the claim with the target predicate
@@ -165,25 +166,25 @@ def find_edges_of_interest(rdf_path,graph_path,graph_type,embed_path,source_fcg_
 	edges=target_fcg.edges.data(keys=True)
 	for edge in edges:
 		u,v,k,data=edge
-		# try:
-		# 	edges_of_interest[data['claim_ID']].add((u,v))
-		# except KeyError:
-		# 	edges_of_interest[data['claim_ID']]=set([(u,v)])
+		try:
+			edges_of_interest[data['claim_ID']].add((u,v))
+		except KeyError:
+			edges_of_interest[data['claim_ID']]=set([(u,v)])
 		# if graph_type=='nx.MultiDiGraph':
 		# 	try:
 		# 		edges_of_interest[data['claim_ID']].add((v,u))
 		# 	except KeyError:
 		# 		edges_of_interest[data['claim_ID']]=set([(v,u)])
-		if source_fcg.has_node(u) and source_fcg.has_node(v) and nx.has_path(source_fcg,u,v):#and not source_fcg.has_edge(u,v) and 
-			try:
-				edges_of_interest[data['claim_ID']].add((u,v))
-			except KeyError:
-				edges_of_interest[data['claim_ID']]=set([(u,v)])
-		elif graph_type=='nx.MultiDiGraph' and source_fcg.has_node(u) and source_fcg.has_node(v) and nx.has_path(source_fcg,v,u):
-			try:
-				edges_of_interest[data['claim_ID']].add((v,u))
-			except KeyError:
-				edges_of_interest[data['claim_ID']]=set([(v,u)])
+		# if source_fcg.has_node(u) and source_fcg.has_node(v) and nx.has_path(source_fcg,u,v):#and not source_fcg.has_edge(u,v) and 
+		# 	try:
+		# 		edges_of_interest[data['claim_ID']].add((u,v))
+		# 	except KeyError:
+		# 		edges_of_interest[data['claim_ID']]=set([(u,v)])
+		# if graph_type=='nx.MultiDiGraph' and source_fcg.has_node(u) and source_fcg.has_node(v) and nx.has_path(source_fcg,v,u):
+		# 	try:
+		# 		edges_of_interest[data['claim_ID']].add((v,u))
+		# 	except KeyError:
+		# 		edges_of_interest[data['claim_ID']]=set([(v,u)])
 	return edges_of_interest
 
 
@@ -282,26 +283,24 @@ def find_paths_of_interest(index,rdf_path,graph_path,graph_type,embed_path,model
 			w1=round(aggregate_edge_data(path_d_data1,'weight'),3)
 			d1=round(aggregate_edge_data(path_d_data1,'dist'),3)
 			path_d_data1['formed_claim']=path_d_formed_claim1
-			if graph_type=='nx.MultiDiGraph':
-				path_d2=nx.shortest_path(source_fcg,source=v,target=u,weight='dist')
-				path_d_data2={}
-				path_d_formed_claim2=cleanstring(path_d2[0])
-				#################################################################################
-				for i in range(len(path_d2)-1):
-					data=source_fcg.edges[path_d2[i],path_d2[i+1]]
-					data['source_claim']=chunkstring(source_claims[source_claims['claimID']==data['claim_ID']]['claim_text'].values[0],75)
-					path_d_data2[str((path_d2[i],path_d2[i+1]))]=data
-					path_d_formed_claim2=path_d_formed_claim2+" "+cleanstring(path_d2[i+1])
-				#################################################################################
-				w2=round(aggregate_edge_data(path_d_data2,'weight'),3)
-				d2=round(aggregate_edge_data(path_d_data2,'dist'),3)
-				path_d_data2['formed_claim']=path_d_formed_claim2
-				if d1<d2:
-					paths_of_interest_d[claimID][str((u,v,w1,d1))]=path_d_data1
-				else:
-					paths_of_interest_d[claimID][str((u,v,w2,d2))]=path_d_data2
-			else:
+			#We have to check both directions in the graph (since we treat the graph as directed for conveniently weighting it)
+			path_d2=nx.shortest_path(source_fcg,source=v,target=u,weight='dist')
+			path_d_data2={}
+			path_d_formed_claim2=cleanstring(path_d2[0])
+			#################################################################################
+			for i in range(len(path_d2)-1):
+				data=source_fcg.edges[path_d2[i],path_d2[i+1]]
+				data['source_claim']=chunkstring(source_claims[source_claims['claimID']==data['claim_ID']]['claim_text'].values[0],75)
+				path_d_data2[str((path_d2[i],path_d2[i+1]))]=data
+				path_d_formed_claim2=path_d_formed_claim2+" "+cleanstring(path_d2[i+1])
+			#################################################################################
+			w2=round(aggregate_edge_data(path_d_data2,'weight'),3)
+			d2=round(aggregate_edge_data(path_d_data2,'dist'),3)
+			path_d_data2['formed_claim']=path_d_formed_claim2
+			if d1<d2:
 				paths_of_interest_d[claimID][str((u,v,w1,d1))]=path_d_data1
+			else:
+				paths_of_interest_d[claimID][str((u,v,w2,d2))]=path_d_data2
 			#################################################################################
 			path_w1=nx.shortest_path(source_fcg,source=u,target=v,weight='weight')
 			path_w_data1={}		
@@ -316,26 +315,24 @@ def find_paths_of_interest(index,rdf_path,graph_path,graph_type,embed_path,model
 			w1=round(aggregate_edge_data(path_w_data1,'weight'),3)
 			d1=round(aggregate_edge_data(path_w_data1,'dist'),3)
 			path_w_data1['formed_claim']=path_w_formed_claim1
-			if graph_type=='nx.MultiDiGraph':
-				path_w2=nx.shortest_path(source_fcg,source=v,target=u,weight='weight')
-				path_w_data2={}
-				path_w_formed_claim2=cleanstring(path_w2[0])
-				#################################################################################
-				for i in range(len(path_w2)-1):
-					data=source_fcg.edges[path_w2[i],path_w2[i+1]]
-					data['source_claim']=chunkstring(source_claims[source_claims['claimID']==data['claim_ID']]['claim_text'].values[0],75)
-					path_w_data2[str((path_w2[i],path_w2[i+1]))]=data
-					path_w_formed_claim2=path_w_formed_claim2+" "+cleanstring(path_w2[i+1])
-				#################################################################################
-				w2=round(aggregate_edge_data(path_w_data2,'weight'),3)
-				d2=round(aggregate_edge_data(path_w_data2,'dist'),3)
-				path_w_data2['formed_claim']=path_w_formed_claim2
-				if w1<w2:
-					paths_of_interest_w[claimID][str((u,v,w1,d1))]=path_w_data1
-				else:
-					paths_of_interest_w[claimID][str((u,v,w2,d2))]=path_w_data2
-			else:
+			#if graph is meant to be undirected, we have to check both directions in the graph (since we treat the graph as directed for conveniently weighting it)
+			path_w2=nx.shortest_path(source_fcg,source=v,target=u,weight='weight')
+			path_w_data2={}
+			path_w_formed_claim2=cleanstring(path_w2[0])
+			#################################################################################
+			for i in range(len(path_w2)-1):
+				data=source_fcg.edges[path_w2[i],path_w2[i+1]]
+				data['source_claim']=chunkstring(source_claims[source_claims['claimID']==data['claim_ID']]['claim_text'].values[0],75)
+				path_w_data2[str((path_w2[i],path_w2[i+1]))]=data
+				path_w_formed_claim2=path_w_formed_claim2+" "+cleanstring(path_w2[i+1])
+			#################################################################################
+			w2=round(aggregate_edge_data(path_w_data2,'weight'),3)
+			d2=round(aggregate_edge_data(path_w_data2,'dist'),3)
+			path_w_data2['formed_claim']=path_w_formed_claim2
+			if w1<w2:
 				paths_of_interest_w[claimID][str((u,v,w1,d1))]=path_w_data1
+			else:
+				paths_of_interest_w[claimID][str((u,v,w2,d2))]=path_w_data2
 			#################################################################################
 			source_fcg=source_fcg2
 	return index,paths_of_interest_w,paths_of_interest_d

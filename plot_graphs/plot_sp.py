@@ -144,14 +144,14 @@ def plot_dist(graph_path,fcg_class,graph_type):
 				plt.close()
 				plt.clf()
 
-# if __name__== "__main__":
-# 	parser = argparse.ArgumentParser(description='Plotting true(adjacent) pairs vs false (non-adjacent)')
-# 	parser.add_argument('-gp','--graphpath', metavar='graph path',type=str,help='Path to the graph directory',default='/gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph_data/graphs/')
-# 	parser.add_argument('-fcg','--fcgclass', metavar='fcg class',type=str,help='Class of FactCheckGraph to process')
-# 	parser.add_argument('-pt','--plottype', metavar='plot type',type=str,choices=['roc','dist'],help='Class of graph to plot')
-# 	parser.add_argument('-gt','--graphtype', metavar='Graph Type Directed/Undirected',type=str,choices=['directed','undirected'])
-# 	args=parser.parse_args()
-# 	if args.plottype=='roc':
-# 		plot_roc(args.graphpath,args.fcgclass,args.graphtype)
-# 	elif args.plottype=='dist':
-# 		plot_dist(args.graphpath,args.fcgclass,args.graphtype)
+if __name__== "__main__":
+	parser = argparse.ArgumentParser(description='Plotting true(adjacent) pairs vs false (non-adjacent)')
+	parser.add_argument('-gp','--graphpath', metavar='graph path',type=str,help='Path to the graph directory',default='/gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph_data/graphs/')
+	parser.add_argument('-fcg','--fcgclass', metavar='fcg class',type=str,help='Class of FactCheckGraph to process')
+	parser.add_argument('-pt','--plottype', metavar='plot type',type=str,choices=['roc','dist'],help='Class of graph to plot')
+	parser.add_argument('-gt','--graphtype', metavar='Graph Type Directed/Undirected',type=str,choices=['directed','undirected'])
+	args=parser.parse_args()
+	if args.plottype=='roc':
+		plot_roc(args.graphpath,args.fcgclass,args.graphtype)
+	elif args.plottype=='dist':
+		plot_dist(args.graphpath,args.fcgclass,args.graphtype)
