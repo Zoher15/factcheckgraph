@@ -6,6 +6,8 @@ from sklearn import metrics
 import json
 import matplotlib
 import matplotlib.pyplot as plt
+plt.rcParams['figure.figsize'] = [9, 8]
+plt.rcParams['figure.dpi'] = 100
 matplotlib.use('Agg')
 import os
 import datetime
@@ -36,8 +38,8 @@ def plot_roc(graph_path,fcg_class,graph_type):
 	tfcg_types={"co_occur":"tfcg_co","fred":"tfcg"}
 	embed={'roberta-base-nli-stsb-mean-tokens':'e1'}#,'claims-roberta-base-nli-stsb-mean-tokens-2020-05-27_19-01-27':'e2'}
 	mode={'w':'d1'}#,'d':'d2'}#,'f':'d3'}
-	aggmode={'mean':'a1'}#,'min':'a2'}#,'max':'a3'}
-	plt.figure(figsize=(9, 8))
+	aggmode={'mean':'a1'}#,'min':'a2','max':'a3'}
+	plt.figure()
 	lw=2
 	plt.plot([0, 1], [0, 1],color='navy',lw=lw,linestyle='--')
 	title=graph_type+" ROC {} shortest path embedded paths".format(fcg_class)
@@ -51,19 +53,19 @@ def plot_roc(graph_path,fcg_class,graph_type):
 				with codecs.open(os.path.join(read_path+"_false_({})".format(e),"paths_"+graph_type+"_"+d+".json"),"r","utf-8") as f: 
 					false_paths=json.loads(f.read())
 				###################################################################################################
-				true_directed_claimIDs=np.load(os.path.join(read_path+"_true_({})".format(e),"paths_directed_"+d+"_claimIDs.npy"))
-				false_directed_claimIDs=np.load(os.path.join(read_path+"_false_({})".format(e),"paths_directed_"+d+"_claimIDs.npy"))
+				# true_directed_claimIDs=np.load(os.path.join(read_path+"_true_({})".format(e),"paths_directed_"+d+"_claimIDs.npy"))
+				# false_directed_claimIDs=np.load(os.path.join(read_path+"_false_({})".format(e),"paths_directed_"+d+"_claimIDs.npy"))
 				# non_true_directed_claimIDs=set(true_paths.keys())-set(true_directed_claimIDs)
 				# non_false_directed_claimIDs=set(false_paths.keys())-set(false_directed_claimIDs)
-				true_paths={key:true_paths[key] for key in true_directed_claimIDs}
-				false_paths={key:false_paths[key] for key in false_directed_claimIDs}
+				# true_paths={key:true_paths[key] for key in true_directed_claimIDs}
+				# false_paths={key:false_paths[key] for key in false_directed_claimIDs}
 				# true_paths={key:true_paths[key] for key in non_true_directed_claimIDs}
 				# false_paths={key:false_paths[key] for key in non_false_directed_claimIDs}
 				###################################################################################################
-				true_scores=[float(1)/aggregate_weights(t[1],d,a) if aggregate_weights(t[1],d,a)>0 else 1000 for t in true_paths.items()]
-				false_scores=[float(1)/aggregate_weights(t[1],d,a) if aggregate_weights(t[1],d,a)>0 else 1000 for t in false_paths.items()]
-				# true_scores=[aggregate_weights(t[1],d,a) for t in true_paths.items()]
-				# false_scores=[aggregate_weights(t[1],d,a) for t in false_paths.items()]
+				# true_scores=[float(1)/aggregate_weights(t[1],d,a) if aggregate_weights(t[1],d,a)>0 else 1000 for t in true_paths.items()]
+				# false_scores=[float(1)/aggregate_weights(t[1],d,a) if aggregate_weights(t[1],d,a)>0 else 1000 for t in false_paths.items()]
+				true_scores=[aggregate_weights(t[1],d,a) for t in true_paths.items()]
+				false_scores=[aggregate_weights(t[1],d,a) for t in false_paths.items()]
 				true_y=[1 for i in range(len(true_scores))]
 				false_y=[0 for i in range(len(false_scores))]
 				y=true_y+false_y
@@ -86,7 +88,7 @@ def plot_roc(graph_path,fcg_class,graph_type):
 	plt.xlabel('True Positive Rate')
 	plt.ylabel('False Positive Rate')
 	plt.legend(loc="lower right")
-	plt.title(title+" using similarity (1/d) transform")
+	plt.title(title)
 	plt.tight_layout()
 	os.makedirs(plot_path,exist_ok=True)
 	x = datetime.datetime.now().strftime("%c")
@@ -106,19 +108,19 @@ def plot_dist(graph_path,fcg_class,graph_type):
 		for d in list(mode.keys()):
 			for a in list(aggmode.keys()):
 				label=embed[e]+mode[d]+aggmode[a]
-				plt.figure(figsize=(9, 8))
+				plt.figure()
 				title=graph_type+" density histogram {} shortest path setence embedded paths".format(fcg_class+"_"+label)
 				with codecs.open(os.path.join(read_path+"_true_({})".format(e),"paths_"+graph_type+"_"+d+".json"),"r","utf-8") as f: 
 					true_paths=json.loads(f.read())
 				with codecs.open(os.path.join(read_path+"_false_({})".format(e),"paths_"+graph_type+"_"+d+".json"),"r","utf-8") as f: 
 					false_paths=json.loads(f.read())
 				###################################################################################################
-				true_directed_claimIDs=np.load(os.path.join(read_path+"_true_({})".format(e),"paths_directed_"+d+"_claimIDs.npy"))
-				false_directed_claimIDs=np.load(os.path.join(read_path+"_false_({})".format(e),"paths_directed_"+d+"_claimIDs.npy"))
+				# true_directed_claimIDs=np.load(os.path.join(read_path+"_true_({})".format(e),"paths_directed_"+d+"_claimIDs.npy"))
+				# false_directed_claimIDs=np.load(os.path.join(read_path+"_false_({})".format(e),"paths_directed_"+d+"_claimIDs.npy"))
 				# non_true_directed_claimIDs=set(true_paths.keys())-set(true_directed_claimIDs)
 				# non_false_directed_claimIDs=set(false_paths.keys())-set(false_directed_claimIDs)
-				true_paths={key:true_paths[key] for key in true_directed_claimIDs}
-				false_paths={key:false_paths[key] for key in false_directed_claimIDs}
+				# true_paths={key:true_paths[key] for key in true_directed_claimIDs}
+				# false_paths={key:false_paths[key] for key in false_directed_claimIDs}
 				# true_paths={key:true_paths[key] for key in non_true_directed_claimIDs}
 				# false_paths={key:false_paths[key] for key in non_false_directed_claimIDs}
 				###################################################################################################
@@ -132,7 +134,7 @@ def plot_dist(graph_path,fcg_class,graph_type):
 				print(maxscore)
 				sns.distplot(true_scores,hist=True,kde=True,bins=np.arange(minscore,maxscore+intervalscore,intervalscore),kde_kws={'linewidth': 3},label="true_"+label)
 				sns.distplot(false_scores,hist=True,kde=True,bins=np.arange(minscore,maxscore+intervalscore,intervalscore),kde_kws={'linewidth': 3},label="false_"+label)
-				plt.xlabel('Distance Scores (lower is positive)')
+				plt.xlabel('Proximity Scores (higher is positive)')
 				plt.ylabel('Density')
 				plt.legend(loc="upper right")
 				plt.title(title)
