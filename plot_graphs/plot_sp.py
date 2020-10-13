@@ -28,7 +28,7 @@ def aggregate_weights(claim_D,mode,mode2):
 	for edge,evalues in claim_D.items():
 		if type(evalues)!=list:
 			#edge looks like this: "('db:John_McCain', 'db:United_States_Senate', 0.09, 1.25)"
-			#u is the source node,v is the target node, w the special weight, d the 1/similarity
+			#u is the source node,v is the target node, w the special similarity, d the 1/1+distance
 			u,v,w,d=eval(edge.replace("inf","np.inf"))
 			# u,v,w,d,f=eval(edge.replace("inf","np.inf"))
 			edge_weights.append(eval(mode))
@@ -37,8 +37,8 @@ def aggregate_weights(claim_D,mode,mode2):
 def plot_roc(graph_path,fcg_class,graph_type):
 	tfcg_types={"co_occur":"tfcg_co","fred":"tfcg"}
 	embed={'roberta-base-nli-stsb-mean-tokens':'e1'}#,'claims-roberta-base-nli-stsb-mean-tokens-2020-05-27_19-01-27':'e2'}
-	mode={'w':'d1'}#,'d':'d2'}#,'f':'d3'}
-	aggmode={'mean':'a1'}#,'min':'a2','max':'a3'}
+	mode={'w':'d1','d':'d2'}#,'f':'d3'}
+	aggmode={'mean':'a1','min':'a2','max':'a3'}
 	plt.figure()
 	lw=2
 	plt.plot([0, 1], [0, 1],color='navy',lw=lw,linestyle='--')
@@ -100,8 +100,8 @@ def plot_roc(graph_path,fcg_class,graph_type):
 def plot_dist(graph_path,fcg_class,graph_type):
 	tfcg_types={"co_occur":"tfcg_co","fred":"tfcg"}
 	embed={'roberta-base-nli-stsb-mean-tokens':'e1'}#,'claims-roberta-base-nli-stsb-mean-tokens-2020-05-27_19-01-27':'e2'}
-	mode={'w':'d1'}#,'f':'d3'}#'d':'d1'}
-	aggmode={'mean':'a1'}#,'min':'a2'}#,'max':'a3'}
+	mode={'w':'d1','d':'d2'}#,'f':'d3'}
+	aggmode={'mean':'a1','min':'a2','max':'a3'}
 	read_path=os.path.join(graph_path,fcg_class,"paths",tfcg_types[fcg_class])
 	plot_path=os.path.join(graph_path,fcg_class,"plots")
 	for e in list(embed.keys()):
