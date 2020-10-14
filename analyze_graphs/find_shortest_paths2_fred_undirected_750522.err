@@ -1,0 +1,47 @@
+
+real	192m5.658s
+user	8981m6.258s
+sys	24m9.953s
+multiprocessing.pool.RemoteTraceback: 
+"""
+Traceback (most recent call last):
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/multiprocessing/pool.py", line 121, in worker
+    result = (True, func(*args, **kwds))
+  File "find_shortest_paths.py", line 223, in find_paths_of_interest
+    source_fcg,dist_p,embeddata=create_weighted(p,rdf_path,model_path,graph_path,graph_type,embed_path,source_claim_type,source_fcg_type+'-'+str(claimID),fcg_class)
+  File "find_shortest_paths.py", line 71, in create_weighted
+    embed=pd.read_csv(os.path.join(embed_path,fcg_type.split('-')[0]+"_nodes_embeddings_({}).tsv".format(model_path.split("/")[-1])),delimiter="\t",header=None).values
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/pandas/io/parsers.py", line 676, in parser_f
+    return _read(filepath_or_buffer, kwds)
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/pandas/io/parsers.py", line 454, in _read
+    data = parser.read(nrows)
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/pandas/io/parsers.py", line 1133, in read
+    ret = self._engine.read(nrows)
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/pandas/io/parsers.py", line 2037, in read
+    data = self._reader.read(nrows)
+  File "pandas/_libs/parsers.pyx", line 860, in pandas._libs.parsers.TextReader.read
+  File "pandas/_libs/parsers.pyx", line 875, in pandas._libs.parsers.TextReader._read_low_memory
+  File "pandas/_libs/parsers.pyx", line 929, in pandas._libs.parsers.TextReader._read_rows
+  File "pandas/_libs/parsers.pyx", line 916, in pandas._libs.parsers.TextReader._tokenize_rows
+  File "pandas/_libs/parsers.pyx", line 2071, in pandas._libs.parsers.raise_parser_error
+pandas.errors.ParserError: Error tokenizing data. C error: Expected 768 fields in line 3598, saw 886
+
+"""
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "find_shortest_paths.py", line 451, in <module>
+    find_shortest_paths(args.rdfpath,args.modelpath,args.graphpath,graph_types[args.graphtype],args.embedpath,"tfcg",args.fcgtype,args.fcgclass,args.cpu)
+  File "find_shortest_paths.py", line 423, in find_shortest_paths
+    output=sorted([p.get() for p in results],key=lambda x:x[0])
+  File "find_shortest_paths.py", line 423, in <listcomp>
+    output=sorted([p.get() for p in results],key=lambda x:x[0])
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/multiprocessing/pool.py", line 657, in get
+    raise self._value
+pandas.errors.ParserError: Error tokenizing data. C error: Expected 768 fields in line 3598, saw 886
+
+
+real	11m49.476s
+user	540m58.863s
+sys	2m5.435s
