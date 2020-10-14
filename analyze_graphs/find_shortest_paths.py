@@ -92,7 +92,6 @@ def create_weighted(p,rdf_path,model_path,graph_path,graph_type,embed_path,claim
 			# uIX=labels[labels['node_label']==u].index[0]
 			IX=labels[labels['node_label']==v].index[0]
 			dist=dist_p[IX]#+dist_p[uIX]
-		# uw=np.log10(fcg.degree(u))
 		fcg.edges[u,v,k]['dist']=dist
 	#Removing multiedges, by selecting the shortest one
 	fcg2=nx.DiGraph()
@@ -114,8 +113,8 @@ def create_weighted(p,rdf_path,model_path,graph_path,graph_type,embed_path,claim
 			# uIX=labels[labels['node_label']==u].index[0]
 			IX=labels[labels['node_label']==v].index[0]
 			dist=dist_p[IX]#+dist_p[uIX]
-		vw=np.log10(fcg.degree(v))
-		weight=dist*(vw)#+uw)*0.
+		vw=np.log10(fcg2.degree(v))
+		weight=dist*(vw)#+uw)
 		fcg2.edges[u,v]['weight']=weight
 
 	if fcg_class=='co_occur':
@@ -220,7 +219,7 @@ def find_paths_of_interest(index,rdf_path,graph_path,graph_type,embed_path,model
 		#source_fcg is not a multigraph
 		#if source and target are the same graph, then the graph without the given claim is fetched
 		if source_fcg_type==target_fcg_type:
-			source_fcg,dist_p,embeddata=create_weighted(p,rdf_path,model_path,graph_path,graph_type,embed_path,source_claim_type,source_fcg_type+'-'+str(claimID),fcg_class)
+			source_fcg,dist_p,embeddata=create_weighted(p,rdf_path,model_path,graph_path,graph_type,embed_path,source_claim_type,source_fcg_type+'-'+str(claimID),"co_occur")
 			name=source_fcg_type+'-'+str(claimID)+"_"+target_claim_type+str(claimID)
 		else:
 			source_fcg,dist_p,embeddata=create_weighted(p,rdf_path,model_path,graph_path,graph_type,embed_path,source_claim_type,source_fcg_type,fcg_class)
