@@ -320,10 +320,10 @@ def find_paths_of_interest(index,rdf_path,graph_path,graph_type,embed_path,model
 					wd1=round(1/(1+aggregate_edge_data(path_w_data1,'dist')),3)
 					path_w_data1['formed_claim']=path_w_formed_claim1
 				else:
-					dw1=np.inf
-					dd1=np.inf
-					ww1=np.inf
-					wd1=np.inf
+					dw1=0
+					dd1=0
+					ww1=0
+					wd1=0
 					path_d_data1={}
 					path_d_data1['formed_claim']=""
 					path_w_data1={}
@@ -364,19 +364,19 @@ def find_paths_of_interest(index,rdf_path,graph_path,graph_type,embed_path,model
 					wd2=round(1/(1+aggregate_edge_data(path_w_data2,'dist')),3)
 					path_w_data2['formed_claim']=path_w_formed_claim2
 				else:
-					dw2=np.inf
-					dd2=np.inf
-					ww2=np.inf
-					wd2=np.inf
+					dw2=0
+					dd2=0
+					ww2=0
+					wd2=0
 					path_d_data2={}
 					path_d_data2['formed_claim']=""
 					path_w_data2={}
 					path_w_data2['formed_claim']=""
-				if dd1<dd2:
+				if dd1>dd2:
 					paths_of_interest_d[claimID][str((u,v,dw1,dd1))]=path_d_data1
 				else:
 					paths_of_interest_d[claimID][str((u,v,dw2,dd2))]=path_d_data2
-				if ww1<ww2:
+				if ww1>ww2:
 					paths_of_interest_w[claimID][str((u,v,ww1,wd1))]=path_w_data1
 				else:
 					paths_of_interest_w[claimID][str((u,v,ww2,wd2))]=path_w_data2
