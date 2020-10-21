@@ -909,10 +909,10 @@ def cleanClaimGraph(claim_g,clean_claims):
 	edgelist=list(claim_g.edges(data=True))
 	for u,v,d in edgelist:
 		if d['label']=='associatedWith' or d['label']=='hasQuality':
-			if u.split("/")[-1].split("#")[-1].lower() in v.split("/")[-1].split("#")[-1].lower() and 'fred' in nodelabel_mapper(u).split(":")[0]:
+			if u.split("/")[-1].split("#")[-1].lower() in v.split("/")[-1].split("#")[-1].lower():
 				contract_edgelist.append((v,u))
 				print((nodelabel_mapper(v),nodelabel_mapper(u),d['label']))
-			elif v.split("/")[-1].split("#")[-1].lower() in u.split("/")[-1].split("#")[-1].lower() and 'fred' in nodelabel_mapper(v).split(":")[0]:
+			elif v.split("/")[-1].split("#")[-1].lower() in u.split("/")[-1].split("#")[-1].lower():
 				contract_edgelist.append((u,v))
 				print((nodelabel_mapper(u),nodelabel_mapper(v),d['label']))
 	claim_g=contractClaimGraph(claim_g,sorted(contract_edgelist))

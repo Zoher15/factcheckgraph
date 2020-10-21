@@ -45,7 +45,7 @@ def domb(numlist):
 
 def plot_roc(graph_path,fcg_class,graph_type):
 	tfcg_types={"co_occur":"tfcg_co","fred":"tfcg"}
-	embed={'roberta-base-nli-stsb-mean-tokens':'e1','claims-roberta-base-nli-stsb-mean-tokens-2020-05-27_19-01-27':'e2'}
+	embed={'roberta-base-nli-stsb-mean-tokens':'e1'}#,'claims-roberta-base-nli-stsb-mean-tokens-2020-05-27_19-01-27':'e2'}
 	mode={'w':'d1','d':'d2'}#,'f':'d3'}
 	aggmode={'mean':'a1','min':'a2','max':'a3','domb':'a4'}
 	plt.figure()
@@ -56,11 +56,11 @@ def plot_roc(graph_path,fcg_class,graph_type):
 	plot_path=os.path.join(graph_path,fcg_class,"plots")
 	for e in list(embed.keys()):
 		for d in list(mode.keys()):
+			with codecs.open(os.path.join(read_path+"_true_({})".format(e),"paths_"+graph_type+"_"+d+".json"),"r","utf-8") as f: 
+				true_paths=json.loads(f.read())
+			with codecs.open(os.path.join(read_path+"_false_({})".format(e),"paths_"+graph_type+"_"+d+".json"),"r","utf-8") as f: 
+				false_paths=json.loads(f.read())
 			for a in list(aggmode.keys()):
-				with codecs.open(os.path.join(read_path+"_true_({})".format(e),"paths_"+graph_type+"_"+d+".json"),"r","utf-8") as f: 
-					true_paths=json.loads(f.read())
-				with codecs.open(os.path.join(read_path+"_false_({})".format(e),"paths_"+graph_type+"_"+d+".json"),"r","utf-8") as f: 
-					false_paths=json.loads(f.read())
 				###################################################################################################
 				# true_directed_claimIDs=np.load(os.path.join(read_path+"_true_({})".format(e),"paths_directed_"+d+"_claimIDs.npy"))
 				# false_directed_claimIDs=np.load(os.path.join(read_path+"_false_({})".format(e),"paths_directed_"+d+"_claimIDs.npy"))
@@ -73,6 +73,15 @@ def plot_roc(graph_path,fcg_class,graph_type):
 				###################################################################################################
 				# true_scores=[float(1)/aggregate_weights(t[1],d,a) if aggregate_weights(t[1],d,a)>0 else 1000 for t in true_paths.items()]
 				# false_scores=[float(1)/aggregate_weights(t[1],d,a) if aggregate_weights(t[1],d,a)>0 else 1000 for t in false_paths.items()]
+				true0={t[0]:t[1] for t in true_paths.items() if 0<aggregate_weights(t[1],d,a)<0.2}
+				true1={t[0]:t[1] for t in true_paths.items() if aggregate_weights(t[1],d,a)>0.6}
+				false1={t[0]:t[1] for t in false_paths.items() if aggregate_weights(t[1],d,a)>0.6}
+				with codecs.open(os.path.join(read_path+"_true_({})".format(e),"0paths_"+graph_type+"_"+d+"_"+a+".json"),"w","utf-8") as f: 
+					f.write(json.dumps(true0,indent=5,ensure_ascii=False))
+				with codecs.open(os.path.join(read_path+"_true_({})".format(e),"1paths_"+graph_type+"_"+d+"_"+a+".json"),"w","utf-8") as f: 
+					f.write(json.dumps(true1,indent=5,ensure_ascii=False))
+				with codecs.open(os.path.join(read_path+"_false_({})".format(e),"1paths_"+graph_type+"_"+d+"_"+a+".json"),"w","utf-8") as f: 
+					f.write(json.dumps(false1,indent=5,ensure_ascii=False))
 				true_scores=[aggregate_weights(t[1],d,a) for t in true_paths.items()]
 				false_scores=[aggregate_weights(t[1],d,a) for t in false_paths.items()]
 				true_y=[1 for i in range(len(true_scores))]
@@ -108,9 +117,9 @@ def plot_roc(graph_path,fcg_class,graph_type):
 
 def plot_dist(graph_path,fcg_class,graph_type):
 	tfcg_types={"co_occur":"tfcg_co","fred":"tfcg"}
-	embed={'roberta-base-nli-stsb-mean-tokens':'e1','claims-roberta-base-nli-stsb-mean-tokens-2020-05-27_19-01-27':'e2'}
-	mode={'w':'d1','d':'d2'}#,'f':'d3'}
-	aggmode={'mean':'a1','min':'a2','max':'a3','domb':'a4'}
+	embed={'roberta-base-nli-stsb-mean-tokens':'e1'}#,'claims-roberta-base-nli-stsb-mean-tokens-2020-05-27_19-01-27':'e2'}
+	mode={'w':'d1'}#,'d':'d2'}#,'f':'d3'}
+	aggmode={'mean':'a1'}#,'min':'a2','max':'a3','domb':'a4'}
 	read_path=os.path.join(graph_path,fcg_class,"paths",tfcg_types[fcg_class])
 	plot_path=os.path.join(graph_path,fcg_class,"plots")
 	for e in list(embed.keys()):

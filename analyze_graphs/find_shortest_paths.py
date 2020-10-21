@@ -63,6 +63,7 @@ def create_weighted(p,rdf_path,model_path,graph_path,graph_type,embed_path,claim
 	else:
 		fcg_path=os.path.join(graph_path,fcg_class,fcg_type)
 	#Adding weights to edges
+	fcg_class='co_occur'
 	if fcg_class=='co_occur':
 		claims=pd.read_csv(os.path.join(rdf_path,"{}_claims.csv".format(claim_type)))
 		claim_IDs=claims['claimID'].tolist()
@@ -71,7 +72,7 @@ def create_weighted(p,rdf_path,model_path,graph_path,graph_type,embed_path,claim
 		embed=pd.read_csv(os.path.join(embed_path,fcg_type.split('-')[0]+"_nodes_embeddings_({}).tsv".format(model_path.split("/")[-1])),delimiter="\t",header=None).values
 		labels=pd.read_csv(os.path.join(embed_path,fcg_type.split('-')[0]+"_nodes_embeddings_labels_({}).tsv".format(model_path.split("/")[-1])),delimiter="\t")
 	#cosine similarity
-	simil_p=cosine_similarity(p,embed)[0]
+	simil_p=np.clip(cosine_similarity(p,embed)[0],-1,1)
 	#normalized angular distance
 	dist_p=np.arccos(simil_p)/np.pi
 	fcg=nx.read_edgelist(os.path.join(fcg_path,"{}.edgelist".format(fcg_type)),comments="@",create_using=eval(graph_type))
@@ -219,7 +220,7 @@ def find_paths_of_interest(index,rdf_path,graph_path,graph_type,embed_path,model
 		#source_fcg is not a multigraph
 		#if source and target are the same graph, then the graph without the given claim is fetched
 		if source_fcg_type==target_fcg_type:
-			source_fcg,dist_p,embeddata=create_weighted(p,rdf_path,model_path,graph_path,graph_type,embed_path,source_claim_type,source_fcg_type+'-'+str(claimID),"co_occur")
+			source_fcg,dist_p,embeddata=create_weighted(p,rdf_path,model_path,graph_path,graph_type,embed_path,source_claim_type,source_fcg_type+'-'+str(claimID),fcg_class)
 			name=source_fcg_type+'-'+str(claimID)+"_"+target_claim_type+str(claimID)
 		else:
 			source_fcg,dist_p,embeddata=create_weighted(p,rdf_path,model_path,graph_path,graph_type,embed_path,source_claim_type,source_fcg_type,fcg_class)
@@ -243,6 +244,7 @@ def find_paths_of_interest(index,rdf_path,graph_path,graph_type,embed_path,model
 				1. There are no 0 dist paths, even when they are directly connected
 				2. While aggregating the entity pairs, we automatically include the weight of the an entity pair by not ignoring the weight of the source node
 				'''
+				fcg_class='co_occur'
 				if fcg_class=='co_occur':
 					for e in source_fcg.in_edges(u,data=True):
 						data=e[2]
@@ -279,6 +281,7 @@ def find_paths_of_interest(index,rdf_path,graph_path,graph_type,embed_path,model
 					# 	data['dist']=data['dist']-ev['dist']
 					# 	data['weight']=data['weight']-ev['weight']
 					# 	source_fcg.edges[e[0],e[1]].update(data)
+				fcg_class='fred'
 				#################################################################################
 				#################################################################################
 				#################################################################################

@@ -1,0 +1,70 @@
+multiprocessing.pool.RemoteTraceback: 
+"""
+Traceback (most recent call last):
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/multiprocessing/pool.py", line 121, in worker
+    result = (True, func(*args, **kwds))
+  File "find_shortest_paths.py", line 226, in find_paths_of_interest
+    source_fcg,dist_p,embeddata=create_weighted(p,rdf_path,model_path,graph_path,graph_type,embed_path,source_claim_type,source_fcg_type,fcg_class)
+  File "find_shortest_paths.py", line 78, in create_weighted
+    fcg=nx.read_edgelist(os.path.join(fcg_path,"{}.edgelist".format(fcg_type)),comments="@",create_using=eval(graph_type))
+  File "<decorator-gen-618>", line 2, in read_edgelist
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/networkx/utils/decorators.py", line 214, in _open_file
+    fobj = _dispatch_dict[ext](path, mode=mode)
+FileNotFoundError: [Errno 2] No such file or directory: '/geode2/home/u110/zkachwal/BigRed3/factcheckgraph_data/graphs/co_occur/tfcg/tfcg.edgelist'
+"""
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "find_shortest_paths.py", line 462, in <module>
+    find_shortest_paths(args.rdfpath,args.modelpath,args.graphpath,graph_types[args.graphtype],args.embedpath,"tfcg",args.fcgtype,args.fcgclass,args.cpu)
+  File "find_shortest_paths.py", line 434, in find_shortest_paths
+    output=sorted([p.get() for p in results],key=lambda x:x[0])
+  File "find_shortest_paths.py", line 434, in <listcomp>
+    output=sorted([p.get() for p in results],key=lambda x:x[0])
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/multiprocessing/pool.py", line 657, in get
+    raise self._value
+FileNotFoundError: [Errno 2] No such file or directory: '/geode2/home/u110/zkachwal/BigRed3/factcheckgraph_data/graphs/co_occur/tfcg/tfcg.edgelist'
+
+real	1m14.387s
+user	44m45.020s
+sys	0m34.983s
+multiprocessing.pool.RemoteTraceback: 
+"""
+Traceback (most recent call last):
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/multiprocessing/pool.py", line 121, in worker
+    result = (True, func(*args, **kwds))
+  File "find_shortest_paths.py", line 212, in find_paths_of_interest
+    edges_of_interest=find_edges_of_interest(rdf_path,graph_path,graph_type,embed_path,source_fcg_type+'-'+str(claimID),target_fcg_type,fcg_class)
+  File "find_shortest_paths.py", line 170, in find_edges_of_interest
+    source_fcg=nx.read_edgelist(os.path.join(source_fcg_path,"{}.edgelist".format(source_fcg_type)),comments="@",create_using=eval(graph_type))
+  File "<decorator-gen-618>", line 2, in read_edgelist
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/networkx/utils/decorators.py", line 214, in _open_file
+    fobj = _dispatch_dict[ext](path, mode=mode)
+FileNotFoundError: [Errno 2] No such file or directory: '/geode2/home/u110/zkachwal/BigRed3/factcheckgraph_data/graphs/co_occur/tfcg/leave1out/tfcg-245.edgelist'
+"""
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "find_shortest_paths.py", line 462, in <module>
+    find_shortest_paths(args.rdfpath,args.modelpath,args.graphpath,graph_types[args.graphtype],args.embedpath,"tfcg",args.fcgtype,args.fcgclass,args.cpu)
+  File "find_shortest_paths.py", line 434, in find_shortest_paths
+    output=sorted([p.get() for p in results],key=lambda x:x[0])
+  File "find_shortest_paths.py", line 434, in <listcomp>
+    output=sorted([p.get() for p in results],key=lambda x:x[0])
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/multiprocessing/pool.py", line 657, in get
+    raise self._value
+FileNotFoundError: [Errno 2] No such file or directory: '/geode2/home/u110/zkachwal/BigRed3/factcheckgraph_data/graphs/co_occur/tfcg/leave1out/tfcg-245.edgelist'
+
+real	2m20.751s
+user	66m46.407s
+sys	0m35.539s
+
+real	42m59.072s
+user	2010m20.898s
+sys	18m33.832s
+
+real	12m20.213s
+user	502m14.183s
+sys	5m50.734s

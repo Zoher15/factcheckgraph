@@ -12,4 +12,4 @@
 source /N/u/zkachwal/Carbonate/miniconda3/etc/profile.d/conda.sh
 conda activate
 cd /geode2/home/u110/zkachwal/BigRed3/factcheckgraph/create_graphs
-time python create_fred.py -ft ffcg
+time python create_fred.py -ft ffcg -gt undirected
