@@ -15,9 +15,10 @@ def compose_graphs(claims_path,fcg_path,suffix,claim_IDs,claim_IDs2remove):
 		for claim_ID in temp_claim_IDs:
 			filename=os.path.join(claims_path,"claim{}".format(str(claim_ID))+"_"+suffix)
 			try:
-				claim_g=nx.read_edgelist(filename+".edgelist",comments="@",create_using=nx.MultiGraph)
+				claim_g=nx.read_edgelist(filename+".edgelist",comments="@")
 			except:
 				continue
+			claim_g=nx.MultiGraph(claim_g)
 			fcg=nx.compose(fcg,claim_g)
 		nx.write_edgelist(fcg,fcg_path+"-"+str(skipID)+".edgelist")
 

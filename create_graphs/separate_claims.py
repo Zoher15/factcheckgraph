@@ -35,8 +35,6 @@ def separate_claims(file,rdf_path):
 	np.save(os.path.join(rdf_path,"false_claimID.npy"),list(false_claims["claimID"]))
 	true_claims.to_csv(os.path.join(rdf_path,"true_claims.csv"))
 	false_claims.to_csv(os.path.join(rdf_path,"false_claims.csv"))
-	import pdb
-	pdb.set_trace()
 	os.makedirs(os.path.join(rdf_path,"true_claims"), exist_ok=True)
 	os.makedirs(os.path.join(rdf_path,"false_claims"), exist_ok=True)
 

@@ -616,7 +616,7 @@ def checkClaimGraph(g,claim_ID,graph_type):#,mode):
 	# 	claim_g=nx.Graph()
 	# elif mode=='nx':
 	# 	claim_g=g
-	claim_g=eval(graph_type+'()')
+	claim_g=nx.Graph()
 	regex_27=re.compile(r'^http:\/\/www\.ontologydesignpatterns\.org\/ont\/fred\/domain\.owl#%27.*')
 	regex_det=re.compile(r'^http:\/\/www\.ontologydesignpatterns\.org\/ont\/fred\/quantifiers\.owl.*$')
 	regex_data=re.compile(r'^http:\/\/www\.ontologydesignpatterns\.org\/ont\/dul\/DUL\.owl#hasDataValue$')
@@ -722,7 +722,7 @@ def checkClaimGraph(g,claim_ID,graph_type):#,mode):
 				nodes2contract['type'].append((a,c))
 		elif edge_list[e].Type==EdgeMotif.SubClass:
 			if not regex_dul.match(c):
-				nodes2contract['subclass'].append((a,c))
+				nodes2contract['subclass'].append((c,a))
 		elif edge_list[e].Type==EdgeMotif.Equivalence:
 			nodes2contract['equivalence'].append((c,a))
 		elif edge_list[e].Type==EdgeMotif.Identity:
@@ -881,7 +881,7 @@ def contractClaimGraph(claim_g,contract_edgelist):
 			for edge in list(nx.find_cycle(temp_g,orientation='original')):
 				cycle_nodes.add(edge[0])
 				cycle_nodes.add(edge[1])
-			degree_dict=dict(temp_g.degree(cycle_nodes))
+			degree_dict=dict(claim_g.degree(cycle_nodes))
 			print("Degree of cycle nodes\n",degree_dict)
 			min_key=min(degree_dict, key=degree_dict.get)
 			print("Node removed:",min_key)
@@ -906,15 +906,31 @@ def cleanClaimGraph(claim_g,clean_claims):
 	Because this edge-to-be-contracted will not be detected by the function checkClaimGraph, we should do the contraction manually.
 	'''
 	contract_edgelist=[]
+	contractmode=0
 	edgelist=list(claim_g.edges(data=True))
+	regex_fred=re.compile(r'^http:\/\/www\.ontologydesignpatterns\.org\/ont\/fred\/domain\.owl#([a-zA-Z]*)_.*')
+	regex_vn=re.compile(r'^http:\/\/www\.ontologydesignpatterns\.org\/ont\/vn\/data\/([a-zA-Z]*)_.*')
+	regex_dbpedia=re.compile(r'^http:\/\/dbpedia\.org\/resource\/(.*)')
 	for u,v,d in edgelist:
-		if d['label']=='associatedWith' or d['label']=='hasQuality':
+		if d['label']=='associatedWith' or d['label']=='hasQuality' or d['label']=='sameAs' or d['label']=='equivalentClass' or d['label']=='type':
+			if (regex_fred.match(u) and regex_fred.match(v)) or (regex_dbpedia.match(u) and regex_dbpedia.match(v)) or (regex_vn.match(u) and regex_vn.match(v)):
+				contractmode=1
+			else:
+				contractmode=2
 			if u.split("/")[-1].split("#")[-1].lower() in v.split("/")[-1].split("#")[-1].lower():
-				contract_edgelist.append((v,u))
-				print((nodelabel_mapper(v),nodelabel_mapper(u),d['label']))
+				if contract_mode=1 or (regex_dbpedia.match(v) or regex_vn.match(v)):
+					contract_edgelist.append((v,u))
+					print((nodelabel_mapper(v),nodelabel_mapper(u),d['label']))
+				elif regex_dbpedia.match(u) or regex_vn.match(u):
+					contract_edgelist.append((u,v))
+					print((nodelabel_mapper(u),nodelabel_mapper(v),d['label']))
 			elif v.split("/")[-1].split("#")[-1].lower() in u.split("/")[-1].split("#")[-1].lower():
-				contract_edgelist.append((u,v))
-				print((nodelabel_mapper(u),nodelabel_mapper(v),d['label']))
+				if contract_mode=1 or (regex_dbpedia.match(u) or regex_vn.match(u)):
+					contract_edgelist.append((u,v))
+					print((nodelabel_mapper(u),nodelabel_mapper(v),d['label']))
+				elif regex_dbpedia.match(v) or regex_vn.match(v):
+					contract_edgelist.append((v,u))	
+					print((nodelabel_mapper(v),nodelabel_mapper(u),d['label']))			
 	claim_g=contractClaimGraph(claim_g,sorted(contract_edgelist))
 	#remove nodes
 	for node in remove_nodelist:
@@ -930,7 +946,7 @@ def cleanClaimGraph(claim_g,clean_claims):
 #Function save individual claim graphs
 def saveClaimGraph(claim_g,filename,graph_type):
 	nx.write_edgelist(claim_g,filename+"_clean.edgelist")
-	claim_g=nx.read_edgelist(filename+"_clean.edgelist",comments="@",create_using=eval(graph_type))
+	claim_g=nx.read_edgelist(filename+"_clean.edgelist",comments="@")
 	nx.write_graphml(claim_g,filename+"_clean.graphml",prettyprint=True)
 	plotFredGraph(claim_g,filename+"_clean")
 
@@ -966,12 +982,13 @@ def compileClaimGraph1(index,claims_path,claim_IDs,clean_claims,init,end,graph_t
 	for claim_ID in claim_IDs[init:end]:
 		filename=os.path.join(claims_path,"claim{}".format(str(claim_ID)))
 		try:
-			claim_g=nx.read_edgelist(filename+".edgelist",comments="@",create_using=eval(graph_type))
+			claim_g=nx.read_edgelist(filename+".edgelist",comments="@")
 		except:
 			continue
 		claim_g=cleanClaimGraph(claim_g,clean_claims[str(claim_ID)])
 		claim_g=nx.relabel_nodes(claim_g,lambda x:nodelabel_mapper(x))
 		saveClaimGraph(claim_g,filename,graph_type)
+		claim_g=nx.MultiGraph(claim_g)
 		fcg=nx.compose(fcg,claim_g)
 	return index,fcg
 
