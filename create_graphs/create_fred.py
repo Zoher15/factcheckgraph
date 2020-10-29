@@ -722,11 +722,20 @@ def checkClaimGraph(g,claim_ID,graph_type):#,mode):
 				nodes2contract['type'].append((a,c))
 		elif edge_list[e].Type==EdgeMotif.SubClass:
 			if not regex_dul.match(c):
-				nodes2contract['subclass'].append((c,a))
+				if (regex_dbpedia.match(a) and not regex_dbpedia.match(c)) or (regex_vn.match(a) and not regex_vn.match(c))
+					nodes2contract['subclass'].append((a,c))
+				else:
+					nodes2contract['subclass'].append((c,a))
 		elif edge_list[e].Type==EdgeMotif.Equivalence:
-			nodes2contract['equivalence'].append((c,a))
+			if (regex_dbpedia.match(a) and not regex_dbpedia.match(c)) or (regex_vn.match(a) and not regex_vn.match(c))
+				nodes2contract['equivalence'].append((a,c))
+			else:
+				nodes2contract['equivalence'].append((c,a))
 		elif edge_list[e].Type==EdgeMotif.Identity:
-			nodes2contract['identity'].append((c,a))
+			if (regex_dbpedia.match(a) and not regex_dbpedia.match(c)) or (regex_vn.match(a) and not regex_vn.match(c))
+				nodes2contract['identity'].append((a,c))
+			else:
+				nodes2contract['identity'].append((c,a))
 		# if regex_type.match(b):
 		# 	if (regex_fredup.match(a) and not regex_fred.match(c)) and (regex_fredup.match(a)[1].split("_")[0].lower() in c.split("\\")[-1].lower()):
 		# 		nodes2contract['type'].append((c,a))
@@ -906,31 +915,26 @@ def cleanClaimGraph(claim_g,clean_claims):
 	Because this edge-to-be-contracted will not be detected by the function checkClaimGraph, we should do the contraction manually.
 	'''
 	contract_edgelist=[]
-	contractmode=0
 	edgelist=list(claim_g.edges(data=True))
 	regex_fred=re.compile(r'^http:\/\/www\.ontologydesignpatterns\.org\/ont\/fred\/domain\.owl#([a-zA-Z]*)_.*')
 	regex_vn=re.compile(r'^http:\/\/www\.ontologydesignpatterns\.org\/ont\/vn\/data\/([a-zA-Z]*)_.*')
 	regex_dbpedia=re.compile(r'^http:\/\/dbpedia\.org\/resource\/(.*)')
 	for u,v,d in edgelist:
 		if d['label']=='associatedWith' or d['label']=='hasQuality' or d['label']=='sameAs' or d['label']=='equivalentClass' or d['label']=='type':
-			if (regex_fred.match(u) and regex_fred.match(v)) or (regex_dbpedia.match(u) and regex_dbpedia.match(v)) or (regex_vn.match(u) and regex_vn.match(v)):
-				contractmode=1
-			else:
-				contractmode=2
 			if u.split("/")[-1].split("#")[-1].lower() in v.split("/")[-1].split("#")[-1].lower():
-				if contract_mode=1 or (regex_dbpedia.match(v) or regex_vn.match(v)):
+				if (regex_dbpedia.match(v) and not regex_dbpedia.match(u)) or (regex_vn.match(v) and not regex_vn.match(u)):
 					contract_edgelist.append((v,u))
 					print((nodelabel_mapper(v),nodelabel_mapper(u),d['label']))
-				elif regex_dbpedia.match(u) or regex_vn.match(u):
+				else:
 					contract_edgelist.append((u,v))
 					print((nodelabel_mapper(u),nodelabel_mapper(v),d['label']))
 			elif v.split("/")[-1].split("#")[-1].lower() in u.split("/")[-1].split("#")[-1].lower():
-				if contract_mode=1 or (regex_dbpedia.match(u) or regex_vn.match(u)):
+				if (regex_dbpedia.match(u) and not regex_dbpedia.match(v)) or (regex_vn.match(u) and not regex_vn.match(v)):
 					contract_edgelist.append((u,v))
 					print((nodelabel_mapper(u),nodelabel_mapper(v),d['label']))
-				elif regex_dbpedia.match(v) or regex_vn.match(v):
-					contract_edgelist.append((v,u))	
-					print((nodelabel_mapper(v),nodelabel_mapper(u),d['label']))			
+				else:
+					contract_edgelist.append((v,u))
+					print((nodelabel_mapper(v),nodelabel_mapper(u),d['label']))
 	claim_g=contractClaimGraph(claim_g,sorted(contract_edgelist))
 	#remove nodes
 	for node in remove_nodelist:
@@ -1119,7 +1123,7 @@ def createFred(rdf_path,graph_path,graph_type,fcg_label,init,passive,cpu,compile
 					for fcg in fcgs:
 						master_fcg=nx.compose(master_fcg,fcg)
 				else:
-					master_fcg=eval("compileClaimGraph"+str(compilefred)+"(0,claims_path,claim_IDs,clean_claims,0,"+str(len(claim_IDs))+")")
+					master_fcg=eval("compileClaimGraph"+str(compilefred)+"(0,claims_path,claim_IDs,clean_claims,0,"+str(len(claim_IDs))+",graph_types[graph_type])")
 				if compilefred==2:
 					master_clean=compile_clean(rdf_path,clean_claims,claim_type)
 					master_fcg=cleanClaimGraph(master_fcg,master_clean)
@@ -1146,7 +1150,7 @@ def createFred(rdf_path,graph_path,graph_type,fcg_label,init,passive,cpu,compile
 					errorclaimid=list(chain(*map(lambda x:x[1],output)))
 					clean_claims=dict(ChainMap(*map(lambda x:x[2],output)))
 				else:
-					index,errorclaimid,clean_claims=passiveFredParse(0,claims_path,claim_IDs,0,n)
+					index,errorclaimid,clean_claims=passiveFredParse(0,claims_path,claim_IDs,0,n,graph_types[graph_type])
 			#if graph rdf files have not been fetched. Slower, dependent on rate limits
 			else:
 				keys={"tfcg":"Bearer a5c2a808-cc39-38e6-898d-84ab912b1e5d","ffcg":"Bearer 0d9d562e-a2aa-30df-90df-d52674f2e1f0"}

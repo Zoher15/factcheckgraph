@@ -1,0 +1,65 @@
+
+real	0m49.452s
+user	15m6.229s
+sys	0m9.073s
+
+real	1m18.351s
+user	50m36.620s
+sys	0m15.646s
+
+real	0m18.268s
+user	6m14.064s
+sys	0m21.429s
+
+real	0m55.799s
+user	23m34.412s
+sys	1m1.661s
+
+real	0m7.464s
+user	0m4.951s
+sys	0m0.773s
+
+real	0m9.813s
+user	0m2.281s
+sys	0m1.139s
+
+real	0m25.665s
+user	0m6.340s
+sys	0m2.610s
+
+real	0m3.112s
+user	0m1.431s
+sys	0m0.454s
+
+real	1m4.906s
+user	0m57.774s
+sys	0m5.925s
+
+real	0m2.851s
+user	0m1.276s
+sys	0m0.458s
+
+real	0m4.031s
+user	0m2.816s
+sys	0m0.490s
+
+real	0m4.725s
+user	0m3.455s
+sys	0m0.453s
+
+real	0m1.905s
+user	0m0.793s
+sys	0m0.411s
+
+real	0m2.738s
+user	0m1.435s
+sys	0m0.453s
+
+real	0m2.710s
+user	0m1.518s
+sys	0m0.475s
+
+real	0m2.148s
+user	0m0.682s
+sys	0m0.341s
+slurmstepd: error: *** JOB 794911 ON nid00151 CANCELLED AT 2020-10-28T20:46:58 ***
