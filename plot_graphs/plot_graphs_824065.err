@@ -1,0 +1,16 @@
+
+real	2m33.125s
+user	2m26.503s
+sys	0m1.699s
+plot_sp.py:153: RuntimeWarning: invalid value encountered in double_scalars
+  sns.distplot(true_scores,hist=True,kde=True,bins=np.arange(minscore,maxscore+intervalscore,intervalscore),kde_kws={'linewidth': 3},label="true_"+label)
+Traceback (most recent call last):
+  File "plot_sp.py", line 177, in <module>
+    plot_dist(args.graphpath,args.fcgclass,args.graphtype)
+  File "plot_sp.py", line 153, in plot_dist
+    sns.distplot(true_scores,hist=True,kde=True,bins=np.arange(minscore,maxscore+intervalscore,intervalscore),kde_kws={'linewidth': 3},label="true_"+label)
+ValueError: arange: cannot compute length
+
+real	0m44.539s
+user	0m41.526s
+sys	0m1.824s

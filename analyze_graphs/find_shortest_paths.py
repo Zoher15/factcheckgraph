@@ -123,6 +123,15 @@ def create_weighted(p,rdf_path,model_path,graph_path,graph_type,embed_path,claim
 	elif fcg_class=='fred':
 		return fcg2,dist_p,labels
 
+def domb(numlist):
+	domb=numlist[0]
+	for j in numlist[1:]:
+		if domb==0 and j==0:
+			domb=0
+		else:
+			domb=(domb*j)/(domb+j-(domb*j))
+	return domb
+
 def aggregate_edge_data(evalues,mode):
 	#mode can be dist or weight
 	edgepair_weights=[]
@@ -146,10 +155,18 @@ def create_ordered_paths(write_path,mode):
 	with codecs.open(rw_path+".json","r","utf-8") as f: 
 		paths=json.loads(f.read())
 	np.save(rw_path+"_claimIDs.npy",list(paths.keys()))
-	for mode2 in ['sum','mean','max','min']:
-		ordered_paths=OrderedDict(sorted(paths.items(), key=lambda t: aggregate_weights(t[1],mode,mode2)),reverse=True)
+	for mode2 in ['sum','mean','max','min','domb']:
+		ordered_paths={str((int(t[0]),aggregate_weights(t[1],mode,mode2))):t[1] for t in paths.items()}
+		ordered_paths=sorted(ordered_paths.items(), key=lambda t: eval(t[0])[1],reverse=True)
+		top10p=ordered_paths[:int(len(ordered_paths)*.10)]
+		bot10p=ordered_paths[int(len(ordered_paths)*.90):]
+		ordered_paths=OrderedDict(ordered_paths)
 		with codecs.open(rw_path+"_"+mode2+".json","w","utf-8") as f:
 			f.write(json.dumps(ordered_paths,indent=5,ensure_ascii=False))
+		with codecs.open(rw_path+"_"+mode2+"_1.json","w","utf-8") as f:
+			f.write(json.dumps(OrderedDict(top10p),indent=5,ensure_ascii=False))
+		with codecs.open(rw_path+"_"+mode2+"_0.json","w","utf-8") as f:
+			f.write(json.dumps(OrderedDict(bot10p),indent=5,ensure_ascii=False))
 
 #Function to find node pairs in the source graph if they exist as edges in the target graph
 def find_edges_of_interest(rdf_path,graph_path,graph_type,embed_path,source_fcg_type,target_fcg_type,fcg_class):
@@ -281,11 +298,11 @@ def find_paths_of_interest(index,rdf_path,graph_path,graph_type,embed_path,model
 					# 	data['dist']=data['dist']-ev['dist']
 					# 	data['weight']=data['weight']-ev['weight']
 					# 	source_fcg.edges[e[0],e[1]].update(data)
+				#################################################################################
+				#################################################################################
+				#################################################################################
+				#################################################################################
 				fcg_class='fred'
-				#################################################################################
-				#################################################################################
-				#################################################################################
-				#################################################################################
 				if nx.has_path(source_fcg,u,v):
 					#################################################################################
 					#################################################################################

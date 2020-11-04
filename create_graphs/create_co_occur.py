@@ -10,6 +10,9 @@ import json
 from itertools import combinations
 
 def create_co_occur(rdf_path,graph_path,fcg_label,skipID):
+	regex_dbpedia=re.compile(r'^http:\/\/dbpedia\.org\/resource\/(.*)')
+	regex_fredup=re.compile(r'^http:\/\/www\.ontologydesignpatterns\.org\/ont\/fred\/domain\.owl#([A-Z]+[a-zA-Z]*)')
+	regex_entity=re.compile(r'^http:\/\/dbpedia\.org\/resource\/(.*)|^http:\/\/www\.ontologydesignpatterns\.org\/ont\/fred\/domain\.owl#([A-Z]+[a-zA-Z]*)')
 	if fcg_label=="ufcg_co":
 		#Assumes that TFCG_co and FFCG_co exists
 		tfcg_path=os.path.join(graph_path,"co_occur","tfcg_co","tfcg_co.edgelist")
@@ -28,7 +31,6 @@ def create_co_occur(rdf_path,graph_path,fcg_label,skipID):
 			claim_IDs.remove(skipID)
 		claim_entities={}
 		claim_edges={}
-		entity_regex=re.compile(r'http:\/\/dbpedia\.org')
 		# entity_regex=re.compile(r'db:')
 		fcg_co=nx.MultiGraph()
 		for claim_ID in claim_IDs:
@@ -53,10 +55,14 @@ def create_co_occur(rdf_path,graph_path,fcg_label,skipID):
 					obj=obj.replace("Middle_East_respiratory_syndrome_coronavirus","Severe_acute_respiratory_syndrome_coronavirus_2")
 				###########################################################
 				try:
-					if entity_regex.search(subject):
+					if regex_dbpedia.match(subject):
 						claim_entities_set.add('db:'+subject.split("/")[-1].split("#")[-1])
-					if entity_regex.search(obj):
+					elif regex_fredup.match(subject):
+						claim_entities_set.add('fu:'+subject.split("/")[-1].split("#")[-1])
+					if regex_fredup.search(obj):
 						claim_entities_set.add('db:'+obj.split("/")[-1].split("#")[-1])
+					elif regex_fredup.match(obj):
+						claim_entities_set.add('fu:'+obj.split("/")[-1].split("#")[-1])
 				except KeyError:
 					pass
 			claim_entities[claim_ID]=list(claim_entities_set)
@@ -84,8 +90,7 @@ def create_co_occur(rdf_path,graph_path,fcg_label,skipID):
 			for node in nodes:
 				f.write(str(node)+"\n")
 		#Save Entities
-		entity_regex=re.compile(r'db:')
-		entities=np.asarray([node for node in nodes if entity_regex.search(node)])
+		entities=np.asarray([node for node in nodes if regex_entity.match(node)])
 		with codecs.open(write_path+"_entities.txt","w","utf-8") as f:
 			for entity in entities:
 				f.write(str(entity)+"\n")

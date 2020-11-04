@@ -722,17 +722,17 @@ def checkClaimGraph(g,claim_ID,graph_type):#,mode):
 				nodes2contract['type'].append((a,c))
 		elif edge_list[e].Type==EdgeMotif.SubClass:
 			if not regex_dul.match(c):
-				if (regex_dbpedia.match(a) and not regex_dbpedia.match(c)) or (regex_vn.match(a) and not regex_vn.match(c))
+				if (regex_dbpedia.match(a) and not regex_dbpedia.match(c)) or (regex_vn.match(a) and not regex_vn.match(c)):
 					nodes2contract['subclass'].append((a,c))
 				else:
 					nodes2contract['subclass'].append((c,a))
 		elif edge_list[e].Type==EdgeMotif.Equivalence:
-			if (regex_dbpedia.match(a) and not regex_dbpedia.match(c)) or (regex_vn.match(a) and not regex_vn.match(c))
+			if (regex_dbpedia.match(a) and not regex_dbpedia.match(c)) or (regex_vn.match(a) and not regex_vn.match(c)):
 				nodes2contract['equivalence'].append((a,c))
 			else:
 				nodes2contract['equivalence'].append((c,a))
 		elif edge_list[e].Type==EdgeMotif.Identity:
-			if (regex_dbpedia.match(a) and not regex_dbpedia.match(c)) or (regex_vn.match(a) and not regex_vn.match(c))
+			if (regex_dbpedia.match(a) and not regex_dbpedia.match(c)) or (regex_vn.match(a) and not regex_vn.match(c)):
 				nodes2contract['identity'].append((a,c))
 			else:
 				nodes2contract['identity'].append((c,a))
@@ -920,7 +920,7 @@ def cleanClaimGraph(claim_g,clean_claims):
 	regex_vn=re.compile(r'^http:\/\/www\.ontologydesignpatterns\.org\/ont\/vn\/data\/([a-zA-Z]*)_.*')
 	regex_dbpedia=re.compile(r'^http:\/\/dbpedia\.org\/resource\/(.*)')
 	for u,v,d in edgelist:
-		if d['label']=='associatedWith' or d['label']=='hasQuality' or d['label']=='sameAs' or d['label']=='equivalentClass' or d['label']=='type':
+		if d['label']=='associatedWith' or d['label']=='hasQuality' or d['label']=='sameAs' or d['label']=='equivalentClass' or d['label']=='type' or d['label']=='subClassOf':
 			if u.split("/")[-1].split("#")[-1].lower() in v.split("/")[-1].split("#")[-1].lower():
 				if (regex_dbpedia.match(v) and not regex_dbpedia.match(u)) or (regex_vn.match(v) and not regex_vn.match(u)):
 					contract_edgelist.append((v,u))

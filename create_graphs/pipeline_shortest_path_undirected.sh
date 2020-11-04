@@ -9,7 +9,7 @@
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=48
 #SBATCH --mem=58G
-#SBATCH --time=12:00:00
+#SBATCH --time=64:00:00
 source /N/u/zkachwal/Carbonate/miniconda3/etc/profile.d/conda.sh
 conda activate
 cd /gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph/create_graphs/
@@ -52,6 +52,10 @@ time python embed.py -ft tfcg -fc fred -mp roberta-base-nli-stsb-mean-tokens -gt
 #finding shortest paths
 time python find_shortest_paths.py -ft ffcg -fc fred -cpu 48 -gt undirected
 time python find_shortest_paths.py -ft tfcg -fc fred -cpu 48 -gt undirected
-#finding shortest paths 2
+# finding shortest paths 2
 time python find_shortest_paths.py -ft ffcg -mp roberta-base-nli-stsb-mean-tokens -fc fred -cpu 48 -gt undirected
 time python find_shortest_paths.py -ft tfcg -mp roberta-base-nli-stsb-mean-tokens -fc fred -cpu 48 -gt undirected
+# plot graphs 
+cd /geode2/home/u110/zkachwal/BigRed3/factcheckgraph/plot_graphs/
+time python plot_sp.py -fcg fred -pt roc -gt undirected
+time python plot_sp.py -fcg fred -pt dist -gt undirected

@@ -64,9 +64,9 @@ def find_baseline(rdf_path,graph_path,model_path,embed_path,graph_type,fcg_class
 		true_claims_embed=np.take(true_claims_embed,true_claimIDs,axis=0)
 		false_claims_embed=np.take(false_claims_embed,true_claimIDs,axis=0)
 	#Calculating angular distance
-	true_true=1-np.arccos(cosine_similarity(true_claims_embed,true_claims_embed))/np.pi
-	true_false=1-np.arccos(cosine_similarity(true_claims_embed,false_claims_embed))/np.pi
-	false_false=1-np.arccos(cosine_similarity(false_claims_embed,false_claims_embed))/np.pi
+	true_true=1-np.arccos(np.clip(cosine_similarity(true_claims_embed,true_claims_embed),-1,1))/np.pi
+	true_false=1-np.arccos(np.clip(cosine_similarity(true_claims_embed,false_claims_embed),-1,1))/np.pi
+	false_false=1-np.arccos(np.clip(cosine_similarity(false_claims_embed,false_claims_embed),-1,1))/np.pi
 	np.fill_diagonal(true_true,np.nan)
 	np.fill_diagonal(false_false,np.nan)
 	##################################################################################ROC PLOT
@@ -132,7 +132,6 @@ def find_baseline(rdf_path,graph_path,model_path,embed_path,graph_type,fcg_class
 	title=title.replace('ROC','KDE')
 	##################################################################################KDE PLOT
 	plt.figure(figsize=(9, 8))
-	Yh=1-Yh
 	minscore=np.min(true_scores+false_scores)
 	maxscore=np.max(true_scores+false_scores)
 	intervalscore=float(maxscore-minscore)/20
@@ -141,7 +140,7 @@ def find_baseline(rdf_path,graph_path,model_path,embed_path,graph_type,fcg_class
 	print(maxscore)
 	sns.distplot(true_scores,hist=True,kde=True,bins=np.arange(minscore,maxscore+intervalscore,intervalscore),kde_kws={'linewidth': 3},label="true",norm_hist=True)
 	sns.distplot(false_scores,hist=True,kde=True,bins=np.arange(minscore,maxscore+intervalscore,intervalscore),kde_kws={'linewidth': 3},label="false",norm_hist=True)
-	plt.xlabel('Distance Scores (lower is positive)')
+	plt.xlabel('similarity Scores (higher is positive)')
 	plt.ylabel('Density')
 	plt.legend(loc="upper right")
 	plt.title(title)
@@ -179,7 +178,7 @@ def find_knn(rdf_path,graph_path,model_path,embed_path,graph_type,fcg_class,cpu,
 	#set x matrix
 	X=np.concatenate((true_claims_embed,false_claims_embed),axis=0)
 	#find pairwise cosine similarity
-	X=np.arccos(cosine_similarity(X,X))/np.pi
+	X=np.arccos(np.clip(cosine_similarity(X,X),-1,1))/np.pi
 	# data from claim labels: text, rating, claimID
 	Xlabels=np.concatenate((true_claims_labels[1:],false_claims_labels[1:]),axis=0)
 	np.fill_diagonal(X,np.nan)
@@ -209,13 +208,22 @@ def find_knn(rdf_path,graph_path,model_path,embed_path,graph_type,fcg_class,cpu,
 		Xndict[i]['text']=text
 		Xndict[i]['predscore']=round(Yh[i],2)
 		Xndict[i]['score']=float(Y[i])
+	#True claims (label=1)
 	Xndict_1={t[0]:t[1] for t in Xndict.items() if t[1]['score']==1}
+	#False claims (label=-1)
 	Xndict_0={t[0]:t[1] for t in Xndict.items() if t[1]['score']==-1}
+	#False claims with high predscore
+	
 	Xndict_1=OrderedDict(sorted(Xndict_1.items(), key=lambda t:np.mean([x['dist'] for x in t[1].items() if type(x)==dict])))
 	Xndict_0=OrderedDict(sorted(Xndict_0.items(), key=lambda t:np.mean([x['dist'] for x in t[1].items() if type(x)==dict])))
 	with codecs.open(os.path.join(embed_path,"knn_1_{}.json".format(n_neighbors)),"w","utf-8") as f:
 		f.write(json.dumps(Xndict_1,indent=5,ensure_ascii=False))
 	with codecs.open(os.path.join(embed_path,"knn_0_{}.json".format(n_neighbors)),"w","utf-8") as f:
+		f.write(json.dumps(Xndict_0,indent=5,ensure_ascii=False))
+
+	Xndict_0_high={t[0]:t[1] for t in Xndict.items() if t[1]['score']==-1 and t[1]['predscore']>0}
+	Xndict_0_high=OrderedDict(sorted(Xndict_0_high.items(), key=lambda t:t[1]['predscore'],reverse=True))
+	with codecs.open(os.path.join(embed_path,"knn_0_high_{}.json".format(n_neighbors)),"w","utf-8") as f:
 		f.write(json.dumps(Xndict_0,indent=5,ensure_ascii=False))
 	##################################################################################ROC PLOT
 	plt.figure(figsize=(9, 8))
@@ -237,7 +245,6 @@ def find_knn(rdf_path,graph_path,model_path,embed_path,graph_type,fcg_class,cpu,
 	##################################################################################KDE PLOT
 	title=title.replace('ROC','KDE')
 	plt.figure(figsize=(9, 8))
-	Yh=1-Yh
 	minscore=np.min(list(Yh[Y==1])+list(Yh[Y==-1]))
 	maxscore=np.max(list(Yh[Y==1])+list(Yh[Y==-1]))
 	intervalscore=float(maxscore-minscore)/20
@@ -246,7 +253,7 @@ def find_knn(rdf_path,graph_path,model_path,embed_path,graph_type,fcg_class,cpu,
 	print(maxscore)
 	sns.distplot(Yh[Y==1],hist=True,kde=True,bins=np.arange(minscore,maxscore+intervalscore,intervalscore),kde_kws={'linewidth': 3},label="true",norm_hist=True)
 	sns.distplot(Yh[Y==-1],hist=True,kde=True,bins=np.arange(minscore,maxscore+intervalscore,intervalscore),kde_kws={'linewidth': 3},label="false",norm_hist=True)
-	plt.xlabel('Distance Scores (lower is positive)')
+	plt.xlabel('Similarity Scores (higher is positive)')
 	plt.ylabel('Density')
 	plt.legend(loc="upper right")
 	plt.title(title)
@@ -264,7 +271,7 @@ if __name__== "__main__":
 	parser.add_argument('-mp','--modelpath', metavar='model path',type=str,help='Model directory to load the model',default="/geode2/home/u110/zkachwal/BigRed3/factcheckgraph_data/models/claims-relatedness-model/claims-roberta-base-nli-stsb-mean-tokens-2020-05-27_19-01-27")
 	parser.add_argument('-ep','--embedpath', metavar='embed path',type=str,help='Model directory to save and load embeddings',default="/geode2/home/u110/zkachwal/BigRed3/factcheckgraph_data/embeddings")
 	parser.add_argument('-fcg','--fcgclass', metavar='FactCheckGraph class',type=str,choices=['co_occur','fred'])
-	parser.add_argument('-gt','--graphtype', metavar='Graph Type Directed/Undirected',type=str,choices=['directed','undirected'])
+	parser.add_argument('-gt','--graphtype', metavar='Graph Type Directed/Undirected',type=str,choices=['directed','undirected'],default='undirected')
 	parser.add_argument('-bt','--baselinetype', metavar='Baseline Type All neighbors or K NearestNeighbors',type=str,choices=['all','knn'])
 	parser.add_argument('-cpu','--cpu',metavar='Number of CPUs',type=int,help='Number of CPUs available',default=1)
 	parser.add_argument('-n','--neighbors',metavar='Number of Neighbors',type=int,help='Number of Neighbors for KNN',default=0)

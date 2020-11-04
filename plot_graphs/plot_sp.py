@@ -47,7 +47,7 @@ def plot_roc(graph_path,fcg_class,graph_type):
 	tfcg_types={"co_occur":"tfcg_co","fred":"tfcg"}
 	embed={'roberta-base-nli-stsb-mean-tokens':'e1'}#,'claims-roberta-base-nli-stsb-mean-tokens-2020-05-27_19-01-27':'e2'}
 	mode={'w':'d1','d':'d2'}#,'f':'d3'}
-	aggmode={'mean':'a1','min':'a2','max':'a3','domb':'a4'}
+	aggmode={'mean':'a1','max':'a2'}#,'min':'a3'}#,'domb':'a4'}
 	plt.figure()
 	lw=2
 	plt.plot([0, 1], [0, 1],color='navy',lw=lw,linestyle='--')
@@ -56,11 +56,11 @@ def plot_roc(graph_path,fcg_class,graph_type):
 	plot_path=os.path.join(graph_path,fcg_class,"plots")
 	for e in list(embed.keys()):
 		for d in list(mode.keys()):
-			with codecs.open(os.path.join(read_path+"_true_({})".format(e),"paths_"+graph_type+"_"+d+".json"),"r","utf-8") as f: 
-				true_paths=json.loads(f.read())
-			with codecs.open(os.path.join(read_path+"_false_({})".format(e),"paths_"+graph_type+"_"+d+".json"),"r","utf-8") as f: 
-				false_paths=json.loads(f.read())
 			for a in list(aggmode.keys()):
+				with codecs.open(os.path.join(read_path+"_true_({})".format(e),"paths_"+graph_type+"_"+d+"_"+a+".json"),"r","utf-8") as f: 
+					true_paths=json.loads(f.read())
+				with codecs.open(os.path.join(read_path+"_false_({})".format(e),"paths_"+graph_type+"_"+d+"_"+a+".json"),"r","utf-8") as f: 
+					false_paths=json.loads(f.read())
 				###################################################################################################
 				# true_directed_claimIDs=np.load(os.path.join(read_path+"_true_({})".format(e),"paths_directed_"+d+"_claimIDs.npy"))
 				# false_directed_claimIDs=np.load(os.path.join(read_path+"_false_({})".format(e),"paths_directed_"+d+"_claimIDs.npy"))
@@ -73,17 +73,17 @@ def plot_roc(graph_path,fcg_class,graph_type):
 				###################################################################################################
 				# true_scores=[float(1)/aggregate_weights(t[1],d,a) if aggregate_weights(t[1],d,a)>0 else 1000 for t in true_paths.items()]
 				# false_scores=[float(1)/aggregate_weights(t[1],d,a) if aggregate_weights(t[1],d,a)>0 else 1000 for t in false_paths.items()]
-				true0={t[0]:t[1] for t in true_paths.items() if 0<aggregate_weights(t[1],d,a)<0.2}
-				true1={t[0]:t[1] for t in true_paths.items() if aggregate_weights(t[1],d,a)>0.6}
-				false1={t[0]:t[1] for t in false_paths.items() if aggregate_weights(t[1],d,a)>0.6}
-				with codecs.open(os.path.join(read_path+"_true_({})".format(e),"0paths_"+graph_type+"_"+d+"_"+a+".json"),"w","utf-8") as f: 
-					f.write(json.dumps(true0,indent=5,ensure_ascii=False))
-				with codecs.open(os.path.join(read_path+"_true_({})".format(e),"1paths_"+graph_type+"_"+d+"_"+a+".json"),"w","utf-8") as f: 
-					f.write(json.dumps(true1,indent=5,ensure_ascii=False))
-				with codecs.open(os.path.join(read_path+"_false_({})".format(e),"1paths_"+graph_type+"_"+d+"_"+a+".json"),"w","utf-8") as f: 
-					f.write(json.dumps(false1,indent=5,ensure_ascii=False))
-				true_scores=[aggregate_weights(t[1],d,a) for t in true_paths.items()]
-				false_scores=[aggregate_weights(t[1],d,a) for t in false_paths.items()]
+				# true0={t[0]:t[1] for t in true_paths.items() if 0<eval(t[0])[1]<0.1}
+				# true1={t[0]:t[1] for t in true_paths.items() if eval(t[0])[1]>0.1}
+				# false1={t[0]:t[1] for t in false_paths.items() if aggregate_weights(t[1],d,a)>0.6}
+				# with codecs.open(os.path.join(read_path+"_true_({})".format(e),"0paths_"+graph_type+"_"+d+"_"+a+".json"),"w","utf-8") as f: 
+				# 	f.write(json.dumps(true0,indent=5,ensure_ascii=False))
+				# with codecs.open(os.path.join(read_path+"_true_({})".format(e),"1paths_"+graph_type+"_"+d+"_"+a+".json"),"w","utf-8") as f: 
+				# 	f.write(json.dumps(true1,indent=5,ensure_ascii=False))
+				# with codecs.open(os.path.join(read_path+"_false_({})".format(e),"1paths_"+graph_type+"_"+d+"_"+a+".json"),"w","utf-8") as f: 
+				# 	f.write(json.dumps(false1,indent=5,ensure_ascii=False))
+				true_scores=[eval(t[0])[1] for t in true_paths.items()]
+				false_scores=[eval(t[0])[1] for t in false_paths.items()]
 				true_y=[1 for i in range(len(true_scores))]
 				false_y=[0 for i in range(len(false_scores))]
 				y=true_y+false_y
@@ -118,8 +118,8 @@ def plot_roc(graph_path,fcg_class,graph_type):
 def plot_dist(graph_path,fcg_class,graph_type):
 	tfcg_types={"co_occur":"tfcg_co","fred":"tfcg"}
 	embed={'roberta-base-nli-stsb-mean-tokens':'e1'}#,'claims-roberta-base-nli-stsb-mean-tokens-2020-05-27_19-01-27':'e2'}
-	mode={'w':'d1'}#,'d':'d2'}#,'f':'d3'}
-	aggmode={'mean':'a1'}#,'min':'a2','max':'a3','domb':'a4'}
+	mode={'w':'d1','d':'d2'}#,'f':'d3'}
+	aggmode={'mean':'a1','max':'a2'}#,'min':'a3'}#,'domb':'a4'}
 	read_path=os.path.join(graph_path,fcg_class,"paths",tfcg_types[fcg_class])
 	plot_path=os.path.join(graph_path,fcg_class,"plots")
 	for e in list(embed.keys()):
@@ -128,9 +128,9 @@ def plot_dist(graph_path,fcg_class,graph_type):
 				label=embed[e]+mode[d]+aggmode[a]
 				plt.figure()
 				title=graph_type+" density histogram {} shortest path setence embedded paths".format(fcg_class+"_"+label)
-				with codecs.open(os.path.join(read_path+"_true_({})".format(e),"paths_"+graph_type+"_"+d+".json"),"r","utf-8") as f: 
+				with codecs.open(os.path.join(read_path+"_true_({})".format(e),"paths_"+graph_type+"_"+d+"_"+a+".json"),"r","utf-8") as f: 
 					true_paths=json.loads(f.read())
-				with codecs.open(os.path.join(read_path+"_false_({})".format(e),"paths_"+graph_type+"_"+d+".json"),"r","utf-8") as f: 
+				with codecs.open(os.path.join(read_path+"_false_({})".format(e),"paths_"+graph_type+"_"+d+"_"+a+".json"),"r","utf-8") as f: 
 					false_paths=json.loads(f.read())
 				###################################################################################################
 				# true_directed_claimIDs=np.load(os.path.join(read_path+"_true_({})".format(e),"paths_directed_"+d+"_claimIDs.npy"))
@@ -142,16 +142,21 @@ def plot_dist(graph_path,fcg_class,graph_type):
 				# true_paths={key:true_paths[key] for key in non_true_directed_claimIDs}
 				# false_paths={key:false_paths[key] for key in non_false_directed_claimIDs}
 				###################################################################################################
-				true_scores=list(map(lambda t:aggregate_weights(t[1],d,a),true_paths.items()))
-				false_scores=list(map(lambda t:aggregate_weights(t[1],d,a),false_paths.items()))
+				true_scores=[eval(t[0])[1] for t in true_paths.items()]
+				false_scores=[eval(t[0])[1] for t in false_paths.items()]
 				minscore=np.floor(min(true_scores+false_scores))
 				maxscore=np.ceil(max(true_scores+false_scores))
 				intervalscore=float(maxscore-minscore)/20
 				print(intervalscore)
 				print(minscore)
 				print(maxscore)
-				sns.distplot(true_scores,hist=True,kde=True,bins=np.arange(minscore,maxscore+intervalscore,intervalscore),kde_kws={'linewidth': 3},label="true_"+label)
-				sns.distplot(false_scores,hist=True,kde=True,bins=np.arange(minscore,maxscore+intervalscore,intervalscore),kde_kws={'linewidth': 3},label="false_"+label)
+				try:
+					plotrange=np.arange(minscore,maxscore+intervalscore,intervalscore)
+					sns.distplot(true_scores,hist=True,kde=True,bins=plotrange,kde_kws={'linewidth': 3},label="true_"+label)
+					sns.distplot(false_scores,hist=True,kde=True,bins=plotrange,kde_kws={'linewidth': 3},label="false_"+label)
+				except ValueError:
+					sns.distplot(true_scores,hist=True,kde=True,kde_kws={'linewidth': 3},label="true_"+label)
+					sns.distplot(false_scores,hist=True,kde=True,kde_kws={'linewidth': 3},label="false_"+label)
 				plt.xlabel('Proximity Scores (higher is positive)')
 				plt.ylabel('Density')
 				plt.legend(loc="upper right")

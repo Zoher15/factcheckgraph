@@ -20,7 +20,7 @@ def calculate_stats(graph_path,graph_class,g_label):
 	# g2e=set(list(map(lambda x:(sorted([x[0],x[1]])[0],sorted([x[0],x[1]])[1],x[2]['claim_ID']),list(G2.edges(data=True)))))
 	# import pdb
 	# pdb.set_trace()
-	entity_regex=re.compile(r'db:')
+	entity_regex=re.compile(r'^db:|^fu:')
 	nodes=G.nodes()
 	if graph_class=="kg":
 		entities=list(nodes)
