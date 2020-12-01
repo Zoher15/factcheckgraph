@@ -604,7 +604,7 @@ def nodelabel_mapper(text):
 		bool(regex_quant.match(text)):'quant:'+text.split("/")[-1].split("#")[-1],
 		bool(regex_schema.match(text)):'schema:'+text.split("/")[-1].split("#")[-1],
 		bool(regex_fred.match(text)):'fred:'+text.split("/")[-1].split("#")[-1],
-		bool(regex_fredup.match(text)):'fredup:'+text.split("/")[-1].split("#")[-1],
+		bool(regex_fredup.match(text)):'fu:'+text.split("/")[-1].split("#")[-1],
 		}
 		return d[True]
 	except KeyError:

@@ -146,17 +146,17 @@ def plot_dist(graph_path,fcg_class,graph_type):
 				false_scores=[eval(t[0])[1] for t in false_paths.items()]
 				minscore=np.floor(min(true_scores+false_scores))
 				maxscore=np.ceil(max(true_scores+false_scores))
-				intervalscore=float(maxscore-minscore)/20
+				intervalscore=float(maxscore-minscore)/100
 				print(intervalscore)
 				print(minscore)
 				print(maxscore)
 				try:
 					plotrange=np.arange(minscore,maxscore+intervalscore,intervalscore)
-					sns.distplot(true_scores,hist=True,kde=True,bins=plotrange,kde_kws={'linewidth': 3},label="true_"+label)
-					sns.distplot(false_scores,hist=True,kde=True,bins=plotrange,kde_kws={'linewidth': 3},label="false_"+label)
+					sns.distplot(true_scores,hist=True,kde=False,bins=plotrange,kde_kws={'linewidth': 3},label="true_"+label)
+					sns.distplot(false_scores,hist=True,kde=False,bins=plotrange,kde_kws={'linewidth': 3},label="false_"+label)
 				except ValueError:
-					sns.distplot(true_scores,hist=True,kde=True,kde_kws={'linewidth': 3},label="true_"+label)
-					sns.distplot(false_scores,hist=True,kde=True,kde_kws={'linewidth': 3},label="false_"+label)
+					sns.distplot(true_scores,hist=True,kde=False,kde_kws={'linewidth': 3},label="true_"+label)
+					sns.distplot(false_scores,hist=True,kde=False,kde_kws={'linewidth': 3},label="false_"+label)
 				plt.xlabel('Proximity Scores (higher is positive)')
 				plt.ylabel('Density')
 				plt.legend(loc="upper right")

@@ -59,7 +59,7 @@ def create_co_occur(rdf_path,graph_path,fcg_label,skipID):
 						claim_entities_set.add('db:'+subject.split("/")[-1].split("#")[-1])
 					elif regex_fredup.match(subject):
 						claim_entities_set.add('fu:'+subject.split("/")[-1].split("#")[-1])
-					if regex_fredup.search(obj):
+					if regex_dbpedia.match(obj):
 						claim_entities_set.add('db:'+obj.split("/")[-1].split("#")[-1])
 					elif regex_fredup.match(obj):
 						claim_entities_set.add('fu:'+obj.split("/")[-1].split("#")[-1])
