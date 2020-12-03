@@ -1,0 +1,49 @@
+embed
+
+real	1m48.087s
+user	33m20.175s
+sys	0m23.162s
+
+real	0m34.157s
+user	8m47.260s
+sys	0m6.309s
+
+real	1m47.305s
+user	33m6.715s
+sys	0m23.452s
+
+real	0m34.827s
+user	8m54.837s
+sys	0m7.112s
+find_shortest_paths
+multiprocessing.pool.RemoteTraceback: 
+"""
+Traceback (most recent call last):
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/multiprocessing/pool.py", line 121, in worker
+    result = (True, func(*args, **kwds))
+  File "find_shortest_paths.py", line 247, in find_paths_of_interest
+    source_fcg,dist_p,embeddata=create_weighted(p,rdf_path,model_path,graph_path,graph_type,embed_path,source_claim_type,source_fcg_type,fcg_class)
+  File "find_shortest_paths.py", line 82, in create_weighted
+    fcg=nx.read_edgelist(os.path.join(fcg_path,"{}.edgelist".format(fcg_type)),comments="@",create_using=eval(graph_type))
+  File "<decorator-gen-618>", line 2, in read_edgelist
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/networkx/utils/decorators.py", line 214, in _open_file
+    fobj = _dispatch_dict[ext](path, mode=mode)
+FileNotFoundError: [Errno 2] No such file or directory: '/geode2/home/u110/zkachwal/BigRed3/factcheckgraph_data/graphs/fred/tfcg_co/tfcg_co.edgelist'
+"""
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "find_shortest_paths.py", line 484, in <module>
+    find_shortest_paths(args.rdfpath,args.modelpath,args.graphpath,graph_types[args.graphtype],args.embedpath,"tfcg",args.fcgtype,args.fcgclass,args.cpu)
+  File "find_shortest_paths.py", line 456, in find_shortest_paths
+    output=sorted([p.get() for p in results],key=lambda x:x[0])
+  File "find_shortest_paths.py", line 456, in <listcomp>
+    output=sorted([p.get() for p in results],key=lambda x:x[0])
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/multiprocessing/pool.py", line 657, in get
+    raise self._value
+FileNotFoundError: [Errno 2] No such file or directory: '/geode2/home/u110/zkachwal/BigRed3/factcheckgraph_data/graphs/fred/tfcg_co/tfcg_co.edgelist'
+
+real	3m13.997s
+user	141m22.327s
+sys	0m52.283s

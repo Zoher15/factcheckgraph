@@ -43,7 +43,7 @@ def chunkstring(string,length):
 			string=string[:loc]+"\n"+string[loc+1:]
 	return string.splitlines()
 
-def find_baseline(rdf_path,graph_path,model_path,embed_path,graph_type,fcg_class,cpu):
+def find_baseline(rdf_path,graph_path,model_path,embed_path,graph_type,fcg_class):
 	'''
 	To have an accurate baseline for future: 1. remove claims that do no exist in the fred graph
 	2. Remove claims that are near duplicates
@@ -151,7 +151,7 @@ def find_baseline(rdf_path,graph_path,model_path,embed_path,graph_type,fcg_class
 	plt.close()
 	plt.clf()
 
-def find_knn(rdf_path,graph_path,model_path,embed_path,graph_type,fcg_class,cpu,n_neighbors):
+def find_knn(k,rdf_path,graph_path,model_path,embed_path,graph_type,fcg_class,n_neighbors):
 	'''
 	To have an accurate baseline for future: 1. remove claims that do no exist in the fred graph
 	2. Remove claims that are near duplicates
@@ -204,20 +204,23 @@ def find_knn(rdf_path,graph_path,model_path,embed_path,graph_type,fcg_class,cpu,
 			n_text=chunkstring(Xlabels[Xn[i,j]][0],100)
 			Xndict[i]['neighbors'][Xn[i,j]]={'n_text':n_text,'claimID':XclaimID[i,j],'rating':Xrating[i,j],'dist':round(X[i,Xn[i,j]],2)}
 			aggregate+=Y[Xn[i,j]]*(1-X[i,Xn[i,j]])
-		Yh[i]=float(aggregate)/sum([X[i,Xn[i,j]] for j in range(Xn.shape[1])])
+		Yh[i]=float(aggregate)/n_neighbors
 		Xndict[i]['text']=text
 		Xndict[i]['predscore']=round(Yh[i],2)
 		Xndict[i]['score']=float(Y[i])
 		Xndict[i]['neighbors']=OrderedDict(sorted(Xndict[i]['neighbors'].items(), key=lambda t: t[1]['dist']))
 		Xndict[i]=OrderedDict(sorted(Xndict[i].items(), key=lambda t: t[0],reverse=True))
+
 	#True claims (label=1)
 	Xndict_1={t[0]:t[1] for t in Xndict.items() if t[1]['score']==1}
 	#False claims (label=-1)
 	Xndict_0={t[0]:t[1] for t in Xndict.items() if t[1]['score']==-1}
 	#False claims with high predscore
-	
-	Xndict_1=OrderedDict(sorted(Xndict_1.items(), key=lambda t:np.mean([x['dist'] for x in t[1].items() if type(x)==dict])))
-	Xndict_0=OrderedDict(sorted(Xndict_0.items(), key=lambda t:np.mean([x['dist'] for x in t[1].items() if type(x)==dict])))
+
+	Xndict_1=OrderedDict(sorted(Xndict_1.items(), key=lambda t:t[1]['predscore'], reverse=True))
+	Xndict_0=OrderedDict(sorted(Xndict_0.items(), key=lambda t:t[1]['predscore'], reverse=True))
+
+
 	with codecs.open(os.path.join(embed_path,"knn_1_{}.json".format(n_neighbors)),"w","utf-8") as f:
 		f.write(json.dumps(Xndict_1,indent=6,ensure_ascii=False))
 	with codecs.open(os.path.join(embed_path,"knn_0_{}.json".format(n_neighbors)),"w","utf-8") as f:
@@ -265,7 +268,7 @@ def find_knn(rdf_path,graph_path,model_path,embed_path,graph_type,fcg_class,cpu,
 	plt.savefig(os.path.join(embed_path,title.replace(" ","_")+".png"))
 	plt.close()
 	plt.clf()
-	return float(metrics.auc(fpr,tpr))
+	return k,float(metrics.auc(fpr,tpr))
 
 if __name__== "__main__":
 	parser=argparse.ArgumentParser(description='Find baseline')
@@ -276,22 +279,36 @@ if __name__== "__main__":
 	parser.add_argument('-fcg','--fcgclass', metavar='FactCheckGraph class',type=str,choices=['co_occur','fred'])
 	parser.add_argument('-gt','--graphtype', metavar='Graph Type Directed/Undirected',type=str,choices=['directed','undirected'],default='undirected')
 	parser.add_argument('-bt','--baselinetype', metavar='Baseline Type All neighbors or K NearestNeighbors',type=str,choices=['all','knn'])
-	parser.add_argument('-cpu','--cpu',metavar='Number of CPUs',type=int,help='Number of CPUs available',default=1)
+	parser.add_argument('-cpu','--cpu',metavar='Number of CPUs',type=int,help='Number of CPUs available')
 	# parser.add_argument('-n','--neighbors',metavar='Number of Neighbors',type=int,help='Number of Neighbors for KNN',default=0)
 	args=parser.parse_args()
 	# embed_claims(args.rdfpath,"roberta-base-nli-stsb-mean-tokens",args.embedpath,args.fcgtype)
 	if args.baselinetype=='all':
-		find_baseline(args.rdfpath,args.graphpath,args.modelpath,args.embedpath,args.graphtype,args.fcgclass,args.cpu)
+		find_baseline(args.rdfpath,args.graphpath,args.modelpath,args.embedpath,args.graphtype,args.fcgclass)
 	elif args.baselinetype=='knn':
 		rocs=[]
-		plotrange=[i+1 for i in range(0,200,5)]
-		pool=mp.Pool(processes=args.cpu)
-		results=[pool.apply_async(find_knn, args=(args.rdfpath,args.graphpath,args.modelpath,args.embedpath,args.graphtype,args.fcgclass,args.cpu,k)) for k in plotrange]
-		rocs=sorted([p.get() for p in results])
-		plt.plot(plotrange,rocs,'g^',markersize=7)
-		plt.savefig(os.path.join(args.embedpath,"rocs.png"))
-		plt.xlabel('number of neighbors')
-		plt.ylabel('auc')
-		plt.close()
-		plt.clf()
+		plotrange=[i+1 for i in range(1,55,5)]
+		if args.cpu:
+			pool=mp.Pool(processes=args.cpu)
+			results=[pool.apply_async(find_knn, args=(k,args.rdfpath,args.graphpath,args.modelpath,args.embedpath,args.graphtype,args.fcgclass,k)) for k in plotrange]
+			rocs=sorted([p.get() for p in results],key=lambda t:t[0])
+			rocs=[t[1] for t in rocs]
+			plt.plot(plotrange,rocs,'g^',markersize=7)
+			plt.savefig(os.path.join(args.embedpath,"rocs.png"))
+			plt.xlabel('number of neighbors')
+			plt.ylabel('auc')
+			plt.close()
+			plt.clf()
+		else:
+			rocs=[]
+			for k in plotrange:
+				rocs.append(find_knn(k,args.rdfpath,args.graphpath,args.modelpath,args.embedpath,args.graphtype,args.fcgclass,k)[1])
+			plt.plot(plotrange,rocs,'g^',markersize=7)
+			plt.savefig(os.path.join(args.embedpath,"rocs_{}.png".format(datetime.datetime.now().strftime("%c"))))
+			plt.xlabel('number of neighbors')
+			plt.ylabel('auc')
+			plt.close()
+			plt.clf()
+
+
 

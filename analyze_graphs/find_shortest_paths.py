@@ -72,7 +72,11 @@ def create_weighted(p,rdf_path,model_path,graph_path,graph_type,embed_path,claim
 		embed=pd.read_csv(os.path.join(embed_path,fcg_type.split('-')[0]+"_nodes_embeddings_({}).tsv".format(model_path.split("/")[-1])),delimiter="\t",header=None).values
 		labels=pd.read_csv(os.path.join(embed_path,fcg_type.split('-')[0]+"_nodes_embeddings_labels_({}).tsv".format(model_path.split("/")[-1])),delimiter="\t")
 	#cosine similarity
-	simil_p=np.clip(cosine_similarity(p,embed)[0],-1,1)
+	try:
+		simil_p=np.clip(cosine_similarity(p,embed)[0],-1,1)
+	except ValueError:
+		import pdb
+		pdb.set_trace()
 	#normalized angular distance
 	dist_p=np.arccos(simil_p)/np.pi
 	fcg=nx.read_edgelist(os.path.join(fcg_path,"{}.edgelist".format(fcg_type)),comments="@",create_using=eval(graph_type))

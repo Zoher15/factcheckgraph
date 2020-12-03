@@ -10,9 +10,9 @@ import json
 from itertools import combinations
 
 def create_co_occur(rdf_path,graph_path,fcg_label,skipID):
-	regex_dbpedia=re.compile(r'^http:\/\/dbpedia\.org\/resource\/(.*)')
-	regex_fredup=re.compile(r'^http:\/\/www\.ontologydesignpatterns\.org\/ont\/fred\/domain\.owl#([A-Z]+[a-zA-Z]*)')
-	regex_entity=re.compile(r'^http:\/\/dbpedia\.org\/resource\/(.*)|^http:\/\/www\.ontologydesignpatterns\.org\/ont\/fred\/domain\.owl#([A-Z]+[a-zA-Z]*)')
+	regex_dbpedia=re.compile(r'^db:')
+	regex_fredup=re.compile(r'^fu:')
+	regex_entity=re.compile(r'^db:|^fu:')
 	if fcg_label=="ufcg_co":
 		#Assumes that TFCG_co and FFCG_co exists
 		tfcg_path=os.path.join(graph_path,"co_occur","tfcg_co","tfcg_co.edgelist")
@@ -39,7 +39,7 @@ def create_co_occur(rdf_path,graph_path,fcg_label,skipID):
 			claim_g=nx.Graph()
 			claim_nxg=nx.MultiGraph()
 			# filename="claim{}.rdf".format(str(claim_ID))
-			filename="claim{}.edgelist".format(str(claim_ID))
+			filename="claim{}_clean.edgelist".format(str(claim_ID))
 			try:
 				# claim_g.parse(os.path.join(rdf_path,"{}_claims".format(claim_type),filename),format='application/rdf+xml')
 				claim_g=nx.read_edgelist(os.path.join(rdf_path,"{}_claims".format(claim_type),filename),comments="@")
