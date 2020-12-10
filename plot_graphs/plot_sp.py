@@ -44,10 +44,10 @@ def domb(numlist):
 	return domb
 
 def plot_roc(graph_path,fcg_class,graph_type):
-	tfcg_types={"co_occur":"tfcg_co","fred":"tfcg"}
-	embed={'roberta-base-nli-stsb-mean-tokens':'e1'}#,'claims-roberta-base-nli-stsb-mean-tokens-2020-05-27_19-01-27':'e2'}
+	tfcg_types={"co_occur":"ffcg_co","fred":"ffcg"}
+	embed={'roberta-base-nli-stsb-mean-tokens':'e1','claims-roberta-base-nli-stsb-mean-tokens-2020-05-27_19-01-27':'e2'}
 	mode={'w':'d1','d':'d2'}#,'f':'d3'}
-	aggmode={'mean':'a1','max':'a2'}#,'min':'a3'}#,'domb':'a4'}
+	aggmode={'mean':'a1','max':'a2','min':'a3'}#,'domb':'a4'}
 	plt.figure()
 	lw=2
 	plt.plot([0, 1], [0, 1],color='navy',lw=lw,linestyle='--')
@@ -116,10 +116,10 @@ def plot_roc(graph_path,fcg_class,graph_type):
 	plt.clf()
 
 def plot_dist(graph_path,fcg_class,graph_type):
-	tfcg_types={"co_occur":"tfcg_co","fred":"tfcg"}
-	embed={'roberta-base-nli-stsb-mean-tokens':'e1'}#,'claims-roberta-base-nli-stsb-mean-tokens-2020-05-27_19-01-27':'e2'}
+	tfcg_types={"co_occur":"ffcg_co","fred":"ffcg"}
+	embed={'roberta-base-nli-stsb-mean-tokens':'e1','claims-roberta-base-nli-stsb-mean-tokens-2020-05-27_19-01-27':'e2'}
 	mode={'w':'d1','d':'d2'}#,'f':'d3'}
-	aggmode={'mean':'a1','max':'a2'}#,'min':'a3'}#,'domb':'a4'}
+	aggmode={'mean':'a1','max':'a2','min':'a3'}#,'domb':'a4'}
 	read_path=os.path.join(graph_path,fcg_class,"paths",tfcg_types[fcg_class])
 	plot_path=os.path.join(graph_path,fcg_class,"plots")
 	for e in list(embed.keys()):

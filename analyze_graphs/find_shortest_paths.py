@@ -63,7 +63,7 @@ def create_weighted(p,rdf_path,model_path,graph_path,graph_type,embed_path,claim
 	else:
 		fcg_path=os.path.join(graph_path,fcg_class,fcg_type)
 	#Adding weights to edges
-	fcg_class='co_occur'
+	# fcg_class='co_occur'
 	if fcg_class=='co_occur':
 		claims=pd.read_csv(os.path.join(rdf_path,"{}_claims.csv".format(claim_type)))
 		claim_IDs=claims['claimID'].tolist()
@@ -174,7 +174,7 @@ def create_ordered_paths(write_path,mode):
 
 #Function to find node pairs in the source graph if they exist as edges in the target graph
 def find_edges_of_interest(rdf_path,graph_path,graph_type,embed_path,source_fcg_type,target_fcg_type,fcg_class):
-	suffix={"co_occur":"_co","fred":"_co"}
+	suffix={"co_occur":"_co","fred":"_clean"}
 	if target_fcg_type in source_fcg_type:
 		fcg_type,target_claimID=source_fcg_type.split('-')
 		claim_types={'tfcg_co':'true','ffcg_co':'false','tfcg':'true','ffcg':'false'}
@@ -183,13 +183,14 @@ def find_edges_of_interest(rdf_path,graph_path,graph_type,embed_path,source_fcg_
 		target_fcg_path=os.path.join(rdf_path,claim_type)
 		target_fcg_type="claim"+target_claimID+suffix[fcg_class]
 	else:
-		target_fcg_types={"ffcg_co":"ffcg_co","ffcg":"ffcg_co"}
-		target_fcg_type=target_fcg_types[target_fcg_type]
 		source_fcg_path=os.path.join(graph_path,fcg_class,source_fcg_type)
-		target_fcg_path=os.path.join(graph_path,"co_occur",target_fcg_type)
+		target_fcg_path=os.path.join(graph_path,fcg_class,target_fcg_type)
 	#loading source and target fcg
 	source_fcg=nx.read_edgelist(os.path.join(source_fcg_path,"{}.edgelist".format(source_fcg_type)),comments="@",create_using=eval(graph_type))
-	target_fcg=nx.read_edgelist(os.path.join(target_fcg_path,"{}.edgelist".format(target_fcg_type)),comments="@",create_using=eval(graph_type))
+	try:
+		target_fcg=nx.read_edgelist(os.path.join(target_fcg_path,"{}.edgelist".format(target_fcg_type)),comments="@",create_using=eval(graph_type))
+	except FileNotFoundError:
+		target_fcg=eval(graph_type+'()')
 	edges_of_interest={}
 	'''
 	If the graph is co-occurrence, then the target edges of interest are simply all the edges in the graph.
@@ -234,7 +235,7 @@ def find_paths_of_interest(index,rdf_path,graph_path,graph_type,embed_path,model
 			if claimID not in set(list(edges_of_interest.keys())):
 				continue
 			claimIDs=list(edges_of_interest.keys())
-			np.save(os.path.join(graph_path,fcg_class,source_fcg_type,'leave1out','claimIDs_directed_'+source_fcg_type+'-'+str(claimID)+'.npy'),claimIDs)
+			# np.save(os.path.join(graph_path,fcg_class,source_fcg_type,'leave1out','claimIDs_undirected_'+source_fcg_type+'-'+str(claimID)+'.npy'),claimIDs)
 		#getting index of claim
 		claimIX=target_claims[target_claims['claimID']==claimID].index[0]
 		p=np.array([target_claims_embed[claimIX]])
@@ -265,7 +266,7 @@ def find_paths_of_interest(index,rdf_path,graph_path,graph_type,embed_path,model
 				1. There are no 0 dist paths, even when they are directly connected
 				2. While aggregating the entity pairs, we automatically include the weight of the an entity pair by not ignoring the weight of the source node
 				'''
-				fcg_class='co_occur'
+				# fcg_class='co_occur'
 				if fcg_class=='co_occur':
 					for e in source_fcg.in_edges(u,data=True):
 						data=e[2]
@@ -306,7 +307,7 @@ def find_paths_of_interest(index,rdf_path,graph_path,graph_type,embed_path,model
 				#################################################################################
 				#################################################################################
 				#################################################################################
-				fcg_class='fred'
+				# fcg_class='fred'
 				if nx.has_path(source_fcg,u,v):
 					#################################################################################
 					#################################################################################
@@ -475,10 +476,11 @@ if __name__== "__main__":
 	parser.add_argument('-gp','--graphpath', metavar='graph path',type=str,help='Graph directory to store the graphs',default="/geode2/home/u110/zkachwal/BigRed3/factcheckgraph_data/graphs/")
 	parser.add_argument('-mp','--modelpath', metavar='model path',type=str,help='Model directory to load the model',default="/geode2/home/u110/zkachwal/BigRed3/factcheckgraph_data/models/claims-relatedness-model/claims-roberta-base-nli-stsb-mean-tokens-2020-05-27_19-01-27")
 	parser.add_argument('-ep','--embedpath', metavar='embed path',type=str,help='Model directory to save and load embeddings',default="/geode2/home/u110/zkachwal/BigRed3/factcheckgraph_data/embeddings")
+	parser.add_argument('-st','--sfcgtype', metavar='Source FactCheckGraph type',type=str,choices=['tfcg','ffcg','tfcg_co','ffcg_co','ufcg','covid19'],help='True/False/Union/Covid19 FactCheckGraph')
 	parser.add_argument('-ft','--fcgtype', metavar='FactCheckGraph type',type=str,choices=['tfcg','ffcg','tfcg_co','ffcg_co','ufcg','covid19'],help='True/False/Union/Covid19 FactCheckGraph')
 	parser.add_argument('-fc','--fcgclass', metavar='FactCheckGraph class',type=str,choices=['co_occur','fred'])
 	parser.add_argument('-gt','--graphtype', metavar='Graph Type Directed/Undirected',type=str,choices=['directed','undirected'])
 	parser.add_argument('-cpu','--cpu',metavar='Number of CPUs',type=int,help='Number of CPUs available',default=1)
 	graph_types={'undirected':'nx.MultiGraph','directed':'nx.MultiDiGraph'}
 	args=parser.parse_args()
-	find_shortest_paths(args.rdfpath,args.modelpath,args.graphpath,graph_types[args.graphtype],args.embedpath,"tfcg",args.fcgtype,args.fcgclass,args.cpu)
+	find_shortest_paths(args.rdfpath,args.modelpath,args.graphpath,graph_types[args.graphtype],args.embedpath,args.sfcgtype,args.fcgtype,args.fcgclass,args.cpu)

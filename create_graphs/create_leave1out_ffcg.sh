@@ -7,8 +7,8 @@
 #SBATCH --mail-user=zoher.kachwala@gmail.com
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
+#SBATCH --mem=58G
 #SBATCH --cpus-per-task=48
-#SBATCH --mem=24G
 #SBATCH --time=96:00:00
 source /N/u/zkachwal/Carbonate/miniconda3/etc/profile.d/conda.sh
 conda activate

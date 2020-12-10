@@ -55,14 +55,10 @@ def create_co_occur(rdf_path,graph_path,fcg_label,skipID):
 					obj=obj.replace("Middle_East_respiratory_syndrome_coronavirus","Severe_acute_respiratory_syndrome_coronavirus_2")
 				###########################################################
 				try:
-					if regex_dbpedia.match(subject):
-						claim_entities_set.add('db:'+subject.split("/")[-1].split("#")[-1])
-					elif regex_fredup.match(subject):
-						claim_entities_set.add('fu:'+subject.split("/")[-1].split("#")[-1])
-					if regex_dbpedia.match(obj):
-						claim_entities_set.add('db:'+obj.split("/")[-1].split("#")[-1])
-					elif regex_fredup.match(obj):
-						claim_entities_set.add('fu:'+obj.split("/")[-1].split("#")[-1])
+					if regex_entity.match(subject):
+						claim_entities_set.add(subject)
+					if regex_entity.match(obj):
+						claim_entities_set.add(obj)
 				except KeyError:
 					pass
 			claim_entities[claim_ID]=list(claim_entities_set)

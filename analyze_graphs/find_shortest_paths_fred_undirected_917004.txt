@@ -1,3 +1,0 @@
-> /geode2/home/u110/zkachwal/BigRed3/factcheckgraph/analyze_graphs/find_shortest_paths.py(81)create_weighted()
--> dist_p=np.arccos(simil_p)/np.pi
-(Pdb) 

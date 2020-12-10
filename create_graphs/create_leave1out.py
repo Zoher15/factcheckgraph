@@ -5,22 +5,23 @@ import numpy as np
 import networkx as nx
 import sys
 import argparse
-import os
 
 def compose_graphs(claims_path,fcg_path,suffix,claim_IDs,claim_IDs2remove):
 	for skipID in claim_IDs2remove:
 		temp_claim_IDs=claim_IDs.copy()
 		temp_claim_IDs.remove(skipID)
 		fcg=nx.MultiGraph()
-		for claim_ID in temp_claim_IDs:
-			filename=os.path.join(claims_path,"claim{}".format(str(claim_ID))+"_"+suffix)
-			try:
-				claim_g=nx.read_edgelist(filename+".edgelist",comments="@")
-			except:
-				continue
-			claim_g=nx.MultiGraph(claim_g)
-			fcg=nx.compose(fcg,claim_g)
-		nx.write_edgelist(fcg,fcg_path+"-"+str(skipID)+".edgelist")
+		pathname=fcg_path+"-"+str(skipID)+".edgelist"
+		if not os.path.isfile(pathname): 
+			for claim_ID in temp_claim_IDs:
+				filename=os.path.join(claims_path,"claim{}".format(str(claim_ID))+"_"+suffix)
+				try:
+					claim_g=nx.read_edgelist(filename+".edgelist",comments="@")
+				except:
+					continue
+				claim_g=nx.MultiGraph(claim_g)
+				fcg=nx.compose(fcg,claim_g)
+			nx.write_edgelist(fcg,pathname)
 
 def create_leave1out(rdf_path,graph_path,fcg_class,fcg_label,cpu):
 	claim_types={"tfcg_co":"true","ffcg_co":"false","tfcg":"true","ffcg":"false"}
@@ -48,7 +49,3 @@ if __name__== "__main__":
 	parser.add_argument('-cpu','--cpu',metavar='Number of CPUs',type=int,help='Number of CPUs available',default=1)
 	args=parser.parse_args()
 	create_leave1out(args.rdfpath,args.graphpath,args.fcgclass,args.fcgtype,args.cpu)
-
-
-
-

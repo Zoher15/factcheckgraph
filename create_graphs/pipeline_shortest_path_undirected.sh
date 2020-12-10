@@ -30,9 +30,9 @@ errcho calculate stats
 time python calculate_stats.py -gc fred -gt tfcg
 time python calculate_stats.py -gc fred -gt ffcg
 time python calculate_stats.py -gc fred -gt ufcg
-# time python calculate_stats.py -gc co_occur -gt tfcg_co
-# time python calculate_stats.py -gc co_occur -gt ffcg_co
-# time python calculate_stats.py -gc co_occur -gt ufcg_co
+time python calculate_stats.py -gc co_occur -gt tfcg_co
+time python calculate_stats.py -gc co_occur -gt ffcg_co
+time python calculate_stats.py -gc co_occur -gt ufcg_co
 time python compile_stats.py
 ################################################################
 errcho leave1out
@@ -51,9 +51,9 @@ time python embed.py -ft tfcg -fc co_occur -mp roberta-base-nli-stsb-mean-tokens
 time python embed.py -ft ffcg -fc fred -mp roberta-base-nli-stsb-mean-tokens -gt undirected
 time python embed.py -ft tfcg -fc fred -mp roberta-base-nli-stsb-mean-tokens -gt undirected
 ################################################################
-errcho finding shortest paths
-time python find_shortest_paths.py -ft ffcg -fc fred -cpu 48 -gt undirected
-time python find_shortest_paths.py -ft tfcg -fc fred -cpu 48 -gt undirected
+# errcho finding shortest paths
+# time python find_shortest_paths.py -ft ffcg -fc fred -cpu 48 -gt undirected
+# time python find_shortest_paths.py -ft tfcg -fc fred -cpu 48 -gt undirected
 errcho finding shortest paths 2
 time python find_shortest_paths.py -ft ffcg -mp roberta-base-nli-stsb-mean-tokens -fc fred -cpu 48 -gt undirected
 time python find_shortest_paths.py -ft tfcg -mp roberta-base-nli-stsb-mean-tokens -fc fred -cpu 48 -gt undirected

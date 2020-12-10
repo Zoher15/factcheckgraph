@@ -9,7 +9,7 @@
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=48
 #SBATCH --mem=58G
-#SBATCH --time=8:00:00
+#SBATCH --time=48:00:00
 errcho(){ >&2 echo $@; }
 source /N/u/zkachwal/Carbonate/miniconda3/etc/profile.d/conda.sh
 conda activate
