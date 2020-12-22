@@ -1,0 +1,44 @@
+embed
+
+real	1m25.359s
+user	25m10.912s
+sys	0m12.739s
+
+real	0m40.674s
+user	10m47.632s
+sys	0m6.019s
+slurmstepd: error: _is_a_lwp: open() /proc/27644/status failed: No such file or directory
+
+real	1m25.061s
+user	25m17.043s
+sys	0m15.181s
+
+real	0m40.890s
+user	10m51.393s
+sys	0m5.148s
+find_shortest_paths
+
+real	144m37.953s
+user	6783m33.055s
+sys	26m0.910s
+
+real	39m15.861s
+user	1812m15.311s
+sys	7m22.555s
+
+real	141m58.206s
+user	6685m50.549s
+sys	25m2.365s
+
+real	39m23.039s
+user	1820m54.493s
+sys	7m25.083s
+plot graphs
+
+real	0m18.132s
+user	0m10.684s
+sys	0m1.677s
+
+real	0m17.824s
+user	0m14.373s
+sys	0m2.031s

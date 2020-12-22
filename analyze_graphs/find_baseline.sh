@@ -14,13 +14,13 @@
 source /N/u/zkachwal/Carbonate/miniconda3/etc/profile.d/conda.sh
 conda activate
 cd /geode2/home/u110/zkachwal/BigRed3/factcheckgraph/analyze_graphs/
-time python embed.py -ft ffcg -fc co_occur -gt undirected
-time python embed.py -ft tfcg -fc co_occur -gt undirected
-time python embed.py -ft ffcg -fc fred -gt undirected
-time python embed.py -ft tfcg -fc fred -gt undirected
-time python embed.py -ft ffcg -fc co_occur -mp roberta-base-nli-stsb-mean-tokens -gt undirected
-time python embed.py -ft tfcg -fc co_occur -mp roberta-base-nli-stsb-mean-tokens -gt undirected
-time python embed.py -ft ffcg -fc fred -mp roberta-base-nli-stsb-mean-tokens -gt undirected
-time python embed.py -ft tfcg -fc fred -mp roberta-base-nli-stsb-mean-tokens -gt undirected
-time python find_baseline.py -bt knn -cpu 48
-time python find_baseline.py -bt all
+# time python embed.py -ft ffcg -fc co_occur -gt undirected
+# time python embed.py -ft tfcg -fc co_occur -gt undirected
+# time python embed.py -ft ffcg -fc fred -gt undirected
+# time python embed.py -ft tfcg -fc fred -gt undirected
+# time python embed.py -ft ffcg -fc co_occur -mp roberta-base-nli-stsb-mean-tokens -gt undirected
+# time python embed.py -ft tfcg -fc co_occur -mp roberta-base-nli-stsb-mean-tokens -gt undirected
+# time python embed.py -ft ffcg -fc fred -mp roberta-base-nli-stsb-mean-tokens -gt undirected
+# time python embed.py -ft tfcg -fc fred -mp roberta-base-nli-stsb-mean-tokens -gt undirected
+time python find_baseline.py -bt knn -cpu 48 -mp roberta-base-nli-stsb-mean-tokens
+time python find_baseline.py -bt all -mp roberta-base-nli-stsb-mean-tokens

@@ -43,16 +43,16 @@ def domb(numlist):
 			domb=(domb*j)/(domb+j-(domb*j))
 	return domb
 
-def plot_roc(graph_path,fcg_class,graph_type):
-	tfcg_types={"co_occur":"ffcg_co","fred":"ffcg"}
-	embed={'roberta-base-nli-stsb-mean-tokens':'e1','claims-roberta-base-nli-stsb-mean-tokens-2020-05-27_19-01-27':'e2'}
+def plot_roc(graph_path,fcg_class,fcg_type,graph_type):
+	fcg_types={"co_occur":{"tfcg":"tfcg_co","ffcg":"ffcg_co"},"fred":{"tfcg":"tfcg","ffcg":"ffcg"}}
+	embed={'roberta-base-nli-stsb-mean-tokens':'e1'}#,'claims-roberta-base-nli-stsb-mean-tokens-2020-05-27_19-01-27':'e2'}
 	mode={'w':'d1','d':'d2'}#,'f':'d3'}
-	aggmode={'mean':'a1','max':'a2','min':'a3'}#,'domb':'a4'}
+	aggmode={'mean':'a1','max':'a2'}#,'min':'a3'}#,'domb':'a4'}
 	plt.figure()
 	lw=2
 	plt.plot([0, 1], [0, 1],color='navy',lw=lw,linestyle='--')
-	title=graph_type+" ROC {} shortest path embedded paths".format(fcg_class)
-	read_path=os.path.join(graph_path,fcg_class,"paths",tfcg_types[fcg_class])
+	title=graph_type+" ROC {} shortest path embedded paths".format(fcg_class+"_"+fcg_type)
+	read_path=os.path.join(graph_path,fcg_class,"paths",fcg_types[fcg_class][fcg_type])
 	plot_path=os.path.join(graph_path,fcg_class,"plots")
 	for e in list(embed.keys()):
 		for d in list(mode.keys()):
@@ -115,19 +115,19 @@ def plot_roc(graph_path,fcg_class,graph_type):
 	plt.close()
 	plt.clf()
 
-def plot_dist(graph_path,fcg_class,graph_type):
-	tfcg_types={"co_occur":"ffcg_co","fred":"ffcg"}
-	embed={'roberta-base-nli-stsb-mean-tokens':'e1','claims-roberta-base-nli-stsb-mean-tokens-2020-05-27_19-01-27':'e2'}
+def plot_dist(graph_path,fcg_class,fcg_type,graph_type):
+	fcg_types={"co_occur":{"tfcg":"tfcg_co","ffcg":"ffcg_co"},"fred":{"tfcg":"tfcg","ffcg":"ffcg"}}
+	embed={'roberta-base-nli-stsb-mean-tokens':'e1'}#,'claims-roberta-base-nli-stsb-mean-tokens-2020-05-27_19-01-27':'e2'}
 	mode={'w':'d1','d':'d2'}#,'f':'d3'}
-	aggmode={'mean':'a1','max':'a2','min':'a3'}#,'domb':'a4'}
-	read_path=os.path.join(graph_path,fcg_class,"paths",tfcg_types[fcg_class])
+	aggmode={'mean':'a1','max':'a2'}#,'min':'a3'}#,'domb':'a4'}
+	read_path=os.path.join(graph_path,fcg_class,"paths",fcg_types[fcg_class][fcg_type])
 	plot_path=os.path.join(graph_path,fcg_class,"plots")
 	for e in list(embed.keys()):
 		for d in list(mode.keys()):
 			for a in list(aggmode.keys()):
 				label=embed[e]+mode[d]+aggmode[a]
 				plt.figure()
-				title=graph_type+" density histogram {} shortest path setence embedded paths".format(fcg_class+"_"+label)
+				title=graph_type+" density histogram {} shortest path setence embedded paths".format(fcg_class+"_"+fcg_type+"_"+label)
 				with codecs.open(os.path.join(read_path+"_true_({})".format(e),"paths_"+graph_type+"_"+d+"_"+a+".json"),"r","utf-8") as f: 
 					true_paths=json.loads(f.read())
 				with codecs.open(os.path.join(read_path+"_false_({})".format(e),"paths_"+graph_type+"_"+d+"_"+a+".json"),"r","utf-8") as f: 
@@ -173,10 +173,11 @@ if __name__== "__main__":
 	parser = argparse.ArgumentParser(description='Plotting true(adjacent) pairs vs false (non-adjacent)')
 	parser.add_argument('-gp','--graphpath', metavar='graph path',type=str,help='Path to the graph directory',default='/gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph_data/graphs/')
 	parser.add_argument('-fcg','--fcgclass', metavar='fcg class',type=str,help='Class of FactCheckGraph to process')
+	parser.add_argument('-ft','--fcgtype', metavar='FCG Type',type=str,choices=['tfcg','ffcg','tfcg_co','ffcg_co'])
 	parser.add_argument('-pt','--plottype', metavar='plot type',type=str,choices=['roc','dist'],help='Class of graph to plot')
 	parser.add_argument('-gt','--graphtype', metavar='Graph Type Directed/Undirected',type=str,choices=['directed','undirected'])
 	args=parser.parse_args()
 	if args.plottype=='roc':
-		plot_roc(args.graphpath,args.fcgclass,args.graphtype)
+		plot_roc(args.graphpath,args.fcgclass,args.fcgtype,args.graphtype)
 	elif args.plottype=='dist':
-		plot_dist(args.graphpath,args.fcgclass,args.graphtype)
+		plot_dist(args.graphpath,args.fcgclass,args.fcgtype,args.graphtype)

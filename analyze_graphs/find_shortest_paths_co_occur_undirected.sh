@@ -20,11 +20,11 @@ time python embed.py -ft tfcg -fc co_occur -gt undirected
 time python embed.py -ft ffcg -fc co_occur -mp roberta-base-nli-stsb-mean-tokens -gt undirected
 time python embed.py -ft tfcg -fc co_occur -mp roberta-base-nli-stsb-mean-tokens -gt undirected
 errcho find_shortest_paths
-time python find_shortest_paths.py -ft ffcg -fc co_occur -cpu 48 -gt undirected
-time python find_shortest_paths.py -ft tfcg -fc co_occur -cpu 48 -gt undirected
-time python find_shortest_paths.py -ft ffcg -mp roberta-base-nli-stsb-mean-tokens -fc co_occur -cpu 48 -gt undirected
-time python find_shortest_paths.py -ft tfcg -mp roberta-base-nli-stsb-mean-tokens -fc co_occur -cpu 48 -gt undirected
+time python find_shortest_paths.py -st tfcg -ft ffcg -fc co_occur -cpu 48 -gt undirected
+time python find_shortest_paths.py -st tfcg -ft tfcg -fc co_occur -cpu 48 -gt undirected
+time python find_shortest_paths.py -st tfcg -ft ffcg -mp roberta-base-nli-stsb-mean-tokens -fc co_occur -cpu 48 -gt undirected
+time python find_shortest_paths.py -st tfcg -ft tfcg -mp roberta-base-nli-stsb-mean-tokens -fc co_occur -cpu 48 -gt undirected
 errcho plot graphs 
 cd /geode2/home/u110/zkachwal/BigRed3/factcheckgraph/plot_graphs/
-time python plot_sp.py -fcg co_occur -pt roc -gt undirected
-time python plot_sp.py -fcg co_occur -pt dist -gt undirected
+time python plot_sp.py -fcg co_occur -ft tfcg -pt roc -gt undirected
+time python plot_sp.py -fcg co_occur -ft tfcg -pt dist -gt undirected

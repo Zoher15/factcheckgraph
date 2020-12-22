@@ -67,6 +67,48 @@ def find_baseline(rdf_path,graph_path,model_path,embed_path,graph_type,fcg_class
 	true_true=1-np.arccos(np.clip(cosine_similarity(true_claims_embed,true_claims_embed),-1,1))/np.pi
 	true_false=1-np.arccos(np.clip(cosine_similarity(true_claims_embed,false_claims_embed),-1,1))/np.pi
 	false_false=1-np.arccos(np.clip(cosine_similarity(false_claims_embed,false_claims_embed),-1,1))/np.pi
+	#storing index of duplicate-ish claims to get rid of them from the data
+	x_true=list(set([np.sort([i,j])[-1] for i in range(len(true_true)) for j in range(len(true_true)) if true_true[j][i]>0.825 and i!=j]))
+	x_false=list(set([np.sort([i,j])[-1] for i in range(len(false_false)) for j in range(len(false_false)) if false_false[j][i]>0.825 and i!=j]))
+	#deleting from the cross matrix
+	true_true=np.delete(true_true,x_true,axis=0)
+	true_true=np.delete(true_true,x_true,axis=1)
+	true_false=np.delete(true_false,x_true,axis=0)
+	true_false=np.delete(true_false,x_false,axis=1)
+	false_false=np.delete(false_false,x_false,axis=0)
+	false_false=np.delete(false_false,x_false,axis=1)
+	####################################################################################################
+	title="true vs true duplicates"
+	plt.figure(figsize=(9, 8))
+	sns.heatmap(true_true)
+	plt.xlabel('True Claims')
+	plt.ylabel('True Claims')
+	plt.title(title)
+	plt.tight_layout()
+	plt.savefig(os.path.join(embed_path,title.replace(" ","_")+"_"+model_path.split("/")[-1]+".png"))
+	plt.close()
+	plt.clf()
+	title="false vs false duplicates"
+	plt.figure(figsize=(9, 8))
+	sns.heatmap(false_false)
+	plt.xlabel('False Claims')
+	plt.ylabel('False Claims')
+	plt.title(title)
+	plt.tight_layout()
+	plt.savefig(os.path.join(embed_path,title.replace(" ","_")+"_"+model_path.split("/")[-1]+".png"))
+	plt.close()
+	plt.clf()
+	title="true vs false duplicates"
+	plt.figure(figsize=(9, 8))
+	sns.heatmap(true_false)
+	plt.xlabel('False Claims')
+	plt.ylabel('True Claims')
+	plt.title(title)
+	plt.tight_layout()
+	plt.savefig(os.path.join(embed_path,title.replace(" ","_")+"_"+model_path.split("/")[-1]+".png"))
+	plt.close()
+	plt.clf()
+	####################################################################################################
 	np.fill_diagonal(true_true,np.nan)
 	np.fill_diagonal(false_false,np.nan)
 	##################################################################################ROC PLOT
@@ -183,9 +225,21 @@ def find_knn(k,rdf_path,graph_path,model_path,embed_path,graph_type,fcg_class,n_
 	# data from claim labels: text, rating, claimID
 	Xlabels=np.concatenate((true_claims_labels[1:],false_claims_labels[1:]),axis=0)
 	Xlabels_t=true_claims_labels[1:]
-	#
 	np.fill_diagonal(X,np.nan)
 	np.fill_diagonal(X_t[:len(true_y),:],np.nan)
+	########################################################################################### de duplication
+	#storing index of duplicate-ish claims to get rid of them from the data
+	x_true=list(set([np.sort([i,j])[-1] for i in range(len(true_claims_embed)) for j in range(len(true_claims_embed)) if X[j][i]<=0.175 and i!=j]))
+	x_false=list(set([np.sort([i,j])[-1] for i in range(len(true_claims_embed),len(false_claims_embed)+len(true_claims_embed)) for j in range(len(true_claims_embed),len(false_claims_embed)+len(true_claims_embed)) if X[j][i]<=0.175 and i!=j]))# to put the index in right spot
+	#deleting from the cross matrix
+	X=np.delete(X,x_true+x_false,axis=0)
+	X=np.delete(X,x_true+x_false,axis=1)
+	X_t=np.delete(X_t,x_true+x_false,axis=0)
+	X_t=np.delete(X_t,x_true,axis=1)
+	Xlabels=np.delete(Xlabels,x_true+x_false,axis=0)
+	Xlabels_t=np.delete(Xlabels_t,x_true,axis=0)
+	Y=np.delete(Y,x_true+x_false,axis=0)
+	####################################################################################################
 	#Finding n_neighbors
 	Xn=np.argpartition(X,n_neighbors)[:,:n_neighbors]
 	Xn_t=np.argpartition(X_t,n_neighbors)[:,:n_neighbors]
@@ -195,6 +249,8 @@ def find_knn(k,rdf_path,graph_path,model_path,embed_path,graph_type,fcg_class,n_
 	Yh_t=np.array([float(0) for i in range(Xn_t.shape[0])])
 	#text in Xlabels
 	Xlabel=np.apply_along_axis(lambda x:Xlabels[x,0],1,Xn)
+	################################################################################################################
+	###############################"_t" indicates only true claims are being used to check the claims
 	Xlabel_t=np.apply_along_axis(lambda x:Xlabels_t[x,0],1,Xn_t)
 	#claimID in Xlabels
 	XclaimID=np.apply_along_axis(lambda x:Xlabels[x,1],1,Xn)
@@ -207,21 +263,23 @@ def find_knn(k,rdf_path,graph_path,model_path,embed_path,graph_type,fcg_class,n_
 	for i in range(Xn.shape[0]):
 		text=chunkstring(Xlabels[i][0],100)
 		text_t=chunkstring(Xlabels[i][0],100)
-		Xndict[i]={}
-		Xndict_t[i]={}
+		#Xlabels[i][1] gives the claimID. We want to use the claimID as the key
+		claimID=Xlabels[i][1]
+		Xndict[claimID]={}
+		Xndict_t[claimID]={}
 		aggregate=0
 		aggregate_t=0
-		Xndict[i]['neighbors']={}
-		Xndict_t[i]['neighbors']={}
+		Xndict[claimID]['neighbors']={}
+		Xndict_t[claimID]['neighbors']={}
 		for j in range(Xn.shape[1]):
-			Xndict[i]['neighbors'][int(Xn[i,j])]={}
-			Xndict_t[i]['neighbors'][int(Xn_t[i,j])]={}
+			Xndict[claimID]['neighbors'][int(Xn[i,j])]={}
+			Xndict_t[claimID]['neighbors'][int(Xn_t[i,j])]={}
 			#
 			n_text=chunkstring(Xlabels[Xn[i,j]][0],100)
 			n_text_t=chunkstring(Xlabels_t[Xn_t[i,j]][0],100)
 			#
-			Xndict[i]['neighbors'][Xn[i,j]]={'n_text':n_text,'claimID':XclaimID[i,j],'rating':Xrating[i,j],'dist':round(X[i,Xn[i,j]],2)}
-			Xndict_t[i]['neighbors'][Xn_t[i,j]]={'n_text':n_text_t,'claimID':XclaimID_t[i,j],'rating':Xrating_t[i,j],'dist':round(X_t[i,Xn_t[i,j]],2)}
+			Xndict[claimID]['neighbors'][Xn[i,j]]={'n_text':n_text,'claimID':XclaimID[i,j],'rating':Xrating[i,j],'dist':round(X[i,Xn[i,j]],2)}
+			Xndict_t[claimID]['neighbors'][Xn_t[i,j]]={'n_text':n_text_t,'claimID':XclaimID_t[i,j],'rating':Xrating_t[i,j],'dist':round(X_t[i,Xn_t[i,j]],2)}
 			#
 			aggregate+=Y[Xn[i,j]]*(1-X[i,Xn[i,j]])
 			aggregate_t+=Y[Xn_t[i,j]]*(1-X_t[i,Xn_t[i,j]])
@@ -229,20 +287,20 @@ def find_knn(k,rdf_path,graph_path,model_path,embed_path,graph_type,fcg_class,n_
 		Yh[i]=float(aggregate)/n_neighbors
 		Yh_t[i]=float(aggregate_t)/n_neighbors
 		#
-		Xndict[i]['text']=text
-		Xndict_t[i]['text']=text_t
+		Xndict[claimID]['text']=text
+		Xndict_t[claimID]['text']=text_t
 		#
-		Xndict[i]['predscore']=round(Yh[i],2)
-		Xndict_t[i]['predscore']=round(Yh_t[i],2)
+		Xndict[claimID]['predscore']=round(Yh[i],2)
+		Xndict_t[claimID]['predscore']=round(Yh_t[i],2)
 		#
-		Xndict[i]['score']=float(Y[i])
-		Xndict_t[i]['score']=float(Y[i])
+		Xndict[claimID]['score']=float(Y[i])
+		Xndict_t[claimID]['score']=float(Y[i])
 		#
-		Xndict[i]['neighbors']=OrderedDict(sorted(Xndict[i]['neighbors'].items(), key=lambda t: t[1]['dist']))
-		Xndict_t[i]['neighbors']=OrderedDict(sorted(Xndict_t[i]['neighbors'].items(), key=lambda t: t[1]['dist']))
+		Xndict[claimID]['neighbors']=OrderedDict(sorted(Xndict[claimID]['neighbors'].items(), key=lambda t: t[1]['dist']))
+		Xndict_t[claimID]['neighbors']=OrderedDict(sorted(Xndict_t[claimID]['neighbors'].items(), key=lambda t: t[1]['dist']))
 		#
-		Xndict[i]=OrderedDict(sorted(Xndict[i].items(), key=lambda t: t[0],reverse=True))
-		Xndict_t[i]=OrderedDict(sorted(Xndict_t[i].items(), key=lambda t: t[0],reverse=True))
+		Xndict[claimID]=OrderedDict(sorted(Xndict[claimID].items(), key=lambda t: t[0],reverse=True))
+		Xndict_t[claimID]=OrderedDict(sorted(Xndict_t[claimID].items(), key=lambda t: t[0],reverse=True))
 
 	#True claims (label=1)
 	Xndict_1={t[0]:t[1] for t in Xndict.items() if t[1]['score']==1}
@@ -401,7 +459,8 @@ if __name__== "__main__":
 			plt.legend(loc="upper right")
 			plt.xlabel('number of neighbors')
 			plt.ylabel('auc')
-			plt.savefig(os.path.join(args.embedpath,"rocs.png"))
+			x = datetime.datetime.now().strftime("%c")
+			plt.savefig(os.path.join(args.embedpath,"rocs_{}.png".format(x)))
 			plt.close()
 			plt.clf()
 

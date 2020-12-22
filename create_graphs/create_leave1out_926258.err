@@ -1,5 +1,0 @@
-
-real	0m1.851s
-user	0m0.858s
-sys	0m0.721s
-slurmstepd: error: *** JOB 926258 ON nid00128 CANCELLED AT 2020-12-09T10:12:06 DUE TO TIME LIMIT ***

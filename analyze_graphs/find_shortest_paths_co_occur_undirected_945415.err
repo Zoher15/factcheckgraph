@@ -1,0 +1,44 @@
+embed
+slurmstepd: error: _is_a_lwp: open() /proc/386/status failed: No such file or directory
+
+real	1m46.409s
+user	32m44.677s
+sys	0m23.832s
+
+real	0m34.833s
+user	8m54.524s
+sys	0m7.087s
+
+real	1m46.790s
+user	32m54.019s
+sys	0m22.278s
+
+real	0m34.663s
+user	8m50.239s
+sys	0m6.961s
+find_shortest_paths
+
+real	450m34.724s
+user	21160m29.023s
+sys	28m6.440s
+
+real	114m14.012s
+user	5281m11.066s
+sys	8m57.120s
+
+real	449m24.964s
+user	21083m31.132s
+sys	28m37.185s
+
+real	116m16.361s
+user	5334m13.276s
+sys	9m2.729s
+plot graphs
+
+real	0m32.195s
+user	0m20.837s
+sys	0m3.881s
+
+real	0m29.824s
+user	0m24.584s
+sys	0m3.998s

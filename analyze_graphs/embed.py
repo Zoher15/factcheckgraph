@@ -4,12 +4,14 @@ import re
 import os
 import csv
 import networkx as nx
+import numpy as np
+from sklearn.metrics.pairwise import cosine_similarity,cosine_distances
 import argparse
 
 def embed_claims(rdf_path,model_path,embed_path,claim_type):
 	os.makedirs(embed_path, exist_ok=True)
 	model = SentenceTransformer(model_path)
-	claims=pd.read_csv(os.path.join(rdf_path,"{}_claims.csv".format(claim_type)))
+	claims=pd.read_csv(os.path.join(rdf_path,"{}_claims.csv".format(claim_type)),index_col=0)
 	claims_list=list(claims['claim_text'])
 	claims_embeddings=model.encode(claims_list)
 	with open(os.path.join(embed_path,claim_type+'_claims_embeddings_({}).tsv'.format(model_path.split("/")[-1])),'w',newline='') as f:
@@ -24,6 +26,14 @@ def embed_claims(rdf_path,model_path,embed_path,claim_type):
 			vector=list((claims.iloc[i]['claim_text'],claims.iloc[i]['claimID'],claim_type))
 			tsv_output=csv.writer(f,delimiter='\t')
 			tsv_output.writerow(vector)
+	if model_path=="roberta-base-nli-stsb-mean-tokens":
+		#Calculating angular distance
+		claim_claim=1-np.arccos(np.clip(cosine_similarity(claims_embeddings,claims_embeddings),-1,1))/np.pi
+		#storing index of duplicate-ish claims to get rid of them from the data
+		x_claim=list(set([np.sort([i,j])[-1] for i in range(len(claim_claim)) for j in range(len(claim_claim)) if claim_claim[j][i]>0.825 and i!=j]))
+		claims=claims.drop(index=x_claim).reset_index()
+		claims.to_csv(os.path.join(rdf_path,"{}_claims.csv".format(claim_type)),index=False)
+		np.save(os.path.join(rdf_path,"{}_claimID.npy".format(claim_type)),list(claims["claimID"]))
 
 def clean_node_labels(node_label):
 	node_label=node_label.split(':')[-1]

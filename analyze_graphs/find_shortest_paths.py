@@ -64,13 +64,13 @@ def create_weighted(p,rdf_path,model_path,graph_path,graph_type,embed_path,claim
 		fcg_path=os.path.join(graph_path,fcg_class,fcg_type)
 	#Adding weights to edges
 	# fcg_class='co_occur'
-	if fcg_class=='co_occur':
-		claims=pd.read_csv(os.path.join(rdf_path,"{}_claims.csv".format(claim_type)))
-		claim_IDs=claims['claimID'].tolist()
-		embed=pd.read_csv(os.path.join(embed_path,claim_type+"_claims_embeddings_({}).tsv".format(model_path.split("/")[-1])),delimiter="\t",header=None).values
-	elif fcg_class=='fred':
-		embed=pd.read_csv(os.path.join(embed_path,fcg_type.split('-')[0]+"_nodes_embeddings_({}).tsv".format(model_path.split("/")[-1])),delimiter="\t",header=None).values
-		labels=pd.read_csv(os.path.join(embed_path,fcg_type.split('-')[0]+"_nodes_embeddings_labels_({}).tsv".format(model_path.split("/")[-1])),delimiter="\t")
+	# if fcg_class=='co_occur':
+	claims=pd.read_csv(os.path.join(rdf_path,"{}_claims.csv".format(claim_type)))
+	claim_IDs=claims['claimID'].tolist()
+	embed=pd.read_csv(os.path.join(embed_path,claim_type+"_claims_embeddings_({}).tsv".format(model_path.split("/")[-1])),delimiter="\t",header=None).values
+	# elif fcg_class=='fred':
+	# 	embed=pd.read_csv(os.path.join(embed_path,fcg_type.split('-')[0]+"_nodes_embeddings_({}).tsv".format(model_path.split("/")[-1])),delimiter="\t",header=None).values
+	# 	labels=pd.read_csv(os.path.join(embed_path,fcg_type.split('-')[0]+"_nodes_embeddings_labels_({}).tsv".format(model_path.split("/")[-1])),delimiter="\t")
 	#cosine similarity
 	try:
 		simil_p=np.clip(cosine_similarity(p,embed)[0],-1,1)
@@ -89,14 +89,14 @@ def create_weighted(p,rdf_path,model_path,graph_path,graph_type,embed_path,claim
 	#assigning weight by summing the log of adjacent nodes, and dividing by the similiarity of the claim with the target predicate
 	fcg_edges=fcg.edges.data(keys=True)
 	for u,v,k,d in fcg_edges:
-		if fcg_class=='co_occur':
-			claimID=d['claim_ID']
-			IX=claims[claims['claimID']==claimID].index[0]
-			dist=dist_p[IX]
-		elif fcg_class=='fred':
-			# uIX=labels[labels['node_label']==u].index[0]
-			IX=labels[labels['node_label']==v].index[0]
-			dist=dist_p[IX]#+dist_p[uIX]
+		# if fcg_class=='co_occur':
+		claimID=d['claim_ID']
+		IX=claims[claims['claimID']==claimID].index[0]
+		dist=dist_p[IX]
+		# elif fcg_class=='fred':
+		# 	# uIX=labels[labels['node_label']==u].index[0]
+		# 	IX=labels[labels['node_label']==v].index[0]
+		# 	dist=dist_p[IX]#+dist_p[uIX]
 		fcg.edges[u,v,k]['dist']=dist
 	#Removing multiedges, by selecting the shortest one
 	fcg2=nx.DiGraph()
@@ -110,22 +110,22 @@ def create_weighted(p,rdf_path,model_path,graph_path,graph_type,embed_path,claim
 			fcg2.edges[u,v].update(data)
 	#Assigning the weight (dist*log(degree)) it again after the graph is pruned off its mutli edges
 	for u,v,data in fcg2.edges.data():
-		if fcg_class=='co_occur':
-			claimID=d['claim_ID']
-			IX=claims[claims['claimID']==claimID].index[0]
-			dist=dist_p[IX]
-		elif fcg_class=='fred':
-			# uIX=labels[labels['node_label']==u].index[0]
-			IX=labels[labels['node_label']==v].index[0]
-			dist=dist_p[IX]#+dist_p[uIX]
+		# if fcg_class=='co_occur':
+		claimID=d['claim_ID']
+		IX=claims[claims['claimID']==claimID].index[0]
+		dist=dist_p[IX]
+		# elif fcg_class=='fred':
+		# 	# uIX=labels[labels['node_label']==u].index[0]
+		# 	IX=labels[labels['node_label']==v].index[0]
+		# 	dist=dist_p[IX]#+dist_p[uIX]
 		vw=np.log10(fcg2.degree(v))
 		weight=dist*(vw)#+uw)
 		fcg2.edges[u,v]['weight']=weight
 
-	if fcg_class=='co_occur':
-		return fcg2,dist_p,claims
-	elif fcg_class=='fred':
-		return fcg2,dist_p,labels
+	# if fcg_class=='co_occur':
+	return fcg2,dist_p,claims
+	# elif fcg_class=='fred':
+	# 	return fcg2,dist_p,labels
 
 def domb(numlist):
 	domb=numlist[0]
@@ -267,37 +267,37 @@ def find_paths_of_interest(index,rdf_path,graph_path,graph_type,embed_path,model
 				2. While aggregating the entity pairs, we automatically include the weight of the an entity pair by not ignoring the weight of the source node
 				'''
 				# fcg_class='co_occur'
-				if fcg_class=='co_occur':
-					for e in source_fcg.in_edges(u,data=True):
-						data=e[2]
-						#removing the influence of the log of degree of target node v
-						data['weight']=data['dist']
-						source_fcg.edges[e[0],e[1]].update(data)
-					for e in source_fcg.in_edges(v,data=True):
-						data=e[2]
-						#removing the influence of the log of degree of target node v
-						data['weight']=data['dist']
-						source_fcg.edges[e[0],e[1]].update(data)
-				elif fcg_class=='fred':
-					IX=embeddata[embeddata['node_label']==u].index[0]
-					eu={'dist':dist_p[IX],'weight':dist_p[IX]*np.log10(source_fcg.degree(u))}
-					for e in source_fcg.out_edges(u,data=True):
-						data=e[2]
-						data['dist']=data['dist']+eu['dist']
-						data['weight']=data['weight']+eu['weight']
-						source_fcg.edges[e[0],e[1]].update(data)
-					# for e in source_fcg.in_edges(u,data=True):
-					# 	data=e[2]
-					# 	data['dist']=data['dist']-eu['dist']
-					# 	data['weight']=data['weight']-eu['weight']
-					# 	source_fcg.edges[e[0],e[1]].update(data)
-					IX=embeddata[embeddata['node_label']==v].index[0]
-					ev={'dist':dist_p[IX],'weight':dist_p[IX]*np.log10(source_fcg.degree(v))}
-					for e in source_fcg.out_edges(v,data=True):
-						data=e[2]
-						data['dist']=data['dist']+ev['dist']
-						data['weight']=data['weight']+ev['weight']
-						source_fcg.edges[e[0],e[1]].update(data)
+				# if fcg_class=='co_occur':
+				for e in source_fcg.out_edges(u,data=True):
+					data=e[2]
+					#adding the influence of the log of degree of target node v
+					data['weight']=data['dist']*(np.log10(source_fcg.degree(u))+np.log10(source_fcg.degree(v)))
+					source_fcg.edges[e[0],e[1]].update(data)
+				for e in source_fcg.out_edges(v,data=True):
+					data=e[2]
+					#removing the influence of the log of degree of target node v
+					data['weight']=data['dist']*(np.log10(source_fcg.degree(u))+np.log10(source_fcg.degree(v)))
+					source_fcg.edges[e[0],e[1]].update(data)
+				# elif fcg_class=='fred':
+				# 	IX=embeddata[embeddata['node_label']==u].index[0]
+				# 	eu={'dist':dist_p[IX],'weight':dist_p[IX]*np.log10(source_fcg.degree(u))}
+				# 	for e in source_fcg.out_edges(u,data=True):
+				# 		data=e[2]
+				# 		data['dist']=data['dist']+eu['dist']
+				# 		data['weight']=data['weight']+eu['weight']
+				# 		source_fcg.edges[e[0],e[1]].update(data)
+				# 	# for e in source_fcg.in_edges(u,data=True):
+				# 	# 	data=e[2]
+				# 	# 	data['dist']=data['dist']-eu['dist']
+				# 	# 	data['weight']=data['weight']-eu['weight']
+				# 	# 	source_fcg.edges[e[0],e[1]].update(data)
+				# 	IX=embeddata[embeddata['node_label']==v].index[0]
+				# 	ev={'dist':dist_p[IX],'weight':dist_p[IX]*np.log10(source_fcg.degree(v))}
+				# 	for e in source_fcg.out_edges(v,data=True):
+				# 		data=e[2]
+				# 		data['dist']=data['dist']+ev['dist']
+				# 		data['weight']=data['weight']+ev['weight']
+				# 		source_fcg.edges[e[0],e[1]].update(data)
 					# for e in source_fcg.in_edges(v,data=True):
 					# 	data=e[2]
 					# 	data['dist']=data['dist']-ev['dist']
