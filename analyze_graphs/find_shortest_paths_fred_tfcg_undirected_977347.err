@@ -1,0 +1,53 @@
+embed
+slurmstepd: error: _is_a_lwp: open() /proc/41161/status failed: No such file or directory
+
+real	1m57.890s
+user	25m11.559s
+sys	0m15.080s
+
+real	0m41.000s
+user	10m46.735s
+sys	0m6.263s
+
+real	1m28.434s
+user	26m11.708s
+sys	0m14.141s
+
+real	0m43.070s
+user	11m32.179s
+sys	0m7.050s
+find_shortest_paths
+
+real	38m38.396s
+user	1779m0.105s
+sys	7m12.253s
+
+real	38m38.999s
+user	1794m36.865s
+sys	7m24.523s
+
+real	138m58.534s
+user	6533m39.363s
+sys	24m35.022s
+
+real	139m17.278s
+user	6548m34.081s
+sys	24m26.423s
+find baseline
+
+real	1m18.546s
+user	11m1.486s
+sys	1m9.469s
+
+real	1m38.595s
+user	1m47.178s
+sys	0m6.425s
+plot graphs
+
+real	0m6.796s
+user	0m4.136s
+sys	0m1.088s
+
+real	0m7.692s
+user	0m5.423s
+sys	0m1.001s

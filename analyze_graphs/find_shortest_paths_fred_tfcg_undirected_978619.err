@@ -1,0 +1,52 @@
+embed
+
+real	1m28.249s
+user	26m1.606s
+sys	0m13.986s
+
+real	0m41.575s
+user	10m45.845s
+sys	0m5.695s
+
+real	1m29.858s
+user	26m32.001s
+sys	0m13.429s
+
+real	0m41.946s
+user	10m57.806s
+sys	0m5.781s
+find_shortest_paths
+
+real	38m30.110s
+user	1783m16.720s
+sys	7m10.541s
+
+real	38m8.309s
+user	1767m1.320s
+sys	7m18.202s
+
+real	137m24.874s
+user	6477m0.529s
+sys	24m5.393s
+
+real	137m47.851s
+user	6491m14.395s
+sys	24m10.155s
+find baseline
+
+real	1m17.479s
+user	11m10.761s
+sys	1m13.469s
+
+real	1m40.248s
+user	1m47.691s
+sys	0m6.314s
+plot graphs
+
+real	0m7.248s
+user	0m4.039s
+sys	0m1.129s
+
+real	0m8.065s
+user	0m5.399s
+sys	0m1.089s

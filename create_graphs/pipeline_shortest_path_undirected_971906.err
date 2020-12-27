@@ -1,0 +1,119 @@
+embeddings
+
+real	2m50.924s
+user	32m44.497s
+sys	0m22.295s
+
+real	0m39.290s
+user	8m49.809s
+sys	0m6.746s
+
+real	1m27.972s
+user	26m22.628s
+sys	0m14.418s
+
+real	0m41.681s
+user	11m6.385s
+sys	0m6.345s
+slurmstepd: error: _is_a_lwp: open() /proc/24916/status failed: No such file or directory
+
+real	1m42.767s
+user	31m32.822s
+sys	0m20.710s
+
+real	0m34.775s
+user	8m53.454s
+sys	0m6.694s
+
+real	1m26.641s
+user	25m51.220s
+sys	0m14.646s
+
+real	0m42.090s
+user	11m16.033s
+sys	0m5.772s
+create graphs
+
+real	0m24.407s
+user	14m56.155s
+sys	0m8.549s
+
+real	1m14.049s
+user	49m13.318s
+sys	0m15.116s
+
+real	0m17.763s
+user	5m56.628s
+sys	0m17.851s
+
+real	0m53.823s
+user	22m1.283s
+sys	0m46.465s
+
+real	0m7.181s
+user	0m4.882s
+sys	0m0.720s
+find intersect
+calculate stats
+
+real	0m2.637s
+user	0m1.267s
+sys	0m0.470s
+
+real	0m3.921s
+user	0m2.776s
+sys	0m0.430s
+
+real	0m4.702s
+user	0m3.383s
+sys	0m0.516s
+
+real	0m1.766s
+user	0m0.577s
+sys	0m0.459s
+leave1out
+
+real	131m19.138s
+user	6165m17.638s
+sys	14m49.043s
+finding shortest paths 2
+Traceback (most recent call last):
+  File "find_shortest_paths.py", line 486, in <module>
+    find_shortest_paths(args.rdfpath,args.modelpath,args.graphpath,graph_types[args.graphtype],args.embedpath,args.sfcgtype,args.fcgtype,args.fcgclass,args.cpu)
+  File "find_shortest_paths.py", line 423, in find_shortest_paths
+    source_fcg_type=fcg_types[fcg_class][source_fcg_type]
+KeyError: None
+
+real	0m5.612s
+user	0m1.420s
+sys	0m1.048s
+find baseline
+
+real	1m13.485s
+user	11m10.073s
+sys	1m12.265s
+
+real	1m38.370s
+user	1m47.279s
+sys	0m6.072s
+plot graphs
+Traceback (most recent call last):
+  File "plot_sp.py", line 181, in <module>
+    plot_roc(args.graphpath,args.fcgclass,args.fcgtype,args.graphtype)
+  File "plot_sp.py", line 54, in plot_roc
+    title=graph_type+" ROC {} shortest path embedded paths".format(fcg_class+"_"+fcg_type)
+TypeError: can only concatenate str (not "NoneType") to str
+
+real	0m2.866s
+user	0m0.972s
+sys	0m0.621s
+Traceback (most recent call last):
+  File "plot_sp.py", line 183, in <module>
+    plot_dist(args.graphpath,args.fcgclass,args.fcgtype,args.graphtype)
+  File "plot_sp.py", line 123, in plot_dist
+    read_path=os.path.join(graph_path,fcg_class,"paths",fcg_types[fcg_class][fcg_type])
+KeyError: None
+
+real	0m2.383s
+user	0m0.944s
+sys	0m0.538s

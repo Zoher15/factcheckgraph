@@ -1,8 +1,8 @@
 #!/bin/bash
-#SBATCH -J find_shortest_paths_fred_tfcg_undirected
+#SBATCH -J find_shortest_paths2_fred_tfcg_undirected
 #SBATCH -p general
-#SBATCH -o find_shortest_paths_fred_tfcg_undirected_%j.txt
-#SBATCH -e find_shortest_paths_fred_tfcg_undirected_%j.err
+#SBATCH -o find_shortest_paths2_fred_tfcg_undirected_%j.txt
+#SBATCH -e find_shortest_paths2_fred_tfcg_undirected_%j.err
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=zoher.kachwala@gmail.com
 #SBATCH --nodes=1
@@ -22,9 +22,9 @@ cd /geode2/home/u110/zkachwal/BigRed3/factcheckgraph/analyze_graphs/
 ################################################################
 errcho find_shortest_paths
 # time python find_shortest_paths.py -st tfcg -ft tfcg -mp roberta-base-nli-stsb-mean-tokens -fc fred -cpu 48 -gt undirected
-time python find_shortest_paths.py -st tfcg -ft ffcg -mp roberta-base-nli-stsb-mean-tokens -fc fred -cpu 48 -gt undirected
+# time python find_shortest_paths.py -st tfcg -ft ffcg -mp roberta-base-nli-stsb-mean-tokens -fc fred -cpu 48 -gt undirected
 # time python find_shortest_paths.py -st tfcg -ft tfcg -fc fred -cpu 48 -gt undirected
-# time python find_shortest_paths.py -st tfcg -ft ffcg -fc fred -cpu 48 -gt undirected
+time python find_shortest_paths.py -st tfcg -ft ffcg -fc fred -cpu 48 -gt undirected
 # time python find_shortest_paths.py -st tfcg -ft ffcg -fc fred -cpu 48 -gt undirected
 # time python find_shortest_paths.py -st tfcg -ft ffcg -mp roberta-base-nli-stsb-mean-tokens -fc fred -cpu 48 -gt undirected
 ################################################################

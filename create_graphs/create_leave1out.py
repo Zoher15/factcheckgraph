@@ -12,16 +12,16 @@ def compose_graphs(claims_path,fcg_path,suffix,claim_IDs,claim_IDs2remove):
 		temp_claim_IDs.remove(skipID)
 		fcg=nx.MultiGraph()
 		pathname=fcg_path+"-"+str(skipID)+".edgelist"
-		if not os.path.isfile(pathname): 
-			for claim_ID in temp_claim_IDs:
-				filename=os.path.join(claims_path,"claim{}".format(str(claim_ID))+"_"+suffix)
-				try:
-					claim_g=nx.read_edgelist(filename+".edgelist",comments="@")
-				except:
-					continue
-				claim_g=nx.MultiGraph(claim_g)
-				fcg=nx.compose(fcg,claim_g)
-			nx.write_edgelist(fcg,pathname)
+		# if not os.path.isfile(pathname): 
+		for claim_ID in temp_claim_IDs:
+			filename=os.path.join(claims_path,"claim{}".format(str(claim_ID))+"_"+suffix)
+			try:
+				claim_g=nx.read_edgelist(filename+".edgelist",comments="@")
+			except:
+				continue
+			claim_g=nx.MultiGraph(claim_g)
+			fcg=nx.compose(fcg,claim_g)
+		nx.write_edgelist(fcg,pathname)
 
 def create_leave1out(rdf_path,graph_path,fcg_class,fcg_label,cpu):
 	claim_types={"tfcg_co":"true","ffcg_co":"false","tfcg":"true","ffcg":"false"}

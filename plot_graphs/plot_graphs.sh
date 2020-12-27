@@ -12,9 +12,9 @@
 
 source /N/u/zkachwal/Carbonate/miniconda3/etc/profile.d/conda.sh
 conda activate
-cd /gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph/plot_graphs/
-time python plot_sp.py -fcg fred -pt roc -gt undirected
-time python plot_sp.py -fcg fred -pt dist -gt undirected
+cd /geode2/home/u110/zkachwal/BigRed3/factcheckgraph/plot_graphs/
+time python plot_sp.py -fcg fred -ft tfcg -pt roc -gt undirected
+time python plot_sp.py -fcg fred -ft tfcg -pt dist -gt undirected
 # time python plot_adj_pairs.py -fcg fred -kg dbpedia
 # time python plot_adj_pairs.py -fcg fred1 -kg dbpedia
 # time python plot_adj_pairs.py -fcg fred2 -kg dbpedia

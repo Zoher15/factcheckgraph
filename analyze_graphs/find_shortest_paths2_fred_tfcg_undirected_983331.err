@@ -1,0 +1,24 @@
+embed
+find_shortest_paths
+
+real	197m31.416s
+user	9281m30.096s
+sys	30m13.371s
+find baseline
+
+real	1m14.779s
+user	11m30.566s
+sys	1m19.237s
+
+real	1m40.479s
+user	1m47.703s
+sys	0m6.482s
+plot graphs
+
+real	0m7.900s
+user	0m4.111s
+sys	0m1.122s
+
+real	0m8.440s
+user	0m5.439s
+sys	0m1.126s

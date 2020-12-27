@@ -58,8 +58,9 @@ time python create_leave1out.py -fc fred -ft tfcg -cpu 48
 # time python find_shortest_paths.py -ft ffcg -fc fred -cpu 48 -gt undirected
 # time python find_shortest_paths.py -ft tfcg -fc fred -cpu 48 -gt undirected
 errcho finding shortest paths 2
-time python find_shortest_paths.py -ft ffcg -mp roberta-base-nli-stsb-mean-tokens -fc fred -cpu 48 -gt undirected
-time python find_shortest_paths.py -ft tfcg -mp roberta-base-nli-stsb-mean-tokens -fc fred -cpu 48 -gt undirected
+cd /geode2/home/u110/zkachwal/BigRed3/factcheckgraph/analyze_graphs/
+# time python find_shortest_paths.py -st tfcg -ft ffcg -mp roberta-base-nli-stsb-mean-tokens -fc fred -cpu 48 -gt undirected
+time python find_shortest_paths.py -st tfcg -ft tfcg -mp roberta-base-nli-stsb-mean-tokens -fc fred -cpu 48 -gt undirected
 ################################################################
 errcho find baseline
 time python find_baseline.py -bt knn -cpu 48 -mp roberta-base-nli-stsb-mean-tokens
