@@ -335,26 +335,56 @@ def find_knn(k,rdf_path,graph_path,model_path,embed_path,graph_type,fcg_class,n_
 		f.write(json.dumps(Xndict_0_high,indent=6,ensure_ascii=False))
 	with codecs.open(os.path.join(embed_path,"knn_0_high_{}_t.json".format(n_neighbors)),"w","utf-8") as f:
 		f.write(json.dumps(Xndict_0_high_t,indent=6,ensure_ascii=False))
+	lw=2
+	ogtitle="KNN using angular similarity of claims K={}".format(n_neighbors)
 	##################################################################################ROC PLOT
 	plt.figure(figsize=(9, 8))
-	lw=2
 	plt.plot([0, 1], [0, 1],color='navy',lw=lw,linestyle='--')
-	title="ROC KNN using angular similarity of claims K={}".format(n_neighbors)
+	title="ROC "+ogtitle
 	fpr,tpr,thresholds=metrics.roc_curve(Y,Yh,pos_label=1)
-	auc=metrics.auc(fpr,tpr)
-	plt.plot(fpr,tpr,lw=lw,label='scores (%0.2f) '%auc)
+	auc=metrics.roc_auc_score(Y,Yh)
+	plt.plot(fpr,tpr,lw=lw,label='AUC (%0.2f) '%auc)
 	plt.xlabel('True Positive Rate')
 	plt.ylabel('False Positive Rate')
 	plt.legend(loc="lower right")
 	plt.title(title)
 	plt.tight_layout()
-	x = datetime.datetime.now().strftime("%c")
-	title+=" "+x
+	title+=" "+datetime.datetime.now().strftime("%c")
+	plt.savefig(os.path.join(embed_path,title.replace(" ","_")+".png"))
+	plt.close()
+	plt.clf()
+	##################################################################################PR PLOT
+	title="PR "+ogtitle
+	plt.figure(figsize=(9, 8))
+	precision,recall,thresholds=metrics.precision_recall_curve(Y,Yh,pos_label=1)
+	avg_pr=metrics.average_precision_score(Y,Yh)
+	plt.plot(recall,precision,lw=lw,label='AVG_Pr (%0.2f) '%avg_pr)
+	plt.xlabel('Recall')
+	plt.ylabel('Precision')
+	plt.legend(loc="upper right")
+	plt.title(title)
+	plt.tight_layout()
+	title+=" "+datetime.datetime.now().strftime("%c")
+	plt.savefig(os.path.join(embed_path,title.replace(" ","_")+".png"))
+	plt.close()
+	plt.clf()
+	##################################################################################F1 PLOT
+	title="F1 "+ogtitle
+	plt.figure(figsize=(9, 8))
+	f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+	f1=max(f1scores)
+	plt.plot(thresholds,f1scores,lw=lw,label='Max F1 (%0.2f) '%f1)
+	plt.xlabel('Thresholds')
+	plt.ylabel('F1 Scores')
+	plt.legend(loc="upper right")
+	plt.title(title)
+	plt.tight_layout()
+	title+=" "+datetime.datetime.now().strftime("%c")
 	plt.savefig(os.path.join(embed_path,title.replace(" ","_")+".png"))
 	plt.close()
 	plt.clf()
 	##################################################################################KDE PLOT
-	title=title.replace('ROC','KDE')
+	title="KDE "+ogtitle
 	plt.figure(figsize=(9, 8))
 	minscore=np.min(list(Yh[Y==1])+list(Yh[Y==-1]))
 	maxscore=np.max(list(Yh[Y==1])+list(Yh[Y==-1]))
@@ -369,32 +399,60 @@ def find_knn(k,rdf_path,graph_path,model_path,embed_path,graph_type,fcg_class,n_
 	plt.legend(loc="upper right")
 	plt.title(title)
 	plt.tight_layout()
-	x = datetime.datetime.now().strftime("%c")
-	title+=" "+x
+	title+=" "+datetime.datetime.now().strftime("%c")
 	plt.savefig(os.path.join(embed_path,title.replace(" ","_")+".png"))
 	plt.close()
 	plt.clf()
 	##################################################################################################################################
+	ogtitle="KNN using angular similarity of claims K={} t".format(n_neighbors)
 	##################################################################################ROC PLOT
 	plt.figure(figsize=(9, 8))
-	lw=2
 	plt.plot([0, 1], [0, 1],color='navy',lw=lw,linestyle='--')
-	title="ROC KNN using angular similarity of claims K={} t".format(n_neighbors)
+	title="ROC "+ogtitle
 	fpr,tpr,thresholds=metrics.roc_curve(Y,Yh_t,pos_label=1)
-	auc_t=metrics.auc(fpr,tpr)
-	plt.plot(fpr,tpr,lw=lw,label='scores (%0.2f) '%auc_t)
+	auc_t=metrics.roc_auc_score(Y,Yh_t)
+	plt.plot(fpr,tpr,lw=lw,label='AUC (%0.2f) '%auc_t)
 	plt.xlabel('True Positive Rate')
 	plt.ylabel('False Positive Rate')
 	plt.legend(loc="lower right")
 	plt.title(title)
 	plt.tight_layout()
-	x = datetime.datetime.now().strftime("%c")
-	title+=" "+x
+	title+=" "+datetime.datetime.now().strftime("%c")
+	plt.savefig(os.path.join(embed_path,title.replace(" ","_")+".png"))
+	plt.close()
+	plt.clf()
+	##################################################################################PR PLOT
+	title="PR "+ogtitle
+	plt.figure(figsize=(9, 8))
+	precision,recall,thresholds=metrics.precision_recall_curve(Y,Yh_t,pos_label=1)
+	avg_pr_t=metrics.average_precision_score(Y,Yh_t)
+	plt.plot(recall,precision,lw=lw,label='AVG_Pr (%0.2f) '%avg_pr_t)
+	plt.xlabel('Recall')
+	plt.ylabel('Precision')
+	plt.legend(loc="upper right")
+	plt.title(title)
+	plt.tight_layout()
+	title+=" "+datetime.datetime.now().strftime("%c")
+	plt.savefig(os.path.join(embed_path,title.replace(" ","_")+".png"))
+	plt.close()
+	plt.clf()
+	##################################################################################F1 PLOT
+	title="F1 "+ogtitle
+	plt.figure(figsize=(9, 8))
+	f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+	f1_t=max(f1scores)
+	plt.plot(thresholds,f1scores,lw=lw,label='Max F1 (%0.2f) '%f1_t)
+	plt.xlabel('Thresholds')
+	plt.ylabel('F1 Scores')
+	plt.legend(loc="upper right")
+	plt.title(title)
+	plt.tight_layout()
+	title+=" "+datetime.datetime.now().strftime("%c")
 	plt.savefig(os.path.join(embed_path,title.replace(" ","_")+".png"))
 	plt.close()
 	plt.clf()
 	##################################################################################KDE PLOT
-	title=title.replace('ROC','KDE')
+	title="KDE "+ogtitle
 	plt.figure(figsize=(9, 8))
 	minscore=np.min(list(Yh_t[Y==1])+list(Yh_t[Y==-1]))
 	maxscore=np.max(list(Yh_t[Y==1])+list(Yh_t[Y==-1]))
@@ -409,12 +467,11 @@ def find_knn(k,rdf_path,graph_path,model_path,embed_path,graph_type,fcg_class,n_
 	plt.legend(loc="upper right")
 	plt.title(title)
 	plt.tight_layout()
-	x = datetime.datetime.now().strftime("%c")
-	title+=" "+x
+	title+=" "+datetime.datetime.now().strftime("%c")
 	plt.savefig(os.path.join(embed_path,title.replace(" ","_")+".png"))
 	plt.close()
 	plt.clf()
-	return k,auc,auc_t
+	return k,auc,auc_t,avg_pr,avg_pr_t,f1,f1_t
 
 if __name__== "__main__":
 	parser=argparse.ArgumentParser(description='Find baseline')
@@ -433,35 +490,50 @@ if __name__== "__main__":
 		find_baseline(args.rdfpath,args.graphpath,args.modelpath,args.embedpath,args.graphtype,args.fcgclass)
 	elif args.baselinetype=='knn':
 		rocs=[]
-		plotrange=[i+1 for i in range(0,60,5)]
+		plotrange=[i for i in range(0,41,10)]
+		plotrange[0]+=1
 		if args.cpu:
 			pool=mp.Pool(processes=args.cpu)
 			results=[pool.apply_async(find_knn, args=(k,args.rdfpath,args.graphpath,args.modelpath,args.embedpath,args.graphtype,args.fcgclass,k)) for k in plotrange]
-			rocs=sorted([p.get() for p in results],key=lambda t:t[0])
-			rocs_=[t[1] for t in rocs]
-			rocs_t=[t[2] for t in rocs]
-			plt.plot(plotrange,rocs_,'g^',markersize=7,label='true+false')
-			plt.plot(plotrange,rocs_t,'bs',markersize=7,label='true')
-			plt.legend(loc="upper right")
-			plt.xlabel('number of neighbors')
-			plt.ylabel('auc')
-			plt.savefig(os.path.join(args.embedpath,"rocs.png"))
-			plt.close()
-			plt.clf()
+			results=sorted([p.get() for p in results],key=lambda t:t[0])
 		else:
 			rocs=[]
 			for k in plotrange:
-				rocs.append(find_knn(k,args.rdfpath,args.graphpath,args.modelpath,args.embedpath,args.graphtype,args.fcgclass,k))
-			rocs_=[t[1] for t in rocs]
-			rocs_t=[t[2] for t in rocs]
-			plt.plot(plotrange,rocs_,'g^',markersize=7,label='true+false')
-			plt.plot(plotrange,rocs_t,'bs',markersize=7,label='true')
-			plt.legend(loc="upper right")
-			plt.xlabel('number of neighbors')
-			plt.ylabel('auc')
-			x = datetime.datetime.now().strftime("%c")
-			plt.savefig(os.path.join(args.embedpath,"rocs_{}.png".format(x)))
-			plt.close()
-			plt.clf()
-
+				results.append(find_knn(k,args.rdfpath,args.graphpath,args.modelpath,args.embedpath,args.graphtype,args.fcgclass,k))
+		aucs=[t[1] for t in results]
+		aucs_t=[t[2] for t in results]
+		avg_pr=[t[3] for t in results]
+		avg_pr_t=[t[4] for t in results]
+		f1=[t[5] for t in results]
+		f1_t=[t[6] for t in results]
+		plt.figure(figsize=(9, 8))
+		plt.plot(plotrange,aucs,'g^',markersize=7,label='true+false')
+		plt.plot(plotrange,aucs_t,'bs',markersize=7,label='true')
+		plt.legend(loc="center right")
+		plt.xlabel('number of neighbors')
+		plt.ylabel('roc auc')
+		x = datetime.datetime.now().strftime("%c")
+		plt.savefig(os.path.join(args.embedpath,"roc_auc_{}.png".format(x)))
+		plt.close()
+		plt.clf()
+		plt.figure(figsize=(9, 8))
+		plt.plot(plotrange,avg_pr,'g^',markersize=7,label='true+false')
+		plt.plot(plotrange,avg_pr_t,'bs',markersize=7,label='true')
+		plt.legend(loc="center right")
+		plt.xlabel('number of neighbors')
+		plt.ylabel('average precision score')
+		x = datetime.datetime.now().strftime("%c")
+		plt.savefig(os.path.join(args.embedpath,"avg_pr_{}.png".format(x)))
+		plt.close()
+		plt.clf()
+		plt.figure(figsize=(9, 8))
+		plt.plot(plotrange,f1,'g^',markersize=7,label='true+false')
+		plt.plot(plotrange,f1_t,'bs',markersize=7,label='true')
+		plt.legend(loc="center right")
+		plt.xlabel('number of neighbors')
+		plt.ylabel('max f1 score')
+		x = datetime.datetime.now().strftime("%c")
+		plt.savefig(os.path.join(args.embedpath,"f1_{}.png".format(x)))
+		plt.close()
+		plt.clf()
 

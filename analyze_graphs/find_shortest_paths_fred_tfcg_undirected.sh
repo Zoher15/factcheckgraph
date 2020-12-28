@@ -21,7 +21,7 @@ cd /geode2/home/u110/zkachwal/BigRed3/factcheckgraph/analyze_graphs/
 # time python embed.py -ft tfcg -fc fred -gt undirected
 ################################################################
 errcho find_shortest_paths
-# time python find_shortest_paths.py -st tfcg -ft tfcg -mp roberta-base-nli-stsb-mean-tokens -fc fred -cpu 48 -gt undirected
+time python find_shortest_paths.py -st tfcg -ft tfcg -mp roberta-base-nli-stsb-mean-tokens -fc fred -cpu 48 -gt undirected
 time python find_shortest_paths.py -st tfcg -ft ffcg -mp roberta-base-nli-stsb-mean-tokens -fc fred -cpu 48 -gt undirected
 # time python find_shortest_paths.py -st tfcg -ft tfcg -fc fred -cpu 48 -gt undirected
 # time python find_shortest_paths.py -st tfcg -ft ffcg -fc fred -cpu 48 -gt undirected

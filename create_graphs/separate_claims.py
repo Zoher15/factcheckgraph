@@ -9,8 +9,11 @@ def filterclaim(row):
 	row['claim_text']=row['claim_text'].replace("Says ","")
 	row['claim_text']=row['claim_text'].replace("breaking: ","")
 	row['claim_text']=row['claim_text'].replace("Breaking: ","")
+	row['claim_text']=row['claim_text'].replace("BREAKING: ","")
 	row['claim_text']=row['claim_text'].replace("Said that ","")
 	row['claim_text']=row['claim_text'].replace("Said ","")
+	row['claim_text']=row['claim_text'].replace("Claim ","")
+	row['claim_text']=row['claim_text'].replace("Claim :","")
 	firstletter=re.search(r'[a-zA-Z]',row['claim_text']).span()[0]
 	row['claim_text']=row['claim_text'][0:firstletter]+row['claim_text'][firstletter].capitalize()+row['claim_text'][firstletter+1:]
 	return row

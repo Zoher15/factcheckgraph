@@ -1,0 +1,19 @@
+embed
+find_shortest_paths
+
+real	25m34.309s
+user	1099m40.737s
+sys	3m10.433s
+
+real	5m49.599s
+user	240m19.311s
+sys	1m15.928s
+plot graphs
+
+real	0m7.183s
+user	0m4.493s
+sys	0m1.156s
+
+real	0m8.621s
+user	0m5.936s
+sys	0m1.165s

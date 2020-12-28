@@ -1,7 +1,0 @@
-embed
-find_shortest_paths
-
-real	54m39.196s
-user	2532m58.581s
-sys	8m6.765s
-slurmstepd: error: *** JOB 983040 ON nid00298 CANCELLED AT 2020-12-26T22:58:07 DUE TO TIME LIMIT ***

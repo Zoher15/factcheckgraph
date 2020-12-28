@@ -64,60 +64,62 @@ def create_weighted(p,rdf_path,model_path,graph_path,graph_type,embed_path,claim
 		fcg_path=os.path.join(graph_path,fcg_class,fcg_type)
 	#Adding weights to edges
 	# fcg_class='co_occur'
-	if fcg_class=='co_occur':
-		claims=pd.read_csv(os.path.join(rdf_path,"{}_claims.csv".format(claim_type)))
-		claim_IDs=claims['claimID'].tolist()
-		embed=pd.read_csv(os.path.join(embed_path,claim_type+"_claims_embeddings_({}).tsv".format(model_path.split("/")[-1])),delimiter="\t",header=None).values
-	elif fcg_class=='fred':
-		embed=pd.read_csv(os.path.join(embed_path,fcg_type.split('-')[0]+"_nodes_embeddings_({}).tsv".format(model_path.split("/")[-1])),delimiter="\t",header=None).values
-		labels=pd.read_csv(os.path.join(embed_path,fcg_type.split('-')[0]+"_nodes_embeddings_labels_({}).tsv".format(model_path.split("/")[-1])),delimiter="\t")
+	# if fcg_class=='co_occur':
+	# 	claims=pd.read_csv(os.path.join(rdf_path,"{}_claims.csv".format(claim_type)))
+	# 	claim_IDs=claims['claimID'].tolist()
+	# 	embed=pd.read_csv(os.path.join(embed_path,claim_type+"_claims_embeddings_({}).tsv".format(model_path.split("/")[-1])),delimiter="\t",header=None).values
+	# elif fcg_class=='fred':
+	# 	embed=pd.read_csv(os.path.join(embed_path,fcg_type.split('-')[0]+"_nodes_embeddings_({}).tsv".format(model_path.split("/")[-1])),delimiter="\t",header=None).values
+	# 	labels=pd.read_csv(os.path.join(embed_path,fcg_type.split('-')[0]+"_nodes_embeddings_labels_({}).tsv".format(model_path.split("/")[-1])),delimiter="\t")
 	#cosine similarity with clipping between -1 and 1
-	simil_p=np.clip(cosine_similarity(p,embed)[0],-1,1)
+	# simil_p=np.clip(cosine_similarity(p,embed)[0],-1,1)
 	#normalized angular distance
-	dist_p=np.arccos(simil_p)/np.pi
+	# dist_p=np.arccos(simil_p)/np.pi
 	fcg=nx.read_edgelist(os.path.join(fcg_path,"{}.edgelist".format(fcg_type)),comments="@",create_using=eval(graph_type))
-	temp_fcg=nx.MultiDiGraph()
-	temp_fcg.add_edges_from(list(fcg.edges.data(keys=True)))
+	temp_fcg=nx.DiGraph()
+	temp_fcg.add_edges_from(list(fcg.edges.data()))
 	#if graph is undirected, add a reverse edge to the directed graph, to simulate undirectedness
 	if graph_type=='nx.MultiGraph':
-		temp_fcg.add_edges_from(list(map(lambda x:(x[1],x[0],x[2],x[3]),list(fcg.edges.data(keys=True)))))
+		temp_fcg.add_edges_from(list(map(lambda x:(x[1],x[0],x[2]),list(fcg.edges.data()))))
 	fcg=temp_fcg.copy()
 	#assigning weight by summing the log of adjacent nodes, and dividing by the similiarity of the claim with the target predicate
-	fcg_edges=fcg.edges.data(keys=True)
-	for u,v,k,d in fcg_edges:
-		if fcg_class=='co_occur':
-			claimID=d['claim_ID']
-			IX=claims[claims['claimID']==claimID].index[0]
-			dist=dist_p[IX]
-		elif fcg_class=='fred':
-			# uIX=labels[labels['node_label']==u].index[0]
-			IX=labels[labels['node_label']==v].index[0]
-			dist=dist_p[IX]#+dist_p[uIX]
-		fcg.edges[u,v,k]['dist']=dist
-	#Removing multiedges, by selecting the shortest one
-	fcg2=nx.DiGraph()
-	for u,v,k,data in fcg.edges.data(keys=True):
-		if not fcg2.has_edge(u,v):
-			fcg2.add_edge(u,v)
-			if len(fcg.get_edge_data(u,v))>1:
-				datalist=fcg.get_edge_data(u,v)
-				#finding the data dict among all the multiedges between u and v with the min distance
-				data=min(fcg.get_edge_data(u,v).items(), key=lambda x:x[1]['dist'])[1]
-			fcg2.edges[u,v].update(data)
-	#Assigning the weight (dist*log(degree)) it again after the graph is pruned off its mutli edges
-	for u,v,data in fcg2.edges.data():
-		if fcg_class=='co_occur':
-			claimID=d['claim_ID']
-			IX=claims[claims['claimID']==claimID].index[0]
-			dist=dist_p[IX]
-		elif fcg_class=='fred':
-			# uIX=labels[labels['node_label']==u].index[0]
-			IX=labels[labels['node_label']==v].index[0]
-			dist=dist_p[IX]#+dist_p[uIX]
-		vw=np.log2(fcg2.degree(v))
+	# fcg_edges=fcg.edges.data(keys=True)
+	# for u,v,k,d in fcg_edges:
+	# 	if fcg_class=='co_occur':
+	# 		claimID=d['claim_ID']
+	# 		IX=claims[claims['claimID']==claimID].index[0]
+	# 		dist=dist_p[IX]
+	# 	elif fcg_class=='fred':
+	# 		# uIX=labels[labels['node_label']==u].index[0]
+	# 		IX=labels[labels['node_label']==v].index[0]
+	# 		dist=dist_p[IX]#+dist_p[uIX]
+	# 	fcg.edges[u,v,k]['dist']=dist
+	# #Removing multiedges, by selecting the shortest one
+	# fcg2=nx.DiGraph()
+	# for u,v,k,data in fcg.edges.data(keys=True):
+	# 	if not fcg2.has_edge(u,v):
+	# 		fcg2.add_edge(u,v)
+	# 		if len(fcg.get_edge_data(u,v))>1:
+	# 			datalist=fcg.get_edge_data(u,v)
+	# 			#finding the data dict among all the multiedges between u and v with the min distance
+	# 			data=min(fcg.get_edge_data(u,v).items(), key=lambda x:x[1]['dist'])[1]
+	# 		fcg2.edges[u,v].update(data)
+	# #Assigning the weight (dist*log(degree)) it again after the graph is pruned off its mutli edges
+	for u,v,data in fcg.edges.data():
+		# if fcg_class=='co_occur':
+		# 	claimID=d['claim_ID']
+		# 	IX=claims[claims['claimID']==claimID].index[0]
+		# 	dist=dist_p[IX]
+		# elif fcg_class=='fred':
+		# 	# uIX=labels[labels['node_label']==u].index[0]
+		# 	IX=labels[labels['node_label']==v].index[0]
+		# 	dist=dist_p[IX]#+dist_p[uIX]
+		dist=1
+		vw=np.log10(fcg.degree(v))
 		weight=dist*(vw)#+uw)
-		fcg2.edges[u,v]['weight']=weight
-	return fcg2
+		fcg.edges[u,v]['weight']=weight
+		fcg.edges[u,v]['dist']=dist
+	return fcg
 
 def domb(numlist):
 	domb=numlist[0]
@@ -245,13 +247,13 @@ def find_paths_of_interest(index,rdf_path,graph_path,graph_type,embed_path,model
 		paths_of_interest_d[claimID]['target_claim']=chunkstring(target_claims[target_claims['claimID']==claimID]['claim_text'].values[0],100)
 		source_fcg2=source_fcg.copy()
 		'''
-		for every edge of interest, all edges connected to the source u and target v are reweighted by removing their log(degree)
+		for every edge of interest, all edges connected to the source u and target v are reweighted by adding the source log(degree)
 		'''
 		z=len(edges_of_interest[claimID])
 		zcount=0
 		for edge in edges_of_interest[claimID]:
 			u,v=edge
-			if source_fcg.has_node(u) and source_fcg.has_node(v):
+			if source_fcg.has_node(u) and source_fcg.has_node(v) and u!=v:
 				'''
 				If both node exists, we add the influence of source nodes i.e. the weight and log10(degree) to all the paths.
 				We want to include source node weights to all parts starting from them so that:
@@ -261,12 +263,12 @@ def find_paths_of_interest(index,rdf_path,graph_path,graph_type,embed_path,model
 				for e in source_fcg.out_edges(u,data=True):
 					data=e[2]
 					#adding the influence of the log of degree of target node u
-					data['weight']=data['dist']*(np.log2(source_fcg.degree(e[0]))+np.log2(source_fcg.degree(e[1])))
+					data['weight']=data['dist']*(np.log10(source_fcg.degree(e[0]))+np.log10(source_fcg.degree(e[1])))
 					source_fcg.edges[e[0],e[1]].update(data)
 				for e in source_fcg.out_edges(v,data=True):
 					data=e[2]
 					#adding the influence of the log of degree of target node u
-					data['weight']=data['dist']*(np.log2(source_fcg.degree(e[0]))+np.log2(source_fcg.degree(e[1])))
+					data['weight']=data['dist']*(np.log10(source_fcg.degree(e[0]))+np.log10(source_fcg.degree(e[1])))
 					source_fcg.edges[e[0],e[1]].update(data)
 				#################################################################################
 				#################################################################################
