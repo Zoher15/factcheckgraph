@@ -1,0 +1,10 @@
+embed
+
+real	1m29.002s
+user	25m22.052s
+sys	0m14.255s
+
+real	0m45.669s
+user	11m3.333s
+sys	0m6.289s
+find_shortest_paths

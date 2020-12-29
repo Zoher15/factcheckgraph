@@ -2,9 +2,9 @@ import os
 import pandas as pd
 import multiprocessing as mp
 import pandas as pd 
-from langdetect import DetectorFactory
-DetectorFactory.seed = 0
-from langdetect import detect
+import fasttext
+path_to_pretrained_model = '/geode2/home/u110/zkachwal/BigRed3/factcheckgraph_data/models/lid.176.bin'
+fmodel = fasttext.load_model(path_to_pretrained_model)
 import numpy as np
 import argparse
 import pdb
@@ -43,13 +43,6 @@ import os
        'weeklystandard.com', 'youturn.in', 'zimfact.org'}
 '''
 
-def lang_detect(text):
-	try:
-		ret=detect(text)
-	except:
-		ret=None
-	return ret
-
 def clean_new_data(file,rdf_path):
 	data=pd.read_csv(os.path.join(rdf_path,file))
 	##Dropping non-str rows
@@ -59,13 +52,12 @@ def clean_new_data(file,rdf_path):
 	data.drop(data[filter].index,inplace=True)
 	data['claim_text']=data['claim_text'].apply(lambda x:eval(x)[0])
 	data['verdict']=data['verdict'].apply(lambda x:eval(x)[0])
-	data['lang']=data['claim_text'].apply(lambda x:lang_detect(x))
-	data=data[data['lang']=='en']
-	print(data.groupby('publisher').count())
+	data['lang']=data['claim_text'].apply(lambda x:fmodel.predict(x.replace("\n","").replace("\t",""))[0][0])
+	print(data.groupby('lang').count())
+	data=data[data['lang']=='__label__en']
+	# claimsdata=pd.read_csv(os.path.join(rdf_path,'claims_dataset.csv'))
 	# pdb.set_trace()
-	# data['vlang']=data['verdict'].apply(lambda x:lang_detect(x))
-	# data=data[data['vlang']=='en']
-	data.to_csv(os.path.join(rdf_path,file.split(".csv")[0]+"_en.csv"))
+	data.to_csv(os.path.join(rdf_path,file.split(".csv")[0]+"_en2.csv"))
 
 if __name__== "__main__":
 	parser=argparse.ArgumentParser(description='Clean new data')

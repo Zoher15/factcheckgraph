@@ -14,6 +14,12 @@ def filterclaim(row):
 	row['claim_text']=row['claim_text'].replace("Said ","")
 	row['claim_text']=row['claim_text'].replace("Claim ","")
 	row['claim_text']=row['claim_text'].replace("Claim :","")
+	row['claim_text']=row['claim_text'].replace("FACT CHECK:","")
+	row['claim_text']=row['claim_text'].replace("Webqoof:","")
+	row['claim_text']=row['claim_text'].replace("WebQoof:","")
+	row['claim_text']=row['claim_text'].replace("Fact Check:","")
+	row['claim_text']=row['claim_text'].replace("FAKE ALERT:","")
+	row['claim_text']=row['claim_text'].replace("Fact check/ :","")
 	firstletter=re.search(r'[a-zA-Z]',row['claim_text']).span()[0]
 	row['claim_text']=row['claim_text'][0:firstletter]+row['claim_text'][firstletter].capitalize()+row['claim_text'][firstletter+1:]
 	return row
@@ -36,8 +42,8 @@ def separate_claims(file,rdf_path):
 	false_claims=data.loc[false_ind].reset_index(drop=True)
 	np.save(os.path.join(rdf_path,"true_claimID.npy"),list(true_claims["claimID"]))
 	np.save(os.path.join(rdf_path,"false_claimID.npy"),list(false_claims["claimID"]))
-	true_claims.to_csv(os.path.join(rdf_path,"true_claims.csv"))
-	false_claims.to_csv(os.path.join(rdf_path,"false_claims.csv"))
+	true_claims.to_csv(os.path.join(rdf_path,"true_claims_new.csv"))
+	false_claims.to_csv(os.path.join(rdf_path,"false_claims_new.csv"))
 	os.makedirs(os.path.join(rdf_path,"true_claims"), exist_ok=True)
 	os.makedirs(os.path.join(rdf_path,"false_claims"), exist_ok=True)
 
