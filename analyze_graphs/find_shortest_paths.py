@@ -120,24 +120,24 @@ def create_ordered_paths(write_path,mode):
 			f.write(json.dumps(OrderedDict(bot10p),indent=5,ensure_ascii=False))
 
 #Function to find node pairs in the source graph if they exist as edges in the target graph
-def find_edges_of_interest(rdf_path,graph_path,graph_type,embed_path,source_fcg_type,target_fcg_type,fcg_class):
+def find_edges_of_interest(rdf_path,graph_path,graph_type,embed_path,source_fcg_type,target_fcg_type,target_claimID,fcg_class):
 	suffix={"co_occur":"_co","fred":"_clean"}
-	if target_fcg_type in source_fcg_type:
-		fcg_type,target_claimID=source_fcg_type.split('-')
-		claim_types={'tfcg_co':'true','ffcg_co':'false','tfcg':'true','ffcg':'false'}
-		claim_type=claim_types[fcg_type]+"_claims"
-		source_fcg_path=os.path.join(graph_path,fcg_class,fcg_type,"leave1out")
-		target_fcg_path=os.path.join(rdf_path,claim_type)
-		target_fcg_type="claim"+target_claimID+suffix[fcg_class]
-	else:
-		source_fcg_path=os.path.join(graph_path,fcg_class,source_fcg_type)
-		target_fcg_path=os.path.join(graph_path,fcg_class,target_fcg_type)
-	#loading source and target fcg
-	source_fcg=nx.read_edgelist(os.path.join(source_fcg_path,"{}.edgelist".format(source_fcg_type)),comments="@",create_using=eval(graph_type))
+	claim_types={'tfcg_co':'true','ffcg_co':'false','tfcg':'true','ffcg':'false'}
+	claim_type=claim_types[source_fcg_type]+"_claims"
+	target_fcg_path=os.path.join(rdf_path,claim_type)
+	target_fcg_type="claim"+str(target_claimID)+suffix[fcg_class]
+	#loading target fcg
 	try:
 		target_fcg=nx.read_edgelist(os.path.join(target_fcg_path,"{}.edgelist".format(target_fcg_type)),comments="@",create_using=eval(graph_type))
 	except FileNotFoundError:
 		target_fcg=eval(graph_type+'()')
+	if target_fcg_type==source_fcg_type:
+		source_fcg_path=os.path.join(graph_path,fcg_class,source_fcg_type,"leave1out")
+		source_fcg_type=source_fcg_type+'-'+str(target_claimID)
+	else:
+		source_fcg_path=os.path.join(graph_path,fcg_class,source_fcg_type)
+	#loading source fcg
+	source_fcg=nx.read_edgelist(os.path.join(source_fcg_path,"{}.edgelist".format(source_fcg_type)),comments="@",create_using=eval(graph_type))
 	edges_of_interest={}
 	'''
 	If the graph is co-occurrence, then the target edges of interest are simply all the edges in the graph.
@@ -156,20 +156,21 @@ def find_edges_of_interest(rdf_path,graph_path,graph_type,embed_path,source_fcg_
 				edges_of_interest[data['claim_ID']]=set([(u,v)])
 	return edges_of_interest
 
-
 def find_paths_of_interest(index,rdf_path,graph_path,graph_type,embed_path,model_path,claimIDs,fcg_class,source_fcg_type,target_fcg_type,source_claim_type,target_claim_type,source_claims,target_claims,edges_of_interest,target_claims_embed,writegraph_path):
 	paths_of_interest_w={}
 	paths_of_interest_d={}
-	#iterating throuhg the claimIDs of interest
+	#iterating throuhg the target claimIDs
 	for claimID in claimIDs:
-		if source_fcg_type==target_fcg_type:
-			#checking if the source graph (without the given claim), has edges of interest. If not, we skip the claim .i.e continue in the for loop
-			edges_of_interest=find_edges_of_interest(rdf_path,graph_path,graph_type,embed_path,source_fcg_type+'-'+str(claimID),target_fcg_type,fcg_class)
-			if claimID not in set(list(edges_of_interest.keys())):
-				continue
-			claimIDs=list(edges_of_interest.keys())
+		#checking if the source graph (without the given claim), has edges of interest. If not, we skip the claim .i.e continue in the for loop
+		edges_of_interest=find_edges_of_interest(rdf_path,graph_path,graph_type,embed_path,source_fcg_type,target_fcg_type,claimID,fcg_class)
+		if claimID not in set(list(edges_of_interest.keys())):
+			continue
 		#getting index of claim
-		claimIX=target_claims[target_claims['claimID']==claimID].index[0]
+		try:
+			claimIX=target_claims[target_claims['claimID']==claimID].index[0]
+		except IndexError:
+			import pdb
+			pdb.set_trace()
 		p=np.array([target_claims_embed[claimIX]])
 		#source_fcg is not a multigraph
 		#if source and target are the same graph, then the graph without the given claim is fetched
@@ -334,12 +335,8 @@ def find_shortest_paths(rdf_path,model_path,graph_path,graph_type,embed_path,sou
 	#loading target claim embeddings
 	target_claims_embed=pd.read_csv(os.path.join(embed_path,target_claim_type+"_claims_embeddings_({}).tsv".format(model_path.split("/")[-1])),delimiter="\t",header=None).values
 	#limiting claimIDs to edges of interest if both graphs are different
-	if source_fcg_type==target_fcg_type:
-		edges_of_interest={}
-		claimIDs=source_claims['claimID'].tolist()
-	else:
-		edges_of_interest=find_edges_of_interest(rdf_path,graph_path,graph_type,embed_path,source_fcg_type,target_fcg_type,fcg_class)
-		claimIDs=list(edges_of_interest.keys())
+	edges_of_interest={}
+	claimIDs=target_claims['claimID'].tolist()
 	#finding paths of interest
 	n=int(len(claimIDs)/cpu)+1
 	if cpu>1:
