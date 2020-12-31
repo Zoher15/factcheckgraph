@@ -69,7 +69,7 @@ def create_weighted(p,rdf_path,model_path,graph_path,graph_type,embed_path,fcg_t
 	#Assigning the weight (dist*log(degree)) it again after the graph is pruned off its mutli edges
 	for u,v,data in fcg.edges.data():
 		dist=1
-		weight=np.log2(fcg.degree(v))
+		weight=np.log10(fcg.degree(v))
 		fcg.edges[u,v]['weight']=weight
 		fcg.edges[u,v]['dist']=dist
 	return fcg
@@ -127,12 +127,12 @@ def find_paths_of_interest(index,rdf_path,graph_path,graph_type,embed_path,model
 				for e in source_fcg.out_edges(u,data=True):
 					data=e[2]
 					#adding the influence of the log of degree of target node u
-					data['weight']=data['dist']*(np.log2(source_fcg.degree(e[0]))+np.log2(source_fcg.degree(e[1])))
+					data['weight']=data['dist']*(np.log10(source_fcg.degree(e[0]))+np.log10(source_fcg.degree(e[1])))
 					source_fcg.edges[e[0],e[1]].update(data)
 				for e in source_fcg.out_edges(v,data=True):
 					data=e[2]
 					#adding the influence of the log of degree of target node u
-					data['weight']=data['dist']*(np.log2(source_fcg.degree(e[0]))+np.log2(source_fcg.degree(e[1])))
+					data['weight']=data['dist']*(np.log10(source_fcg.degree(e[0]))+np.log10(source_fcg.degree(e[1])))
 					source_fcg.edges[e[0],e[1]].update(data)
 				#################################################################################
 				if nx.has_path(source_fcg,u,v):
