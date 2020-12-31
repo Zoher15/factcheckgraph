@@ -220,13 +220,15 @@ def find_paths_of_interest(index,rdf_path,graph_path,graph_type,embed_path,model
 					path_d_data2['formed_claim']=""
 					path_w_data2={}
 					path_w_data2['formed_claim']=""
-				if dd1>dd2:
+				if dd1==dd2:
 					paths_of_interest_d[claimID][str((u,v,dw1,dd1))]=path_d_data1
 				else:
+					print("dd1!=dd2,",claimID)
 					paths_of_interest_d[claimID][str((u,v,dw2,dd2))]=path_d_data2
-				if ww1>ww2:
+				if ww1==ww2:
 					paths_of_interest_w[claimID][str((u,v,ww1,wd1))]=path_w_data1
 				else:
+					print("ww1!=ww2,",claimID)
 					paths_of_interest_w[claimID][str((u,v,ww2,wd2))]=path_w_data2
 			else:
 				path_data={}
