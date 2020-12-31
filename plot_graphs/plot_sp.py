@@ -47,7 +47,7 @@ def plot_roc(graph_path,fcg_class,fcg_type,graph_type):
 	fcg_types={"co_occur":{"tfcg":"tfcg_co","ffcg":"ffcg_co"},"fred":{"tfcg":"tfcg","ffcg":"ffcg"}}
 	embed={'roberta-base-nli-stsb-mean-tokens':'e1'}#,'claims-roberta-base-nli-stsb-mean-tokens-2020-05-27_19-01-27':'e2'}
 	mode={'w':'d1','d':'d2'}#,'f':'d3'}
-	aggmode={'mean':'a1','max':'a2'}#,'min':'a3'}#,'domb':'a4'}
+	aggmode={'mean':'a1','max':'a2','min':'a3'}#,'domb':'a4'}
 	read_path_tfcg=os.path.join(graph_path,fcg_class,"paths",fcg_types[fcg_class]['tfcg'])
 	read_path_ffcg=os.path.join(graph_path,fcg_class,"paths",fcg_types[fcg_class]['ffcg'])
 	plot_path=os.path.join(graph_path,fcg_class,"plots")
@@ -161,7 +161,7 @@ def plot_dist(graph_path,fcg_class,fcg_type,graph_type):
 	fcg_types={"co_occur":{"tfcg":"tfcg_co","ffcg":"ffcg_co"},"fred":{"tfcg":"tfcg","ffcg":"ffcg"}}
 	embed={'roberta-base-nli-stsb-mean-tokens':'e1'}#,'claims-roberta-base-nli-stsb-mean-tokens-2020-05-27_19-01-27':'e2'}
 	mode={'w':'d1','d':'d2'}#,'f':'d3'}
-	aggmode={'mean':'a1','max':'a2'}#,'min':'a3'}#,'domb':'a4'}
+	aggmode={'mean':'a1','max':'a2','min':'a3'}#,'domb':'a4'}
 	read_path_tfcg=os.path.join(graph_path,fcg_class,"paths",fcg_types[fcg_class]['tfcg'])
 	read_path_ffcg=os.path.join(graph_path,fcg_class,"paths",fcg_types[fcg_class]['ffcg'])
 	plot_path=os.path.join(graph_path,fcg_class,"plots")
