@@ -19,6 +19,13 @@ from collections import ChainMap
 import sys
 import csv
 
+def aggregate_edge_data(evalues,mode):
+	#mode can be dist or weight
+	edgepair_weights=[]
+	for edgepair,e2values in evalues.items():
+		edgepair_weights.append(e2values[mode])
+	return sum(edgepair_weights)
+
 def cleanstring(string):
 	string=re.sub(r'([a-z]*:)','',string)
 	string=re.sub(r'([A-Z]*[a-z]+)_([A-Z]*[a-z]+)_',r'\1 \2 ',string)
