@@ -19,8 +19,7 @@ def compose_graphs(claims_path,fcg_path,suffix,claim_IDs,claim_IDs2remove):
 				claim_g=nx.read_edgelist(filename+".edgelist",comments="@")
 			except:
 				continue
-			claim_g=nx.MultiGraph(claim_g)
-			fcg=nx.compose(fcg,claim_g)
+			fcg.add_edges_from(claim_g.edges.data())
 		nx.write_edgelist(fcg,pathname)
 
 def create_leave1out(rdf_path,graph_path,fcg_class,fcg_label,cpu):

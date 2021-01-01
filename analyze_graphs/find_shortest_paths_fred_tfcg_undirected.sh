@@ -21,7 +21,7 @@ time python embed.py -ft tfcg -fc fred -mp roberta-base-nli-stsb-mean-tokens -gt
 errcho find_shortest_paths
 time python find_shortest_paths.py -st tfcg -ft tfcg -mp roberta-base-nli-stsb-mean-tokens -fc fred -cpu 48 -gt undirected
 time python find_shortest_paths.py -st tfcg -ft ffcg -mp roberta-base-nli-stsb-mean-tokens -fc fred -cpu 48 -gt undirected
-time order_paths.py -fcg fred -ft tfcg
+time python order_paths.py -fcg fred -ft tfcg
 ################################################################
 # errcho find baseline
 # time python find_baseline.py -bt knn -cpu 48 -mp roberta-base-nli-stsb-mean-tokens

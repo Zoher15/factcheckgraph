@@ -8,14 +8,14 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=48
-#SBATCH --time=30:00:00
+#SBATCH --time=24:00:00
 source /N/u/zkachwal/Carbonate/miniconda3/etc/profile.d/conda.sh
 conda activate
 cd /gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph/create_graphs/
-time python create_fred.py -ft tfcg -cpu 48 -p -gt undirected
-# time python create_fred.py -ft ffcg -cpu 48 -p -gt undirected
-time python create_fred.py -ft tfcg -cpu 48 -cf 1 -gt undirected
-# time python create_fred.py -ft ffcg -cpu 48 -cf 1 -gt undirected
+time python fetch_fred.py -ft tfcg -cpu 48 -p
+time python fetch_fred.py -ft ffcg -cpu 48 -p 
+time python compile_fred.py -ft tfcg -cpu 48 
+time python compile_fred.py -ft ffcg -cpu 48 
 # time python create_fred.py -ft ufcg -cf 1 -gt undirected
 # time python create_fred.py -ft ufcg
 # time python create_backbone.py -fcg fred -ft tfcg -kg dbpedia

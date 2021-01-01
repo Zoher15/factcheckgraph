@@ -21,7 +21,7 @@ time python embed.py -ft tfcg -fc fred -mp roberta-base-nli-stsb-mean-tokens -gt
 errcho find_shortest_paths
 time python find_shortest_paths.py -st ffcg -ft ffcg -mp roberta-base-nli-stsb-mean-tokens -fc fred -cpu 48 -gt undirected
 time python find_shortest_paths.py -st ffcg -ft tfcg -mp roberta-base-nli-stsb-mean-tokens -fc fred -cpu 48 -gt undirected
-time order_paths.py -fcg fred -ft ffcg
+time python order_paths.py -fcg fred -ft ffcg
 ################################################################
 errcho find baseline
 time python find_baseline.py -bt knn -cpu 48 -mp roberta-base-nli-stsb-mean-tokens
@@ -29,7 +29,7 @@ time python find_baseline.py -bt all -mp roberta-base-nli-stsb-mean-tokens
 ################################################################
 errcho plot graphs 
 cd /geode2/home/u110/zkachwal/BigRed3/factcheckgraph/plot_graphs/
-time python plot_sp.py -fcg fred -ft ffcg -pt roc -gt undirected
-time python plot_sp.py -fcg fred -ft ffcg -pt dist -gt undirected
+time python plot_sp.py -fcg fred -ft ffcg -pt roc
+time python plot_sp.py -fcg fred -ft ffcg -pt dist
 time python plot_sp.py -fcg fred -pt roc
 time python plot_sp.py -fcg fred -pt dist

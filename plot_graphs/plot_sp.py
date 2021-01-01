@@ -17,9 +17,10 @@ def plot_roc(graph_path,fcg_class,fcg_type,graph_type):
 	fcg_types={"co_occur":{"tfcg":"tfcg_co","ffcg":"ffcg_co"},"fred":{"tfcg":"tfcg","ffcg":"ffcg"}}
 	embeds={'roberta-base-nli-stsb-mean-tokens':'e1'}#,'claims-roberta-base-nli-stsb-mean-tokens-2020-05-27_19-01-27':'e2'}
 	dists={'w':'d1','d':'d2'}#,'f':'d3'}
-	aggs={'mean':'a1','max':'a2'}#,'min':'a3'}#,'domb':'a4'}
+	aggs={'mean':'a1','max':'a2','median':'a3'}#,'domb':'a4'}
 	if fcg_type:
-		read_path=os.path.join(graph_path,fcg_class,"paths",fcg_types[fcg_class][fcg_type])
+		true_read_path=os.path.join(graph_path,fcg_class,"paths","true_"+fcg_types[fcg_class][fcg_type])
+		false_read_path=os.path.join(graph_path,fcg_class,"paths","false_"+fcg_types[fcg_class][fcg_type])
 	else:
 		read_path=os.path.join(graph_path,fcg_class,"paths")	
 	plot_path=os.path.join(graph_path,fcg_class,"plots")
@@ -31,9 +32,9 @@ def plot_roc(graph_path,fcg_class,fcg_type,graph_type):
 		for dist in list(dists.keys()):
 			for agg in list(aggs.keys()):
 				if fcg_type:
-					with codecs.open(os.path.join(read_path+"_true_({})".format(embed),"paths_"+graph_type+"_"+dist+"_"+agg+".json"),"r","utf-8") as f: 
+					with codecs.open(os.path.join(true_read_path+"_({})".format(embed),"paths_"+graph_type+"_"+dist+"_"+agg+".json"),"r","utf-8") as f: 
 						true_paths=json.loads(f.read())
-					with codecs.open(os.path.join(read_path+"_false_({})".format(embed),"paths_"+graph_type+"_"+dist+"_"+agg+".json"),"r","utf-8") as f: 
+					with codecs.open(os.path.join(false_read_path+"_({})".format(embed),"paths_"+graph_type+"_"+dist+"_"+agg+".json"),"r","utf-8") as f: 
 						false_paths=json.loads(f.read())
 				else:
 					with codecs.open(os.path.join(read_path,"true_scores_"+dist+"_({})".format(embed)+"_"+agg+".json"),"r","utf-8") as f: 
@@ -120,11 +121,12 @@ def plot_dist(graph_path,fcg_class,fcg_type,graph_type):
 	fcg_types={"co_occur":{"tfcg":"tfcg_co","ffcg":"ffcg_co"},"fred":{"tfcg":"tfcg","ffcg":"ffcg"}}
 	embeds={'roberta-base-nli-stsb-mean-tokens':'e1'}#,'claims-roberta-base-nli-stsb-mean-tokens-2020-05-27_19-01-27':'e2'}
 	dists={'w':'d1','d':'d2'}#,'f':'d3'}
-	aggs={'mean':'a1','max':'a2'}#,'min':'a3'}#,'domb':'a4'}
+	aggs={'mean':'a1','max':'a2','median':'a3'}#,'domb':'a4'}
 	if fcg_type:
-		read_path=os.path.join(graph_path,fcg_class,"paths",fcg_types[fcg_class][fcg_type])
+		true_read_path=os.path.join(graph_path,fcg_class,"paths","true_"+fcg_types[fcg_class][fcg_type])
+		false_read_path=os.path.join(graph_path,fcg_class,"paths","false_"+fcg_types[fcg_class][fcg_type])
 	else:
-		read_path=os.path.join(graph_path,fcg_class,"paths")
+		read_path=os.path.join(graph_path,fcg_class,"paths")	
 	plot_path=os.path.join(graph_path,fcg_class,"plots")
 	for embed in list(embeds.keys()):
 		for dist in list(dists.keys()):
@@ -133,9 +135,9 @@ def plot_dist(graph_path,fcg_class,fcg_type,graph_type):
 				plt.figure()
 				if fcg_type:
 					title=graph_type+" density histogram {} shortest path embedded paths".format(fcg_class+"_"+fcg_type+"_"+label)
-					with codecs.open(os.path.join(read_path+"_true_({})".format(embed),"paths_"+graph_type+"_"+dist+"_"+agg+".json"),"r","utf-8") as f: 
+					with codecs.open(os.path.join(true_read_path+"_({})".format(embed),"paths_"+graph_type+"_"+dist+"_"+agg+".json"),"r","utf-8") as f: 
 						true_paths=json.loads(f.read())
-					with codecs.open(os.path.join(read_path+"_false_({})".format(embed),"paths_"+graph_type+"_"+dist+"_"+agg+".json"),"r","utf-8") as f: 
+					with codecs.open(os.path.join(false_read_path+"_({})".format(embed),"paths_"+graph_type+"_"+dist+"_"+agg+".json"),"r","utf-8") as f: 
 						false_paths=json.loads(f.read())
 				else:
 					title=graph_type+" density histogram {} shortest path embedded paths".format(fcg_class+"_"+label)
