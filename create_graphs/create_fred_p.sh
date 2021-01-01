@@ -15,7 +15,18 @@ cd /gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph/create_graphs/
 time python fetch_fred.py -ft tfcg -cpu 48 -p
 time python fetch_fred.py -ft ffcg -cpu 48 -p 
 time python compile_fred.py -ft tfcg -cpu 48 
-time python compile_fred.py -ft ffcg -cpu 48 
+time python compile_fred.py -ft ffcg -cpu 48
+time python compile_fred.py -ft ufcg
+################################################################
+cd /gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph/process_graphs/
+# errcho find intersect
+# time python find_intersect.py -fcg fred -kg dbpedia
+################################################################
+errcho calculate stats
+time python calculate_stats.py -gc fred -gt tfcg
+time python calculate_stats.py -gc fred -gt ffcg
+time python calculate_stats.py -gc fred -gt ufcg
+time python compile_stats.py
 # time python create_fred.py -ft ufcg -cf 1 -gt undirected
 # time python create_fred.py -ft ufcg
 # time python create_backbone.py -fcg fred -ft tfcg -kg dbpedia

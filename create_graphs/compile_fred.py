@@ -134,10 +134,40 @@ def cleanClaimGraph(claim_g,clean_claims):
 		claim_g.remove_node(situation_node)
 	return claim_g
 
+#Function to save fred graph including its nodes, entities, node2ID dictionary and edgelistID (format needed by klinker)	
+def saveFred(fcg,graph_path,fcg_label):
+	fcg_path=os.path.join(graph_path,"fred",fcg_label)
+	os.makedirs(fcg_path, exist_ok=True)
+	#writing aggregated networkx graphs as edgelist and graphml
+	nx.write_edgelist(fcg,os.path.join(fcg_path,"{}.edgelist".format(fcg_label)))
+	fcg=nx.read_edgelist(os.path.join(fcg_path,"{}.edgelist".format(fcg_label)),comments="@")
+	#Saving graph as graphml
+	nx.write_graphml(fcg,os.path.join(fcg_path,"{}.graphml".format(fcg_label)),prettyprint=True)
+	os.makedirs(os.path.join(fcg_path,"data"),exist_ok=True)
+	write_path=os.path.join(fcg_path,"data",fcg_label)
+	nodes=list(fcg.nodes)
+	edges=list(fcg.edges)
+	#Save Nodes
+	with codecs.open(write_path+"_nodes.txt","w","utf-8") as f:
+		for node in nodes:
+			f.write(str(node)+"\n")
+	#Save Entities
+	entity_regex=re.compile(r'^db:.*')
+	entities=np.asarray([node for node in nodes if entity_regex.match(node)])
+	with codecs.open(write_path+"_entities.txt","w","utf-8") as f:
+		for entity in entities:
+			f.write(str(entity)+"\n")
+	#Save node2ID dictionary
+	node2ID={node:i for i,node in enumerate(nodes)}
+	with codecs.open(write_path+"_node2ID.json","w","utf-8") as f:
+		f.write(json.dumps(node2ID,indent=4,ensure_ascii=False))
+	#Save Edgelist ID
+	edgelistID=np.asarray([[int(node2ID[edge[0]]),int(node2ID[edge[1]]),1] for edge in edges])
+	np.save(write_path+"_edgelistID.npy",edgelistID)
+
 #Function to stitch/compile graphs in an iterative way. i.e clean individual graphs before unioning 
 def compileClaimGraph(index,claims_path,claim_IDs,clean_claims,init,end,graph_type):
-	end=min(end,len(claim_IDs))
-	fcg=eval(graph_type+'()')
+	edgelist=[]
 	for claim_ID in claim_IDs[init:end]:
 		filename=os.path.join(claims_path,"claim{}".format(str(claim_ID)))
 		try:
@@ -147,8 +177,8 @@ def compileClaimGraph(index,claims_path,claim_IDs,clean_claims,init,end,graph_ty
 		claim_g=cleanClaimGraph(claim_g,clean_claims[str(claim_ID)])
 		claim_g=nx.relabel_nodes(claim_g,lambda x:nodelabel_mapper(x))
 		saveClaimGraph(claim_g,filename,graph_type)
-		fcg.add_edges_from(claim_g.edges.data())
-	return index,fcg
+		edgelist+=claim_g.edges.data()
+	return index,sorted(edgelist)
 
 def compileFred(rdf_path,graph_path,graph_type,fcg_label,cpu):
 	multigraph_types={'undirected':'nx.MultiGraph','directed':'nx.MultiDiGraph'}
@@ -181,14 +211,13 @@ def compileFred(rdf_path,graph_path,graph_type,fcg_label,cpu):
 		if cpu>1:
 			n=int(len(claim_IDs)/cpu)+1
 			pool=mp.Pool(processes=cpu)					
-			results=[pool.apply_async(eval("compileClaimGraph"+str(compilefred)), args=(index,claims_path,claim_IDs,clean_claims,index*n,(index+1)*n,multigraph_types[graph_type])) for index in range(cpu)]
+			results=[pool.apply_async(compileClaimGraph, args=(index,claims_path,claim_IDs,clean_claims,index*n,min((index+1)*n,len(claim_IDs)),multigraph_types[graph_type])) for index in range(cpu)]
 			output=sorted([p.get() for p in results],key=lambda x:x[0])
-			fcgs=list(map(lambda x:x[1],output))
-			master_fcg=eval(multigraph_types[graph_type]+'()')
-			for fcg in fcgs:
-				master_fcg.add_edges_from(fcg.edges.data())
+			edgelist=[edge for o in output for edge in o[1]]
 		else:
-			master_fcg=eval("compileClaimGraph"+str(compilefred)+"(0,claims_path,claim_IDs,clean_claims,0,"+str(len(claim_IDs))+",graph_types[graph_type])")[1]
+			edgelist=compileClaimGraph(0,claims_path,claim_IDs,clean_claims,0,len(claim_IDs),graph_types[graph_type])[1]
+		master_fcg=eval(multigraph_types[graph_type]+'()')
+		master_fcg.add_edges_from(edgelist)
 		saveFred(master_fcg,graph_path,fcg_label)
 
 if __name__== "__main__":

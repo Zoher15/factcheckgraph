@@ -633,7 +633,7 @@ def checkClaimGraph(g,claim_ID,graph_type):#,mode):
 	nodes2contract['subclass']=set()#keep left node
 	nodes2contract['equivalence']=set()#keep right node
 	nodes2contract['identity']=set()#keep right node
-	nodes2contract['quality']=set()#keep left node
+	# nodes2contract['quality']=set()#keep left node
 	nodes2remove['num']=set()
 	nodes2remove['%27']=set()
 	nodes2remove['thing']=set()
@@ -650,11 +650,11 @@ def checkClaimGraph(g,claim_ID,graph_type):#,mode):
 		nodes_set.add(c)
 		claim_g.add_edge(a,c,label=b.split("/")[-1].split("#")[-1],claim_ID=claim_ID)
 		#Edges
-		if edge_list[e].Type==EdgeMotif.Property:
-			if regex_quality.match(b) and (regex_fredup.match(c) and regex_fredup.match(a)):
-				if regex_fredup.match(c)[1].lower() in regex_fredup.match(a)[1].lower():
-					nodes2contract['quality'].add((a,c))
-		elif edge_list[e].Type==EdgeMotif.Type or regex_type.match(b):
+		# if edge_list[e].Type==EdgeMotif.Property:
+		# 	if regex_quality.match(b) and (regex_fredup.match(c) and regex_fredup.match(a)):
+		# 		if regex_fredup.match(c)[1].lower() in regex_fredup.match(a)[1].lower():
+		# 			nodes2contract['quality'].add((a,c))
+		if edge_list[e].Type==EdgeMotif.Type or regex_type.match(b):
 			if regex_fred.match(a) and (regex_fred.match(a)[1].lower() in c.split("\\")[-1].lower()):
 				nodes2contract['type'].add((c,a))
 			elif (regex_fred.match(c)) and (regex_fred.match(c)[1].lower() in a.split("\\")[-1].lower()):
@@ -788,37 +788,6 @@ def passiveFredParse(index,claims_path,claim_IDs,init,end,graph_type):
 		#plot claim graph
 		# plotFredGraph(claim_g,filename+".png")
 	return index,errorclaimid,clean_claims
-
-#Function to save fred graph including its nodes, entities, node2ID dictionary and edgelistID (format needed by klinker)	
-def saveFred(fcg,graph_path,fcg_label):
-	fcg_path=os.path.join(graph_path,"fred",fcg_label)
-	os.makedirs(fcg_path, exist_ok=True)
-	#writing aggregated networkx graphs as edgelist and graphml
-	nx.write_edgelist(fcg,os.path.join(fcg_path,"{}.edgelist".format(fcg_label)))
-	fcg=nx.read_edgelist(os.path.join(fcg_path,"{}.edgelist".format(fcg_label)),comments="@")
-	#Saving graph as graphml
-	nx.write_graphml(fcg,os.path.join(fcg_path,"{}.graphml".format(fcg_label)),prettyprint=True)
-	os.makedirs(os.path.join(fcg_path,"data"),exist_ok=True)
-	write_path=os.path.join(fcg_path,"data",fcg_label)
-	nodes=list(fcg.nodes)
-	edges=list(fcg.edges)
-	#Save Nodes
-	with codecs.open(write_path+"_nodes.txt","w","utf-8") as f:
-		for node in nodes:
-			f.write(str(node)+"\n")
-	#Save Entities
-	entity_regex=re.compile(r'^db:.*')
-	entities=np.asarray([node for node in nodes if entity_regex.match(node)])
-	with codecs.open(write_path+"_entities.txt","w","utf-8") as f:
-		for entity in entities:
-			f.write(str(entity)+"\n")
-	#Save node2ID dictionary
-	node2ID={node:i for i,node in enumerate(nodes)}
-	with codecs.open(write_path+"_node2ID.json","w","utf-8") as f:
-		f.write(json.dumps(node2ID,indent=4,ensure_ascii=False))
-	#Save Edgelist ID
-	edgelistID=np.asarray([[int(node2ID[edge[0]]),int(node2ID[edge[1]]),1] for edge in edges])
-	np.save(write_path+"_edgelistID.npy",edgelistID)
 
 def fetchFred(rdf_path,graph_path,graph_type,fcg_label,init,passive,cpu):
 	multigraph_types={'undirected':'nx.MultiGraph','directed':'nx.MultiDiGraph'}
