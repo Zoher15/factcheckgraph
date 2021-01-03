@@ -6,7 +6,6 @@ import argparse
 import random
 import networkx as nx
 import matplotlib
-# matplotlib.use('TkAgg')
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -17,6 +16,7 @@ import html
 from operator import itemgetter
 from collections import ChainMap 
 from itertools import chain
+from urllib.parse import urlparse
 import multiprocessing as mp
 from pprint import pprint
 import re
@@ -42,7 +42,7 @@ def nodelabel_mapper(text):
 		return 'un:'+text.split("/")[-1].split("#")[-1]
 
 #Function save individual claim graphs
-def saveClaimGraph(claim_g,filename,graph_type):
+def saveClaimGraph(claim_g,filename):
 	nx.write_edgelist(claim_g,filename+"_clean.edgelist")
 	claim_g=nx.read_edgelist(filename+"_clean.edgelist",comments="@")
 	nx.write_graphml(claim_g,filename+"_clean.graphml",prettyprint=True)
@@ -83,64 +83,103 @@ def contractClaimGraph(claim_g,contract_edgelist):
 			print("Node removed:",min_key)
 			temp_g.remove_node(min_key)
 	#contractings edges from the leave nodes to the root
-	for nodes in list(nx.edge_bfs(temp_g,tsnodes))[::-1]:
-		if claim_g.has_node(nodes[0]) and claim_g.has_node(nodes[1]):
-			claim_g=nx.contracted_nodes(claim_g,nodes[0],nodes[1],self_loops=False)
+	for snode in tsnodes:	
+		for nodes in list(nx.bfs_edges(temp_g,snode))[::-1]:
+			if claim_g.has_node(nodes[0]) and claim_g.has_node(nodes[1]):
+				claim_g=nx.contracted_nodes(claim_g,nodes[0],nodes[1],self_loops=False)
 	return claim_g
 
+def contractList(edgelist):
+	regex_fred=re.compile(r'^http:\/\/www\.ontologydesignpatterns\.org\/ont\/fred\/domain\.owl#([a-zA-Z]*)_.*')
+	regex_vn=re.compile(r'^http:\/\/www\.ontologydesignpatterns\.org\/ont\/vn\/data\/([a-zA-Z]*)_.*')
+	regex_dbpedia=re.compile(r'^http:\/\/dbpedia\.org\/resource\/(.*)')
+	contract_edgelist=[]
+	for u,v,d in edgelist:
+		boolequality=d['label']=='sameAs' or d['label']=='equivalentClass'
+		boolsub= d['label']=='type' or d['label']=='subClassOf'# or d['label']=='associatedWith' or d['label']=='hasQuality'
+		boolsuffixeq=u.split("/")[-1].split("#")[-1].lower() == v.split("/")[-1].split("#")[-1].lower()
+		boolsuffixVinU=v.split("/")[-1].split("#")[-1].lower() in u.split("/")[-1].split("#")[-1].lower()
+		boolsuffixUinV=u.split("/")[-1].split("#")[-1].lower() in v.split("/")[-1].split("#")[-1].lower()
+		#To test if the suffix are equal like fu:date and db:Date, u in v: db:child in db:childmarriage
+		boolsuffixVgrtU=(regex_dbpedia.match(v) and not regex_dbpedia.match(u)) or (regex_vn.match(v) and not regex_vn.match(u))
+		boolsuffixUgrtV=(regex_dbpedia.match(u) and not regex_dbpedia.match(v)) or (regex_vn.match(u) and not regex_vn.match(v))
+		if boolequality or (boolsub and boolsuffixeq):
+			if boolsuffixVgrtU:
+				#V is dbpedia/vn and U is not
+				contract_edgelist.append((v,u))
+				print((nodelabel_mapper(v),nodelabel_mapper(u),d['label']))	
+			elif boolsuffixUgrtV:
+				#U is dbpedia/vn and V is not
+				contract_edgelist.append((u,v))
+				print((nodelabel_mapper(u),nodelabel_mapper(v),d['label']))
+			else:
+				#Both are dbpedia/vn or both are non dbpedia/vn
+				cedge=tuple(sorted((u,v)))
+				contract_edgelist.append(cedge)
+				print((nodelabel_mapper(cedge[0]),nodelabel_mapper(cedge[1]),d['label']))
+		elif boolsuffixVinU and boolsub:
+			#V:child in U:childmarriage
+			if boolsuffixUgrtV:
+				#U is dbpedia/vn and V is not
+				contract_edgelist.append((u,v))
+				print((nodelabel_mapper(u),nodelabel_mapper(v),d['label']))
+			else:
+				#V is dbpedia/vn and U is not or Both are non dbpedia/vn
+				contract_edgelist.append((v,u)) 
+				print((nodelabel_mapper(v),nodelabel_mapper(u),d['label']))
+
+		elif boolsuffixUinV and boolsub:
+			#U:child in V:childmarriage
+			if boolsuffixVgrtU:
+				#V is dbpedia/vn and U is not
+				contract_edgelist.append((v,u))
+				print((nodelabel_mapper(v),nodelabel_mapper(u),d['label']))	
+			else:
+				#U is dbpedia/vn and V is not or Both are non dbpedia/vn
+				contract_edgelist.append((u,v))
+				print((nodelabel_mapper(u),nodelabel_mapper(v),d['label']))
+	return contract_edgelist
 
 #Function to return a clean graph, depending on the edges to delete and contract
 def cleanClaimGraph(claim_g,clean_claims):
 	nodes2remove=clean_claims['nodes2remove']
 	nodes2contract=clean_claims['nodes2contract']
-	contract_edgelist=[edge for edgelist in nodes2contract.values() for edge in edgelist]
-	remove_nodelist=[node for nodelist in nodes2remove.values() for node in nodelist]
-	claim_g=contractClaimGraph(claim_g,sorted(contract_edgelist))
+	contract_edgelist=sorted([edge for edgelist in nodes2contract.values() for edge in edgelist])
+	remove_nodelist=sorted([node for nodelist in nodes2remove.values() for node in nodelist])
+	claim_g=contractClaimGraph(claim_g,contract_edgelist)
 	'''
 	After contracting edges, sometimes the edge hasQuality now exists between two words like Related and RelatedAccount.
 	This edge  Related-{hasQuality}-RelatedAccount is a result of the base contraction. This edge should be contracted.
 	Because this edge-to-be-contracted will not be detected by the function checkClaimGraph, we should do the contraction manually.
 	'''
-	contract_edgelist=[]
-	edgelist=list(claim_g.edges(data=True))
-	regex_fred=re.compile(r'^http:\/\/www\.ontologydesignpatterns\.org\/ont\/fred\/domain\.owl#([a-zA-Z]*)_.*')
-	regex_vn=re.compile(r'^http:\/\/www\.ontologydesignpatterns\.org\/ont\/vn\/data\/([a-zA-Z]*)_.*')
-	regex_dbpedia=re.compile(r'^http:\/\/dbpedia\.org\/resource\/(.*)')
-	for u,v,d in edgelist:
-		if d['label']=='associatedWith' or d['label']=='hasQuality' or d['label']=='sameAs' or d['label']=='equivalentClass' or d['label']=='type' or d['label']=='subClassOf':
-			if u.split("/")[-1].split("#")[-1].lower() in v.split("/")[-1].split("#")[-1].lower():
-				if (regex_dbpedia.match(v) and not regex_dbpedia.match(u)) or (regex_vn.match(v) and not regex_vn.match(u)):
-					contract_edgelist.append((v,u))
-					print((nodelabel_mapper(v),nodelabel_mapper(u),d['label']))
-				else:
-					contract_edgelist.append((u,v))
-					print((nodelabel_mapper(u),nodelabel_mapper(v),d['label']))
-			elif v.split("/")[-1].split("#")[-1].lower() in u.split("/")[-1].split("#")[-1].lower():
-				if (regex_dbpedia.match(u) and not regex_dbpedia.match(v)) or (regex_vn.match(u) and not regex_vn.match(v)):
-					contract_edgelist.append((u,v))
-					print((nodelabel_mapper(u),nodelabel_mapper(v),d['label']))
-				else:
-					contract_edgelist.append((v,u))
-					print((nodelabel_mapper(v),nodelabel_mapper(u),d['label']))
-	claim_g=contractClaimGraph(claim_g,sorted(contract_edgelist))
+	#recurring cleaning
+	edgelist=sorted(list(claim_g.edges(data=True)),key=lambda x:x[0])
+	prev_contract_edgelist=contract_edgelist
+	contract_edgelist=contractList(edgelist)
+	#either the contract_edgelist is empty or the there is an infinite loop
+	while len(contract_edgelist)>0 and contract_edgelist!=prev_contract_edgelist:
+		claim_g=contractClaimGraph(claim_g,contract_edgelist)
+		edgelist=sorted(list(claim_g.edges(data=True)),key=lambda x:x[0])
+		prev_contract_edgelist=contract_edgelist
+		contract_edgelist=contractList(edgelist)
 	#remove nodes
-	for node in remove_nodelist:
+	for node in sorted(remove_nodelist):
 		if claim_g.has_node(node):
 			claim_g.remove_node(node)
 	#removing isolates
-	claim_g.remove_nodes_from(list(nx.isolates(claim_g)))
 	situation_node='http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Situation'
 	if claim_g.has_node(situation_node):
 		claim_g.remove_node(situation_node)
+	claim_g.remove_nodes_from(list(nx.isolates(claim_g)))
 	return claim_g
 
 #Function to save fred graph including its nodes, entities, node2ID dictionary and edgelistID (format needed by klinker)	
-def saveFred(fcg,graph_path,fcg_label):
+def saveFred(fcg,graph_path,fcg_label,graph_type):
 	fcg_path=os.path.join(graph_path,"fred",fcg_label)
 	os.makedirs(fcg_path, exist_ok=True)
 	#writing aggregated networkx graphs as edgelist and graphml
 	nx.write_edgelist(fcg,os.path.join(fcg_path,"{}.edgelist".format(fcg_label)))
-	fcg=nx.read_edgelist(os.path.join(fcg_path,"{}.edgelist".format(fcg_label)),comments="@")
+	fcg=nx.read_edgelist(os.path.join(fcg_path,"{}.edgelist".format(fcg_label)),comments="@",create_using=eval(graph_type))
 	#Saving graph as graphml
 	nx.write_graphml(fcg,os.path.join(fcg_path,"{}.graphml".format(fcg_label)),prettyprint=True)
 	os.makedirs(os.path.join(fcg_path,"data"),exist_ok=True)
@@ -166,7 +205,7 @@ def saveFred(fcg,graph_path,fcg_label):
 	np.save(write_path+"_edgelistID.npy",edgelistID)
 
 #Function to stitch/compile graphs in an iterative way. i.e clean individual graphs before unioning 
-def compileClaimGraph(index,claims_path,claim_IDs,clean_claims,init,end,graph_type):
+def compileClaimGraph(index,claims_path,claim_IDs,clean_claims,init,end):
 	edgelist=[]
 	for claim_ID in claim_IDs[init:end]:
 		filename=os.path.join(claims_path,"claim{}".format(str(claim_ID)))
@@ -174,15 +213,14 @@ def compileClaimGraph(index,claims_path,claim_IDs,clean_claims,init,end,graph_ty
 			claim_g=nx.read_edgelist(filename+".edgelist",comments="@")
 		except:
 			continue
+		print("ClaimID:",claim_ID)
 		claim_g=cleanClaimGraph(claim_g,clean_claims[str(claim_ID)])
 		claim_g=nx.relabel_nodes(claim_g,lambda x:nodelabel_mapper(x))
-		saveClaimGraph(claim_g,filename,graph_type)
+		saveClaimGraph(claim_g,filename)
 		edgelist+=claim_g.edges.data()
-	return index,sorted(edgelist)
+	return index,edgelist
 
 def compileFred(rdf_path,graph_path,graph_type,fcg_label,cpu):
-	multigraph_types={'undirected':'nx.MultiGraph','directed':'nx.MultiDiGraph'}
-	graph_types={'undirected':'nx.MultiGraph','directed':'nx.MultiDiGraph'}
 	fcg_path=os.path.join(graph_path,"fred",fcg_label)
 	#If union of tfcg and ffcg wants to be created i.e ufcg
 	if fcg_label=="ufcg":
@@ -190,13 +228,13 @@ def compileFred(rdf_path,graph_path,graph_type,fcg_label,cpu):
 		tfcg_path=os.path.join(graph_path,"fred","tfcg","tfcg.edgelist")
 		ffcg_path=os.path.join(graph_path,"fred","ffcg","ffcg.edgelist")
 		if os.path.exists(tfcg_path) and os.path.exists(ffcg_path):
-			ufcg=eval(graph_types[graph_type]+"()")
-			tfcg=nx.read_edgelist(tfcg_path,comments="@")
-			ffcg=nx.read_edgelist(ffcg_path,comments="@")
+			ufcg=eval(graph_type+"()")
+			tfcg=nx.read_edgelist(tfcg_path,comments="@",create_using=eval(graph_type))
+			ffcg=nx.read_edgelist(ffcg_path,comments="@",create_using=eval(graph_type))
 			ufcg.add_edges_from(tfcg.edges.data())
 			ufcg.add_edges_from(ffcg.edges.data())
 			os.makedirs(fcg_path, exist_ok=True)
-			saveFred(ufcg,graph_path,fcg_label)
+			saveFred(ufcg,graph_path,fcg_label,graph_type)
 		else:
 			print("Create tfcg and ffcg before attempting to create the union: ufcg")
 	else:
@@ -211,14 +249,15 @@ def compileFred(rdf_path,graph_path,graph_type,fcg_label,cpu):
 		if cpu>1:
 			n=int(len(claim_IDs)/cpu)+1
 			pool=mp.Pool(processes=cpu)					
-			results=[pool.apply_async(compileClaimGraph, args=(index,claims_path,claim_IDs,clean_claims,index*n,min((index+1)*n,len(claim_IDs)),multigraph_types[graph_type])) for index in range(cpu)]
+			results=[pool.apply_async(compileClaimGraph, args=(index,claims_path,claim_IDs,clean_claims,index*n,min((index+1)*n,len(claim_IDs)))) for index in range(cpu)]
 			output=sorted([p.get() for p in results],key=lambda x:x[0])
 			edgelist=[edge for o in output for edge in o[1]]
 		else:
-			edgelist=compileClaimGraph(0,claims_path,claim_IDs,clean_claims,0,len(claim_IDs),graph_types[graph_type])[1]
-		master_fcg=eval(multigraph_types[graph_type]+'()')
+			edgelist=compileClaimGraph(0,claims_path,claim_IDs,clean_claims,0,len(claim_IDs))[1]
+		edgelist=list(sorted(edgelist,key=lambda x:x[0]))
+		master_fcg=eval(graph_type+'()')
 		master_fcg.add_edges_from(edgelist)
-		saveFred(master_fcg,graph_path,fcg_label)
+		saveFred(master_fcg,graph_path,fcg_label,graph_type)
 
 if __name__== "__main__":
 	parser=argparse.ArgumentParser(description='Create fred graph')
@@ -229,8 +268,7 @@ if __name__== "__main__":
 	parser.add_argument('-cpu','--cpu',metavar='Number of CPUs',type=int,help='Number of CPUs available',default=1)
 	parser.add_argument('-gt','--graphtype', metavar='Graph Type Directed/Undirected',type=str,choices=['directed','undirected'],default='undirected')
 	args=parser.parse_args()
-	compileFred(args.rdfpath,args.graphpath,args.graphtype,args.fcgtype,args.cpu)
-
-
+	graph_types={'undirected':'nx.MultiGraph','directed':'nx.MultiDiGraph'}
+	compileFred(args.rdfpath,args.graphpath,graph_types[args.graphtype],args.fcgtype,args.cpu)
 
 

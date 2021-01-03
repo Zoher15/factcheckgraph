@@ -8,20 +8,22 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=48
-#SBATCH --time=24:00:00
+#SBATCH --time=00:10:00
+errcho(){ >&2 echo $@; }
 source /N/u/zkachwal/Carbonate/miniconda3/etc/profile.d/conda.sh
 conda activate
 cd /gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph/create_graphs/
+################################################################
+errcho fetching
 time python fetch_fred.py -ft tfcg -cpu 48 -p
 time python fetch_fred.py -ft ffcg -cpu 48 -p 
+################################################################
+errcho compiling
 time python compile_fred.py -ft tfcg -cpu 48 
 time python compile_fred.py -ft ffcg -cpu 48
 time python compile_fred.py -ft ufcg
 ################################################################
 cd /gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph/process_graphs/
-# errcho find intersect
-# time python find_intersect.py -fcg fred -kg dbpedia
-################################################################
 errcho calculate stats
 time python calculate_stats.py -gc fred -gt tfcg
 time python calculate_stats.py -gc fred -gt ffcg
