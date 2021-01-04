@@ -67,13 +67,9 @@ def create_weighted(p,rdf_path,model_path,graph_path,graph_type,embed_path,fcg_t
 	else:
 		fcg_path=os.path.join(graph_path,fcg_class,fcg_type)
 	#loading weighting embeddings
-	if fcg_class=='co_occur':
-		claims=pd.read_csv(os.path.join(rdf_path,"{}_claims.csv".format(claim_type)))
-		claim_IDs=claims['claimID'].tolist()
-		embed=pd.read_csv(os.path.join(embed_path,claim_type+"_claims_embeddings_({}).tsv".format(model_path.split("/")[-1])),delimiter="\t",header=None).values
-	elif fcg_class=='fred':
-		embed=pd.read_csv(os.path.join(embed_path,fcg_type.split('-')[0]+"_nodes_embeddings_({}).tsv".format(model_path.split("/")[-1])),delimiter="\t",header=None).values
-		labels=pd.read_csv(os.path.join(embed_path,fcg_type.split('-')[0]+"_nodes_embeddings_labels_({}).tsv".format(model_path.split("/")[-1])),delimiter="\t")
+	claims=pd.read_csv(os.path.join(rdf_path,"{}_claims.csv".format(claim_type)))
+	claim_IDs=claims['claimID'].tolist()
+	embed=pd.read_csv(os.path.join(embed_path,claim_type+"_claims_embeddings_({}).tsv".format(model_path.split("/")[-1])),delimiter="\t",header=None).values
 	#cosine similarity with clipping between -1 and 1
 	simil_p=np.clip(cosine_similarity(p,embed)[0],-1,1)
 	#normalized angular distance
@@ -89,13 +85,8 @@ def create_weighted(p,rdf_path,model_path,graph_path,graph_type,embed_path,fcg_t
 	#assigning weight by summing the log of adjacent nodes, and dividing by the similiarity of the claim with the target predicate
 	fcg_edges=fcg.edges.data(keys=True)
 	for u,v,k,d in fcg_edges:
-		if fcg_class=='co_occur':
-			claimID=d['claim_ID']
-			IX=claims[claims['claimID']==claimID].index[0]
-			dist=dist_p[IX]
-		elif fcg_class=='fred':
-			IX=labels[labels['node_label']==v].index[0]
-			dist=dist_p[IX]
+		IX=claims[claims['claimID']==d['claim_ID']].index[0]
+		dist=dist_p[IX]
 		fcg.edges[u,v,k]['dist']=dist
 	#Removing multiedges, by selecting the shortest one
 	fcg2=nx.DiGraph()
@@ -112,6 +103,7 @@ def create_weighted(p,rdf_path,model_path,graph_path,graph_type,embed_path,fcg_t
 		dist=data['dist']
 		weight=np.log10(fcg.degree(v))
 		fcg2.edges[u,v]['weight']=weight*dist
+	#returning labels and embeddata so that source dist and weights can be added
 	return fcg2
 
 def find_paths_of_interest(index,rdf_path,graph_path,graph_type,embed_path,model_path,claimIDs,fcg_class,source_fcg_type,target_fcg_type,target_claim_type,source_claims,target_claims,target_claims_embed):
@@ -160,18 +152,16 @@ def find_paths_of_interest(index,rdf_path,graph_path,graph_type,embed_path,model
 			if source_fcg.has_node(u) and source_fcg.has_node(v):
 				'''
 				If both node exists, we add the influence of source nodes i.e. the weight and log10(degree) to all the paths.
-				We want to include source node weights to all parts starting from them so that:
+				We want to include source node dist and weights to all parts starting from them so that:
 				1. There are no 0 dist paths, even when they are directly connected
 				2. While aggregating the entity pairs, we automatically include the weight of the an entity pair by not ignoring the weight of the source node
 				'''
 				for e in source_fcg.out_edges(u,data=True):
 					data=e[2]
-					#adding the influence of the log of degree of target node u
 					data['weight']=data['dist']*(np.log10(source_fcg.degree(e[0]))+np.log10(source_fcg.degree(e[1])))
 					source_fcg.edges[e[0],e[1]].update(data)
 				for e in source_fcg.out_edges(v,data=True):
 					data=e[2]
-					#adding the influence of the log of degree of target node u
 					data['weight']=data['dist']*(np.log10(source_fcg.degree(e[0]))+np.log10(source_fcg.degree(e[1])))
 					source_fcg.edges[e[0],e[1]].update(data)
 				#################################################################################
@@ -187,8 +177,8 @@ def find_paths_of_interest(index,rdf_path,graph_path,graph_type,embed_path,model
 						path_d_data1[str((path_d1[i],path_d1[i+1]))]=data
 						path_d_formed_claim1=path_d_formed_claim1+" "+cleanstring(path_d1[i+1])
 					###########################################################################
-					dw1=round(1/(1+aggregate_edge_data(path_d_data1,'weight')),3)
-					dd1=round(1/(1+aggregate_edge_data(path_d_data1,'dist')),3)
+					dw1=round(1/(1+aggregate_edge_data(path_d_data1,'weight')),7)
+					dd1=round(1/(1+aggregate_edge_data(path_d_data1,'dist')),7)
 					path_d_data1['formed_claim']=path_d_formed_claim1
 					#################################################################################
 					path_w1=nx.shortest_path(source_fcg,source=u,target=v,weight='weight')
@@ -201,8 +191,8 @@ def find_paths_of_interest(index,rdf_path,graph_path,graph_type,embed_path,model
 						path_w_data1[str((path_w1[i],path_w1[i+1]))]=data
 						path_w_formed_claim1=path_w_formed_claim1+" "+cleanstring(path_w1[i+1])
 					#################################################################################
-					ww1=round(1/(1+aggregate_edge_data(path_w_data1,'weight')),3)
-					wd1=round(1/(1+aggregate_edge_data(path_w_data1,'dist')),3)
+					ww1=round(1/(1+aggregate_edge_data(path_w_data1,'weight')),7)
+					wd1=round(1/(1+aggregate_edge_data(path_w_data1,'dist')),7)
 					path_w_data1['formed_claim']=path_w_formed_claim1
 				else:
 					dw1=0
@@ -226,8 +216,8 @@ def find_paths_of_interest(index,rdf_path,graph_path,graph_type,embed_path,model
 						path_d_data2[str((path_d2[i],path_d2[i+1]))]=data
 						path_d_formed_claim2=path_d_formed_claim2+" "+cleanstring(path_d2[i+1])
 					#################################################################################
-					dw2=round(1/(1+aggregate_edge_data(path_d_data2,'weight')),3)
-					dd2=round(1/(1+aggregate_edge_data(path_d_data2,'dist')),3)
+					dw2=round(1/(1+aggregate_edge_data(path_d_data2,'weight')),7)
+					dd2=round(1/(1+aggregate_edge_data(path_d_data2,'dist')),7)
 					path_d_data2['formed_claim']=path_d_formed_claim2
 					#################################################################################
 					#################################################################################
@@ -241,8 +231,8 @@ def find_paths_of_interest(index,rdf_path,graph_path,graph_type,embed_path,model
 						path_w_data2[str((path_w2[i],path_w2[i+1]))]=data
 						path_w_formed_claim2=path_w_formed_claim2+" "+cleanstring(path_w2[i+1])
 					#################################################################################
-					ww2=round(1/(1+aggregate_edge_data(path_w_data2,'weight')),3)
-					wd2=round(1/(1+aggregate_edge_data(path_w_data2,'dist')),3)
+					ww2=round(1/(1+aggregate_edge_data(path_w_data2,'weight')),7)
+					wd2=round(1/(1+aggregate_edge_data(path_w_data2,'dist')),7)
 					path_w_data2['formed_claim']=path_w_formed_claim2
 				else:
 					dw2=0
@@ -257,11 +247,15 @@ def find_paths_of_interest(index,rdf_path,graph_path,graph_type,embed_path,model
 					paths_of_interest_d[claimID][str((u,v,dw1,dd1))]=path_d_data1
 				else:
 					print("dd1!=dd2,",claimID)
+					import pdb
+					pdb.set_trace()
 					paths_of_interest_d[claimID][str((u,v,dw2,dd2))]=path_d_data2
 				if ww1==ww2:
 					paths_of_interest_w[claimID][str((u,v,ww1,wd1))]=path_w_data1
 				else:
 					print("ww1!=ww2,",claimID)
+					import pdb
+					pdb.set_trace()
 					paths_of_interest_w[claimID][str((u,v,ww2,wd2))]=path_w_data2
 			else:
 				path_data={}
