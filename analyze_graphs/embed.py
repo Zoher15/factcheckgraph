@@ -11,7 +11,7 @@ import argparse
 def embed_claims(rdf_path,model_path,embed_path,claim_type):
 	os.makedirs(embed_path, exist_ok=True)
 	model = SentenceTransformer(model_path)
-	claims=pd.read_csv(os.path.join(rdf_path,"{}_claims.csv".format(claim_type)),index_col=0)
+	claims=pd.read_csv(os.path.join(rdf_path,"{}_claims_og.csv".format(claim_type)),index_col=0)
 	claims_list=list(claims['claim_text'])
 	claims_embeddings=model.encode(claims_list)
 	with open(os.path.join(embed_path,claim_type+'_claims_embeddings_({}).tsv'.format(model_path.split("/")[-1])),'w',newline='') as f:
@@ -30,7 +30,9 @@ def embed_claims(rdf_path,model_path,embed_path,claim_type):
 		#Calculating angular distance
 		claim_claim=1-np.arccos(np.clip(cosine_similarity(claims_embeddings,claims_embeddings),-1,1))/np.pi
 		#storing index of duplicate-ish claims to get rid of them from the data
-		x_claim=list(set([np.sort([i,j])[-1] for i in range(len(claim_claim)) for j in range(len(claim_claim)) if claim_claim[j][i]>0.825 and i!=j]))
+		np.fill_diagonal(claim_claim,np.nan)
+		indices=np.argwhere(claim_claim>0.825)
+		x_claim=list(set([np.sort(ind)[-1] for ind in indices]))
 		claims=claims.drop(index=x_claim).reset_index()
 		claims.to_csv(os.path.join(rdf_path,"{}_claims.csv".format(claim_type)),index=False)
 		np.save(os.path.join(rdf_path,"{}_claimID.npy".format(claim_type)),list(claims["claimID"]))
@@ -69,7 +71,7 @@ if __name__== "__main__":
 	parser.add_argument('-mp','--modelpath', metavar='model path',type=str,help='Model directory to load the model',default="/geode2/home/u110/zkachwal/BigRed3/factcheckgraph_data/models/claims-relatedness-model/claims-roberta-base-nli-stsb-mean-tokens-2020-05-27_19-01-27")
 	parser.add_argument('-ep','--embedpath', metavar='embed path',type=str,help='Model directory to save and load embeddings',default="/geode2/home/u110/zkachwal/BigRed3/factcheckgraph_data/embeddings")
 	parser.add_argument('-ft','--fcgtype', metavar='FactCheckGraph type',type=str,choices=['tfcg','ffcg','tfcg_co','ffcg_co','ufcg','covid19'],help='True/False/Union/Covid19 FactCheckGraph')
-	parser.add_argument('-fc','--fcgclass', metavar='FactCheckGraph class',type=str,choices=['co_occur','fred'])
+	parser.add_argument('-fc','--fcgclass', metavar='FactCheckGraph class',type=str,choices=['co_occur','fred'],default='co_occur')
 	parser.add_argument('-gt','--graphtype', metavar='Graph Type Directed/Undirected',type=str,choices=['directed','undirected'])
 	parser.add_argument('-cpu','--cpu',metavar='Number of CPUs',type=int,help='Number of CPUs available',default=1)
 	args=parser.parse_args()

@@ -42,8 +42,8 @@ def separate_claims(file,rdf_path):
 	false_claims=data.loc[false_ind].reset_index(drop=True)
 	np.save(os.path.join(rdf_path,"true_claimID.npy"),list(true_claims["claimID"]))
 	np.save(os.path.join(rdf_path,"false_claimID.npy"),list(false_claims["claimID"]))
-	true_claims.to_csv(os.path.join(rdf_path,"true_claims_new.csv"))
-	false_claims.to_csv(os.path.join(rdf_path,"false_claims_new.csv"))
+	true_claims.to_csv(os.path.join(rdf_path,"true_claims_og.csv"))
+	false_claims.to_csv(os.path.join(rdf_path,"false_claims_og.csv"))
 	os.makedirs(os.path.join(rdf_path,"true_claims"), exist_ok=True)
 	os.makedirs(os.path.join(rdf_path,"false_claims"), exist_ok=True)
 

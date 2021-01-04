@@ -14,16 +14,14 @@ errcho(){ >&2 echo $@; }
 source /N/u/zkachwal/Carbonate/miniconda3/etc/profile.d/conda.sh
 conda activate
 ################################################################
+cd /gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph/create_graphs/
+errcho separate_claims
+time python separate_claims.py
+################################################################
 cd /geode2/home/u110/zkachwal/BigRed3/factcheckgraph/analyze_graphs/
 errcho embeddings
-time python embed.py -ft ffcg -fc co_occur -mp roberta-base-nli-stsb-mean-tokens -gt undirected
-time python embed.py -ft tfcg -fc co_occur -mp roberta-base-nli-stsb-mean-tokens -gt undirected
-time python embed.py -ft ffcg -fc fred -mp roberta-base-nli-stsb-mean-tokens -gt undirected
-time python embed.py -ft tfcg -fc fred -mp roberta-base-nli-stsb-mean-tokens -gt undirected
-time python embed.py -ft ffcg -fc co_occur -gt undirected
-time python embed.py -ft tfcg -fc co_occur -gt undirected
-time python embed.py -ft ffcg -fc fred -gt undirected
-time python embed.py -ft tfcg -fc fred -gt undirected
+time python embed.py -ft ffcg -mp roberta-base-nli-stsb-mean-tokens -gt undirected
+time python embed.py -ft tfcg -mp roberta-base-nli-stsb-mean-tokens -gt undirected
 ################################################################
 cd /gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph/create_graphs/
 errcho create graphs
@@ -37,7 +35,7 @@ time python create_fred.py -ft ufcg -cf 1 -gt undirected
 # time python create_co_occur.py -ft ufcg_co
 ################################################################
 cd /gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph/process_graphs/
-errcho find intersect
+# errcho find intersect
 # time python find_intersect.py -fcg fred -kg dbpedia
 ################################################################
 errcho calculate stats
@@ -52,15 +50,24 @@ time python compile_stats.py
 errcho leave1out
 cd /gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph/create_graphs/
 time python create_leave1out.py -fc fred -ft tfcg -cpu 48
+time python create_leave1out.py -fc fred -ft ffcg -cpu 48
 # time python create_leave1out.py -fc co_occur -ft tfcg_co -cpu 48
 ################################################################
 # errcho finding shortest paths
 # time python find_shortest_paths.py -ft ffcg -fc fred -cpu 48 -gt undirected
 # time python find_shortest_paths.py -ft tfcg -fc fred -cpu 48 -gt undirected
-errcho finding shortest paths 2
+errcho finding shortest paths tfcg
 cd /geode2/home/u110/zkachwal/BigRed3/factcheckgraph/analyze_graphs/
-# time python find_shortest_paths.py -st tfcg -ft ffcg -mp roberta-base-nli-stsb-mean-tokens -fc fred -cpu 48 -gt undirected
+time python find_shortest_paths.py -st tfcg -ft ffcg -mp roberta-base-nli-stsb-mean-tokens -fc fred -cpu 48 -gt undirected
 time python find_shortest_paths.py -st tfcg -ft tfcg -mp roberta-base-nli-stsb-mean-tokens -fc fred -cpu 48 -gt undirected
+time python order_paths.py -fcg fred -ft tfcg
+################################################################
+errcho finding shortest paths ffcg
+time python find_shortest_paths.py -st ffcg -ft ffcg -mp roberta-base-nli-stsb-mean-tokens -fc fred -cpu 48 -gt undirected
+time python find_shortest_paths.py -st ffcg -ft tfcg -mp roberta-base-nli-stsb-mean-tokens -fc fred -cpu 48 -gt undirected
+time python order_paths.py -fcg fred -ft ffcg
+################################################################
+time python order_paths.py -fcg fred
 ################################################################
 errcho find baseline
 time python find_baseline.py -bt knn -cpu 48 -mp roberta-base-nli-stsb-mean-tokens
@@ -68,5 +75,7 @@ time python find_baseline.py -bt all -mp roberta-base-nli-stsb-mean-tokens
 ################################################################
 errcho plot graphs 
 cd /geode2/home/u110/zkachwal/BigRed3/factcheckgraph/plot_graphs/
-time python plot_sp.py -fcg fred -pt roc -gt undirected
-time python plot_sp.py -fcg fred -pt dist -gt undirected
+time python plot_sp.py -fcg fred -ft ffcg -pt roc
+time python plot_sp.py -fcg fred -ft ffcg -pt dist
+time python plot_sp.py -fcg fred -pt roc
+time python plot_sp.py -fcg fred -pt dist

@@ -1,8 +1,8 @@
 #!/bin/bash
 #SBATCH -J pipeline_shortest_path_undirected
 #SBATCH -p general
-#SBATCH -o pipeline_shortest_path_undirected_ffcg_%j.txt
-#SBATCH -e pipeline_shortest_path_undirected_ffcg_%j.err
+#SBATCH -o pipeline_shortest_path_undirected_%j.txt
+#SBATCH -e pipeline_shortest_path_undirected_%j.err
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=zoher.kachwala@gmail.com
 #SBATCH --nodes=1

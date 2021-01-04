@@ -1,8 +1,8 @@
 #!/bin/bash
-#SBATCH -J find_shortest_paths_fred_ffcg_undirected
+#SBATCH -J find_shortest_paths_fred_ffcg
 #SBATCH -p general
-#SBATCH -o find_shortest_paths_fred_ffcg_undirected_%j.txt
-#SBATCH -e find_shortest_paths_fred_ffcg_undirected_%j.err
+#SBATCH -o find_shortest_paths_fred_ffcg%j.txt
+#SBATCH -e find_shortest_paths_fred_ffcg%j.err
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=zoher.kachwala@gmail.com
 #SBATCH --nodes=1
@@ -13,14 +13,11 @@
 errcho(){ >&2 echo $@; }
 source /N/u/zkachwal/Carbonate/miniconda3/etc/profile.d/conda.sh
 conda activate
-errcho embed
 cd /geode2/home/u110/zkachwal/BigRed3/factcheckgraph/analyze_graphs/
-time python embed.py -ft ffcg -fc fred -mp roberta-base-nli-stsb-mean-tokens -gt undirected
-time python embed.py -ft tfcg -fc fred -mp roberta-base-nli-stsb-mean-tokens -gt undirected
 ################################################################
 errcho find_shortest_paths
-time python find_shortest_paths.py -st ffcg -ft ffcg -mp roberta-base-nli-stsb-mean-tokens -fc fred -cpu 48 -gt undirected
-time python find_shortest_paths.py -st ffcg -ft tfcg -mp roberta-base-nli-stsb-mean-tokens -fc fred -cpu 48 -gt undirected
+time python find_shortest_paths.py -st ffcg -ft ffcg -mp roberta-base-nli-stsb-mean-tokens -fc fred -cpu 48
+time python find_shortest_paths.py -st ffcg -ft tfcg -mp roberta-base-nli-stsb-mean-tokens -fc fred -cpu 48
 time python order_paths.py -fcg fred -ft ffcg
 time python order_paths.py -fcg fred
 ################################################################
