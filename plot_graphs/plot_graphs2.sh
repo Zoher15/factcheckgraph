@@ -1,8 +1,8 @@
 #!/bin/bash
-#SBATCH -J plot_graphs
+#SBATCH -J plot_graphs2
 #SBATCH -p general
-#SBATCH -o plot_graphs_%j.txt
-#SBATCH -e plot_graphs_%j.err
+#SBATCH -o plot_graphs2_%j.txt
+#SBATCH -e plot_graphs2_%j.err
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=zoher.kachwala@gmail.com
 #SBATCH --nodes=1
@@ -15,18 +15,18 @@ conda activate
 ################################################################
 errcho order_paths
 cd /geode2/home/u110/zkachwal/BigRed3/factcheckgraph/analyze_graphs/
-time python order_paths.py -fcg fred -ft tfcg
-time python order_paths.py -fcg fred -ft ffcg
-time python order_paths.py -fcg fred
+time python order_paths2.py -fcg fred -ft tfcg
+time python order_paths2.py -fcg fred -ft ffcg
+time python order_paths2.py -fcg fred
 ################################################################
 errcho plots
 cd /geode2/home/u110/zkachwal/BigRed3/factcheckgraph/plot_graphs/
-time python plot_sp.py -fcg fred -ft tfcg -pt roc
-time python plot_sp.py -fcg fred -ft tfcg -pt dist
-time python plot_sp.py -fcg fred -ft ffcg -pt roc
-time python plot_sp.py -fcg fred -ft ffcg -pt dist
-time python plot_sp.py -fcg fred -pt roc
-time python plot_sp.py -fcg fred -pt dist
+time python plot_sp2.py -fcg fred -ft tfcg -pt roc
+time python plot_sp2.py -fcg fred -ft tfcg -pt dist
+time python plot_sp2.py -fcg fred -ft ffcg -pt roc
+time python plot_sp2.py -fcg fred -ft ffcg -pt dist
+time python plot_sp2.py -fcg fred -pt roc
+time python plot_sp2.py -fcg fred -pt dist
 # time python plot_adj_pairs.py -fcg fred -kg dbpedia
 # time python plot_adj_pairs.py -fcg fred1 -kg dbpedia
 # time python plot_adj_pairs.py -fcg fred2 -kg dbpedia

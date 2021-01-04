@@ -20,7 +20,7 @@ def compose_graphs(claims_path,fcg_path,suffix,claim_IDs,claim_IDs2remove,graph_
 				claim_g=nx.read_edgelist(filename+".edgelist",comments="@")
 			except:
 				continue
-			edgelist.append(claim_g.edges.data())
+			edgelist+=list(claim_g.edges.data())
 		fcg.add_edges_from(sorted(edgelist,key=lambda x:x[0]))
 		nx.write_edgelist(fcg,pathname)
 
@@ -33,8 +33,8 @@ def create_leave1out(rdf_path,graph_path,fcg_class,fcg_label,cpu,jobs,jobnum,gra
 	os.makedirs(fcg_path,exist_ok=True)
 	claims_path=os.path.join(rdf_path,"{}_claims".format(claim_type))
 	n=int(len(claim_IDs)/(cpu*jobs))+1
-	start=cpu*(jobnumn-1)
-	end=cpu*(jobnumn)
+	start=cpu*(jobnum-1)
+	end=cpu*(jobnum)
 	if cpu>1:
 		pool=mp.Pool(processes=cpu)
 		results=[pool.apply_async(compose_graphs, args=(claims_path,os.path.join(fcg_path,fcg_label),suffix[fcg_label],claim_IDs,claim_IDs[index*n:(index+1)*n],graph_type)) for index in range(start,end)]

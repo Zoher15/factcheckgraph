@@ -131,6 +131,7 @@ def find_paths_of_interest(index,rdf_path,graph_path,graph_type,embed_path,model
 				1. There are no 0 dist paths, even when they are directly connected
 				2. While aggregating the entity pairs, we automatically include the weight of the an entity pair by not ignoring the weight of the source node
 				'''
+				source_fcg_num_nodes=source_fcg.number_of_nodes()
 				for e in source_fcg.out_edges(u,data=True):
 					data=e[2]
 					#adding the influence of the log of degree of target node u
@@ -154,8 +155,8 @@ def find_paths_of_interest(index,rdf_path,graph_path,graph_type,embed_path,model
 						path_d_data1[str((path_d1[i],path_d1[i+1]))]=data
 						path_d_formed_claim1=path_d_formed_claim1+" "+cleanstring(path_d1[i+1])
 					###########################################################################
-					dw1=round(1/(1+aggregate_edge_data(path_d_data1,'weight')),3)
-					dd1=round(1/(1+aggregate_edge_data(path_d_data1,'dist')),3)
+					dw1=1/(1+aggregate_edge_data(path_d_data1,'weight'))
+					dd1=1/(1+aggregate_edge_data(path_d_data1,'dist'))
 					path_d_data1['formed_claim']=path_d_formed_claim1
 					#################################################################################
 					path_w1=nx.shortest_path(source_fcg,source=u,target=v,weight='weight')
@@ -168,14 +169,14 @@ def find_paths_of_interest(index,rdf_path,graph_path,graph_type,embed_path,model
 						path_w_data1[str((path_w1[i],path_w1[i+1]))]=data
 						path_w_formed_claim1=path_w_formed_claim1+" "+cleanstring(path_w1[i+1])
 					#################################################################################
-					ww1=round(1/(1+aggregate_edge_data(path_w_data1,'weight')),3)
-					wd1=round(1/(1+aggregate_edge_data(path_w_data1,'dist')),3)
+					ww1=1/(1+aggregate_edge_data(path_w_data1,'weight'))
+					wd1=1/(1+aggregate_edge_data(path_w_data1,'dist'))
 					path_w_data1['formed_claim']=path_w_formed_claim1
 				else:
-					dw1=0
-					dd1=0
-					ww1=0
-					wd1=0
+					dw1=1/(1+source_fcg_num_nodes)
+					dd1=1/(1+source_fcg_num_nodes)
+					ww1=1/(1+source_fcg_num_nodes)
+					wd1=1/(1+source_fcg_num_nodes)
 					path_d_data1={}
 					path_d_data1['formed_claim']=""
 					path_w_data1={}
@@ -193,8 +194,8 @@ def find_paths_of_interest(index,rdf_path,graph_path,graph_type,embed_path,model
 						path_d_data2[str((path_d2[i],path_d2[i+1]))]=data
 						path_d_formed_claim2=path_d_formed_claim2+" "+cleanstring(path_d2[i+1])
 					#################################################################################
-					dw2=round(1/(1+aggregate_edge_data(path_d_data2,'weight')),3)
-					dd2=round(1/(1+aggregate_edge_data(path_d_data2,'dist')),3)
+					dw2=1/(1+aggregate_edge_data(path_d_data2,'weight'))
+					dd2=1/(1+aggregate_edge_data(path_d_data2,'dist'))
 					path_d_data2['formed_claim']=path_d_formed_claim2
 					#################################################################################
 					#################################################################################
@@ -208,14 +209,14 @@ def find_paths_of_interest(index,rdf_path,graph_path,graph_type,embed_path,model
 						path_w_data2[str((path_w2[i],path_w2[i+1]))]=data
 						path_w_formed_claim2=path_w_formed_claim2+" "+cleanstring(path_w2[i+1])
 					#################################################################################
-					ww2=round(1/(1+aggregate_edge_data(path_w_data2,'weight')),3)
-					wd2=round(1/(1+aggregate_edge_data(path_w_data2,'dist')),3)
+					ww2=1/(1+aggregate_edge_data(path_w_data2,'weight'))
+					wd2=1/(1+aggregate_edge_data(path_w_data2,'dist'))
 					path_w_data2['formed_claim']=path_w_formed_claim2
 				else:
-					dw2=0
-					dd2=0
-					ww2=0
-					wd2=0
+					dw2=1/(1+source_fcg_num_nodes)
+					dd2=1/(1+source_fcg_num_nodes)
+					ww2=1/(1+source_fcg_num_nodes)
+					wd2=1/(1+source_fcg_num_nodes)
 					path_d_data2={}
 					path_d_data2['formed_claim']=""
 					path_w_data2={}
@@ -294,7 +295,7 @@ if __name__== "__main__":
 	parser.add_argument('-st','--sfcgtype', metavar='Source FactCheckGraph type',type=str,choices=['tfcg','ffcg','tfcg_co','ffcg_co','ufcg','covid19'],help='True/False/Union/Covid19 FactCheckGraph')
 	parser.add_argument('-ft','--tfcgtype', metavar='Target FactCheckGraph type',type=str,choices=['tfcg','ffcg','tfcg_co','ffcg_co','ufcg','covid19'],help='True/False/Union/Covid19 FactCheckGraph')
 	parser.add_argument('-fc','--fcgclass', metavar='FactCheckGraph class',type=str,choices=['co_occur','fred'])
-	parser.add_argument('-gt','--graphtype', metavar='Graph Type Directed/Undirected',type=str,choices=['directed','undirected'])
+	parser.add_argument('-gt','--graphtype', metavar='Graph Type Directed/Undirected',type=str,choices=['directed','undirected'],default='undirected')
 	parser.add_argument('-cpu','--cpu',metavar='Number of CPUs',type=int,help='Number of CPUs available',default=1)
 	graph_types={'undirected':'nx.MultiGraph','directed':'nx.MultiDiGraph'}
 	args=parser.parse_args()

@@ -12,81 +12,38 @@ matplotlib.use('Agg')
 import os
 import datetime
 import codecs
-from statistics import mean
-
-def aggregate_edge_data(evalues,mode):
-	#mode can be dist or weight
-	edgepair_weights=[]
-	for edgepair,e2values in evalues.items():
-		edgepair_weights.append(e2values[mode])
-	return sum(edgepair_weights)
-
-def aggregate_weights(claim_D,mode,mode2):
-	#mode can be w d or f
-	#mode2 can be max, min, sum, mean
-	edge_weights=[]
-	for edge,evalues in claim_D.items():
-		if type(evalues)!=list:
-			#edge looks like this: "('db:John_McCain', 'db:United_States_Senate', 0.09, 1.25)"
-			#u is the source node,v is the target node, w the special similarity, d the 1/1+distance
-			u,v,w,d=eval(edge.replace("inf","np.inf"))
-			# u,v,w,d,f=eval(edge.replace("inf","np.inf"))
-			edge_weights.append(eval(mode))
-	return eval("{}(edge_weights)".format(mode2))
-
-def domb(numlist):
-	domb=numlist[0]
-	for j in numlist[1:]:
-		if domb==0 and j==0:
-			domb=0
-		else:
-			domb=(domb*j)/(domb+j-(domb*j))
-	return domb
 
 def plot_roc(graph_path,fcg_class,fcg_type,graph_type):
 	fcg_types={"co_occur":{"tfcg":"tfcg_co","ffcg":"ffcg_co"},"fred":{"tfcg":"tfcg","ffcg":"ffcg"}}
-	embed={'roberta-base-nli-stsb-mean-tokens':'e1'}#,'claims-roberta-base-nli-stsb-mean-tokens-2020-05-27_19-01-27':'e2'}
-	mode={'w':'d1','d':'d2'}#,'f':'d3'}
-	aggmode={'mean':'a1','max':'a2','median':'a3'}#,'domb':'a4'}
-	read_path_tfcg=os.path.join(graph_path,fcg_class,"paths",fcg_types[fcg_class]['tfcg'])
-	read_path_ffcg=os.path.join(graph_path,fcg_class,"paths",fcg_types[fcg_class]['ffcg'])
+	embeds={'roberta-base-nli-stsb-mean-tokens':'e1'}#,'claims-roberta-base-nli-stsb-mean-tokens-2020-05-27_19-01-27':'e2'}
+	dists={'w':'d1','d':'d2'}#,'f':'d3'}
+	aggs={'mean':'a1','max':'a2','median':'a3'}#,'domb':'a4'}
+	if fcg_type:
+		true_read_path=os.path.join(graph_path,fcg_class,"paths",fcg_types[fcg_class][fcg_type]+"_true")
+		false_read_path=os.path.join(graph_path,fcg_class,"paths",fcg_types[fcg_class][fcg_type]+"_false")
+	else:
+		read_path=os.path.join(graph_path,fcg_class,"paths")	
 	plot_path=os.path.join(graph_path,fcg_class,"plots")
 	plot_dict={}
 	plot_dict['roc']={}
 	plot_dict['pr']={}
 	plot_dict['f1']={}
-	for e in list(embed.keys()):
-		for d in list(mode.keys()):
-			for a in list(aggmode.keys()):
-				with codecs.open(os.path.join(read_path_tfcg+"_true_({})".format(e),"paths_"+graph_type+"_"+d+"_"+a+".json"),"r","utf-8") as f: 
-					true_paths_tfcg=json.loads(f.read())
-				with codecs.open(os.path.join(read_path_tfcg+"_false_({})".format(e),"paths_"+graph_type+"_"+d+"_"+a+".json"),"r","utf-8") as f: 
-					false_paths_tfcg=json.loads(f.read())
-				with codecs.open(os.path.join(read_path_ffcg+"_true_({})".format(e),"paths_"+graph_type+"_"+d+"_"+a+".json"),"r","utf-8") as f: 
-					true_paths_ffcg=json.loads(f.read())
-				with codecs.open(os.path.join(read_path_ffcg+"_false_({})".format(e),"paths_"+graph_type+"_"+d+"_"+a+".json"),"r","utf-8") as f: 
-					false_paths_ffcg=json.loads(f.read())
-				#creating a dictionary with the claimID as key and score as value
-				true_scores_tfcg={eval(t[0])[0]:eval(t[0])[1] for t in true_paths_tfcg.items()}
-				false_scores_tfcg={eval(t[0])[0]:eval(t[0])[1] for t in false_paths_tfcg.items()}
-				true_scores_ffcg={eval(t[0])[0]:eval(t[0])[1] for t in true_paths_ffcg.items()}
-				false_scores_ffcg={eval(t[0])[0]:eval(t[0])[1] for t in false_paths_ffcg.items()}
-				#finding claimIDs that may not be have been checked by the other 
-				true_miss_claimIDs=(set(true_scores_tfcg.keys())-set(true_scores_ffcg.keys())).union(set(true_scores_ffcg.keys())-set(true_scores_tfcg.keys()))
-				false_miss_claimIDs=(set(false_scores_tfcg.keys())-set(false_scores_ffcg.keys())).union(set(false_scores_ffcg.keys())-set(false_scores_tfcg.keys()))
-				#setting the scores for missing claimIDs to 0
-				true_scores_tfcg_miss={t:0 for t in true_miss_claimIDs if t not in set(true_scores_tfcg.keys())}
-				true_scores_ffcg_miss={t:0 for t in true_miss_claimIDs if t not in set(true_scores_ffcg.keys())}
-				false_scores_tfcg_miss={t:0 for t in false_miss_claimIDs if t not in set(false_scores_tfcg.keys())}
-				false_scores_ffcg_miss={t:0 for t in false_miss_claimIDs if t not in set(false_scores_ffcg.keys())}
-				#updating original dictionaries
-				true_scores_tfcg.update(true_scores_tfcg_miss)
-				false_scores_tfcg.update(false_scores_tfcg_miss)
-				true_scores_ffcg.update(true_scores_ffcg_miss)
-				false_scores_ffcg.update(false_scores_ffcg_miss)
-				#tfcg score- ffcg score for each claim
-				true_scores=[true_scores_tfcg[i]-true_scores_ffcg[i] for i in set(true_scores_tfcg.keys()).union(set(true_scores_ffcg.keys()))]
-				false_scores=[false_scores_tfcg[i]-false_scores_ffcg[i] for i in set(false_scores_tfcg.keys()).union(set(false_scores_ffcg.keys()))] 
+	for embed in list(embeds.keys()):
+		for dist in list(dists.keys()):
+			for agg in list(aggs.keys()):
+				if fcg_type:
+					with codecs.open(os.path.join(true_read_path+"_({})".format(embed),"paths_"+graph_type+"_"+dist+"_"+agg+".json"),"r","utf-8") as f: 
+						true_paths=json.loads(f.read())
+					with codecs.open(os.path.join(false_read_path+"_({})".format(embed),"paths_"+graph_type+"_"+dist+"_"+agg+".json"),"r","utf-8") as f: 
+						false_paths=json.loads(f.read())
+				else:
+					with codecs.open(os.path.join(read_path,"scores_true_"+dist+"_({})".format(embed)+"_"+agg+".json"),"r","utf-8") as f: 
+						true_paths=json.loads(f.read())
+					with codecs.open(os.path.join(read_path,"scores_false_"+dist+"_({})".format(embed)+"_"+agg+".json"),"r","utf-8") as f: 
+						false_paths=json.loads(f.read())
+				###################################################################################################
+				true_scores=[eval(t[0])[1] for t in true_paths.items()]
+				false_scores=[eval(t[0])[1] for t in false_paths.items()]
 				true_y=[1 for i in range(len(true_scores))]
 				false_y=[0 for i in range(len(false_scores))]
 				y=true_y+false_y
@@ -94,7 +51,7 @@ def plot_roc(graph_path,fcg_class,fcg_type,graph_type):
 				fpr,tpr,thresholds=metrics.roc_curve(y,scores, pos_label=1)
 				precision,recall,thresholds=metrics.precision_recall_curve(y,scores, pos_label=1)
 				f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
-				mlabel=embed[e]+mode[d]+aggmode[a]
+				mlabel=embeds[embed]+dists[dist]+aggs[agg]
 				plot_dict['roc'][mlabel]={}
 				plot_dict['pr'][mlabel]={}
 				plot_dict['f1'][mlabel]={}
@@ -109,7 +66,10 @@ def plot_roc(graph_path,fcg_class,fcg_type,graph_type):
 				plot_dict['f1'][mlabel]['label']=mlabel+' AVG_Pr (%0.2f) '%metrics.average_precision_score(y,scores)
 	#Plotting
 	lw=2
-	title=graph_type+" {} shortest path embedded paths".format(fcg_class+"_"+fcg_type)
+	if fcg_type:
+		title=graph_type+" {} shortest path embedded paths".format(fcg_class+"_"+fcg_type)
+	else:
+		title=graph_type+" {} shortest path embedded paths".format(fcg_class)
 	#Plot ROC
 	plt.figure()
 	roctitle="ROC "+title
@@ -159,47 +119,35 @@ def plot_roc(graph_path,fcg_class,fcg_type,graph_type):
 
 def plot_dist(graph_path,fcg_class,fcg_type,graph_type):
 	fcg_types={"co_occur":{"tfcg":"tfcg_co","ffcg":"ffcg_co"},"fred":{"tfcg":"tfcg","ffcg":"ffcg"}}
-	embed={'roberta-base-nli-stsb-mean-tokens':'e1'}#,'claims-roberta-base-nli-stsb-mean-tokens-2020-05-27_19-01-27':'e2'}
-	mode={'w':'d1','d':'d2'}#,'f':'d3'}
-	aggmode={'mean':'a1','max':'a2','median':'a3'}#,'domb':'a4'}
-	read_path_tfcg=os.path.join(graph_path,fcg_class,"paths",fcg_types[fcg_class]['tfcg'])
-	read_path_ffcg=os.path.join(graph_path,fcg_class,"paths",fcg_types[fcg_class]['ffcg'])
+	embeds={'roberta-base-nli-stsb-mean-tokens':'e1'}#,'claims-roberta-base-nli-stsb-mean-tokens-2020-05-27_19-01-27':'e2'}
+	dists={'w':'d1','d':'d2'}#,'f':'d3'}
+	aggs={'mean':'a1','max':'a2','median':'a3'}#,'domb':'a4'}
+	if fcg_type:
+		true_read_path=os.path.join(graph_path,fcg_class,"paths","true_"+fcg_types[fcg_class][fcg_type])
+		false_read_path=os.path.join(graph_path,fcg_class,"paths","false_"+fcg_types[fcg_class][fcg_type])
+	else:
+		read_path=os.path.join(graph_path,fcg_class,"paths")	
 	plot_path=os.path.join(graph_path,fcg_class,"plots")
-	for e in list(embed.keys()):
-		for d in list(mode.keys()):
-			for a in list(aggmode.keys()):
-				label=embed[e]+mode[d]+aggmode[a]
+	for embed in list(embeds.keys()):
+		for dist in list(dists.keys()):
+			for agg in list(aggs.keys()):
+				label=embeds[embed]+dists[dist]+aggs[agg]
 				plt.figure()
-				title=graph_type+" density histogram {} shortest path setence embedded paths".format(fcg_class+"_"+fcg_type+"_"+label)
-				with codecs.open(os.path.join(read_path_tfcg+"_true_({})".format(e),"paths_"+graph_type+"_"+d+"_"+a+".json"),"r","utf-8") as f: 
-					true_paths_tfcg=json.loads(f.read())
-				with codecs.open(os.path.join(read_path_tfcg+"_false_({})".format(e),"paths_"+graph_type+"_"+d+"_"+a+".json"),"r","utf-8") as f: 
-					false_paths_tfcg=json.loads(f.read())
-				with codecs.open(os.path.join(read_path_ffcg+"_true_({})".format(e),"paths_"+graph_type+"_"+d+"_"+a+".json"),"r","utf-8") as f: 
-					true_paths_ffcg=json.loads(f.read())
-				with codecs.open(os.path.join(read_path_ffcg+"_false_({})".format(e),"paths_"+graph_type+"_"+d+"_"+a+".json"),"r","utf-8") as f: 
-					false_paths_ffcg=json.loads(f.read())
-				#creating a dictionary with the claimID as key and score as value
-				true_scores_tfcg={eval(t[0])[0]:eval(t[0])[1] for t in true_paths_tfcg.items()}
-				false_scores_tfcg={eval(t[0])[0]:eval(t[0])[1] for t in false_paths_tfcg.items()}
-				true_scores_ffcg={eval(t[0])[0]:eval(t[0])[1] for t in true_paths_ffcg.items()}
-				false_scores_ffcg={eval(t[0])[0]:eval(t[0])[1] for t in false_paths_ffcg.items()}
-				#finding claimIDs that may not be have been checked by the other 
-				true_miss_claimIDs=(set(true_scores_tfcg.keys())-set(true_scores_ffcg.keys())).union(set(true_scores_ffcg.keys())-set(true_scores_tfcg.keys()))
-				false_miss_claimIDs=(set(false_scores_tfcg.keys())-set(false_scores_ffcg.keys())).union(set(false_scores_ffcg.keys())-set(false_scores_tfcg.keys()))
-				#setting the scores for missing claimIDs to 0
-				true_scores_tfcg_miss={t:0 for t in true_miss_claimIDs if t not in set(true_scores_tfcg.keys())}
-				true_scores_ffcg_miss={t:0 for t in true_miss_claimIDs if t not in set(true_scores_ffcg.keys())}
-				false_scores_tfcg_miss={t:0 for t in false_miss_claimIDs if t not in set(false_scores_tfcg.keys())}
-				false_scores_ffcg_miss={t:0 for t in false_miss_claimIDs if t not in set(false_scores_ffcg.keys())}
-				#updating original dictionaries
-				true_scores_tfcg.update(true_scores_tfcg_miss)
-				false_scores_tfcg.update(false_scores_tfcg_miss)
-				true_scores_ffcg.update(true_scores_ffcg_miss)
-				false_scores_ffcg.update(false_scores_ffcg_miss)
-				#tfcg score- ffcg score for each claim
-				true_scores=[true_scores_tfcg[i]-true_scores_ffcg[i] for i in set(true_scores_tfcg.keys()).union(set(true_scores_ffcg.keys()))]
-				false_scores=[false_scores_tfcg[i]-false_scores_ffcg[i] for i in set(false_scores_tfcg.keys()).union(set(false_scores_ffcg.keys()))] 
+				if fcg_type:
+					title=graph_type+" density histogram {} shortest path embedded paths".format(fcg_class+"_"+fcg_type+"_"+label)
+					with codecs.open(os.path.join(true_read_path+"_({})".format(embed),"paths_"+graph_type+"_"+dist+"_"+agg+".json"),"r","utf-8") as f: 
+						true_paths=json.loads(f.read())
+					with codecs.open(os.path.join(false_read_path+"_({})".format(embed),"paths_"+graph_type+"_"+dist+"_"+agg+".json"),"r","utf-8") as f: 
+						false_paths=json.loads(f.read())
+				else:
+					title=graph_type+" density histogram {} shortest path embedded paths".format(fcg_class+"_"+label)
+					with codecs.open(os.path.join(read_path,"true_scores_"+dist+"_({})".format(embed)+"_"+agg+".json"),"r","utf-8") as f: 
+						true_paths=json.loads(f.read())
+					with codecs.open(os.path.join(read_path,"false_scores_"+dist+"_({})".format(embed)+"_"+agg+".json"),"r","utf-8") as f: 
+						false_paths=json.loads(f.read())
+				###################################################################################################
+				true_scores=[eval(t[0])[1] for t in true_paths.items()]
+				false_scores=[eval(t[0])[1] for t in false_paths.items()]
 				minscore=np.floor(min(true_scores+false_scores))
 				maxscore=np.ceil(max(true_scores+false_scores))
 				intervalscore=float(maxscore-minscore)/100
@@ -231,7 +179,7 @@ if __name__== "__main__":
 	parser.add_argument('-fcg','--fcgclass', metavar='fcg class',type=str,help='Class of FactCheckGraph to process')
 	parser.add_argument('-ft','--fcgtype', metavar='FCG Type',type=str,choices=['tfcg','ffcg','tfcg_co','ffcg_co'])
 	parser.add_argument('-pt','--plottype', metavar='plot type',type=str,choices=['roc','dist'],help='Class of graph to plot')
-	parser.add_argument('-gt','--graphtype', metavar='Graph Type Directed/Undirected',type=str,choices=['directed','undirected'])
+	parser.add_argument('-gt','--graphtype', metavar='Graph Type Directed/Undirected',type=str,choices=['directed','undirected'],default='undirected')
 	args=parser.parse_args()
 	if args.plottype=='roc':
 		plot_roc(args.graphpath,args.fcgclass,args.fcgtype,args.graphtype)
