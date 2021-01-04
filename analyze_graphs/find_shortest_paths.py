@@ -80,7 +80,7 @@ def create_weighted(p,rdf_path,model_path,graph_path,graph_type,embed_path,fcg_t
 	dist_p=np.arccos(simil_p)/np.pi
 	#loading source fcg to be weighted
 	fcg=nx.read_edgelist(os.path.join(fcg_path,"{}.edgelist".format(fcg_type)),comments="@",create_using=eval(graph_type))
-	temp_fcg=nx.DiGraph()
+	temp_fcg=nx.MultiDiGraph()
 	temp_fcg.add_edges_from(list(fcg.edges.data()))
 	#if graph is undirected, add a reverse edge to the directed graph, to simulate undirectedness
 	if graph_type=='nx.MultiGraph':
