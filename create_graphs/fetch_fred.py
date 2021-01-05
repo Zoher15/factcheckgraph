@@ -605,7 +605,7 @@ def nodelabel_mapper(text):
 		return 'un:'+text.split("/")[-1].split("#")[-1]
 
 #function to check a claim and create dictionary of nodes to contract and remove
-def checkClaimGraph(g,claim_ID,graph_type):#,mode):
+def checkClaimGraph(g,claim_type,claim_ID,graph_type):#,mode):
 	claim_g=nx.Graph()
 	regex_27=re.compile(r'^http:\/\/www\.ontologydesignpatterns\.org\/ont\/fred\/domain\.owl#%27.*')
 	regex_det=re.compile(r'^http:\/\/www\.ontologydesignpatterns\.org\/ont\/fred\/quantifiers\.owl.*$')
@@ -644,11 +644,12 @@ def checkClaimGraph(g,claim_ID,graph_type):#,mode):
 	nodes2remove['schema']=set()#remove schema.org nodes
 	edge_list=g.getInfoEdges()
 	nodes_set=set()
+	ratings={'true':1,'false':-1}
 	for e in edge_list:
 		(a,b,c)=e
 		nodes_set.add(a)
 		nodes_set.add(c)
-		claim_g.add_edge(a,c,label=b.split("/")[-1].split("#")[-1],claim_ID=claim_ID)
+		claim_g.add_edge(a,c,label=b.split("/")[-1].split("#")[-1],claim_ID=claim_ID,rating=ratings[claim_type])
 		#Edges
 		# if edge_list[e].Type==EdgeMotif.Property:
 		# 	if regex_quality.match(b) and (regex_fredup.match(c) and regex_fredup.match(a)):
@@ -701,7 +702,7 @@ def checkClaimGraph(g,claim_ID,graph_type):#,mode):
 	return claim_g,nodes2remove,nodes2contract
 
 #fetch fred graph files from their API. slow and dependent on rate
-def fredParse(claims_path,claims,init,end,key,graph_type):
+def fredParse(claim_type,claims_path,claims,init,end,key,graph_type):
 	errorclaimid=[]
 	#fred starts
 	start=time.time()
@@ -727,7 +728,7 @@ def fredParse(claims_path,claims,init,end,key,graph_type):
 				if "You have exceeded your quota" not in r.text and "Runtime Error" not in r.text and "Service Unavailable" not in r.text:
 					if r.status_code in range(100,500) and r.text:
 						g=openFredGraph(filename+".rdf")
-						claim_g,nodes2remove,nodes2contract=checkClaimGraph(g,claim_ID,graph_type)
+						claim_g,nodes2remove,nodes2contract=checkClaimGraph(g,claim_type,claim_ID,graph_type)
 						#store pruning data
 						clean_claims[str(claim_ID)]={}
 						clean_claims[str(claim_ID)]['nodes2remove']=nodes2remove
@@ -757,7 +758,7 @@ def fredParse(claims_path,claims,init,end,key,graph_type):
 	return errorclaimid,clean_claims
 
 #Function to passively parse existing fetched fred rdf files
-def passiveFredParse(index,claims_path,claim_IDs,init,end,graph_type):
+def passiveFredParse(index,claim_type,claims_path,claim_IDs,init,end,graph_type):
 	end=min(end,len(claim_IDs))
 	#Reading claim_IDs
 	errorclaimid=[]
@@ -772,7 +773,7 @@ def passiveFredParse(index,claims_path,claim_IDs,init,end,graph_type):
 			print("Exception Occurred")
 			errorclaimid.append(claim_ID)
 			continue
-		claim_g,nodes2remove,nodes2contract=checkClaimGraph(g,claim_ID,graph_type)
+		claim_g,nodes2remove,nodes2contract=checkClaimGraph(g,claim_type,claim_ID,graph_type)
 		#store pruning data
 		clean_claims[str(claim_ID)]={}
 		clean_claims[str(claim_ID)]['nodes2remove']=nodes2remove
@@ -805,17 +806,17 @@ def fetchFred(rdf_path,graph_path,graph_type,fcg_label,init,passive,cpu):
 		n=int(len(claim_IDs)/cpu)+1
 		if cpu>1:
 			pool=mp.Pool(processes=cpu)						
-			results=[pool.apply_async(passiveFredParse, args=(index,claims_path,claim_IDs,index*n,(index+1)*n,graph_types[graph_type])) for index in range(cpu)]
+			results=[pool.apply_async(passiveFredParse, args=(index,claim_type,claims_path,claim_IDs,index*n,(index+1)*n,graph_types[graph_type])) for index in range(cpu)]
 			output=sorted([p.get() for p in results],key=lambda x:x[0])
 			errorclaimid=list(chain(*map(lambda x:x[1],output)))
 			clean_claims=dict(ChainMap(*map(lambda x:x[2],output)))
 		else:
-			index,errorclaimid,clean_claims=passiveFredParse(0,claims_path,claim_IDs,0,n,graph_types[graph_type])
+			index,errorclaimid,clean_claims=passiveFredParse(0,claim_type,claims_path,claim_IDs,0,n,graph_types[graph_type])
 	#if graph rdf files have not been fetched. Slower, dependent on rate limits
 	else:
 		keys={"tfcg":"Bearer a5c2a808-cc39-38e6-898d-84ab912b1e5d","ffcg":"Bearer 0d9d562e-a2aa-30df-90df-d52674f2e1f0"}
 		end=len(claims)
-		errorclaimid,clean_claims=fredParse(claims_path,claims,init,end,keys[fcg_label],graph_types[graph_type])
+		errorclaimid,clean_claims=fredParse(claim_type,claims_path,claims,init,end,keys[fcg_label],graph_types[graph_type])
 	np.save(os.path.join(rdf_path,"{}_error_claimID.npy".format(fcg_label)),errorclaimid)
 	with codecs.open(os.path.join(rdf_path,"{}claims_clean.json".format(claim_type)),"w","utf-8") as f:
 		f.write(json.dumps(clean_claims,indent=4,ensure_ascii=False))

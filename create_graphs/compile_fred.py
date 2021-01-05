@@ -96,7 +96,7 @@ def contractList(edgelist):
 	contract_edgelist=[]
 	for u,v,d in edgelist:
 		boolequality=d['label']=='sameAs' or d['label']=='equivalentClass'
-		boolsub= d['label']=='type' or d['label']=='subClassOf'# or d['label']=='associatedWith' or d['label']=='hasQuality'
+		boolsub= d['label']=='type' or d['label']=='subClassOf' or d['label']=='associatedWith' or d['label']=='hasQuality'
 		boolsuffixeq=u.split("/")[-1].split("#")[-1].lower() == v.split("/")[-1].split("#")[-1].lower()
 		boolsuffixVinU=v.split("/")[-1].split("#")[-1].lower() in u.split("/")[-1].split("#")[-1].lower()
 		boolsuffixUinV=u.split("/")[-1].split("#")[-1].lower() in v.split("/")[-1].split("#")[-1].lower()
@@ -127,7 +127,6 @@ def contractList(edgelist):
 				#V is dbpedia/vn and U is not or Both are non dbpedia/vn
 				contract_edgelist.append((v,u)) 
 				print((nodelabel_mapper(v),nodelabel_mapper(u),d['label']))
-
 		elif boolsuffixUinV and boolsub:
 			#U:child in V:childmarriage
 			if boolsuffixVgrtU:

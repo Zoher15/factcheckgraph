@@ -173,6 +173,182 @@ def plot_dist(graph_path,fcg_class,fcg_type,graph_type):
 				plt.close()
 				plt.clf()
 
+
+def plot_roc2(graph_path,fcg_class,fcg_type,graph_type):
+	fcg_types={"co_occur":{"tfcg":"tfcg_co","ffcg":"ffcg_co"},"fred":{"tfcg":"tfcg","ffcg":"ffcg"}}
+	embeds={'roberta-base-nli-stsb-mean-tokens':'e1'}#,'claims-roberta-base-nli-stsb-mean-tokens-2020-05-27_19-01-27':'e2'}
+	dists={'w':'d1','d':'d2'}#,'f':'d3'}
+	aggs={'mean':'a1','max':'a2','median':'a3'}#,'domb':'a4'}
+	# read paths true
+	true_tfcg_read_path=os.path.join(graph_path,fcg_class,"paths","true_tfcg")
+	true_ffcg_read_path=os.path.join(graph_path,fcg_class,"paths","true_ffcg")
+	#read paths false
+	false_tfcg_read_path=os.path.join(graph_path,fcg_class,"paths","false_tfcg")
+	false_ffcg_read_path=os.path.join(graph_path,fcg_class,"paths","false_ffcg")
+	#plot paths	
+	plot_path=os.path.join(graph_path,fcg_class,"plots")
+	plot_dict={}
+	plot_dict['roc']={}
+	plot_dict['pr']={}
+	plot_dict['f1']={}
+	for embed in list(embeds.keys()):
+		for dist in list(dists.keys()):
+			for agg in list(aggs.keys()):
+				with codecs.open(os.path.join(true_tfcg_read_path+"_({})".format(embed),"paths_"+graph_type+"_"+dist+"_"+agg+".json"),"r","utf-8") as f: 
+					true_tfcg_paths=json.loads(f.read())
+				with codecs.open(os.path.join(true_ffcg_read_path+"_({})".format(embed),"paths_"+graph_type+"_"+dist+"_"+agg+".json"),"r","utf-8") as f: 
+					true_ffcg_paths=json.loads(f.read())
+				with codecs.open(os.path.join(false_tfcg_read_path+"_({})".format(embed),"paths_"+graph_type+"_"+dist+"_"+agg+".json"),"r","utf-8") as f: 
+					false_tfcg_paths=json.loads(f.read())
+				with codecs.open(os.path.join(false_ffcg_read_path+"_({})".format(embed),"paths_"+graph_type+"_"+dist+"_"+agg+".json"),"r","utf-8") as f: 
+					false_ffcg_paths=json.loads(f.read())
+				#scores
+				true_tfcg_scores={eval(t[0])[0]:eval(t[0])[1] for t in true_tfcg_paths.items()}
+				true_ffcg_scores={eval(t[0])[0]:eval(t[0])[1] for t in true_ffcg_paths.items()}
+				false_tfcg_scores={eval(t[0])[0]:eval(t[0])[1] for t in false_tfcg_paths.items()}
+				false_ffcg_scores={eval(t[0])[0]:eval(t[0])[1] for t in false_ffcg_paths.items()}
+				###################################################################################################
+				#true scores
+				if len(set(true_tfcg_scores.keys())-set(true_ffcg_scores.keys()))==0 and len(set(true_ffcg_scores.keys())-set(true_tfcg_scores.keys()))==0:
+					true_scores=[true_tfcg_scores[i]-true_ffcg_scores[i] for i in set(true_tfcg_scores.keys())]
+				#false scores
+				if len(set(false_tfcg_scores.keys())-set(false_ffcg_scores.keys()))==0 and len(set(false_ffcg_scores.keys())-set(false_tfcg_scores.keys()))==0:
+					false_scores=[false_tfcg_scores[i]-false_ffcg_scores[i] for i in set(false_tfcg_scores.keys())]
+				true_y=[1 for i in range(len(true_scores))]
+				false_y=[0 for i in range(len(false_scores))]
+				y=true_y+false_y
+				scores=true_scores+false_scores
+				fpr,tpr,thresholds=metrics.roc_curve(y,scores, pos_label=1)
+				precision,recall,thresholds=metrics.precision_recall_curve(y,scores, pos_label=1)
+				f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+				mlabel=embeds[embed]+dists[dist]+aggs[agg]
+				plot_dict['roc'][mlabel]={}
+				plot_dict['pr'][mlabel]={}
+				plot_dict['f1'][mlabel]={}
+				plot_dict['roc'][mlabel]['fpr']=fpr
+				plot_dict['roc'][mlabel]['tpr']=tpr
+				plot_dict['roc'][mlabel]['label']=mlabel+' AUC (%0.2f) '%metrics.roc_auc_score(y,scores)
+				plot_dict['pr'][mlabel]['precision']=precision
+				plot_dict['pr'][mlabel]['recall']=recall
+				plot_dict['pr'][mlabel]['label']=mlabel+' AVG_Pr (%0.2f) '%metrics.average_precision_score(y,scores)
+				plot_dict['f1'][mlabel]['thresholds']=thresholds
+				plot_dict['f1'][mlabel]['f1scores']=f1scores
+				plot_dict['f1'][mlabel]['label']=mlabel+' AVG_Pr (%0.2f) '%metrics.average_precision_score(y,scores)
+	#Plotting
+	lw=2
+	if fcg_type:
+		title=graph_type+" {} shortest path embedded paths".format(fcg_class+"_"+fcg_type)
+	else:
+		title=graph_type+" {} shortest path embedded paths".format(fcg_class)
+	#Plot ROC
+	plt.figure()
+	roctitle="ROC "+title
+	plt.plot([0, 1], [0, 1],color='navy',lw=lw,linestyle='--')
+	for k in plot_dict['roc'].keys():
+		plt.plot(plot_dict['roc'][k]['fpr'],plot_dict['roc'][k]['tpr'],lw=lw,label=plot_dict['roc'][k]['label'])
+	plt.xlabel('False Positive Rate')
+	plt.ylabel('True Positive Rate')
+	plt.legend(loc="lower right")
+	plt.title(roctitle)
+	plt.tight_layout()
+	os.makedirs(plot_path,exist_ok=True)
+	roctitle+=" "+datetime.datetime.now().strftime("%c")
+	plt.savefig(os.path.join(plot_path,roctitle.replace(" ","_")+".png"))
+	plt.close()
+	plt.clf()
+	#Plot Precision Recall
+	plt.figure()
+	prtitle="PR "+title
+	for k in plot_dict['pr'].keys():
+		plt.plot(plot_dict['pr'][k]['recall'],plot_dict['pr'][k]['precision'],lw=lw,label=plot_dict['pr'][k]['label'])
+	plt.xlabel('Recall')
+	plt.ylabel('Precision')
+	plt.legend(loc="upper right")
+	plt.title(prtitle)
+	plt.tight_layout()
+	os.makedirs(plot_path,exist_ok=True)
+	prtitle+=" "+datetime.datetime.now().strftime("%c")
+	plt.savefig(os.path.join(plot_path,prtitle.replace(" ","_")+".png"))
+	plt.close()
+	plt.clf()
+	#F1 Scores Thresholds
+	plt.figure()
+	f1title="F1 "+title
+	for k in plot_dict['f1'].keys():
+		plt.plot(plot_dict['f1'][k]['thresholds'],plot_dict['f1'][k]['f1scores'],lw=lw,label=plot_dict['f1'][k]['label'])
+	plt.xlabel('Thresholds')
+	plt.ylabel('F1 Scores')
+	plt.legend(loc="upper right")
+	plt.title(f1title)
+	plt.tight_layout()
+	os.makedirs(plot_path,exist_ok=True)
+	f1title+=" "+datetime.datetime.now().strftime("%c")
+	plt.savefig(os.path.join(plot_path,f1title.replace(" ","_")+".png"))
+	plt.close()
+	plt.clf()
+
+def plot_dist2(graph_path,fcg_class,fcg_type,graph_type):
+	fcg_types={"co_occur":{"tfcg":"tfcg_co","ffcg":"ffcg_co"},"fred":{"tfcg":"tfcg","ffcg":"ffcg"}}
+	embeds={'roberta-base-nli-stsb-mean-tokens':'e1'}#,'claims-roberta-base-nli-stsb-mean-tokens-2020-05-27_19-01-27':'e2'}
+	dists={'w':'d1','d':'d2'}#,'f':'d3'}
+	aggs={'mean':'a1','max':'a2','median':'a3'}#,'domb':'a4'}
+	# read paths true
+	true_tfcg_read_path=os.path.join(graph_path,fcg_class,"paths","true_tfcg")
+	true_ffcg_read_path=os.path.join(graph_path,fcg_class,"paths","true_ffcg")
+	#read paths false
+	false_tfcg_read_path=os.path.join(graph_path,fcg_class,"paths","false_tfcg")
+	false_ffcg_read_path=os.path.join(graph_path,fcg_class,"paths","false_ffcg")
+	#plot paths	
+	plot_path=os.path.join(graph_path,fcg_class,"plots")
+	for embed in list(embeds.keys()):
+		for dist in list(dists.keys()):
+			for agg in list(aggs.keys()):
+				with codecs.open(os.path.join(true_tfcg_read_path+"_({})".format(embed),"paths_"+graph_type+"_"+dist+"_"+agg+".json"),"r","utf-8") as f: 
+					true_tfcg_paths=json.loads(f.read())
+				with codecs.open(os.path.join(true_ffcg_read_path+"_({})".format(embed),"paths_"+graph_type+"_"+dist+"_"+agg+".json"),"r","utf-8") as f: 
+					true_ffcg_paths=json.loads(f.read())
+				with codecs.open(os.path.join(false_tfcg_read_path+"_({})".format(embed),"paths_"+graph_type+"_"+dist+"_"+agg+".json"),"r","utf-8") as f: 
+					false_tfcg_paths=json.loads(f.read())
+				with codecs.open(os.path.join(false_ffcg_read_path+"_({})".format(embed),"paths_"+graph_type+"_"+dist+"_"+agg+".json"),"r","utf-8") as f: 
+					false_ffcg_paths=json.loads(f.read())
+				#scores
+				true_tfcg_scores={eval(t[0])[1] for t in true_tfcg_paths.items()}
+				true_ffcg_scores={eval(t[0])[1] for t in true_ffcg_paths.items()}
+				false_tfcg_scores={eval(t[0])[1] for t in false_tfcg_paths.items()}
+				false_ffcg_scores={eval(t[0])[1] for t in false_ffcg_paths.items()}
+				###################################################################################################
+				#true scores
+				if len(set(true_tfcg_scores.keys())-set(true_ffcg_scores.keys()))==0 and len(set(true_ffcg_scores.keys())-set(true_tfcg_scores.keys()))==0:
+					true_scores=[true_tfcg_scores[i]-true_ffcg_scores[i] for i in set(true_scores_tfcg.keys())]
+				#false scores
+				if len(set(false_tfcg_scores.keys())-set(false_ffcg_scores.keys()))==0 and len(set(false_ffcg_scores.keys())-set(false_tfcg_scores.keys()))==0:
+					false_scores=[false_tfcg_scores[i]-false_ffcg_scores[i] for i in set(false_scores_tfcg.keys())]
+				###################################################################################################	
+				minscore=np.floor(min(true_scores+false_scores))
+				maxscore=np.ceil(max(true_scores+false_scores))
+				intervalscore=float(maxscore-minscore)/100
+				print(intervalscore)
+				print(minscore)
+				print(maxscore)
+				try:
+					plotrange=np.arange(minscore,maxscore+intervalscore,intervalscore)
+					sns.distplot(true_scores,hist=True,kde=False,bins=plotrange,kde_kws={'linewidth': 3},label="true_"+label)
+					sns.distplot(false_scores,hist=True,kde=False,bins=plotrange,kde_kws={'linewidth': 3},label="false_"+label)
+				except ValueError:
+					sns.distplot(true_scores,hist=True,kde=False,kde_kws={'linewidth': 3},label="true_"+label)
+					sns.distplot(false_scores,hist=True,kde=False,kde_kws={'linewidth': 3},label="false_"+label)
+				plt.xlabel('Proximity Scores (higher is positive)')
+				plt.ylabel('Density')
+				plt.legend(loc="upper right")
+				plt.title(title)
+				plt.tight_layout()
+				os.makedirs(plot_path,exist_ok=True)
+				x = datetime.datetime.now().strftime("%c")
+				title+=" "+x
+				plt.savefig(os.path.join(plot_path,title.replace(" ","_")+".png"))
+				plt.close()
+				plt.clf()
+
 if __name__== "__main__":
 	parser = argparse.ArgumentParser(description='Plotting true(adjacent) pairs vs false (non-adjacent)')
 	parser.add_argument('-gp','--graphpath', metavar='graph path',type=str,help='Path to the graph directory',default='/gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph_data/graphs/')

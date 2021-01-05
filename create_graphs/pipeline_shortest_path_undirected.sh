@@ -9,7 +9,7 @@
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=48
 #SBATCH --mem=58G
-#SBATCH --time=36:00:00
+#SBATCH --time=5:00:00
 errcho(){ >&2 echo $@; }
 source /N/u/zkachwal/Carbonate/miniconda3/etc/profile.d/conda.sh
 conda activate
@@ -25,14 +25,15 @@ time python embed.py -ft tfcg -mp roberta-base-nli-stsb-mean-tokens -gt undirect
 ################################################################
 cd /gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph/create_graphs/
 errcho create graphs
-time python create_fred.py -ft tfcg -cpu 48 -p -gt undirected
-time python create_fred.py -ft ffcg -cpu 48 -p -gt undirected
-time python create_fred.py -ft tfcg -cpu 48 -cf 1 -gt undirected
-time python create_fred.py -ft ffcg -cpu 48 -cf 1 -gt undirected
-time python create_fred.py -ft ufcg -cf 1 -gt undirected
-# time python create_co_occur.py -ft tfcg_co
-# time python create_co_occur.py -ft ffcg_co
-# time python create_co_occur.py -ft ufcg_co
+################################################################
+errcho fetching
+time python fetch_fred.py -ft tfcg -cpu 48 -p
+time python fetch_fred.py -ft ffcg -cpu 48 -p 
+################################################################
+errcho compiling
+time python compile_fred.py -ft tfcg -cpu 48 
+time python compile_fred.py -ft ffcg -cpu 48
+time python compile_fred.py -ft ufcg
 ################################################################
 cd /gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph/process_graphs/
 # errcho find intersect
@@ -75,6 +76,8 @@ time python find_baseline.py -bt all -mp roberta-base-nli-stsb-mean-tokens
 ################################################################
 errcho plot graphs 
 cd /geode2/home/u110/zkachwal/BigRed3/factcheckgraph/plot_graphs/
+time python plot_sp.py -fcg fred -ft tfcg -pt roc
+time python plot_sp.py -fcg fred -ft tfcg -pt dist
 time python plot_sp.py -fcg fred -ft ffcg -pt roc
 time python plot_sp.py -fcg fred -ft ffcg -pt dist
 time python plot_sp.py -fcg fred -pt roc

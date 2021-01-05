@@ -67,40 +67,42 @@ def create_weighted(p,rdf_path,model_path,graph_path,graph_type,embed_path,fcg_t
 	else:
 		fcg_path=os.path.join(graph_path,fcg_class,fcg_type)
 	#loading weighting embeddings
-	claims=pd.read_csv(os.path.join(rdf_path,"{}_claims.csv".format(claim_type)))
-	claim_IDs=claims['claimID'].tolist()
-	embed=pd.read_csv(os.path.join(embed_path,claim_type+"_claims_embeddings_({}).tsv".format(model_path.split("/")[-1])),delimiter="\t",header=None).values
-	#cosine similarity with clipping between -1 and 1
-	simil_p=np.clip(cosine_similarity(p,embed)[0],-1,1)
-	#normalized angular distance
-	dist_p=np.arccos(simil_p)/np.pi
+	# claims=pd.read_csv(os.path.join(rdf_path,"{}_claims.csv".format(claim_type)))
+	# claim_IDs=claims['claimID'].tolist()
+	# embed=pd.read_csv(os.path.join(embed_path,claim_type+"_claims_embeddings_({}).tsv".format(model_path.split("/")[-1])),delimiter="\t",header=None).values
+	# #cosine similarity with clipping between -1 and 1
+	# simil_p=np.clip(cosine_similarity(p,embed)[0],-1,1)
+	# #normalized angular distance
+	# dist_p=np.arccos(simil_p)/np.pi
 	#loading source fcg to be weighted
 	fcg=nx.read_edgelist(os.path.join(fcg_path,"{}.edgelist".format(fcg_type)),comments="@",create_using=eval(graph_type))
 	#assigning weight by summing the log of adjacent nodes, and dividing by the similiarity of the claim with the target predicate
-	fcg_edges=fcg.edges.data(keys=True)
-	for u,v,k,d in fcg_edges:
-		try:
-			IX=claims[claims['claimID']==d['claim_ID']].index[0]
-		except IndexError:
-			import pdb
-			pdb.set_trace()
-		dist=dist_p[IX]
-		fcg.edges[u,v,k]['dist']=dist
+	# fcg_edges=fcg.edges.data(keys=True)
+	# for u,v,k,d in fcg_edges:
+	# 	try:
+	# 		IX=claims[claims['claimID']==d['claim_ID']].index[0]
+	# 	except IndexError:
+	# 		import pdb
+	# 		pdb.set_trace()
+	# 	dist=dist_p[IX]
+	# 	fcg.edges[u,v,k]['dist']=dist
 	#Removing multiedges, by selecting the shortest one
-	fcg2=nx.Graph()
-	for u,v,k,data in fcg.edges.data(keys=True):
-		if not fcg2.has_edge(u,v):
-			fcg2.add_edge(u,v)
-			if len(fcg.get_edge_data(u,v))>1:
-				datalist=fcg.get_edge_data(u,v)
-				#finding the data dict among all the multiedges between u and v with the min distance
-				data=min(fcg.get_edge_data(u,v).items(), key=lambda x:x[1]['dist'])[1]
-			fcg2.edges[u,v].update(data)
+	fcg2=nx.Graph(fcg.copy())
+	# for u,v,k,data in fcg.edges.data(keys=True):
+	# 	if not fcg2.has_edge(u,v):
+	# 		fcg2.add_edge(u,v)
+	# 		if len(fcg.get_edge_data(u,v))>1:
+	# 			datalist=fcg.get_edge_data(u,v)
+	# 			#finding the data dict among all the multiedges between u and v with the min distance
+	# 			data=min(fcg.get_edge_data(u,v).items(), key=lambda x:x[1]['dist'])[1]
+	# 		fcg2.edges[u,v].update(data)
 	#Assigning the weight (dist*log(degree)) it again after the graph is pruned off its mutli edges
 	for u,v,data in fcg2.edges.data():
-		dist=data['dist']
+		# dist=data['dist']
+		dist=1
 		weight=np.log10(fcg.degree(u))+np.log10(fcg.degree(v))
 		fcg2.edges[u,v]['weight']=weight*dist
+		fcg2.edges[u,v]['dist']=dist
 	#returning labels and embeddata so that source dist and weights can be added
 	return fcg2
 
