@@ -24,24 +24,64 @@ def compose_graphs(claims_path,fcg_path,suffix,claim_IDs,claim_IDs2remove,graph_
 		fcg.add_edges_from(sorted(edgelist,key=lambda x:x[0]))
 		nx.write_edgelist(fcg,pathname)
 
+def compose_graphs_u(fcg_path,suffix,union_claim_IDs,claim_IDs2remove,graph_type):
+	for skipID in claim_IDs2remove:
+		temp_claim_IDs=union_claim_IDs.copy()
+		temp_claim_IDs.remove(skipID)
+		fcg=eval(graph_type+"()")
+		pathname=fcg_path+"-"+str(skipID[0])+".edgelist"
+		edgelist=[]
+		# if not os.path.isfile(pathname): 
+		for claim_ID,claims_path in temp_claim_IDs:
+			filename=os.path.join(claims_path,"claim{}".format(str(claim_ID))+"_"+suffix)
+			try:
+				claim_g=nx.read_edgelist(filename+".edgelist",comments="@")
+			except:
+				continue
+			edgelist+=list(claim_g.edges.data())
+		fcg.add_edges_from(sorted(edgelist,key=lambda x:x[0]))
+		nx.write_edgelist(fcg,pathname)
+
 def create_leave1out(rdf_path,graph_path,fcg_class,fcg_label,cpu,jobs,jobnum,graph_type):
 	claim_types={"tfcg_co":"true","ffcg_co":"false","tfcg":"true","ffcg":"false"}
-	claim_type=claim_types[fcg_label]
-	claim_IDs=list(np.load(os.path.join(rdf_path,"{}_claimID.npy".format(claim_type))))
-	suffix={"tfcg_co":"co","ffcg_co":"co","tfcg":"clean","ffcg":"clean"}
-	fcg_path=os.path.join(graph_path,fcg_class,fcg_label,"leave1out")
-	os.makedirs(fcg_path,exist_ok=True)
-	claims_path=os.path.join(rdf_path,"{}_claims".format(claim_type))
-	n=int(len(claim_IDs)/(cpu*jobs))+1
-	start=cpu*(jobnum-1)
-	end=cpu*(jobnum)
-	if cpu>1:
-		pool=mp.Pool(processes=cpu)
-		results=[pool.apply_async(compose_graphs, args=(claims_path,os.path.join(fcg_path,fcg_label),suffix[fcg_label],claim_IDs,claim_IDs[index*n:(index+1)*n],graph_type)) for index in range(start,end)]
-		output=[p.get() for p in results]
+	if fcg_label in claim_types.keys():
+		claim_type=claim_types[fcg_label]
+		claim_IDs=list(np.load(os.path.join(rdf_path,"{}_claimID.npy".format(claim_type))))
+		suffix={"tfcg_co":"co","ffcg_co":"co","tfcg":"clean","ffcg":"clean"}
+		fcg_path=os.path.join(graph_path,fcg_class,fcg_label,"leave1out")
+		os.makedirs(fcg_path,exist_ok=True)
+		fcg_path=os.path.join(fcg_path,fcg_label)
+		claims_path=os.path.join(rdf_path,"{}_claims".format(claim_type))
+		n=int(len(claim_IDs)/(cpu*jobs))+1
+		start=cpu*(jobnum-1)
+		end=cpu*(jobnum)
+		if cpu>1:
+			pool=mp.Pool(processes=cpu)
+			results=[pool.apply_async(compose_graphs, args=(claims_path,fcg_path,suffix[fcg_label],claim_IDs,claim_IDs[index*n:(index+1)*n],graph_type)) for index in range(start,end)]
+			output=[p.get() for p in results]
+		else:
+			pool=mp.Pool(processes=cpu)
+			compose_graphs(claims_path,fcg_path,suffix[fcg_label],claim_IDs,claim_IDs[0:n],graph_type)
 	else:
-		pool=mp.Pool(processes=cpu)
-		compose_graphs(claims_path,os.path.join(fcg_path,fcg_label),suffix[fcg_label],claim_IDs,claim_IDs[0:n],graph_type)
+		suffix={"ufcg_co":"co","ufcg":"clean"}
+		fcg_path=os.path.join(graph_path,fcg_class,fcg_label,"leave1out")
+		os.makedirs(fcg_path,exist_ok=True)
+		fcg_path=os.path.join(fcg_path,fcg_label)
+		true_claims_path=os.path.join(rdf_path,"true_claims")
+		false_claims_path=os.path.join(rdf_path,"false_claims")
+		true_claim_IDs=set([(i,true_claims_path) for i in list(np.load(os.path.join(rdf_path,"true_claimID.npy")))])
+		false_claim_IDs=set([(i,false_claims_path) for i in list(np.load(os.path.join(rdf_path,"false_claimID.npy")))])
+		union_claim_IDs=list(true_claim_IDs.union(false_claim_IDs))
+		n=int(len(union_claim_IDs)/(cpu*jobs))+1
+		start=cpu*(jobnum-1)
+		end=cpu*(jobnum)
+		if cpu>1:
+			pool=mp.Pool(processes=cpu)
+			results=[pool.apply_async(compose_graphs_u, args=(fcg_path,suffix[fcg_label],union_claim_IDs,union_claim_IDs[index*n:(index+1)*n],graph_type)) for index in range(start,end)]
+			output=[p.get() for p in results]
+		else:
+			pool=mp.Pool(processes=cpu)
+			compose_graphs_u(fcg_path,suffix[fcg_label],union_claim_IDs,union_claim_IDs[0:n],graph_type)
 
 if __name__== "__main__":
 	parser=argparse.ArgumentParser(description='Create fred graph')
