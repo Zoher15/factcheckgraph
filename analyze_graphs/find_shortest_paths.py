@@ -84,11 +84,11 @@ def create_weighted(p,rdf_path,model_path,graph_path,graph_type,embed_path,fcg_t
 		false_claims_embed_labels=pd.read_csv(os.path.join(embed_path,"false_claims_embeddings_labels_({}).tsv".format(model_path.split("/")[-1])),delimiter="\t")
 		embed=np.concatenate((true_claims_embed,false_claims_embed),axis=0)
 		claims_embed_labels=true_claims_embed_labels.append(false_claims_embed_labels,ignore_index=True)
-		claim_IDs=claims['claimID'].tolist()
+		claim_IDs=claims_embed_labels['claimID'].tolist()
 	else:
 		embed=pd.read_csv(os.path.join(embed_path,claim_type+"_claims_embeddings_({}).tsv".format(model_path.split("/")[-1])),delimiter="\t",header=None).values
 		claims_embed_labels=pd.read_csv(os.path.join(embed_path,claim_type+"_claims_embeddings_labels_({}).tsv".format(model_path.split("/")[-1])),delimiter="\t")
-		claim_IDs=claims['claimID'].tolist()
+		claim_IDs=claims_embed_labels['claimID'].tolist()
 	#cosine similarity with clipping between -1 and 1
 	simil_p=np.clip(cosine_similarity(p,embed)[0],-1,1)
 	#normalized angular distance
@@ -140,106 +140,6 @@ def create_weighted2(p,rdf_path,model_path,graph_path,graph_type,embed_path,fcg_
 		fcg2.edges[u,v]['rating']=data['rating']
 	#returning labels and embeddata so that source dist and weights can be added
 	return fcg2
-
-
-def find_paths_of_interest2(index,rdf_path,graph_path,graph_type,embed_path,model_path,claimIDs,fcg_class,source_fcg_type,target_fcg_type,source_claim_type,target_claim_type,source_claims,target_claims,target_claims_embed,target_claims_embed_labels):
-	paths_of_interest_w={}
-	paths_of_interest_d={}
-	suffix={"co_occur":"_co","fred":"_co2"}
-	#iterating through the claimIDs of interest
-	for claimID,target_claim_type in claimIDs:
-		target_fcg_path=os.path.join(rdf_path,target_claim_type+"_claims")
-		target_claim_label="claim"+str(claimID)+suffix[fcg_class]
-		try:
-			target_fcg=nx.read_edgelist(os.path.join(target_fcg_path,"{}.edgelist".format(target_claim_label)),comments="@",create_using=eval(graph_type))
-		except FileNotFoundError:
-			target_fcg=eval(graph_type+'()')
-			continue
-		'''
-		If the graph is co-occurrence, then the target edges of interest are simply all the edges in the graph.
-		But if it is Fred, then the target edges of interest are more complicated.
-		It has to be the paths between entities (which do not contain other entities)
-		'''
-		###################################################################################
-		edges=target_fcg.edges.data(keys=True)
-		edges_of_interest=set([(u,v,d['dist']) for u,v,k,d in edges if u!=v and d['dist']!=-1])
-		if len(edges_of_interest)==0:
-			continue
-		###################################################################################
-		#getting index of claim
-		claimIX=target_claims_embed_labels[target_claims_embed_labels['claimID']==claimID].index[0]
-		p=np.array([target_claims_embed[claimIX]])
-		#source_fcg is not a multigraph
-		#if source and target are the same graph, then the graph without the given claim is fetched
-		if source_fcg_type==target_fcg_type:
-			source_fcg=create_weighted2(p,rdf_path,model_path,graph_path,graph_type,embed_path,source_fcg_type+'-'+str(claimID),fcg_class,source_claim_type)
-		else:
-			source_fcg=create_weighted2(p,rdf_path,model_path,graph_path,graph_type,embed_path,source_fcg_type,fcg_class,source_claim_type)
-		paths_of_interest_w[claimID]={}
-		paths_of_interest_d[claimID]={}
-		paths_of_interest_w[claimID]['target_claim']=chunkstring(target_claims_embed_labels[target_claims_embed_labels['claimID']==claimID]['claim_text'].values[0],100)
-		paths_of_interest_d[claimID]['target_claim']=chunkstring(target_claims_embed_labels[target_claims_embed_labels['claimID']==claimID]['claim_text'].values[0],100)
-		source_fcg2=source_fcg.copy()
-		'''
-		for every edge of interest, all edges connected to the source u and target v are reweighted by adding the source log(degree)
-		'''
-		for u,v,k in edges_of_interest:
-			if source_fcg.has_node(u) and source_fcg.has_node(v):
-				'''
-				If both node exists, we add the influence of source nodes i.e. the weight and log10(degree) to all the paths.
-				We want to include source node dist and weights to all parts starting from them so that:
-				1. There are no 0 dist paths, even when they are directly connected
-				2. While aggregating the entity pairs, we automatically include the weight of the an entity pair by not ignoring the weight of the source node
-				'''
-				#################################################################################
-				if nx.has_path(source_fcg,u,v):
-					#################################################################################
-					path_d=nx.shortest_path(source_fcg,source=u,target=v,weight='dist')
-					path_d_data={}
-					path_d_formed_claim=cleanstring(path_d[0])
-					#################################################################################
-					for i in range(len(path_d)-1):
-						data=source_fcg.edges[path_d[i],path_d[i+1]]
-						data['source_claim']=chunkstring(source_claims[source_claims['claimID']==data['claim_ID']]['claim_text'].values[0],75)
-						path_d_data[str((path_d[i],path_d[i+1]))]=data
-						path_d_formed_claim=path_d_formed_claim+" "+cleanstring(path_d[i+1])
-					###########################################################################
-					dw=round(1/(1+aggregate_edge_data(path_d_data,'weight')*k),7)
-					dd=round(1/(1+aggregate_edge_data(path_d_data,'dist')*k),7)
-					path_d_data['formed_claim']=path_d_formed_claim
-					#################################################################################
-					path_w=nx.shortest_path(source_fcg,source=u,target=v,weight='weight')
-					path_w_data={}		
-					path_w_formed_claim=cleanstring(path_w[0])
-					#################################################################################
-					for i in range(len(path_w)-1):
-						data=source_fcg.edges[path_w[i],path_w[i+1]]
-						data['source_claim']=chunkstring(source_claims[source_claims['claimID']==data['claim_ID']]['claim_text'].values[0],75)
-						path_w_data[str((path_w[i],path_w[i+1]))]=data
-						path_w_formed_claim=path_w_formed_claim+" "+cleanstring(path_w[i+1])
-					#################################################################################
-					ww=round(1/(1+aggregate_edge_data2(path_w_data,'weight')*k),7)
-					wd=round(1/(1+aggregate_edge_data2(path_w_data,'dist')*k),7)
-					path_w_data['formed_claim']=path_w_formed_claim
-				else:
-					dw=0
-					dd=0
-					ww=0
-					wd=0
-					path_d_data={}
-					path_d_data['formed_claim']=""
-					path_w_data={}
-					path_w_data['formed_claim']=""
-				paths_of_interest_d[claimID][str((u,v,dw,dd))]=path_d_data
-				paths_of_interest_w[claimID][str((u,v,ww,wd))]=path_w_data
-			else:
-				path_data={}
-				path_data['formed_claim']=""
-				paths_of_interest_d[claimID][str((u,v,0,0))]=path_data
-				paths_of_interest_w[claimID][str((u,v,0,0))]=path_data
-			source_fcg=source_fcg2
-	return index,paths_of_interest_w,paths_of_interest_d
-
 
 def find_paths_of_interest(index,rdf_path,graph_path,graph_type,embed_path,model_path,claimIDs,fcg_class,source_fcg_type,target_fcg_type,source_claim_type,target_claim_type,source_claims,target_claims,target_claims_embed,target_claims_embed_labels):
 	paths_of_interest_w={}
@@ -361,7 +261,7 @@ def find_shortest_paths(rdf_path,model_path,graph_path,graph_type,embed_path,sou
 	#path for the graph that is being used to fact-check
 	source_fcg_path=os.path.join(graph_path,fcg_class,source_fcg_type)
 	#loading claims
-	if fcg_type=='ufcg':
+	if source_fcg_type=='ufcg':
 		true_claims=pd.read_csv(os.path.join(rdf_path,"true_claims.csv"),index_col=0)
 		false_claims=pd.read_csv(os.path.join(rdf_path,"false_claims.csv"),index_col=0)
 		source_claims=true_claims.append(false_claims,ignore_index=True)
@@ -380,7 +280,7 @@ def find_shortest_paths(rdf_path,model_path,graph_path,graph_type,embed_path,sou
 	else:
 		target_claims_embed=pd.read_csv(os.path.join(embed_path,target_claim_type+"_claims_embeddings_({}).tsv".format(model_path.split("/")[-1])),delimiter="\t",header=None).values
 		target_claims_embed_labels=pd.read_csv(os.path.join(embed_path,target_claim_type+"_claims_embeddings_labels_({}).tsv".format(model_path.split("/")[-1])),delimiter="\t")
-	if fcg_type=='ufcg':
+	if source_fcg_type=='ufcg':
 		claimIDs=[(i,'true') for i in true_claims['claimID'].tolist()]
 		claimIDs+=[(i,'false') for i in false_claims['claimID'].tolist()]
 	else:

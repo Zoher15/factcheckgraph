@@ -112,8 +112,8 @@ def create_ordered_paths_diff(graph_path,graph_type,fcg_class):
 							if edge!='target_claim':
 								tu,tv,tw,td=eval(list(tfcg_paths[claimID][edge]['tfcg'].keys())[0])
 								fu,fv,fw,fd=eval(list(ffcg_paths[claimID][edge]['ffcg'].keys())[0])
-								w=round(tw-fw,3)
-								d=round(td-fd,3)
+								w=round(tw+fw,3)
+								d=round(td+fd,3)
 								temp[str((tu,tv,w,d))]={'tfcg':tfcg_paths[claimID][edge]['tfcg'],'ffcg':ffcg_paths[claimID][edge]['ffcg']}
 								d_list.append(d)
 								w_list.append(w)
