@@ -1,0 +1,28 @@
+find_shortest_paths
+
+real	12m38.719s
+user	580m15.925s
+sys	6m53.604s
+
+real	46m25.115s
+user	2129m18.989s
+sys	25m39.612s
+
+real	0m37.843s
+user	0m25.851s
+sys	0m1.863s
+plot graphs
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+
+real	0m16.106s
+user	0m8.292s
+sys	0m1.773s
+
+real	0m13.364s
+user	0m9.967s
+sys	0m1.734s

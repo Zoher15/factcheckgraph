@@ -176,12 +176,12 @@ def find_baseline(rdf_path,graph_path,model_path,embed_path,graph_type,fcg_class
 	plt.figure(figsize=(9, 8))
 	minscore=np.min(true_scores+false_scores)
 	maxscore=np.max(true_scores+false_scores)
-	intervalscore=float(maxscore-minscore)/20
+	intervalscore=float(maxscore-minscore)/100
 	print(intervalscore)
 	print(minscore)
 	print(maxscore)
-	sns.distplot(true_scores,hist=True,kde=True,bins=np.arange(minscore,maxscore+intervalscore,intervalscore),kde_kws={'linewidth': 3},label="true",norm_hist=True)
-	sns.distplot(false_scores,hist=True,kde=True,bins=np.arange(minscore,maxscore+intervalscore,intervalscore),kde_kws={'linewidth': 3},label="false",norm_hist=True)
+	sns.distplot(true_scores,hist=True,kde=False,bins=np.arange(minscore,maxscore+intervalscore,intervalscore),kde_kws={'linewidth': 3},label="true",norm_hist=True)
+	sns.distplot(false_scores,hist=True,kde=False,bins=np.arange(minscore,maxscore+intervalscore,intervalscore),kde_kws={'linewidth': 3},label="false",norm_hist=True)
 	plt.xlabel('similarity Scores (higher is positive)')
 	plt.ylabel('Density')
 	plt.legend(loc="upper right")
@@ -388,12 +388,12 @@ def find_knn(k,rdf_path,graph_path,model_path,embed_path,graph_type,fcg_class,n_
 	plt.figure(figsize=(9, 8))
 	minscore=np.min(list(Yh[Y==1])+list(Yh[Y==-1]))
 	maxscore=np.max(list(Yh[Y==1])+list(Yh[Y==-1]))
-	intervalscore=float(maxscore-minscore)/20
+	intervalscore=float(maxscore-minscore)/100
 	print(intervalscore)
 	print(minscore)
 	print(maxscore)
-	sns.distplot(Yh[Y==1],hist=True,kde=True,bins=np.arange(minscore,maxscore+intervalscore,intervalscore),kde_kws={'linewidth': 3},label="true",norm_hist=True)
-	sns.distplot(Yh[Y==-1],hist=True,kde=True,bins=np.arange(minscore,maxscore+intervalscore,intervalscore),kde_kws={'linewidth': 3},label="false",norm_hist=True)
+	sns.distplot(Yh[Y==1],hist=True,kde=False,bins=np.arange(minscore,maxscore+intervalscore,intervalscore),kde_kws={'linewidth': 3},label="true",norm_hist=True)
+	sns.distplot(Yh[Y==-1],hist=True,kde=False,bins=np.arange(minscore,maxscore+intervalscore,intervalscore),kde_kws={'linewidth': 3},label="false",norm_hist=True)
 	plt.xlabel('Similarity Scores (higher is positive)')
 	plt.ylabel('Density')
 	plt.legend(loc="upper right")

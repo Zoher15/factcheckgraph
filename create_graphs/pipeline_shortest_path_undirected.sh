@@ -9,7 +9,7 @@
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=48
 #SBATCH --mem=58G
-#SBATCH --time=5:00:00
+#SBATCH --time=10:00:00
 errcho(){ >&2 echo $@; }
 source /N/u/zkachwal/Carbonate/miniconda3/etc/profile.d/conda.sh
 conda activate
@@ -20,8 +20,8 @@ time python separate_claims.py
 ################################################################
 cd /geode2/home/u110/zkachwal/BigRed3/factcheckgraph/analyze_graphs/
 errcho embeddings
-time python embed.py -ft ffcg -mp roberta-base-nli-stsb-mean-tokens -gt undirected
-time python embed.py -ft tfcg -mp roberta-base-nli-stsb-mean-tokens -gt undirected
+time python embed.py -ft ffcg -mp roberta-base-nli-stsb-mean-tokens
+time python embed.py -ft tfcg -mp roberta-base-nli-stsb-mean-tokens
 ################################################################
 cd /gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph/create_graphs/
 errcho create graphs

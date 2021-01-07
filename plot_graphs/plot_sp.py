@@ -177,8 +177,8 @@ def plot_dist(graph_path,fcg_class,fcg_type,graph_type):
 def plot_roc2(graph_path,fcg_class,fcg_type,graph_type):
 	fcg_types={"co_occur":{"tfcg":"tfcg_co","ffcg":"ffcg_co"},"fred":{"tfcg":"tfcg","ffcg":"ffcg"}}
 	embeds={'roberta-base-nli-stsb-mean-tokens':'e1'}#,'claims-roberta-base-nli-stsb-mean-tokens-2020-05-27_19-01-27':'e2'}
-	dists={'w':'d1','d':'d2'}#,'f':'d3'}
-	aggs={'mean':'a1','max':'a2','median':'a3'}#,'domb':'a4'}
+	dists={'d':'d2'}#,'f':'d3'}
+	aggs={'mean':'a1','max':'a2'}#,'median':'a3'}#,'domb':'a4'}
 	# read paths true
 	true_tfcg_read_path=os.path.join(graph_path,fcg_class,"paths","true_tfcg")
 	true_ffcg_read_path=os.path.join(graph_path,fcg_class,"paths","true_ffcg")
@@ -290,8 +290,8 @@ def plot_roc2(graph_path,fcg_class,fcg_type,graph_type):
 def plot_dist2(graph_path,fcg_class,fcg_type,graph_type):
 	fcg_types={"co_occur":{"tfcg":"tfcg_co","ffcg":"ffcg_co"},"fred":{"tfcg":"tfcg","ffcg":"ffcg"}}
 	embeds={'roberta-base-nli-stsb-mean-tokens':'e1'}#,'claims-roberta-base-nli-stsb-mean-tokens-2020-05-27_19-01-27':'e2'}
-	dists={'w':'d1','d':'d2'}#,'f':'d3'}
-	aggs={'mean':'a1','max':'a2','median':'a3'}#,'domb':'a4'}
+	dists={'d':'d2'}#,'f':'d3'}
+	aggs={'mean':'a1','max':'a2'}#,'median':'a3'}#,'domb':'a4'}
 	# read paths true
 	true_tfcg_read_path=os.path.join(graph_path,fcg_class,"paths","true_tfcg")
 	true_ffcg_read_path=os.path.join(graph_path,fcg_class,"paths","true_ffcg")
