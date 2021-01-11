@@ -814,6 +814,7 @@ def fetchFred(rdf_path,graph_path,graph_type,fcg_label,init,passive,cpu):
 			index,errorclaimid,clean_claims=passiveFredParse(0,claim_type,claims_path,claim_IDs,0,n,graph_types[graph_type])
 	#if graph rdf files have not been fetched. Slower, dependent on rate limits
 	else:
+		
 		keys={"tfcg":"Bearer a5c2a808-cc39-38e6-898d-84ab912b1e5d","ffcg":"Bearer 0d9d562e-a2aa-30df-90df-d52674f2e1f0"}
 		end=len(claims)
 		errorclaimid,clean_claims=fredParse(claim_type,claims_path,claims,init,end,keys[fcg_label],graph_types[graph_type])

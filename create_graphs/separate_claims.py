@@ -20,6 +20,11 @@ def filterclaim(row):
 	row['claim_text']=row['claim_text'].replace("Fact Check:","")
 	row['claim_text']=row['claim_text'].replace("FAKE ALERT:","")
 	row['claim_text']=row['claim_text'].replace("Fact check/ :","")
+	row['claim_text']=row['claim_text'].replace("\"","")
+	row['claim_text']=row['claim_text'].replace("’","'")
+	row['claim_text']=row['claim_text'].replace("‘","'")
+	row['claim_text']=row['claim_text'].replace("”","")
+	row['claim_text']=row['claim_text'].replace("—","-")
 	firstletter=re.search(r'[a-zA-Z]',row['claim_text']).span()[0]
 	row['claim_text']=row['claim_text'][0:firstletter]+row['claim_text'][firstletter].capitalize()+row['claim_text'][firstletter+1:]
 	return row
@@ -31,6 +36,8 @@ def separate_claims(file,rdf_path):
 	data.drop(data[filter].index,inplace=True)
 	#drop duplicates with the same claimID
 	data.drop_duplicates('claimID',keep='first',inplace=True)
+	numwords=data['claim_text'].apply(lambda x: len(x.split()))
+	data.drop(data[numwords<4].index, inplace = True)
 	data=data.apply(filterclaim,axis=1)
 	data.to_csv(os.path.join(rdf_path,"claims_dataset.csv"))
 	print(data.groupby('fact_checkerID').count())

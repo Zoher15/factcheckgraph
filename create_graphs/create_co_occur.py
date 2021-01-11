@@ -144,7 +144,7 @@ def create_co_occur2(rdf_path,graph_path,fcg_label,skipID):
 					claim_nxg.add_edge(u,v,claim_ID=claim_ID,dist=dist,rating=rating[fcg_label])
 				else:
 					claim_nxg.add_edge(u,v,claim_ID=claim_ID,dist=-1,rating=rating[fcg_label])
-			filename=os.path.join(rdf_path,"{}_claims".format(claim_type),"claim{}_co2".format(str(claim_ID)))
+			filename=os.path.join(rdf_path,"{}_claims".format(claim_type),"claim{}_co".format(str(claim_ID)))
 			nx.write_edgelist(claim_nxg,filename+".edgelist")
 			fcg_co.add_edges_from(claim_nxg.edges.data())
 	fcg_path=os.path.join(graph_path,"co_occur",fcg_label)
