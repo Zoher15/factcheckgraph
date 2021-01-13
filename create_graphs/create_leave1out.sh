@@ -17,12 +17,12 @@ cd /geode2/home/u110/zkachwal/BigRed3/factcheckgraph/create_graphs/
 errcho create graphs
 ################################################################
 errcho fetching
-time python fetch_fred.py -ft tfcg -cpu 48 -p
-time python fetch_fred.py -ft ffcg -cpu 48 -p 
+# time python fetch_fred.py -ft tfcg -cpu 48 -p
+# time python fetch_fred.py -ft ffcg -cpu 48 -p 
 ################################################################
 errcho compiling
-time python compile_fred.py -ft tfcg -cpu 48 
-time python compile_fred.py -ft ffcg -cpu 48
+# time python compile_fred.py -ft tfcg -cpu 48 
+# time python compile_fred.py -ft ffcg -cpu 48
 time python compile_fred.py -ft ufcg
 # time python create_leave1out.py -fc fred -ft tfcg -cpu 48
 # time python create_leave1out.py -fc fred -ft ffcg -cpu 48
