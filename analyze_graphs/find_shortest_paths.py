@@ -23,7 +23,7 @@ def aggregate_edge_data(evalues,mode):
 	#mode can be dist or weight
 	edgepair_weights=[]
 	for edgepair,e2values in evalues.items():
-		edgepair_weights.append(e2values[mode])#*e2values['rating'])
+		edgepair_weights.append(e2values[mode]*e2values['rating'])
 	return sum(edgepair_weights)
 
 def cleanstring(string):
@@ -70,9 +70,7 @@ def create_weighted(p,rdf_path,model_path,graph_path,graph_type,embed_path,fcg_t
 	# loading weighting embeddings
 	if claim_type=='truefalse':
 		true_claims_embed=pd.read_csv(os.path.join(embed_path,"true_claims_embeddings_({}).tsv".format(model_path.split("/")[-1])),delimiter="\t",header=None).values
-		true_claims_labels=pd.read_csv(os.path.join(embed_path,"true_claims_embeddings_labels_({}).tsv".format(model_path.split("/")[-1])),delimiter="\t",header=None).values
 		false_claims_embed=pd.read_csv(os.path.join(embed_path,"false_claims_embeddings_({}).tsv".format(model_path.split("/")[-1])),delimiter="\t",header=None).values
-		false_claims_labels=pd.read_csv(os.path.join(embed_path,"false_claims_embeddings_labels_({}).tsv".format(model_path.split("/")[-1])),delimiter="\t",header=None).values
 		true_claims_embed_labels=pd.read_csv(os.path.join(embed_path,"true_claims_embeddings_labels_({}).tsv".format(model_path.split("/")[-1])),delimiter="\t")
 		false_claims_embed_labels=pd.read_csv(os.path.join(embed_path,"false_claims_embeddings_labels_({}).tsv".format(model_path.split("/")[-1])),delimiter="\t")
 		embed=np.concatenate((true_claims_embed,false_claims_embed),axis=0)
@@ -91,8 +89,11 @@ def create_weighted(p,rdf_path,model_path,graph_path,graph_type,embed_path,fcg_t
 	#assigning weight by summing the log of adjacent nodes, and dividing by the similiarity of the claim with the target predicate
 	fcg_edges=fcg.edges.data(keys=True)
 	for u,v,k,d in fcg_edges:
-		IX=claims_embed_labels[claims_embed_labels['claimID']==d['claim_ID']].index[0]
-		dist=dist_p[IX]
+		try:
+			IX=claims_embed_labels[claims_embed_labels['claimID']==d['claim_ID']].index[0]
+			dist=dist_p[IX]
+		except IndexError:
+			pdb.set_trace()
 		fcg.edges[u,v,k]['dist']=dist
 	#Removing multiedges, by selecting the shortest one
 	fcg2=nx.Graph()
@@ -139,6 +140,8 @@ def find_paths_of_interest(index,rdf_path,graph_path,graph_type,embed_path,model
 	suffix={"co_occur":"_co","fred":"_clean"}
 	#iterating through the claimIDs of interest
 	for claimID in claimIDs:
+		if source_fcg_type=='ufcg':
+			claimID,target_claim_type=claimID
 		target_fcg_path=os.path.join(rdf_path,target_claim_type+"_claims")
 		target_claim_label="claim"+str(claimID)+suffix[fcg_class]
 		try:
@@ -166,9 +169,9 @@ def find_paths_of_interest(index,rdf_path,graph_path,graph_type,embed_path,model
 		#source_fcg is not a multigraph
 		#if source and target are the same graph, then the graph without the given claim is fetched
 		if source_fcg_type==target_fcg_type:
-			source_fcg=create_weighted2(p,rdf_path,model_path,graph_path,graph_type,embed_path,source_fcg_type+'-'+str(claimID),fcg_class,source_claim_type)
+			source_fcg=create_weighted(p,rdf_path,model_path,graph_path,graph_type,embed_path,source_fcg_type+'-'+str(claimID),fcg_class,source_claim_type)
 		else:
-			source_fcg=create_weighted2(p,rdf_path,model_path,graph_path,graph_type,embed_path,source_fcg_type,fcg_class,source_claim_type)
+			source_fcg=create_weighted(p,rdf_path,model_path,graph_path,graph_type,embed_path,source_fcg_type,fcg_class,source_claim_type)
 		paths_of_interest_w[claimID]={}
 		paths_of_interest_d[claimID]={}
 		paths_of_interest_w[claimID]['target_claim']=chunkstring(target_claims_embed_labels[target_claims_embed_labels['claimID']==claimID]['claim_text'].values[0],100)
@@ -241,7 +244,7 @@ Function does the following
 3. Finds shortest path for each edge of interest in the target graph
 '''
 def find_shortest_paths(rdf_path,model_path,graph_path,graph_type,embed_path,source_fcg_type,target_fcg_type,fcg_class,cpu):
-	fcg_types={'co_occur':{'tfcg':'tfcg_co','ffcg':'ffcg_co'},'fred':{'tfcg':'tfcg','ffcg':'ffcg'}}
+	fcg_types={'co_occur':{'tfcg':'tfcg_co','ffcg':'ffcg_co','ufcg':'ufcg_co'},'fred':{'tfcg':'tfcg','ffcg':'ffcg','ufcg':'ufcg'}}
 	#setting source fcg_type
 	source_fcg_type=fcg_types[fcg_class][source_fcg_type]
 	#setting target fcg_type
@@ -309,7 +312,7 @@ if __name__== "__main__":
 	parser.add_argument('-ep','--embedpath', metavar='embed path',type=str,help='Model directory to save and load embeddings',default="/geode2/home/u110/zkachwal/BigRed3/factcheckgraph_data/embeddings")
 	parser.add_argument('-st','--sfcgtype', metavar='Source FactCheckGraph type',type=str,choices=['tfcg','ffcg','tfcg_co','ffcg_co','ufcg','covid19'],help='True/False/Union/Covid19 FactCheckGraph')
 	parser.add_argument('-ft','--tfcgtype', metavar='Target FactCheckGraph type',type=str,choices=['tfcg','ffcg','tfcg_co','ffcg_co','ufcg','covid19'],help='True/False/Union/Covid19 FactCheckGraph')
-	parser.add_argument('-fc','--fcgclass', metavar='FactCheckGraph class',type=str,choices=['co_occur','fred'])
+	parser.add_argument('-fc','--fcgclass', metavar='FactCheckGraph class',type=str,choices=['co_occur','fred'],default='fred')
 	parser.add_argument('-gt','--graphtype', metavar='Graph Type Directed/Undirected',type=str,choices=['directed','undirected'],default='undirected')
 	parser.add_argument('-cpu','--cpu',metavar='Number of CPUs',type=int,help='Number of CPUs available',default=1)
 	graph_types={'undirected':'nx.MultiGraph','directed':'nx.MultiDiGraph'}
