@@ -6,9 +6,9 @@ import networkx as nx
 import sys
 import argparse
 
-def compose_graphs(fcg_path,suffix,union_claim_IDs,claim_IDs2remove,graph_type):
+def compose_graphs(fcg_path,suffix,claim_IDs,claim_IDs2remove,graph_type):
 	for skipID in claim_IDs2remove:
-		temp_claim_IDs=union_claim_IDs.copy()
+		temp_claim_IDs=claim_IDs.copy()
 		temp_claim_IDs.remove(skipID)
 		fcg=eval(graph_type+"()")
 		pathname=fcg_path+"-"+str(skipID[0])+".edgelist"
@@ -30,9 +30,11 @@ def create_leave1out(rdf_path,graph_path,fcg_class,fcg_label,cpu,jobs,jobnum,gra
 	fcg_path=os.path.join(graph_path,fcg_class,fcg_label,"leave1out")
 	os.makedirs(fcg_path,exist_ok=True)
 	fcg_path=os.path.join(fcg_path,fcg_label)
+	#true claims
 	true_claims_path=os.path.join(rdf_path,"true_claims")
-	false_claims_path=os.path.join(rdf_path,"false_claims")
 	true_claim_IDs=set([(i,true_claims_path) for i in list(np.load(os.path.join(rdf_path,"true_claimID.npy")))])
+	#false claims
+	false_claims_path=os.path.join(rdf_path,"false_claims")
 	false_claim_IDs=set([(i,false_claims_path) for i in list(np.load(os.path.join(rdf_path,"false_claimID.npy")))])
 	union_claim_IDs=true_claim_IDs.union(false_claim_IDs)
 	start=cpu*(jobnum-1)
@@ -42,16 +44,20 @@ def create_leave1out(rdf_path,graph_path,fcg_class,fcg_label,cpu,jobs,jobnum,gra
 		if fcg_label=='ufcg':
 			n=int(len(union_claim_IDs)/(cpu*jobs))+1
 			results=[pool.apply_async(compose_graphs, args=(fcg_path,suffix[fcg_label],list(union_claim_IDs),list(union_claim_IDs)[index*n:(index+1)*n],graph_type)) for index in range(start,end)]
-		elif fcg_label=='tfcg' or 'tfcg_co':
+		elif fcg_label=='tfcg' or fcg_label=='tfcg_co':
 			n=int(len(true_claim_IDs)/(cpu*jobs))+1
 			results=[pool.apply_async(compose_graphs, args=(fcg_path,suffix[fcg_label],list(true_claim_IDs),list(true_claim_IDs)[index*n:(index+1)*n],graph_type)) for index in range(start,end)]
-		elif fcg_label=='ffcg' or 'ffcg_co':
+		elif fcg_label=='ffcg' or fcg_label=='ffcg_co':
 			n=int(len(false_claim_IDs)/(cpu*jobs))+1
 			results=[pool.apply_async(compose_graphs, args=(fcg_path,suffix[fcg_label],list(false_claim_IDs),list(false_claim_IDs)[index*n:(index+1)*n],graph_type)) for index in range(start,end)]
 		output=[p.get() for p in results]
 	else:
-		pool=mp.Pool(processes=cpu)
-		compose_graphs_u(fcg_path,suffix[fcg_label],union_claim_IDs,union_claim_IDs[0:n],graph_type)
+		if fcg_label=='ufcg':
+			compose_graphs(fcg_path,suffix[fcg_label],union_claim_IDs,union_claim_IDs,graph_type)
+		elif fcg_label=='tfcg' or 'tfcg_co':
+			compose_graphs(fcg_path,suffix[fcg_label],true_claim_IDs,true_claim_IDs,graph_type)
+		elif fcg_label=='ffcg' or 'ffcg_co':
+			compose_graphs(fcg_path,suffix[fcg_label],false_claim_IDs,false_claim_IDs,graph_type)	
 
 if __name__== "__main__":
 	parser=argparse.ArgumentParser(description='Create fred graph')

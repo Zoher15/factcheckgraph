@@ -50,9 +50,9 @@ time python compile_stats.py
 ################################################################
 errcho leave1out
 cd /gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph/create_graphs/
-time python create_leave1out.py -fc fred -ft tfcg -cpu 48
-time python create_leave1out.py -fc fred -ft ffcg -cpu 48
-time python create_leave1out.py -fc fred -ft ufcg -cpu 48
+# time python create_leave1out.py -fc fred -ft tfcg -cpu 48
+# time python create_leave1out.py -fc fred -ft ffcg -cpu 48
+# time python create_leave1out.py -fc fred -ft ufcg -cpu 48
 time python create_leave1out.py -fc co_occur -ft tfcg_co -cpu 48
 time python create_leave1out.py -fc co_occur -ft ffcg_co -cpu 48
 # time python create_leave1out.py -fc co_occur -ft ufcg_co -cpu 48

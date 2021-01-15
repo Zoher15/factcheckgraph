@@ -25,7 +25,7 @@ errcho compiling
 # time python compile_fred.py -ft ffcg -cpu 48
 time python compile_fred.py -ft ufcg
 # time python create_leave1out.py -fc fred -ft tfcg -cpu 48
-# time python create_leave1out.py -fc fred -ft ffcg -cpu 48
+time python create_leave1out.py -fc fred -ft ffcg -cpu 48
 # time python create_leave1out.py -fc co_occur -ft tfcg_co -cpu 48
 # time python create_leave1out.py -fc co_occur -ft ffcg_co -cpu 48
-time python create_leave1out.py -fc fred -ft ufcg -cpu 48
+# time python create_leave1out.py -fc fred -ft ufcg -cpu 48

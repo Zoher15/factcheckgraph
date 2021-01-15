@@ -167,10 +167,43 @@ def cleanClaimGraph(claim_g,clean_claims):
 			claim_g.remove_node(node)
 	#removing isolates
 	situation_node='http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Situation'
+	topic_node='http://www.ontologydesignpatterns.org/ont/fred/domain.owl#Topic'
 	if claim_g.has_node(situation_node):
 		claim_g.remove_node(situation_node)
+	if claim_g.has_node(topic_node):
+		claim_g.remove_node(topic_node)
 	claim_g.remove_nodes_from(list(nx.isolates(claim_g)))
 	return claim_g
+
+#Function to aggregate the graph cleaning dictionary for the entire graph
+def compile_clean(rdf_path,clean_claims,claim_type):
+	master_clean={}
+	master_clean['nodes2contract']={}
+	master_clean['nodes2remove']={}
+	master_clean['nodes2remove']['%27']=[]
+	master_clean['nodes2remove']['thing']=[]
+	master_clean['nodes2remove']['dul']=[]
+	master_clean['nodes2remove']['det']=[]
+	master_clean['nodes2remove']['data']=[]
+	master_clean['nodes2remove']['prop']=[]
+	master_clean['nodes2remove']['schema']=[]
+	master_clean['nodes2contract']['type']=[]#keep right node if left node has "_1"
+	master_clean['nodes2contract']['subclass']=[]#keep left node
+	master_clean['nodes2contract']['equivalence']=[]#keep right node
+	master_clean['nodes2contract']['identity']=[]#keep right node
+	master_clean['nodes2contract']['quality']=[]#keep left node
+	master_clean['nodes2contract']['num']=[]#keep left node
+	with codecs.open(os.path.join(rdf_path,"{}claims_clean.txt".format(claim_type)),"w","utf-8") as f: 
+		pprint(clean_claims,stream=f)
+	for clean_claim in clean_claims.values():
+		for key in clean_claim.keys():
+			for key2 in clean_claim[key].keys():
+				master_clean[key][key2]+=clean_claim[key][key2]
+	with codecs.open(os.path.join(rdf_path,"{}master_clean.txt".format(claim_type)),"w","utf-8") as f: 
+		pprint(master_clean,stream=f)
+	with codecs.open(os.path.join(rdf_path,"{}master_clean.json".format(claim_type)),"w","utf-8") as f:
+		f.write(json.dumps(master_clean,indent=4,ensure_ascii=False))
+	return master_clean
 
 #Function to save fred graph including its nodes, entities, node2ID dictionary and edgelistID (format needed by klinker)	
 def saveFred(fcg,graph_path,fcg_label,graph_type):
@@ -219,6 +252,19 @@ def compileClaimGraph(index,claims_path,claim_IDs,clean_claims,init,end):
 		edgelist+=claim_g.edges.data()
 	return index,edgelist
 
+def compileClaimGraph2(index,claims_path,claim_IDs,clean_claims,init,end):
+	edgelist=[]
+	cleanlist=[]
+	for claim_ID in claim_IDs[init:end]:
+		filename=os.path.join(claims_path,"claim{}".format(str(claim_ID)))
+		try:
+			claim_g=nx.read_edgelist(filename+".edgelist",comments="@")
+		except:
+			continue
+		edgelist+=claim_g.edges.data()
+	return index,edgelist
+
+
 def compileFred(rdf_path,graph_path,graph_type,fcg_label,cpu):
 	fcg_path=os.path.join(graph_path,"fred",fcg_label)
 	#If union of tfcg and ffcg wants to be created i.e ufcg
@@ -248,14 +294,19 @@ def compileFred(rdf_path,graph_path,graph_type,fcg_label,cpu):
 		if cpu>1:
 			n=int(len(claim_IDs)/cpu)+1
 			pool=mp.Pool(processes=cpu)					
-			results=[pool.apply_async(compileClaimGraph, args=(index,claims_path,claim_IDs,clean_claims,index*n,min((index+1)*n,len(claim_IDs)))) for index in range(cpu)]
+			results=[pool.apply_async(compileClaimGraph2, args=(index,claims_path,claim_IDs,clean_claims,index*n,min((index+1)*n,len(claim_IDs)))) for index in range(cpu)]
 			output=sorted([p.get() for p in results],key=lambda x:x[0])
 			edgelist=[edge for o in output for edge in o[1]]
 		else:
-			edgelist=compileClaimGraph(0,claims_path,claim_IDs,clean_claims,0,len(claim_IDs))[1]
+			edgelist=compileClaimGraph2(0,claims_path,claim_IDs,clean_claims,0,len(claim_IDs))[1]
 		edgelist=list(sorted(edgelist,key=lambda x:x[0]))
 		master_fcg=eval(graph_type+'()')
 		master_fcg.add_edges_from(edgelist)
+		#compileclaimgrpah2
+		master_clean=compile_clean(rdf_path,clean_claims,claim_type)
+		master_fcg=cleanClaimGraph(master_fcg,master_clean)
+		master_fcg=nx.relabel_nodes(master_fcg,lambda x:nodelabel_mapper(x))
+		##########################
 		saveFred(master_fcg,graph_path,fcg_label,graph_type)
 
 if __name__== "__main__":

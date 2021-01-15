@@ -682,8 +682,6 @@ def checkClaimGraph(g,claim_type,claim_ID,graph_type):#,mode):
 		#nodes matching
 		if regex_quant.match(a):
 			nodes2remove['det'].add(a)
-		elif (a_urlparse.netloc=='' and a_urlparse.scheme==''):
-			nodes2remove['det'].add(a)
 		elif regex_data.match(a):
 			nodes2remove['data'].add(a)
 		elif regex_prop.match(a):
