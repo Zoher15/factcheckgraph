@@ -14,7 +14,7 @@ import datetime
 import codecs
 
 def plot_roc(graph_path,fcg_class,fcg_type,graph_type):
-	fcg_types={"co_occur":{"tfcg":"tfcg_co","ffcg":"ffcg_co"},"fred":{"tfcg":"tfcg","ffcg":"ffcg"}}
+	fcg_types={"co_occur":{"tfcg":"tfcg_co","ffcg":"ffcg_co"},"fred":{"tfcg":"tfcg","ffcg":"ffcg","ufcg":"ufcg"}}
 	embeds={'roberta-base-nli-stsb-mean-tokens':'e1'}#,'claims-roberta-base-nli-stsb-mean-tokens-2020-05-27_19-01-27':'e2'}
 	dists={'w':'d1','d':'d2'}#,'f':'d3'}
 	aggs={'mean':'a1','max':'a2','median':'a3'}#,'domb':'a4'}
@@ -118,7 +118,7 @@ def plot_roc(graph_path,fcg_class,fcg_type,graph_type):
 	plt.clf()
 
 def plot_dist(graph_path,fcg_class,fcg_type,graph_type):
-	fcg_types={"co_occur":{"tfcg":"tfcg_co","ffcg":"ffcg_co"},"fred":{"tfcg":"tfcg","ffcg":"ffcg"}}
+	fcg_types={"co_occur":{"tfcg":"tfcg_co","ffcg":"ffcg_co"},"fred":{"tfcg":"tfcg","ffcg":"ffcg","ufcg":"ufcg"}}
 	embeds={'roberta-base-nli-stsb-mean-tokens':'e1'}#,'claims-roberta-base-nli-stsb-mean-tokens-2020-05-27_19-01-27':'e2'}
 	dists={'w':'d1','d':'d2'}#,'f':'d3'}
 	aggs={'mean':'a1','max':'a2','median':'a3'}#,'domb':'a4'}
@@ -353,7 +353,7 @@ if __name__== "__main__":
 	parser = argparse.ArgumentParser(description='Plotting true(adjacent) pairs vs false (non-adjacent)')
 	parser.add_argument('-gp','--graphpath', metavar='graph path',type=str,help='Path to the graph directory',default='/gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph_data/graphs/')
 	parser.add_argument('-fcg','--fcgclass', metavar='fcg class',type=str,help='Class of FactCheckGraph to process')
-	parser.add_argument('-ft','--fcgtype', metavar='FCG Type',type=str,choices=['tfcg','ffcg','tfcg_co','ffcg_co'])
+	parser.add_argument('-ft','--fcgtype', metavar='FCG Type',type=str,choices=['tfcg','ffcg','tfcg_co','ffcg_co','ufcg'])
 	parser.add_argument('-pt','--plottype', metavar='plot type',type=str,choices=['roc','dist'],help='Class of graph to plot')
 	parser.add_argument('-gt','--graphtype', metavar='Graph Type Directed/Undirected',type=str,choices=['directed','undirected'],default='undirected')
 	args=parser.parse_args()

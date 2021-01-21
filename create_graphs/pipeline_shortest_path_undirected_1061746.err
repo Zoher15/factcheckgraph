@@ -1,0 +1,150 @@
+separate_claims
+
+real	0m12.997s
+user	0m6.988s
+sys	0m0.348s
+embeddings
+embed.py:22: RuntimeWarning: invalid value encountered in greater
+  indices=np.argwhere(claim_claim>0.825)
+
+real	2m6.902s
+user	32m33.791s
+sys	0m23.681s
+embed.py:22: RuntimeWarning: invalid value encountered in greater
+  indices=np.argwhere(claim_claim>0.825)
+
+real	0m35.305s
+user	8m50.869s
+sys	0m7.065s
+create graphs
+fetching
+
+real	0m18.904s
+user	10m10.029s
+sys	0m7.622s
+
+real	0m52.376s
+user	32m30.304s
+sys	0m13.277s
+compiling
+
+real	0m15.297s
+user	5m56.914s
+sys	0m17.143s
+
+real	0m45.075s
+user	21m33.250s
+sys	0m51.285s
+
+real	0m9.830s
+user	0m7.756s
+sys	0m0.592s
+
+real	0m25.290s
+user	0m6.850s
+sys	0m0.953s
+
+real	1m14.456s
+user	0m21.482s
+sys	0m2.541s
+
+real	0m27.538s
+user	0m25.036s
+sys	0m0.852s
+calculate stats
+
+real	0m3.110s
+user	0m1.547s
+sys	0m0.383s
+
+real	0m5.000s
+user	0m3.660s
+sys	0m0.425s
+
+real	0m6.082s
+user	0m4.431s
+sys	0m0.508s
+
+real	0m6.806s
+user	0m5.198s
+sys	0m0.471s
+
+real	0m17.105s
+user	0m15.277s
+sys	0m0.700s
+
+real	0m19.793s
+user	0m17.896s
+sys	0m0.735s
+
+real	0m2.225s
+user	0m0.533s
+sys	0m0.457s
+leave1out
+
+real	5m25.987s
+user	166m34.741s
+sys	10m15.469s
+multiprocessing.pool.RemoteTraceback: 
+"""
+Traceback (most recent call last):
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/networkx/utils/decorators.py", line 240, in _open_file
+    result = func_to_be_decorated(*new_args, **kwargs)
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/networkx/readwrite/edgelist.py", line 179, in write_edgelist
+    path.write(line.encode(encoding))
+OSError: [Errno 122] Disk quota exceeded
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/multiprocessing/pool.py", line 121, in worker
+    result = (True, func(*args, **kwds))
+  File "create_leave1out.py", line 25, in compose_graphs
+    nx.write_edgelist(fcg,pathname)
+  File "<decorator-gen-616>", line 2, in write_edgelist
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/site-packages/networkx/utils/decorators.py", line 243, in _open_file
+    fobj.close()
+OSError: [Errno 122] Disk quota exceeded
+"""
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "create_leave1out.py", line 74, in <module>
+    create_leave1out(args.rdfpath,args.graphpath,args.fcgclass,args.fcgtype,args.cpu,args.jobs,args.jobnum,graph_types[args.graphtype])
+  File "create_leave1out.py", line 53, in create_leave1out
+    output=[p.get() for p in results]
+  File "create_leave1out.py", line 53, in <listcomp>
+    output=[p.get() for p in results]
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/multiprocessing/pool.py", line 657, in get
+    raise self._value
+OSError: [Errno 122] Disk quota exceeded
+
+real	77m19.572s
+user	2144m48.220s
+sys	125m21.739s
+finding shortest paths tfcg
+Traceback (most recent call last):
+  File "find_shortest_paths.py", line 311, in <module>
+    find_shortest_paths(args.rdfpath,args.modelpath,args.graphpath,graph_types[args.graphtype],args.embedpath,args.sfcgtype,args.tfcgtype,args.fcgclass,args.cpu)
+  File "find_shortest_paths.py", line 294, in find_shortest_paths
+    f.write(json.dumps(paths_of_interest_w,indent=5,ensure_ascii=False))
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/codecs.py", line 721, in write
+    return self.writer.write(data)
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/codecs.py", line 378, in write
+    self.stream.write(data)
+OSError: [Errno 122] Disk quota exceeded
+
+real	11m25.216s
+user	457m25.100s
+sys	0m56.507s
+
+real	0m5.486s
+user	0m1.885s
+sys	0m1.739s
+
+real	0m1.626s
+user	0m0.487s
+sys	0m0.347s
+finding shortest paths ffcg
+find baseline

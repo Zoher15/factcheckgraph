@@ -294,18 +294,18 @@ def compileFred(rdf_path,graph_path,graph_type,fcg_label,cpu):
 		if cpu>1:
 			n=int(len(claim_IDs)/cpu)+1
 			pool=mp.Pool(processes=cpu)					
-			results=[pool.apply_async(compileClaimGraph2, args=(index,claims_path,claim_IDs,clean_claims,index*n,min((index+1)*n,len(claim_IDs)))) for index in range(cpu)]
+			results=[pool.apply_async(compileClaimGraph, args=(index,claims_path,claim_IDs,clean_claims,index*n,min((index+1)*n,len(claim_IDs)))) for index in range(cpu)]
 			output=sorted([p.get() for p in results],key=lambda x:x[0])
 			edgelist=[edge for o in output for edge in o[1]]
 		else:
-			edgelist=compileClaimGraph2(0,claims_path,claim_IDs,clean_claims,0,len(claim_IDs))[1]
+			edgelist=compileClaimGraph(0,claims_path,claim_IDs,clean_claims,0,len(claim_IDs))[1]
 		edgelist=list(sorted(edgelist,key=lambda x:x[0]))
 		master_fcg=eval(graph_type+'()')
 		master_fcg.add_edges_from(edgelist)
 		#compileclaimgrpah2
-		master_clean=compile_clean(rdf_path,clean_claims,claim_type)
-		master_fcg=cleanClaimGraph(master_fcg,master_clean)
-		master_fcg=nx.relabel_nodes(master_fcg,lambda x:nodelabel_mapper(x))
+		# master_clean=compile_clean(rdf_path,clean_claims,claim_type)
+		# master_fcg=cleanClaimGraph(master_fcg,master_clean)
+		# master_fcg=nx.relabel_nodes(master_fcg,lambda x:nodelabel_mapper(x))
 		##########################
 		saveFred(master_fcg,graph_path,fcg_label,graph_type)
 

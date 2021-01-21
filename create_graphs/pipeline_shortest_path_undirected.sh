@@ -17,15 +17,15 @@ conda activate
 cd /gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph/create_graphs/
 errcho separate_claims
 time python separate_claims.py
-################################################################
+# ################################################################
 cd /geode2/home/u110/zkachwal/BigRed3/factcheckgraph/analyze_graphs/
 errcho embeddings
 time python embed.py -ft ffcg -mp roberta-base-nli-stsb-mean-tokens
 time python embed.py -ft tfcg -mp roberta-base-nli-stsb-mean-tokens
-################################################################
+# ################################################################
 cd /gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph/create_graphs/
 errcho create graphs
-################################################################
+# ################################################################
 errcho fetching
 time python fetch_fred.py -ft tfcg -cpu 48 -p
 time python fetch_fred.py -ft ffcg -cpu 48 -p 
@@ -48,13 +48,13 @@ time python calculate_stats.py -gc co_occur -gt ffcg_co
 time python calculate_stats.py -gc co_occur -gt ufcg_co
 time python compile_stats.py
 ################################################################
-errcho leave1out
-cd /gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph/create_graphs/
+# errcho leave1out
+# cd /gpfs/home/z/k/zkachwal/BigRed3/factcheckgraph/create_graphs/
 # time python create_leave1out.py -fc fred -ft tfcg -cpu 48
 # time python create_leave1out.py -fc fred -ft ffcg -cpu 48
 # time python create_leave1out.py -fc fred -ft ufcg -cpu 48
-time python create_leave1out.py -fc co_occur -ft tfcg_co -cpu 48
-time python create_leave1out.py -fc co_occur -ft ffcg_co -cpu 48
+# time python create_leave1out.py -fc co_occur -ft tfcg_co -cpu 48
+# time python create_leave1out.py -fc co_occur -ft ffcg_co -cpu 48
 # time python create_leave1out.py -fc co_occur -ft ufcg_co -cpu 48
 ################################################################
 errcho finding shortest paths tfcg
