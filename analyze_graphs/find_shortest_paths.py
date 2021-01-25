@@ -64,8 +64,8 @@ def create_weighted(p,rdf_path,model_path,graph_path,graph_type,embed_path,fcg_t
 	#Creating fcg read path
 	suffix={"co_occur":"_co","fred":"_clean"}
 	if fcg_type not in set(['tfcg_co','ffcg_co','tfcg','ffcg','ufcg','ufcg_co']):
-		fcg_parent_type,claimID=fcg_type.split('-')
-		fcg_path=os.path.join(graph_path,fcg_class,fcg_parent_type)
+		fcg_type,claimID=fcg_type.split('-')
+		fcg_path=os.path.join(graph_path,fcg_class,fcg_type)
 		claim_label="claim"+claimID+suffix[fcg_class]
 	else:
 		fcg_path=os.path.join(graph_path,fcg_class,fcg_type)
@@ -89,13 +89,17 @@ def create_weighted(p,rdf_path,model_path,graph_path,graph_type,embed_path,fcg_t
 	dist_p=np.arccos(simil_p)/np.pi
 	# loading source fcg to be weighted
 	fcg=nx.read_edgelist(os.path.join(fcg_path,"{}.edgelist".format(fcg_type)),comments="@",create_using=eval(graph_type))
+	fcg_edges=[(u,v,d['claim_ID'],d) for u,v,k,d in fcg.edges.data(keys=True)]
+	fcg=eval(graph_type+'()')
+	fcg.add_edges_from(fcg_edges)
 	#loading claim fcg to be removed
 	try:
 		claim_fcg=nx.read_edgelist(os.path.join(claim_path,"{}.edgelist".format(claim_label)),comments="@",create_using=eval(graph_type))
 	except FileNotFoundError:
 		claim_fcg=eval(graph_type+'()')
 	#remove claim_edges from fcg
-	fcg.remove_edges_from(list(claim_fcg.edges.data()))
+	claim_edges=[(u,v,d['claim_ID'],d) for u,v,k,d in claim_fcg.edges.data(keys=True)]
+	fcg.remove_edges_from(claim_edges)
 	#assigning weight by summing the log of adjacent nodes, and dividing by the similiarity of the claim with the target predicate
 	fcg_edges=fcg.edges.data(keys=True)
 	for u,v,k,d in fcg_edges:
@@ -118,7 +122,7 @@ def create_weighted(p,rdf_path,model_path,graph_path,graph_type,embed_path,fcg_t
 	#Assigning the weight (dist*log(degree)) it again after the graph is pruned off its mutli edges
 	for u,v,data in fcg2.edges.data():
 		dist=data['dist']
-		weight=np.log2(fcg.degree(u))+np.log2(fcg.degree(v))
+		weight=np.log10(fcg.degree(u))+np.log10(fcg.degree(v))
 		fcg2.edges[u,v]['weight']=weight*dist
 	#returning labels and embeddata so that source dist and weights can be added
 	return fcg2
@@ -128,25 +132,29 @@ def create_weighted2(p,rdf_path,model_path,graph_path,graph_type,embed_path,fcg_
 	#Creating fcg read path
 	suffix={"co_occur":"_co","fred":"_clean"}
 	if fcg_type not in set(['tfcg_co','ffcg_co','tfcg','ffcg']):
-		fcg_parent_type,claimID=fcg_type.split('-')
-		fcg_path=os.path.join(graph_path,fcg_class,fcg_parent_type)
+		fcg_type,claimID=fcg_type.split('-')
+		fcg_path=os.path.join(graph_path,fcg_class,fcg_type)
 		claim_label="claim"+claimID+suffix[fcg_class]
 	else:
 		fcg_path=os.path.join(graph_path,fcg_class,fcg_type)
 		claim_label=""
 	fcg=nx.read_edgelist(os.path.join(fcg_path,"{}.edgelist".format(fcg_type)),comments="@",create_using=eval(graph_type))
+	fcg_edges=[(u,v,d['claim_ID'],d) for u,v,k,d in fcg.edges.data(keys=True)]
+	fcg=eval(graph_type+'()')
+	fcg.add_edges_from(fcg_edges)
 	try:
 		claim_fcg=nx.read_edgelist(os.path.join(claim_path,"{}.edgelist".format(claim_label)),comments="@",create_using=eval(graph_type))
 	except FileNotFoundError:
 		claim_fcg=eval(graph_type+'()')
 	#remove claim_edges from fcg
-	fcg.remove_edges_from(list(claim_fcg.edges.data()))
+	claim_edges=[(u,v,d['claim_ID'],d) for u,v,k,d in claim_fcg.edges.data(keys=True)]
+	fcg.remove_edges_from(claim_edges)
 	#Removing multiedges, by selecting the shortest one
 	fcg2=nx.Graph(fcg.copy())
 	#Assigning the weight (dist*log(degree)) it again after the graph is pruned off its mutli edges
 	for u,v,data in fcg2.edges.data():
 		dist=1
-		weight=np.log2(fcg.degree(u))+np.log2(fcg.degree(v))
+		weight=np.log10(fcg.degree(u))+np.log10(fcg.degree(v))
 		fcg2.edges[u,v]['weight']=weight*dist
 		fcg2.edges[u,v]['dist']=dist
 		fcg2.edges[u,v]['rating']=data['rating']
@@ -183,7 +191,7 @@ def find_paths_of_interest(index,rdf_path,graph_path,graph_type,embed_path,model
 		p=np.array([target_claims_embed[claimIX]])
 		#source_fcg is not a multigraph
 		#if source and target are the same graph, then the graph without the given claim is fetched
-		if source_fcg_type==target_fcg_type:
+		if source_fcg_type==target_fcg_type or source_fcg_type=='ufcg':
 			source_fcg=create_weighted2(p,rdf_path,model_path,graph_path,graph_type,embed_path,source_fcg_type+'-'+str(claimID),fcg_class,source_claim_type,target_fcg_path)
 		else:
 			source_fcg=create_weighted2(p,rdf_path,model_path,graph_path,graph_type,embed_path,source_fcg_type,fcg_class,source_claim_type,target_fcg_path)

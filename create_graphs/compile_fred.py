@@ -45,7 +45,7 @@ def nodelabel_mapper(text):
 def saveClaimGraph(claim_g,filename):
 	nx.write_edgelist(claim_g,filename+"_clean.edgelist")
 	claim_g=nx.read_edgelist(filename+"_clean.edgelist",comments="@")
-	nx.write_graphml(claim_g,filename+"_clean.graphml",prettyprint=True)
+	nx.write_gefx(claim_g,filename+"_clean.gefx",prettyprint=True)
 	plotFredGraph(claim_g,filename+"_clean")
 
 #Function to plot a networkx graph
@@ -193,27 +193,29 @@ def compile_clean(rdf_path,clean_claims,claim_type):
 	master_clean['nodes2contract']['identity']=[]#keep right node
 	master_clean['nodes2contract']['quality']=[]#keep left node
 	master_clean['nodes2contract']['num']=[]#keep left node
-	with codecs.open(os.path.join(rdf_path,"{}claims_clean.txt".format(claim_type)),"w","utf-8") as f: 
-		pprint(clean_claims,stream=f)
+	if claim_type:
+		with codecs.open(os.path.join(rdf_path,"{}claims_clean.txt".format(claim_type)),"w","utf-8") as f: 
+			pprint(clean_claims,stream=f)
 	for clean_claim in clean_claims.values():
 		for key in clean_claim.keys():
 			for key2 in clean_claim[key].keys():
 				master_clean[key][key2]+=clean_claim[key][key2]
-	with codecs.open(os.path.join(rdf_path,"{}master_clean.txt".format(claim_type)),"w","utf-8") as f: 
-		pprint(master_clean,stream=f)
-	with codecs.open(os.path.join(rdf_path,"{}master_clean.json".format(claim_type)),"w","utf-8") as f:
-		f.write(json.dumps(master_clean,indent=4,ensure_ascii=False))
+	if claim_type:
+		with codecs.open(os.path.join(rdf_path,"{}master_clean.txt".format(claim_type)),"w","utf-8") as f: 
+			pprint(master_clean,stream=f)
+		with codecs.open(os.path.join(rdf_path,"{}master_clean.json".format(claim_type)),"w","utf-8") as f:
+			f.write(json.dumps(master_clean,indent=4,ensure_ascii=False))
 	return master_clean
 
 #Function to save fred graph including its nodes, entities, node2ID dictionary and edgelistID (format needed by klinker)	
 def saveFred(fcg,graph_path,fcg_label,graph_type):
 	fcg_path=os.path.join(graph_path,"fred",fcg_label)
 	os.makedirs(fcg_path, exist_ok=True)
-	#writing aggregated networkx graphs as edgelist and graphml
+	#writing aggregated networkx graphs as edgelist and gefx
 	nx.write_edgelist(fcg,os.path.join(fcg_path,"{}.edgelist".format(fcg_label)))
 	fcg=nx.read_edgelist(os.path.join(fcg_path,"{}.edgelist".format(fcg_label)),comments="@",create_using=eval(graph_type))
-	#Saving graph as graphml
-	nx.write_graphml(fcg,os.path.join(fcg_path,"{}.graphml".format(fcg_label)),prettyprint=True)
+	#Saving graph as gefx
+	nx.write_gefx(fcg,os.path.join(fcg_path,"{}.gefx".format(fcg_label)),prettyprint=True)
 	os.makedirs(os.path.join(fcg_path,"data"),exist_ok=True)
 	write_path=os.path.join(fcg_path,"data",fcg_label)
 	nodes=list(fcg.nodes)
@@ -249,39 +251,71 @@ def compileClaimGraph(index,claims_path,claim_IDs,clean_claims,init,end):
 		claim_g=cleanClaimGraph(claim_g,clean_claims[str(claim_ID)])
 		claim_g=nx.relabel_nodes(claim_g,lambda x:nodelabel_mapper(x))
 		saveClaimGraph(claim_g,filename)
-		edgelist+=claim_g.edges.data()
+		edgelist+=[(u,v,d['claim_ID'],d) for u,v,d in claim_g.edges.data()]
 	return index,edgelist
 
-def compileClaimGraph2(index,claims_path,claim_IDs,clean_claims,init,end):
-	edgelist=[]
-	cleanlist=[]
-	for claim_ID in claim_IDs[init:end]:
-		filename=os.path.join(claims_path,"claim{}".format(str(claim_ID)))
-		try:
-			claim_g=nx.read_edgelist(filename+".edgelist",comments="@")
-		except:
-			continue
-		edgelist+=claim_g.edges.data()
-	return index,edgelist
+def compileClaimGraph2(index,graph_path,claim_IDs,clean_claims,init,end,neighbors):
+	for claim_ID in list(claim_IDs.keys())[init:end]:
+		edgelist=[]
+		clean_claims=[]
+		for n_ID in neighbors[claim_ID]:
+			filename=os.path.join(claim_IDs[n_ID],"claim{}".format(str(n_ID)))
+			try:
+				claim_g=nx.read_edgelist(filename+".edgelist",comments="@")
+			except:
+				continue
+			edgelist+=[(u,v,d['claim_ID'],d) for u,v,d in claim_g.edges.data()]
+			clean_claims.append(clean_claims[n_ID])
+		master_fcg=eval(graph_type+'()')
+		master_fcg.add_edges_from(edgelist)
+		master_clean=compile_clean(rdf_path,clean_claims,None)
+		master_fcg=cleanClaimGraph(master_fcg,master_clean)
+		master_fcg=nx.relabel_nodes(master_fcg,lambda x:nodelabel_mapper(x))
+		filename=os.path.join(graph_path,"ufcg"+claim_ID)
+		saveClaimGraph(master_fcg,filename)
+		import pdb
+		pdb.set_trace()
 
-
-def compileFred(rdf_path,graph_path,graph_type,fcg_label,cpu):
+def compileFred(rdf_path,graph_path,graph_type,fcg_label,cpu,neighbors):
 	fcg_path=os.path.join(graph_path,"fred",fcg_label)
 	#If union of tfcg and ffcg wants to be created i.e ufcg
 	if fcg_label=="ufcg":
-		#Assumes that tfcg and ffcg exists
-		tfcg_path=os.path.join(graph_path,"fred","tfcg","tfcg.edgelist")
-		ffcg_path=os.path.join(graph_path,"fred","ffcg","ffcg.edgelist")
-		if os.path.exists(tfcg_path) and os.path.exists(ffcg_path):
-			ufcg=eval(graph_type+"()")
-			tfcg=nx.read_edgelist(tfcg_path,comments="@",create_using=eval(graph_type))
-			ffcg=nx.read_edgelist(ffcg_path,comments="@",create_using=eval(graph_type))
-			ufcg.add_edges_from(tfcg.edges.data())
-			ufcg.add_edges_from(ffcg.edges.data())
-			os.makedirs(fcg_path, exist_ok=True)
-			saveFred(ufcg,graph_path,fcg_label,graph_type)
+		if neighbors>0:
+			true_claims_path=os.path.join(rdf_path,"true_claims")
+			false_claims_path=os.path.join(rdf_path,"false_claims")
+			with codecs.open(os.path.join(rdf_path,"trueclaims_clean.json"),"r","utf-8") as f: 
+				true_clean_claims=json.loads(f.read())
+				true_claim_IDs=list(clean_claims.keys())
+			with codecs.open(os.path.join(rdf_path,"falseclaims_clean.json"),"r","utf-8") as f: 
+				false_clean_claims=json.loads(f.read())
+				false_claim_IDs=list(clean_claims.keys())
+			with codecs.open(os.path.join(rdf_path,"neighbors_{}.json".format(neighbors)),"r","utf-8") as f: 
+				neighbors_dict=json.loads(f.read())
+			clean_claims=true_clean_claims.update(false_clean_claims)
+			claim_IDs={t:true_claims_path for t in true_claim_IDs}.update({f:false_claims_path for f in false_claim_IDs})
+			graph_path=os.path.join(graph_path,'fred','ufcg','neighbors_'+neighbors)
+			os.makedirs(graph_path,exist_ok=True)
+			if cpu>1:
+				n=int(len(claim_IDs)/cpu)+1
+				pool=mp.Pool(processes=cpu)					
+				results=[pool.apply_async(compileClaimGraph2, args=(index,graph_path,claim_IDs,clean_claims,index*n,min((index+1)*n,len(claim_IDs)),neighbors_dict)) for index in range(cpu)]
+				output=[p.get() for p in results]
+			else:
+				compileClaimGraph2(0,graph_path,claim_IDs,clean_claims,0,len(claim_IDs),neighbors_dict)
 		else:
-			print("Create tfcg and ffcg before attempting to create the union: ufcg")
+			#Assumes that tfcg and ffcg exists
+			tfcg_path=os.path.join(graph_path,"fred","tfcg","tfcg.edgelist")
+			ffcg_path=os.path.join(graph_path,"fred","ffcg","ffcg.edgelist")
+			if os.path.exists(tfcg_path) and os.path.exists(ffcg_path):
+				ufcg=eval(graph_type+"()")
+				tfcg=nx.read_edgelist(tfcg_path,comments="@",create_using=eval(graph_type))
+				ffcg=nx.read_edgelist(ffcg_path,comments="@",create_using=eval(graph_type))
+				ufcg.add_edges_from([(u,v,d['claim_ID'],d) for u,v,d in tfcg.edges.data()])
+				ufcg.add_edges_from([(u,v,d['claim_ID'],d) for u,v,d in ffcg.edges.data()])
+				os.makedirs(fcg_path, exist_ok=True)
+				saveFred(ufcg,graph_path,fcg_label,graph_type)
+			else:
+				print("Create tfcg and ffcg before attempting to create the union: ufcg")
 	else:
 		claim_types={"tfcg":"true","ffcg":"false"}
 		claim_type=claim_types[fcg_label]
@@ -317,8 +351,9 @@ if __name__== "__main__":
 	parser.add_argument('-p','--passive',action='store_true',help='Passive or not',default=False)
 	parser.add_argument('-cpu','--cpu',metavar='Number of CPUs',type=int,help='Number of CPUs available',default=1)
 	parser.add_argument('-gt','--graphtype', metavar='Graph Type Directed/Undirected',type=str,choices=['directed','undirected'],default='undirected')
+	parser.add_argument('-n','--neighbors',metavar='Number of Neighbors',type=int,help='Number of Neighbors for KNN',default=0)
 	args=parser.parse_args()
 	graph_types={'undirected':'nx.MultiGraph','directed':'nx.MultiDiGraph'}
-	compileFred(args.rdfpath,args.graphpath,graph_types[args.graphtype],args.fcgtype,args.cpu)
+	compileFred(args.rdfpath,args.graphpath,graph_types[args.graphtype],args.fcgtype,args.cpu,args.neighbors)
 
 

@@ -21,9 +21,6 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
 from sklearn import neighbors, datasets
-# sys.path.insert(1, '/geode2/home/u110/zkachwal/BigRed3/factcheckgraph/create_graphs')
-# from create_fred import *
-# from create_co_occur import *
 import csv
 
 def chunkstring(string,length):
@@ -126,41 +123,11 @@ def find_baseline(rdf_path,graph_path,model_path,embed_path,graph_type,fcg_class
 	true_false_true_mean=np.apply_along_axis(np.nanmean,1,true_false)
 	false_false_mean=np.apply_along_axis(np.nanmean,1,false_false)
 	true_false_false_mean=np.apply_along_axis(np.nanmean,0,true_false)
-	# Zoher's formula
-	# true_scores=(true_true_mean-true_false_true_mean)/((true_true_mean*len(true_true)+true_false_true_mean*len(false_false))/(len(true_true)+len(false_false)))
-	# false_scores=(true_false_false_mean-false_false_mean)/((true_false_false_mean*len(true_true)+false_false_mean*len(false_false))/(len(true_true)+len(false_false)))
-	# Fil's formula
 	true_scores=list((true_true_mean*len(true_true)-true_false_true_mean*len(false_false))/(true_true_mean*len(true_true)+true_false_true_mean*len(false_false)))
 	false_scores=list((true_false_false_mean*len(true_true)-false_false_mean*len(false_false))/(true_false_false_mean*len(true_true)+false_false_mean*len(false_false)))
 	#
 	fpr,tpr,thresholds=metrics.roc_curve(true1_y+false0_y,list(true_scores)+list(false_scores), pos_label=1)
 	plt.plot(fpr,tpr,lw=lw,label='scores (%0.2f) '%metrics.auc(fpr,tpr))
-
-	# fpr,tpr,thresholds=metrics.roc_curve(true1_y+false0_y,list(true_false_true_mean)+list(false_false_mean), pos_label=1)
-	# plt.plot(fpr,tpr,lw=lw,label='false claims mean (%0.2f) '%metrics.auc(fpr,tpr))
-
-	# true_true_min=np.apply_along_axis(np.nanmin,1,true_true)
-	# true_false_true_min=np.apply_along_axis(np.nanmin,1,true_false)
-	# false_false_min=np.apply_along_axis(np.nanmin,1,false_false)
-	# true_false_false_min=np.apply_along_axis(np.nanmin,0,true_false)
-
-	# fpr,tpr,thresholds=metrics.roc_curve(true0_y+false1_y,list(true_true_min)+list(true_false_false_min), pos_label=1)
-	# plt.plot(fpr,tpr,lw=lw,label='true claims min (%0.2f) '%metrics.auc(fpr,tpr))
-
-	# fpr,tpr,thresholds=metrics.roc_curve(true1_y+false0_y,list(true_false_true_min)+list(false_false_min), pos_label=1)
-	# plt.plot(fpr,tpr,lw=lw,label='false claims min (%0.2f) '%metrics.auc(fpr,tpr))
-
-	# true_true_max=np.apply_along_axis(np.nanmax,1,true_true)
-	# true_false_true_max=np.apply_along_axis(np.nanmax,1,true_false)
-	# false_false_max=np.apply_along_axis(np.nanmax,1,false_false)
-	# true_false_false_max=np.apply_along_axis(np.nanmax,0,true_false)
-
-	# fpr,tpr,thresholds=metrics.roc_curve(true0_y+false1_y,list(true_true_max)+list(true_false_false_max), pos_label=1)
-	# plt.plot(fpr,tpr,lw=lw,label='true claims max (%0.2f) '%metrics.auc(fpr,tpr))
-
-	# fpr,tpr,thresholds=metrics.roc_curve(true1_y+false0_y,list(true_false_true_max)+list(false_false_max), pos_label=1)
-	# plt.plot(fpr,tpr,lw=lw,label='false claims max (%0.2f) '%metrics.auc(fpr,tpr))
-
 	plt.xlabel('True Positive Rate')
 	plt.ylabel('False Positive Rate')
 	plt.legend(loc="lower right")
@@ -254,6 +221,9 @@ def find_knn(k,rdf_path,graph_path,model_path,embed_path,graph_type,fcg_class,n_
 	Xlabel_t=np.apply_along_axis(lambda x:Xlabels_t[x,0],1,Xn_t)
 	#claimID in Xlabels
 	XclaimID=np.apply_along_axis(lambda x:Xlabels[x,1],1,Xn)
+	neighbor_dict={Xlabels[i,1]:XclaimID[i].tolist() for i in range(len(Xlabels))}
+	with codecs.open(os.path.join(rdf_path,"neighbors_{}.json".format(n_neighbors)),"w","utf-8") as f:
+		f.write(json.dumps(neighbor_dict,indent=6,ensure_ascii=False))
 	XclaimID_t=np.apply_along_axis(lambda x:Xlabels_t[x,1],1,Xn_t)
 	#rating in Xlabels
 	Xrating=np.apply_along_axis(lambda x:Xlabels[x,2],1,Xn)
@@ -489,15 +459,14 @@ if __name__== "__main__":
 	if args.baselinetype=='all':
 		find_baseline(args.rdfpath,args.graphpath,args.modelpath,args.embedpath,args.graphtype,args.fcgclass)
 	elif args.baselinetype=='knn':
-		rocs=[]
-		plotrange=[i for i in range(0,41,10)]
+		plotrange=[i for i in range(0,101,10)]
 		plotrange[0]+=1
 		if args.cpu:
 			pool=mp.Pool(processes=args.cpu)
 			results=[pool.apply_async(find_knn, args=(k,args.rdfpath,args.graphpath,args.modelpath,args.embedpath,args.graphtype,args.fcgclass,k)) for k in plotrange]
 			results=sorted([p.get() for p in results],key=lambda t:t[0])
 		else:
-			rocs=[]
+			results=[]
 			for k in plotrange:
 				results.append(find_knn(k,args.rdfpath,args.graphpath,args.modelpath,args.embedpath,args.graphtype,args.fcgclass,k))
 		aucs=[t[1] for t in results]

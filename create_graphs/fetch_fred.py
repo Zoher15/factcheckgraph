@@ -649,7 +649,7 @@ def checkClaimGraph(g,claim_type,claim_ID,graph_type):#,mode):
 		(a,b,c)=e
 		nodes_set.add(a)
 		nodes_set.add(c)
-		claim_g.add_edge(a,c,label=b.split("/")[-1].split("#")[-1],claim_ID=claim_ID,rating=ratings[claim_type])
+		claim_g.add_edge(a,c,label=b.split("/")[-1].split("#")[-1],claim_ID=claim_ID,rating=ratings[claim_type],key='claim'+str(claim_ID))
 		#Edges
 		# if edge_list[e].Type==EdgeMotif.Property:
 		# 	if regex_quality.match(b) and (regex_fredup.match(c) and regex_fredup.match(a)):
