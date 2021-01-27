@@ -63,7 +63,7 @@ def plot_roc(graph_path,fcg_class,fcg_type,graph_type):
 				plot_dict['pr'][mlabel]['label']=mlabel+' AVG_Pr (%0.2f) '%metrics.average_precision_score(y,scores)
 				plot_dict['f1'][mlabel]['thresholds']=thresholds
 				plot_dict['f1'][mlabel]['f1scores']=f1scores
-				plot_dict['f1'][mlabel]['label']=mlabel+' AVG_Pr (%0.2f) '%metrics.average_precision_score(y,scores)
+				plot_dict['f1'][mlabel]['label']=mlabel+' MAX_F1 (%0.2f) '%max(f1scores)
 	#Plotting
 	lw=2
 	if fcg_type:
@@ -233,7 +233,7 @@ def plot_roc2(graph_path,fcg_class,fcg_type,graph_type):
 				plot_dict['pr'][mlabel]['label']=mlabel+' AVG_Pr (%0.2f) '%metrics.average_precision_score(y,scores)
 				plot_dict['f1'][mlabel]['thresholds']=thresholds
 				plot_dict['f1'][mlabel]['f1scores']=f1scores
-				plot_dict['f1'][mlabel]['label']=mlabel+' AVG_Pr (%0.2f) '%metrics.average_precision_score(y,scores)
+				plot_dict['f1'][mlabel]['label']=mlabel+' Max_F1 (%0.2f) '%max(f1scores)
 	#Plotting
 	lw=2
 	if fcg_type:

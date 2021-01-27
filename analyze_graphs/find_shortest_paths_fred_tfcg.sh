@@ -16,8 +16,8 @@ conda activate
 cd /geode2/home/u110/zkachwal/BigRed3/factcheckgraph/analyze_graphs/
 ################################################################
 errcho find_shortest_paths
-time python find_shortest_paths.py -st tfcg -ft tfcg -mp roberta-base-nli-stsb-mean-tokens -fc fred -cpu 48
-time python find_shortest_paths.py -st tfcg -ft ffcg -mp roberta-base-nli-stsb-mean-tokens -fc fred -cpu 48
+time python find_shortest_paths.py -st tfcg -ft tfcg -mp roberta-base-nli-stsb-mean-tokens -cpu 48 -n 40
+time python find_shortest_paths.py -st tfcg -ft ffcg -mp roberta-base-nli-stsb-mean-tokens -cpu 48 -n 40
 time python order_paths.py -fcg fred -ft tfcg
 ################################################################
 errcho plot graphs 

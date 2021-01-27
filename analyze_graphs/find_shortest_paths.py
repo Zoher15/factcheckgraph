@@ -63,12 +63,15 @@ def clean_node_labels(node_label):
 def create_weighted(p,rdf_path,model_path,graph_path,graph_type,embed_path,fcg_type,fcg_class,claim_type,claim_path):
 	#Creating fcg read path
 	suffix={"co_occur":"_co","fred":"_clean"}
-	if fcg_type not in set(['tfcg_co','ffcg_co','tfcg','ffcg','ufcg','ufcg_co']):
+	if fcg_type not in set(['tfcg_co','ffcg_co','tfcg','ffcg','ufcg','ufcg_co']) and fcg_class in suffix.keys():
 		fcg_type,claimID=fcg_type.split('-')
 		fcg_path=os.path.join(graph_path,fcg_class,fcg_type)
 		claim_label="claim"+claimID+suffix[fcg_class]
 	else:
-		fcg_path=os.path.join(graph_path,fcg_class,fcg_type)
+		if fcg_class not in suffix.keys():
+			fcg_path=os.path.join(graph_path,fcg_class)
+		else:
+			fcg_path=os.path.join(graph_path,fcg_class,fcg_type)
 		claim_label=""
 	# loading weighting embeddings
 	if claim_type=='truefalse':
@@ -128,27 +131,36 @@ def create_weighted(p,rdf_path,model_path,graph_path,graph_type,embed_path,fcg_t
 	return fcg2
 
 #weighted without embedding weighting and without multigraphs
-def create_weighted2(p,rdf_path,model_path,graph_path,graph_type,embed_path,fcg_type,fcg_class,claim_type,claim_path):
+def create_weighted2(p,rdf_path,model_path,graph_path,graph_type,embed_path,fcg_type,fcg_class,claim_type,claim_path,neighbors):
 	#Creating fcg read path
 	suffix={"co_occur":"_co","fred":"_clean"}
-	if fcg_type not in set(['tfcg_co','ffcg_co','tfcg','ffcg']):
+	if fcg_type not in set(['tfcg_co','ffcg_co','tfcg','ffcg']) and fcg_class in suffix.keys():
 		fcg_type,claimID=fcg_type.split('-')
 		fcg_path=os.path.join(graph_path,fcg_class,fcg_type)
 		claim_label="claim"+claimID+suffix[fcg_class]
 	else:
-		fcg_path=os.path.join(graph_path,fcg_class,fcg_type)
+		if fcg_class not in suffix.keys():
+			fcg_path=os.path.join(graph_path,fcg_class)
+		else:
+			fcg_path=os.path.join(graph_path,fcg_class,fcg_type)
 		claim_label=""
+
 	fcg=nx.read_edgelist(os.path.join(fcg_path,"{}.edgelist".format(fcg_type)),comments="@",create_using=eval(graph_type))
-	fcg_edges=[(u,v,d['claim_ID'],d) for u,v,k,d in fcg.edges.data(keys=True)]
-	fcg=eval(graph_type+'()')
-	fcg.add_edges_from(fcg_edges)
-	try:
-		claim_fcg=nx.read_edgelist(os.path.join(claim_path,"{}.edgelist".format(claim_label)),comments="@",create_using=eval(graph_type))
-	except FileNotFoundError:
-		claim_fcg=eval(graph_type+'()')
 	#remove claim_edges from fcg
-	claim_edges=[(u,v,d['claim_ID'],d) for u,v,k,d in claim_fcg.edges.data(keys=True)]
-	fcg.remove_edges_from(claim_edges)
+	if len(neighbors)==0:
+		fcg_edges=[(u,v,d['claim_ID'],d) for u,v,k,d in fcg.edges.data(keys=True)]
+		fcg=eval(graph_type+'()')
+		fcg.add_edges_from(fcg_edges)
+		try:
+			claim_fcg=nx.read_edgelist(os.path.join(claim_path,"{}.edgelist".format(claim_label)),comments="@",create_using=eval(graph_type))
+		except FileNotFoundError:
+			claim_fcg=eval(graph_type+'()')
+		claim_edges=[(u,v,d['claim_ID'],d) for u,v,k,d in claim_fcg.edges.data(keys=True)]
+		fcg.remove_edges_from(claim_edges)
+	else:
+		fcg_edges=[(u,v,d['claim_ID'],d) for u,v,k,d in fcg.edges.data(keys=True) if str(d['claim_ID']) in set(neighbors[claimID])]
+		fcg=eval(graph_type+'()')
+		fcg.add_edges_from(fcg_edges)
 	#Removing multiedges, by selecting the shortest one
 	fcg2=nx.Graph(fcg.copy())
 	#Assigning the weight (dist*log(degree)) it again after the graph is pruned off its mutli edges
@@ -161,10 +173,10 @@ def create_weighted2(p,rdf_path,model_path,graph_path,graph_type,embed_path,fcg_
 	#returning labels and embeddata so that source dist and weights can be added
 	return fcg2
 
-def find_paths_of_interest(index,rdf_path,graph_path,graph_type,embed_path,model_path,claimIDs,fcg_class,source_fcg_type,target_fcg_type,source_claim_type,target_claim_type,source_claims,target_claims,target_claims_embed,target_claims_embed_labels):
+def find_paths_of_interest(index,rdf_path,graph_path,graph_type,embed_path,model_path,claimIDs,fcg_class,source_fcg_type,target_fcg_type,source_claim_type,target_claim_type,source_claims,target_claims,target_claims_embed,target_claims_embed_labels,neighbors):
 	paths_of_interest_w={}
 	paths_of_interest_d={}
-	suffix={"co_occur":"_co","fred":"_co"}
+	suffix={"co_occur":"_co","fred":"_clean"}
 	#iterating through the claimIDs of interest
 	for claimID in claimIDs:
 		target_fcg_path=os.path.join(rdf_path,target_claim_type+"_claims")
@@ -181,8 +193,8 @@ def find_paths_of_interest(index,rdf_path,graph_path,graph_type,embed_path,model
 		'''
 		###################################################################################
 		edges=target_fcg.edges.data(keys=True)
-		edges_of_interest=set([(u,v,d['dist']) for u,v,k,d in edges if u!=v and d['dist']!=-1])
-		#edges_of_interest=set([(u,v) for u,v,k,d in edges if u!=v])
+		# edges_of_interest=set([(u,v,d['dist']) for u,v,k,d in edges if u!=v and d['dist']!=-1])
+		edges_of_interest=set([(u,v) for u,v,k,d in edges if u!=v])
 		if len(edges_of_interest)==0:
 			continue
 		###################################################################################
@@ -192,9 +204,9 @@ def find_paths_of_interest(index,rdf_path,graph_path,graph_type,embed_path,model
 		#source_fcg is not a multigraph
 		#if source and target are the same graph, then the graph without the given claim is fetched
 		if source_fcg_type==target_fcg_type or source_fcg_type=='ufcg':
-			source_fcg=create_weighted2(p,rdf_path,model_path,graph_path,graph_type,embed_path,source_fcg_type+'-'+str(claimID),fcg_class,source_claim_type,target_fcg_path)
+			source_fcg=create_weighted2(p,rdf_path,model_path,graph_path,graph_type,embed_path,source_fcg_type+'-'+str(claimID),fcg_class,source_claim_type,target_fcg_path,neighbors)
 		else:
-			source_fcg=create_weighted2(p,rdf_path,model_path,graph_path,graph_type,embed_path,source_fcg_type,fcg_class,source_claim_type,target_fcg_path)
+			source_fcg=create_weighted2(p,rdf_path,model_path,graph_path,graph_type,embed_path,source_fcg_type,fcg_class,source_claim_type,target_fcg_path,neighbors)
 		paths_of_interest_w[claimID]={}
 		paths_of_interest_d[claimID]={}
 		paths_of_interest_w[claimID]['target_claim']=chunkstring(target_claims_embed_labels[target_claims_embed_labels['claimID']==claimID]['claim_text'].values[0],100)
@@ -203,8 +215,7 @@ def find_paths_of_interest(index,rdf_path,graph_path,graph_type,embed_path,model
 		'''
 		for every edge of interest, all edges connected to the source u and target v are reweighted by adding the source log(degree)
 		'''
-		# for u,v,k in edges_of_interest:
-		for u,v,k in edges_of_interest:
+		for u,v in edges_of_interest:
 			if source_fcg.has_node(u) and source_fcg.has_node(v):
 				'''
 				If both node exists, we add the influence of source nodes i.e. the weight and log10(degree) to all the paths.
@@ -225,8 +236,8 @@ def find_paths_of_interest(index,rdf_path,graph_path,graph_type,embed_path,model
 						path_d_data[str((path_d[i],path_d[i+1]))]=data
 						path_d_formed_claim=path_d_formed_claim+" "+cleanstring(path_d[i+1])
 					###########################################################################
-					dw=round(1/(1+aggregate_edge_data(path_d_data,'weight')*k),7)
-					dd=round(1/(1+aggregate_edge_data(path_d_data,'dist')*k),7)
+					dw=round(1/(1+aggregate_edge_data(path_d_data,'weight')),7)
+					dd=round(1/(1+aggregate_edge_data(path_d_data,'dist')),7)
 					path_d_data['formed_claim']=path_d_formed_claim
 					#################################################################################
 					path_w=nx.shortest_path(source_fcg,source=u,target=v,weight='weight')
@@ -239,8 +250,8 @@ def find_paths_of_interest(index,rdf_path,graph_path,graph_type,embed_path,model
 						path_w_data[str((path_w[i],path_w[i+1]))]=data
 						path_w_formed_claim=path_w_formed_claim+" "+cleanstring(path_w[i+1])
 					#################################################################################
-					ww=round(1/(1+aggregate_edge_data(path_w_data,'weight')*k),7)
-					wd=round(1/(1+aggregate_edge_data(path_w_data,'dist')*k),7)
+					ww=round(1/(1+aggregate_edge_data(path_w_data,'weight')),7)
+					wd=round(1/(1+aggregate_edge_data(path_w_data,'dist')),7)
 					path_w_data['formed_claim']=path_w_formed_claim
 				else:
 					dw=0
@@ -266,7 +277,7 @@ Function does the following
 2. Creates a weighted source graph for each target claim using the function create_weighted
 3. Finds shortest path for each edge of interest in the target graph
 '''
-def find_shortest_paths(rdf_path,model_path,graph_path,graph_type,embed_path,source_fcg_type,target_fcg_type,fcg_class,cpu):
+def find_shortest_paths(rdf_path,model_path,graph_path,graph_type,embed_path,source_fcg_type,target_fcg_type,fcg_class,cpu,n):
 	fcg_types={'co_occur':{'tfcg':'tfcg_co','ffcg':'ffcg_co','ufcg':'ufcg_co'},'fred':{'tfcg':'tfcg','ffcg':'ffcg','ufcg':'ufcg'}}
 	#setting source fcg_type
 	source_fcg_type=fcg_types[fcg_class][source_fcg_type]
@@ -303,16 +314,22 @@ def find_shortest_paths(rdf_path,model_path,graph_path,graph_type,embed_path,sou
 		target_claims_embed_labels=pd.read_csv(os.path.join(embed_path,target_claim_type+"_claims_embeddings_labels_({}).tsv".format(model_path.split("/")[-1])),delimiter="\t")
 	#limiting claimIDs to edges of interest if both graphs are different
 	claimIDs=target_claims['claimID'].tolist()
+	#loading neighbor dictionary
+	if n:
+		with codecs.open(os.path.join(rdf_path,"neighbors_{}.json".format(str(n))),"r","utf-8") as f:
+			neighbors=json.loads(f.read())
+	else:
+		neighbors={}
 	#finding paths of interest
 	n=int(len(claimIDs)/cpu)+1
 	if cpu>1:
 		pool=mp.Pool(processes=cpu)
-		results=[pool.apply_async(find_paths_of_interest, args=(index,rdf_path,graph_path,graph_type,embed_path,model_path,claimIDs[index*n:(index+1)*n],fcg_class,source_fcg_type,target_fcg_type,source_claim_type,target_claim_type,source_claims,target_claims,target_claims_embed,target_claims_embed_labels)) for index in range(cpu)]
+		results=[pool.apply_async(find_paths_of_interest, args=(index,rdf_path,graph_path,graph_type,embed_path,model_path,claimIDs[index*n:(index+1)*n],fcg_class,source_fcg_type,target_fcg_type,source_claim_type,target_claim_type,source_claims,target_claims,target_claims_embed,target_claims_embed_labels,neighbors)) for index in range(cpu)]
 		output=sorted([p.get() for p in results],key=lambda x:x[0])
 		paths_of_interest_w=dict(ChainMap(*map(lambda x:x[1],output)))
 		paths_of_interest_d=dict(ChainMap(*map(lambda x:x[2],output)))
 	else:
-		index,paths_of_interest_w,paths_of_interest_d=find_paths_of_interest(0,rdf_path,graph_path,graph_type,embed_path,model_path,claimIDs[0:n],fcg_class,source_fcg_type,target_fcg_type,source_claim_type,target_claim_type,source_claims,target_claims,target_claims_embed,target_claims_embed_labels)
+		index,paths_of_interest_w,paths_of_interest_d=find_paths_of_interest(0,rdf_path,graph_path,graph_type,embed_path,model_path,claimIDs[0:n],fcg_class,source_fcg_type,target_fcg_type,source_claim_type,target_claim_type,source_claims,target_claims,target_claims_embed,target_claims_embed_labels,neighbors)
 	graph_types={'nx.MultiGraph':'undirected','nx.MultiDiGraph':'directed'}
 	graph_type=graph_types[graph_type]
 	#storing the weighted and distance path files for observation
@@ -333,6 +350,7 @@ if __name__== "__main__":
 	parser.add_argument('-fc','--fcgclass', metavar='FactCheckGraph class',type=str,choices=['co_occur','fred'],default='fred')
 	parser.add_argument('-gt','--graphtype', metavar='Graph Type Directed/Undirected',type=str,choices=['directed','undirected'],default='undirected')
 	parser.add_argument('-cpu','--cpu',metavar='Number of CPUs',type=int,help='Number of CPUs available',default=1)
+	parser.add_argument('-n','--neighbors',metavar='Number of Neighbors',type=int,help='Number of Neighbors for KNN',default=0)
 	graph_types={'undirected':'nx.MultiGraph','directed':'nx.MultiDiGraph'}
 	args=parser.parse_args()
-	find_shortest_paths(args.rdfpath,args.modelpath,args.graphpath,graph_types[args.graphtype],args.embedpath,args.sfcgtype,args.tfcgtype,args.fcgclass,args.cpu)
+	find_shortest_paths(args.rdfpath,args.modelpath,args.graphpath,graph_types[args.graphtype],args.embedpath,args.sfcgtype,args.tfcgtype,args.fcgclass,args.cpu,args.neighbors)

@@ -9,15 +9,15 @@
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=48
 #SBATCH --mem=58G
-#SBATCH --time=5:00:00
+#SBATCH --time=1:00:00
 errcho(){ >&2 echo $@; }
 source /N/u/zkachwal/Carbonate/miniconda3/etc/profile.d/conda.sh
 conda activate
 cd /geode2/home/u110/zkachwal/BigRed3/factcheckgraph/analyze_graphs/
 ################################################################
 errcho find_shortest_paths
-time python find_shortest_paths.py -st ufcg -ft tfcg -mp roberta-base-nli-stsb-mean-tokens -fc fred -cpu 48
-time python find_shortest_paths.py -st ufcg -ft ffcg -mp roberta-base-nli-stsb-mean-tokens -fc fred -cpu 48
+time python find_shortest_paths.py -st ufcg -ft tfcg -mp roberta-base-nli-stsb-mean-tokens -fc fred -cpu 48 -n 100
+time python find_shortest_paths.py -st ufcg -ft ffcg -mp roberta-base-nli-stsb-mean-tokens -fc fred -cpu 48 -n 100
 time python order_paths.py -fcg fred -ft ufcg
 # time python order_paths.py -fcg fred
 # ################################################################

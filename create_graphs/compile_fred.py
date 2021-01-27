@@ -48,6 +48,11 @@ def saveClaimGraph(claim_g,filename):
 	nx.write_gexf(claim_g,filename+"_clean.gexf",prettyprint=True)
 	plotFredGraph(claim_g,filename+"_clean")
 
+def saveNeighborGraph(claim_g,filename):
+	nx.write_edgelist(claim_g,filename+".edgelist")
+	claim_g=nx.read_edgelist(filename+".edgelist",comments="@")
+	nx.write_gexf(claim_g,filename+".gexf",prettyprint=True)
+
 #Function to plot a networkx graph
 def plotFredGraph(claim_g,filename):
 	plt.figure()
@@ -275,8 +280,8 @@ def compileClaimGraph2(index,rdf_path,graph_path,graph_type,claim_IDs,clean_clai
 		master_clean=compile_clean(rdf_path,clean_list,None)
 		master_fcg=cleanClaimGraph(master_fcg,master_clean)
 		master_fcg=nx.relabel_nodes(master_fcg,lambda x:nodelabel_mapper(x))
-		filename=os.path.join(graph_path,"ufcg"+claim_ID)
-		saveClaimGraph(master_fcg,filename)
+		filename=os.path.join(graph_path,"ufcg-"+claim_ID)
+		saveNeighborGraph(master_fcg,filename)
 
 def compileFred(rdf_path,graph_path,graph_type,fcg_label,cpu,neighbors):
 	fcg_path=os.path.join(graph_path,"fred",fcg_label)
