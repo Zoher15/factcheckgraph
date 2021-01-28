@@ -459,7 +459,7 @@ if __name__== "__main__":
 	if args.baselinetype=='all':
 		find_baseline(args.rdfpath,args.graphpath,args.modelpath,args.embedpath,args.graphtype,args.fcgclass)
 	elif args.baselinetype=='knn':
-		plotrange=[i for i in range(0,101,10)]
+		plotrange=[i for i in range(0,401,50)]
 		plotrange[0]+=1
 		if args.cpu:
 			pool=mp.Pool(processes=args.cpu)

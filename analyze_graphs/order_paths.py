@@ -42,7 +42,7 @@ def create_ordered_paths(rdf_path,graph_path,graph_type,fcg_class,fcg_type):
 	fcg_types={"co_occur":{"tfcg":"tfcg_co","ffcg":"ffcg_co"},"fred":{"tfcg":"tfcg","ffcg":"ffcg","ufcg":"ufcg"}}
 	embeds={'roberta-base-nli-stsb-mean-tokens':'e1'}#,'claims-roberta-base-nli-stsb-mean-tokens-2020-05-27_19-01-27':'e2'}
 	dists={'w':'d1','d':'d2'}#,'f':'d3'}
-	aggs={'mean':'a1','max':'a2','median':'a3'}#,'domb':'a4'}
+	aggs={'mean':'a1','max':'a2'}#,'median':'a3'}#,'domb':'a4'}
 	fcg_type=fcg_types[fcg_class][fcg_type]
 	for embed in list(embeds.keys()):
 		for dist in list(dists.keys()):
@@ -72,7 +72,7 @@ def create_ordered_paths_diff(rdf_path,graph_path,graph_type,fcg_class):
 	fcg_types={"co_occur":{"tfcg":"tfcg_co","ffcg":"ffcg_co"},"fred":{"tfcg":"tfcg","ffcg":"ffcg"}}
 	embeds={'roberta-base-nli-stsb-mean-tokens':'e1'}#,'claims-roberta-base-nli-stsb-mean-tokens-2020-05-27_19-01-27':'e2'}
 	dists={'w':'d1','d':'d2'}#,'f':'d3'}
-	aggs={'mean':'a1','max':'a2','median':'a3'}#,'domb':'a4'}
+	aggs={'mean':'a1','max':'a2'}#,'median':'a3'}#,'domb':'a4'}
 	for embed in list(embeds.keys()):
 		for dist in list(dists.keys()):
 			for truth_label in ['true','false']:

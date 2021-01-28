@@ -60,18 +60,14 @@ def clean_node_labels(node_label):
 	return node_label
 
 #weighted for ufcg with embedding weighting and without multigraphs
-def create_weighted(p,rdf_path,model_path,graph_path,graph_type,embed_path,fcg_type,fcg_class,claim_type,claim_path):
+def create_weighted(p,claimID,rdf_path,model_path,graph_path,graph_type,embed_path,source_fcg_type,target_fcg_type,fcg_class,claim_type,claim_path):
 	#Creating fcg read path
 	suffix={"co_occur":"_co","fred":"_clean"}
-	if fcg_type not in set(['tfcg_co','ffcg_co','tfcg','ffcg','ufcg','ufcg_co']) and fcg_class in suffix.keys():
-		fcg_type,claimID=fcg_type.split('-')
-		fcg_path=os.path.join(graph_path,fcg_class,fcg_type)
+	if source_fcg_type==target_fcg_type or source_fcg_type=='ufcg':
+		fcg_path=os.path.join(graph_path,fcg_class,source_fcg_type)
 		claim_label="claim"+claimID+suffix[fcg_class]
 	else:
-		if fcg_class not in suffix.keys():
-			fcg_path=os.path.join(graph_path,fcg_class)
-		else:
-			fcg_path=os.path.join(graph_path,fcg_class,fcg_type)
+		fcg_path=os.path.join(graph_path,fcg_class,source_fcg_type)
 		claim_label=""
 	# loading weighting embeddings
 	if claim_type=='truefalse':
@@ -91,7 +87,7 @@ def create_weighted(p,rdf_path,model_path,graph_path,graph_type,embed_path,fcg_t
 	#normalized angular distance
 	dist_p=np.arccos(simil_p)/np.pi
 	# loading source fcg to be weighted
-	fcg=nx.read_edgelist(os.path.join(fcg_path,"{}.edgelist".format(fcg_type)),comments="@",create_using=eval(graph_type))
+	fcg=nx.read_edgelist(os.path.join(fcg_path,"{}.edgelist".format(source_fcg_type)),comments="@",create_using=eval(graph_type))
 	fcg_edges=[(u,v,d['claim_ID'],d) for u,v,k,d in fcg.edges.data(keys=True)]
 	fcg=eval(graph_type+'()')
 	fcg.add_edges_from(fcg_edges)
@@ -131,21 +127,16 @@ def create_weighted(p,rdf_path,model_path,graph_path,graph_type,embed_path,fcg_t
 	return fcg2
 
 #weighted without embedding weighting and without multigraphs
-def create_weighted2(p,rdf_path,model_path,graph_path,graph_type,embed_path,fcg_type,fcg_class,claim_type,claim_path,neighbors):
+def create_weighted2(p,claimID,rdf_path,model_path,graph_path,graph_type,embed_path,source_fcg_type,target_fcg_type,fcg_class,claim_type,claim_path,neighbors):
 	#Creating fcg read path
 	suffix={"co_occur":"_co","fred":"_clean"}
-	if fcg_type not in set(['tfcg_co','ffcg_co','tfcg','ffcg']) and fcg_class in suffix.keys():
-		fcg_type,claimID=fcg_type.split('-')
-		fcg_path=os.path.join(graph_path,fcg_class,fcg_type)
+	if source_fcg_type==target_fcg_type or source_fcg_type=='ufcg':
+		fcg_path=os.path.join(graph_path,fcg_class,source_fcg_type)
 		claim_label="claim"+claimID+suffix[fcg_class]
 	else:
-		if fcg_class not in suffix.keys():
-			fcg_path=os.path.join(graph_path,fcg_class)
-		else:
-			fcg_path=os.path.join(graph_path,fcg_class,fcg_type)
+		fcg_path=os.path.join(graph_path,fcg_class,source_fcg_type)
 		claim_label=""
-
-	fcg=nx.read_edgelist(os.path.join(fcg_path,"{}.edgelist".format(fcg_type)),comments="@",create_using=eval(graph_type))
+	fcg=nx.read_edgelist(os.path.join(fcg_path,"{}.edgelist".format(source_fcg_type)),comments="@",create_using=eval(graph_type))
 	#remove claim_edges from fcg
 	if len(neighbors)==0:
 		fcg_edges=[(u,v,d['claim_ID'],d) for u,v,k,d in fcg.edges.data(keys=True)]
@@ -203,10 +194,7 @@ def find_paths_of_interest(index,rdf_path,graph_path,graph_type,embed_path,model
 		p=np.array([target_claims_embed[claimIX]])
 		#source_fcg is not a multigraph
 		#if source and target are the same graph, then the graph without the given claim is fetched
-		if source_fcg_type==target_fcg_type or source_fcg_type=='ufcg':
-			source_fcg=create_weighted2(p,rdf_path,model_path,graph_path,graph_type,embed_path,source_fcg_type+'-'+str(claimID),fcg_class,source_claim_type,target_fcg_path,neighbors)
-		else:
-			source_fcg=create_weighted2(p,rdf_path,model_path,graph_path,graph_type,embed_path,source_fcg_type,fcg_class,source_claim_type,target_fcg_path,neighbors)
+		source_fcg=create_weighted2(p,str(claimID),rdf_path,model_path,graph_path,graph_type,embed_path,source_fcg_type,target_fcg_type,fcg_class,source_claim_type,target_fcg_path,neighbors)
 		paths_of_interest_w[claimID]={}
 		paths_of_interest_d[claimID]={}
 		paths_of_interest_w[claimID]['target_claim']=chunkstring(target_claims_embed_labels[target_claims_embed_labels['claimID']==claimID]['claim_text'].values[0],100)
