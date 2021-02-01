@@ -66,7 +66,10 @@ def plot_roc(graph_path,fcg_class,fcg_type,graph_type,prefix):
 				plot_dict['f1'][mlabel]['label']=mlabel+' MAX_F1 (%0.2f) '%max(f1scores)
 	#Plotting
 	lw=2
-	title=prefix+" "+fcg_type+" "+fcg_class+" shortest path"
+	if fcg_type:
+		title=prefix+" "+fcg_type+" "+fcg_class+" shortest path"
+	else:
+		title=prefix+" "+fcg_class+" shortest path"
 	#Plot ROC
 	plt.figure()
 	roctitle="ROC "+title
@@ -131,13 +134,13 @@ def plot_dist(graph_path,fcg_class,fcg_type,graph_type,prefix):
 				label=embeds[embed]+dists[dist]+aggs[agg]
 				plt.figure()
 				if fcg_type:
-					title=prefix+" histogram "+fcg_type+"_"+fcg_class+"_"+label+" shortest path"
+					title="HIST"+" "+prefix+" "+fcg_type+" "+fcg_class+" "+label+" shortest path"
 					with codecs.open(os.path.join(true_read_path+"_({})".format(embed),"paths_"+graph_type+"_"+dist+"_"+agg+".json"),"r","utf-8") as f: 
 						true_paths=json.loads(f.read())
 					with codecs.open(os.path.join(false_read_path+"_({})".format(embed),"paths_"+graph_type+"_"+dist+"_"+agg+".json"),"r","utf-8") as f: 
 						false_paths=json.loads(f.read())
 				else:
-					title=prefix+" histogram "+fcg_class+"_"+label+" shortest path"
+					title="HIST"+" "+prefix+" "+fcg_class+" "+label+" shortest path"
 					with codecs.open(os.path.join(read_path,"true_scores_"+dist+"_({})".format(embed)+"_"+agg+".json"),"r","utf-8") as f: 
 						true_paths=json.loads(f.read())
 					with codecs.open(os.path.join(read_path,"false_scores_"+dist+"_({})".format(embed)+"_"+agg+".json"),"r","utf-8") as f: 

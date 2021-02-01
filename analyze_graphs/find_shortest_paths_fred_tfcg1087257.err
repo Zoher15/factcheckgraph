@@ -1,0 +1,68 @@
+find_shortest_paths
+multiprocessing.pool.RemoteTraceback: 
+"""
+Traceback (most recent call last):
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/multiprocessing/pool.py", line 121, in worker
+    result = (True, func(*args, **kwds))
+  File "find_shortest_paths.py", line 187, in find_paths_of_interest
+    paths_of_interest_w[claimID]['target_claim']=chunkstring(target_claims_embed_labels[target_claims_embed_labels['claimID']==claimID]['claim_text'].values[0],100)
+NameError: name 'target_claims_embed_labels' is not defined
+"""
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "find_shortest_paths.py", line 331, in <module>
+    find_shortest_paths(args.rdfpath,args.modelpath,args.graphpath,graph_types[args.graphtype],args.embedpath,args.sfcgtype,args.tfcgtype,args.fcgclass,args.cpu,args.neighbors)
+  File "find_shortest_paths.py", line 303, in find_shortest_paths
+    output=sorted([p.get() for p in results],key=lambda x:x[0])
+  File "find_shortest_paths.py", line 303, in <listcomp>
+    output=sorted([p.get() for p in results],key=lambda x:x[0])
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/multiprocessing/pool.py", line 657, in get
+    raise self._value
+NameError: name 'target_claims_embed_labels' is not defined
+
+real	0m40.589s
+user	0m16.011s
+sys	0m8.348s
+multiprocessing.pool.RemoteTraceback: 
+"""
+Traceback (most recent call last):
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/multiprocessing/pool.py", line 121, in worker
+    result = (True, func(*args, **kwds))
+  File "find_shortest_paths.py", line 187, in find_paths_of_interest
+    paths_of_interest_w[claimID]['target_claim']=chunkstring(target_claims_embed_labels[target_claims_embed_labels['claimID']==claimID]['claim_text'].values[0],100)
+NameError: name 'target_claims_embed_labels' is not defined
+"""
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "find_shortest_paths.py", line 331, in <module>
+    find_shortest_paths(args.rdfpath,args.modelpath,args.graphpath,graph_types[args.graphtype],args.embedpath,args.sfcgtype,args.tfcgtype,args.fcgclass,args.cpu,args.neighbors)
+  File "find_shortest_paths.py", line 303, in find_shortest_paths
+    output=sorted([p.get() for p in results],key=lambda x:x[0])
+  File "find_shortest_paths.py", line 303, in <listcomp>
+    output=sorted([p.get() for p in results],key=lambda x:x[0])
+  File "/N/u/zkachwal/Carbonate/miniconda3/lib/python3.7/multiprocessing/pool.py", line 657, in get
+    raise self._value
+NameError: name 'target_claims_embed_labels' is not defined
+
+real	0m14.347s
+user	0m16.377s
+sys	0m8.026s
+
+real	0m20.070s
+user	0m16.064s
+sys	0m1.230s
+plot graphs
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+
+real	0m10.762s
+user	0m5.032s
+sys	0m1.134s
+
+real	0m8.501s
+user	0m5.895s
+sys	0m1.215s

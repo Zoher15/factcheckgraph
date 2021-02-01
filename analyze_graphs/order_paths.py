@@ -118,8 +118,11 @@ def create_ordered_paths_diff(rdf_path,graph_path,graph_type,fcg_class):
 								d_list.append(d)
 								w_list.append(w)
 							else:
-								temp[str(edge)]=tfcg_paths[claimID][edge]
-						scores[str(claimID)]=temp
+								targetclaim=tfcg_paths[claimID][edge]
+						temp2={}
+						temp2["target_claim"]=targetclaim
+						temp2.update(temp)
+						scores[str(claimID)]=temp2
 				scores_path=os.path.join(graph_path,fcg_class,"paths",truth_label+"_scores_"+dist+"_({})".format(embed))
 				with codecs.open(scores_path+".json","w","utf-8") as f:
 					f.write(json.dumps(scores,indent=6,ensure_ascii=False))

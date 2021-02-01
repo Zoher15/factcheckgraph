@@ -1,0 +1,1580 @@
+1
+find_shortest_paths
+
+real	0m44.473s
+user	26m51.363s
+sys	0m21.017s
+
+real	2m29.414s
+user	101m53.970s
+sys	0m52.543s
+
+real	0m8.748s
+user	0m6.472s
+sys	0m0.424s
+plot graphs
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+
+real	0m4.124s
+user	0m2.089s
+sys	0m0.601s
+
+real	0m4.919s
+user	0m3.054s
+sys	0m0.726s
+find_shortest_paths
+
+real	8m46.301s
+user	381m3.707s
+sys	3m9.570s
+
+real	2m26.889s
+user	100m7.460s
+sys	1m28.778s
+
+real	0m10.032s
+user	0m6.853s
+sys	0m0.532s
+
+real	0m26.706s
+user	0m22.793s
+sys	0m0.953s
+plot graphs
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+
+real	0m4.317s
+user	0m2.154s
+sys	0m0.721s
+
+real	0m4.957s
+user	0m3.147s
+sys	0m0.671s
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+
+real	0m6.111s
+user	0m3.685s
+sys	0m1.054s
+
+real	0m7.172s
+user	0m4.663s
+sys	0m1.067s
+10
+find_shortest_paths
+
+real	0m45.258s
+user	26m32.159s
+sys	0m20.596s
+
+real	2m33.407s
+user	103m38.934s
+sys	0m52.449s
+
+real	0m9.282s
+user	0m6.871s
+sys	0m0.580s
+plot graphs
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+
+real	0m4.206s
+user	0m2.103s
+sys	0m0.749s
+
+real	0m4.815s
+user	0m3.068s
+sys	0m0.673s
+find_shortest_paths
+
+real	8m49.174s
+user	385m50.578s
+sys	2m53.488s
+
+real	2m30.145s
+user	101m28.014s
+sys	1m15.165s
+
+real	0m10.789s
+user	0m8.107s
+sys	0m0.499s
+
+real	0m28.266s
+user	0m24.237s
+sys	0m1.019s
+plot graphs
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+
+real	0m4.645s
+user	0m2.467s
+sys	0m0.704s
+
+real	0m5.328s
+user	0m3.486s
+sys	0m0.679s
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+
+real	0m6.652s
+user	0m4.166s
+sys	0m1.030s
+
+real	0m7.739s
+user	0m5.311s
+sys	0m0.973s
+20
+find_shortest_paths
+
+real	0m46.978s
+user	27m39.490s
+sys	0m21.331s
+
+real	2m35.052s
+user	105m9.946s
+sys	0m49.277s
+
+real	0m10.525s
+user	0m7.591s
+sys	0m0.557s
+plot graphs
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+
+real	0m4.376s
+user	0m2.193s
+sys	0m0.758s
+
+real	0m5.006s
+user	0m3.115s
+sys	0m0.759s
+find_shortest_paths
+
+real	8m59.355s
+user	391m41.757s
+sys	2m39.262s
+
+real	2m32.778s
+user	104m51.895s
+sys	1m3.559s
+
+real	0m12.134s
+user	0m9.353s
+sys	0m0.653s
+
+real	0m31.874s
+user	0m27.292s
+sys	0m1.321s
+plot graphs
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+
+real	0m5.189s
+user	0m2.919s
+sys	0m0.854s
+
+real	0m6.364s
+user	0m3.979s
+sys	0m0.946s
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+
+real	0m7.376s
+user	0m4.776s
+sys	0m1.171s
+
+real	0m8.392s
+user	0m5.767s
+sys	0m1.205s
+30
+find_shortest_paths
+
+real	0m46.925s
+user	26m58.802s
+sys	0m19.970s
+
+real	2m36.712s
+user	106m12.286s
+sys	0m50.613s
+
+real	0m10.040s
+user	0m7.440s
+sys	0m0.548s
+plot graphs
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+
+real	0m4.504s
+user	0m2.231s
+sys	0m0.809s
+
+real	0m5.137s
+user	0m3.234s
+sys	0m0.716s
+find_shortest_paths
+
+real	9m8.396s
+user	398m8.408s
+sys	2m32.689s
+
+real	2m32.371s
+user	104m40.641s
+sys	0m58.525s
+
+real	0m13.394s
+user	0m10.432s
+sys	0m0.848s
+
+real	0m34.071s
+user	0m29.200s
+sys	0m1.547s
+plot graphs
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+
+real	0m5.651s
+user	0m3.273s
+sys	0m0.971s
+
+real	0m6.715s
+user	0m4.443s
+sys	0m0.863s
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+
+real	0m7.922s
+user	0m5.163s
+sys	0m1.346s
+
+real	0m8.952s
+user	0m6.255s
+sys	0m1.269s
+40
+find_shortest_paths
+
+real	0m48.492s
+user	26m48.785s
+sys	0m21.731s
+
+real	2m39.833s
+user	106m22.604s
+sys	0m49.288s
+
+real	0m10.213s
+user	0m7.673s
+sys	0m0.590s
+plot graphs
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+
+real	0m4.573s
+user	0m2.450s
+sys	0m0.721s
+
+real	0m5.349s
+user	0m3.541s
+sys	0m0.694s
+find_shortest_paths
+
+real	9m15.229s
+user	401m45.602s
+sys	2m31.567s
+
+real	2m33.084s
+user	104m5.379s
+sys	0m56.510s
+
+real	0m14.760s
+user	0m11.646s
+sys	0m0.927s
+
+real	0m35.993s
+user	0m31.203s
+sys	0m1.698s
+plot graphs
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+
+real	0m5.915s
+user	0m3.496s
+sys	0m1.021s
+
+real	0m6.927s
+user	0m4.531s
+sys	0m0.978s
+
+real	0m8.312s
+user	0m5.627s
+sys	0m1.272s
+
+real	0m9.332s
+user	0m6.555s
+sys	0m1.351s
+50
+find_shortest_paths
+
+real	0m49.332s
+user	26m38.019s
+sys	0m19.774s
+
+real	2m40.796s
+user	106m23.417s
+sys	0m51.745s
+
+real	0m11.170s
+user	0m8.412s
+sys	0m0.570s
+plot graphs
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+
+real	0m4.675s
+user	0m2.490s
+sys	0m0.790s
+
+real	0m5.367s
+user	0m3.484s
+sys	0m0.781s
+find_shortest_paths
+
+real	9m19.165s
+user	404m37.583s
+sys	2m28.043s
+
+real	2m35.970s
+user	105m33.919s
+sys	0m53.719s
+
+real	0m15.360s
+user	0m12.233s
+sys	0m0.833s
+
+real	0m37.199s
+user	0m32.393s
+sys	0m1.809s
+plot graphs
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+
+real	0m6.081s
+user	0m3.657s
+sys	0m1.030s
+
+real	0m7.245s
+user	0m4.758s
+sys	0m1.066s
+
+real	0m8.750s
+user	0m5.913s
+sys	0m1.437s
+
+real	0m9.785s
+user	0m7.007s
+sys	0m1.343s
+60
+find_shortest_paths
+
+real	0m50.715s
+user	26m45.892s
+sys	0m19.874s
+
+real	2m43.745s
+user	107m27.896s
+sys	0m52.167s
+
+real	0m10.560s
+user	0m8.046s
+sys	0m0.636s
+plot graphs
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+
+real	0m4.602s
+user	0m2.533s
+sys	0m0.710s
+
+real	0m5.322s
+user	0m3.437s
+sys	0m0.744s
+find_shortest_paths
+
+real	9m20.214s
+user	406m0.531s
+sys	2m27.235s
+
+real	2m37.213s
+user	106m23.205s
+sys	0m50.963s
+
+real	0m16.129s
+user	0m12.839s
+sys	0m0.941s
+
+real	0m39.693s
+user	0m34.137s
+sys	0m2.464s
+plot graphs
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+
+real	0m6.311s
+user	0m3.807s
+sys	0m1.089s
+
+real	0m7.244s
+user	0m4.751s
+sys	0m1.090s
+
+real	0m8.855s
+user	0m5.970s
+sys	0m1.471s
+
+real	0m10.062s
+user	0m7.161s
+sys	0m1.484s
+70
+find_shortest_paths
+
+real	0m51.110s
+user	27m1.189s
+sys	0m21.718s
+
+real	2m43.786s
+user	107m1.722s
+sys	0m51.796s
+
+real	0m11.127s
+user	0m8.330s
+sys	0m0.609s
+plot graphs
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+
+real	0m4.776s
+user	0m2.573s
+sys	0m0.768s
+
+real	0m5.409s
+user	0m3.531s
+sys	0m0.711s
+find_shortest_paths
+
+real	9m26.829s
+user	409m56.228s
+sys	2m26.705s
+
+real	2m39.715s
+user	106m46.031s
+sys	0m50.669s
+
+real	0m15.953s
+user	0m12.664s
+sys	0m0.861s
+
+real	0m39.224s
+user	0m34.275s
+sys	0m1.998s
+plot graphs
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+
+real	0m6.523s
+user	0m4.007s
+sys	0m1.071s
+
+real	0m7.440s
+user	0m4.910s
+sys	0m1.098s
+
+real	0m9.299s
+user	0m6.230s
+sys	0m1.626s
+
+real	0m10.345s
+user	0m7.337s
+sys	0m1.582s
+80
+find_shortest_paths
+
+real	0m53.861s
+user	26m45.272s
+sys	0m20.174s
+
+real	2m50.823s
+user	110m27.674s
+sys	0m52.866s
+
+real	0m11.879s
+user	0m9.220s
+sys	0m0.650s
+plot graphs
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+
+real	0m4.946s
+user	0m2.614s
+sys	0m0.938s
+
+real	0m5.672s
+user	0m3.739s
+sys	0m0.801s
+find_shortest_paths
+
+real	9m42.118s
+user	423m13.140s
+sys	2m27.363s
+
+real	2m44.201s
+user	108m29.353s
+sys	0m51.084s
+
+real	0m16.037s
+user	0m12.743s
+sys	0m0.990s
+
+real	0m41.913s
+user	0m36.597s
+sys	0m2.107s
+plot graphs
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+
+real	0m6.615s
+user	0m4.108s
+sys	0m1.063s
+
+real	0m7.561s
+user	0m5.071s
+sys	0m1.032s
+
+real	0m9.571s
+user	0m6.704s
+sys	0m1.456s
+
+real	0m10.526s
+user	0m7.518s
+sys	0m1.494s
+90
+find_shortest_paths
+
+real	0m54.284s
+user	26m58.188s
+sys	0m20.424s
+
+real	2m51.153s
+user	111m14.311s
+sys	0m53.526s
+
+real	0m11.841s
+user	0m8.995s
+sys	0m0.729s
+plot graphs
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+
+real	0m5.032s
+user	0m2.734s
+sys	0m0.863s
+
+real	0m5.827s
+user	0m3.764s
+sys	0m0.820s
+find_shortest_paths
+
+real	9m52.198s
+user	429m7.667s
+sys	2m28.937s
+
+real	2m45.511s
+user	109m55.163s
+sys	0m48.509s
+
+real	0m16.178s
+user	0m12.847s
+sys	0m1.163s
+
+real	0m41.665s
+user	0m36.133s
+sys	0m2.066s
+plot graphs
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+
+real	0m6.582s
+user	0m4.127s
+sys	0m0.988s
+
+real	0m7.618s
+user	0m5.066s
+sys	0m1.090s
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+
+real	0m9.703s
+user	0m6.663s
+sys	0m1.553s
+
+real	0m10.598s
+user	0m7.691s
+sys	0m1.453s
+100
+find_shortest_paths
+
+real	0m55.309s
+user	26m33.239s
+sys	0m20.875s
+
+real	2m52.542s
+user	111m59.814s
+sys	0m53.762s
+
+real	0m12.195s
+user	0m9.493s
+sys	0m0.765s
+plot graphs
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+
+real	0m5.029s
+user	0m2.822s
+sys	0m0.757s
+
+real	0m6.048s
+user	0m3.884s
+sys	0m0.717s
+find_shortest_paths
+
+real	9m59.640s
+user	433m26.427s
+sys	2m31.069s
+
+real	2m46.955s
+user	109m2.547s
+sys	0m51.813s
+
+real	0m16.692s
+user	0m13.504s
+sys	0m1.014s
+
+real	0m42.207s
+user	0m36.989s
+sys	0m2.223s
+plot graphs
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+
+real	0m6.834s
+user	0m4.239s
+sys	0m1.154s
+
+real	0m7.740s
+user	0m5.252s
+sys	0m1.059s
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+
+real	0m9.848s
+user	0m6.829s
+sys	0m1.592s
+
+real	0m11.065s
+user	0m7.941s
+sys	0m1.659s
+110
+find_shortest_paths
+
+real	0m56.044s
+user	26m57.664s
+sys	0m21.337s
+
+real	2m57.767s
+user	113m21.415s
+sys	0m53.288s
+
+real	0m12.623s
+user	0m9.753s
+sys	0m0.754s
+plot graphs
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+
+real	0m5.196s
+user	0m2.936s
+sys	0m0.825s
+
+real	0m6.347s
+user	0m3.965s
+sys	0m0.957s
+find_shortest_paths
+
+real	9m55.827s
+user	428m38.029s
+sys	2m29.660s
+
+real	2m48.478s
+user	111m3.973s
+sys	0m50.235s
+
+real	0m17.220s
+user	0m13.865s
+sys	0m1.127s
+
+real	0m43.507s
+user	0m37.479s
+sys	0m2.587s
+plot graphs
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+
+real	0m6.905s
+user	0m4.389s
+sys	0m1.071s
+
+real	0m7.859s
+user	0m5.374s
+sys	0m1.059s
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+
+real	0m10.030s
+user	0m6.983s
+sys	0m1.576s
+
+real	0m11.139s
+user	0m8.012s
+sys	0m1.687s
+150
+find_shortest_paths
+
+real	1m0.284s
+user	26m44.405s
+sys	0m24.922s
+
+real	3m2.778s
+user	114m53.149s
+sys	0m53.714s
+
+real	0m13.630s
+user	0m10.597s
+sys	0m0.832s
+plot graphs
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+
+real	0m5.449s
+user	0m3.124s
+sys	0m0.872s
+
+real	0m6.678s
+user	0m4.308s
+sys	0m0.922s
+find_shortest_paths
+
+real	10m14.722s
+user	441m26.709s
+sys	2m31.196s
+
+real	2m55.036s
+user	112m15.938s
+sys	0m54.730s
+
+real	0m17.524s
+user	0m14.085s
+sys	0m1.108s
+
+real	0m46.594s
+user	0m41.042s
+sys	0m2.399s
+plot graphs
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+
+real	0m6.993s
+user	0m4.372s
+sys	0m1.135s
+
+real	0m8.165s
+user	0m5.485s
+sys	0m1.143s
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+
+real	0m10.535s
+user	0m7.399s
+sys	0m1.657s
+
+real	0m11.652s
+user	0m8.465s
+sys	0m1.686s
+180
+find_shortest_paths
+
+real	1m6.242s
+user	24m18.871s
+sys	0m23.116s
+
+real	3m10.691s
+user	114m29.253s
+sys	0m55.165s
+
+real	0m14.251s
+user	0m10.976s
+sys	0m0.796s
+plot graphs
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+
+real	0m5.708s
+user	0m3.256s
+sys	0m0.992s
+
+real	0m6.580s
+user	0m4.197s
+sys	0m0.919s
+find_shortest_paths
+
+real	10m29.294s
+user	446m57.605s
+sys	2m32.307s
+
+real	3m3.199s
+user	110m38.510s
+sys	0m53.889s
+
+real	0m18.105s
+user	0m14.579s
+sys	0m1.150s
+
+real	0m47.165s
+user	0m41.028s
+sys	0m2.618s
+plot graphs
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+
+real	0m7.241s
+user	0m4.615s
+sys	0m1.198s
+
+real	0m8.183s
+user	0m5.638s
+sys	0m1.126s
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+
+real	0m11.071s
+user	0m7.880s
+sys	0m1.774s
+
+real	0m12.075s
+user	0m8.833s
+sys	0m1.831s
+190
+find_shortest_paths
+
+real	1m4.960s
+user	24m42.833s
+sys	0m22.339s
+
+real	3m12.787s
+user	115m44.855s
+sys	0m55.238s
+
+real	0m13.614s
+user	0m10.473s
+sys	0m0.800s
+plot graphs
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+
+real	0m5.673s
+user	0m3.184s
+sys	0m1.012s
+
+real	0m6.738s
+user	0m4.356s
+sys	0m0.919s
+find_shortest_paths
+
+real	10m33.605s
+user	451m44.005s
+sys	2m27.664s
+
+real	3m7.348s
+user	113m8.978s
+sys	0m56.234s
+
+real	0m18.524s
+user	0m14.690s
+sys	0m1.151s
+
+real	0m47.257s
+user	0m41.536s
+sys	0m2.463s
+plot graphs
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+
+real	0m7.297s
+user	0m4.601s
+sys	0m1.214s
+
+real	0m8.341s
+user	0m5.691s
+sys	0m1.164s
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+
+real	0m11.160s
+user	0m7.810s
+sys	0m1.870s
+
+real	0m12.302s
+user	0m9.104s
+sys	0m1.685s
+200
+find_shortest_paths
+
+real	1m7.584s
+user	24m50.935s
+sys	0m25.566s
+
+real	3m16.218s
+user	116m13.956s
+sys	0m55.533s
+
+real	0m13.746s
+user	0m10.739s
+sys	0m0.803s
+plot graphs
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+
+real	0m5.739s
+user	0m3.336s
+sys	0m0.924s
+
+real	0m6.759s
+user	0m4.313s
+sys	0m0.994s
+find_shortest_paths
+
+real	10m40.631s
+user	452m55.416s
+sys	2m36.751s
+
+real	3m5.532s
+user	112m44.086s
+sys	0m55.648s
+
+real	0m18.412s
+user	0m14.707s
+sys	0m1.266s
+
+real	0m47.477s
+user	0m41.789s
+sys	0m2.600s
+plot graphs
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+
+real	0m7.210s
+user	0m4.678s
+sys	0m1.158s
+
+real	0m8.384s
+user	0m5.748s
+sys	0m1.163s
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+
+real	0m11.083s
+user	0m7.848s
+sys	0m1.797s
+
+real	0m12.406s
+user	0m9.108s
+sys	0m1.853s
+230
+find_shortest_paths
+
+real	1m11.334s
+user	24m3.834s
+sys	0m25.491s
+
+real	3m20.040s
+user	118m15.586s
+sys	0m59.472s
+
+real	0m14.234s
+user	0m10.949s
+sys	0m0.898s
+plot graphs
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+
+real	0m5.755s
+user	0m3.497s
+sys	0m0.895s
+
+real	0m6.835s
+user	0m4.513s
+sys	0m0.966s
+find_shortest_paths
+
+real	10m56.531s
+user	462m40.522s
+sys	2m35.268s
+
+real	3m12.824s
+user	114m48.049s
+sys	0m55.845s
+
+real	0m18.827s
+user	0m14.994s
+sys	0m1.200s
+
+real	0m48.907s
+user	0m42.866s
+sys	0m2.817s
+plot graphs
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+
+real	0m7.480s
+user	0m4.800s
+sys	0m1.189s
+
+real	0m8.540s
+user	0m5.798s
+sys	0m1.257s
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+
+real	0m11.369s
+user	0m7.978s
+sys	0m1.867s
+
+real	0m12.513s
+user	0m9.142s
+sys	0m1.881s
+250
+find_shortest_paths
+
+real	1m11.881s
+user	23m49.770s
+sys	0m25.624s
+
+real	3m25.157s
+user	118m44.683s
+sys	0m58.169s
+
+real	0m14.470s
+user	0m11.188s
+sys	0m0.887s
+plot graphs
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+
+real	0m6.029s
+user	0m3.504s
+sys	0m1.004s
+
+real	0m7.031s
+user	0m4.533s
+sys	0m0.994s
+find_shortest_paths
+
+real	11m7.449s
+user	473m42.446s
+sys	2m35.614s
+
+real	3m15.918s
+user	116m16.378s
+sys	0m59.190s
+
+real	0m18.975s
+user	0m14.945s
+sys	0m1.372s
+
+real	0m51.606s
+user	0m44.738s
+sys	0m2.810s
+plot graphs
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+
+real	0m7.443s
+user	0m4.809s
+sys	0m1.128s
+
+real	0m8.670s
+user	0m5.997s
+sys	0m1.195s
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+
+real	0m11.861s
+user	0m8.490s
+sys	0m1.803s
+
+real	0m12.738s
+user	0m9.178s
+sys	0m2.010s
+290
+find_shortest_paths
+
+real	1m18.369s
+user	22m43.164s
+sys	0m29.211s
+
+real	3m31.559s
+user	120m53.894s
+sys	1m0.641s
+
+real	0m14.678s
+user	0m11.495s
+sys	0m0.878s
+plot graphs
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+
+real	0m6.247s
+user	0m3.603s
+sys	0m1.039s
+
+real	0m7.260s
+user	0m4.652s
+sys	0m1.026s
+find_shortest_paths
+
+real	11m21.274s
+user	480m34.370s
+sys	2m39.146s
+
+real	3m20.808s
+user	116m59.782s
+sys	0m59.014s
+
+real	0m20.004s
+user	0m15.308s
+sys	0m1.398s
+
+real	0m51.434s
+user	0m44.737s
+sys	0m2.721s
+plot graphs
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+
+real	0m8.118s
+user	0m4.837s
+sys	0m1.303s
+
+real	0m9.264s
+user	0m5.905s
+sys	0m1.350s
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+
+real	0m12.347s
+user	0m8.336s
+sys	0m2.081s
+
+real	0m13.194s
+user	0m9.344s
+sys	0m1.963s
+300
+find_shortest_paths
+
+real	1m19.147s
+user	22m36.457s
+sys	0m29.104s
+
+real	3m35.853s
+user	121m8.874s
+sys	1m1.612s
+
+real	0m14.930s
+user	0m11.559s
+sys	0m0.976s
+plot graphs
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+
+real	0m6.327s
+user	0m3.616s
+sys	0m1.058s
+
+real	0m7.335s
+user	0m4.644s
+sys	0m1.044s
+find_shortest_paths
+
+real	11m23.750s
+user	485m24.795s
+sys	2m37.712s
+
+real	3m19.712s
+user	117m16.446s
+sys	1m0.385s
+
+real	0m19.236s
+user	0m15.323s
+sys	0m1.388s
+
+real	0m52.023s
+user	0m45.136s
+sys	0m3.357s
+plot graphs
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+
+real	0m7.537s
+user	0m4.865s
+sys	0m1.215s
+
+real	0m8.571s
+user	0m5.910s
+sys	0m1.208s
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+
+real	0m11.705s
+user	0m8.378s
+sys	0m1.973s
+
+real	0m13.082s
+user	0m9.749s
+sys	0m1.904s
+310
+find_shortest_paths
+
+real	1m25.460s
+user	27m17.314s
+sys	0m28.960s
+
+real	3m56.599s
+user	142m17.306s
+sys	1m1.861s
+
+real	0m14.856s
+user	0m11.682s
+sys	0m0.939s
+plot graphs
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+
+real	0m6.126s
+user	0m3.648s
+sys	0m1.015s
+
+real	0m7.080s
+user	0m4.638s
+sys	0m1.024s
+find_shortest_paths
+
+real	12m46.640s
+user	550m42.511s
+sys	2m41.115s
+
+real	3m41.453s
+user	134m17.340s
+sys	0m58.274s
+
+real	0m19.531s
+user	0m15.585s
+sys	0m1.249s
+
+real	0m50.962s
+user	0m44.829s
+sys	0m2.840s
+plot graphs
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+
+real	0m7.537s
+user	0m4.956s
+sys	0m1.136s
+
+real	0m8.638s
+user	0m5.915s
+sys	0m1.271s
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+
+real	0m11.890s
+user	0m8.489s
+sys	0m1.963s
+
+real	0m13.020s
+user	0m9.851s
+sys	0m1.811s
+330
+find_shortest_paths
+
+real	1m32.343s
+user	25m53.835s
+sys	0m31.671s
+
+real	4m7.100s
+user	138m18.240s
+sys	1m4.509s
+
+real	0m15.472s
+user	0m12.192s
+sys	0m1.082s
+plot graphs
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+
+real	0m6.210s
+user	0m3.688s
+sys	0m1.068s
+
+real	0m7.179s
+user	0m4.765s
+sys	0m0.978s
+find_shortest_paths
+
+real	13m1.290s
+user	548m55.475s
+sys	2m46.115s
+
+real	3m53.417s
+user	132m30.198s
+sys	1m1.904s
+
+real	0m19.278s
+user	0m15.553s
+sys	0m1.318s
+
+real	0m51.625s
+user	0m45.357s
+sys	0m3.066s
+plot graphs
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+
+real	0m7.646s
+user	0m5.055s
+sys	0m1.142s
+
+real	0m8.742s
+user	0m6.150s
+sys	0m1.135s
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+
+real	0m12.059s
+user	0m8.622s
+sys	0m1.951s
+
+real	0m13.212s
+user	0m9.766s
+sys	0m1.969s
+350
+find_shortest_paths
+
+real	1m35.211s
+user	25m28.888s
+sys	0m33.739s
+
+real	4m8.423s
+user	139m18.062s
+sys	1m5.398s
+
+real	0m15.188s
+user	0m11.935s
+sys	0m1.009s
+plot graphs
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+
+real	0m6.362s
+user	0m3.827s
+sys	0m1.099s
+
+real	0m7.251s
+user	0m4.713s
+sys	0m1.101s
+find_shortest_paths
+
+real	13m4.216s
+user	553m31.882s
+sys	2m43.175s
+
+real	3m56.593s
+user	133m37.644s
+sys	1m1.919s
+
+real	0m19.594s
+user	0m15.653s
+sys	0m1.273s
+
+real	0m57.697s
+user	0m45.356s
+sys	0m3.014s
+plot graphs
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+
+real	0m7.662s
+user	0m5.110s
+sys	0m1.187s
+
+real	0m8.661s
+user	0m5.916s
+sys	0m1.254s
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+
+real	0m12.034s
+user	0m8.423s
+sys	0m2.157s
+
+real	0m13.288s
+user	0m9.830s
+sys	0m2.000s
+400
+find_shortest_paths
+
+real	1m38.967s
+user	25m34.793s
+sys	0m33.946s
+
+real	4m18.514s
+user	142m43.879s
+sys	1m9.645s
+
+real	0m16.066s
+user	0m12.705s
+sys	0m1.048s
+plot graphs
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+
+real	0m6.341s
+user	0m3.841s
+sys	0m1.013s
+
+real	0m7.310s
+user	0m4.938s
+sys	0m0.910s
+find_shortest_paths
+
+real	13m35.065s
+user	574m10.850s
+sys	2m48.703s
+
+real	4m2.839s
+user	136m27.175s
+sys	1m5.392s
+
+real	0m20.292s
+user	0m16.339s
+sys	0m1.336s
+
+real	0m53.169s
+user	0m46.587s
+sys	0m3.069s
+plot graphs
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+
+real	0m7.747s
+user	0m5.033s
+sys	0m1.254s
+
+real	0m8.664s
+user	0m6.053s
+sys	0m1.153s
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+plot_sp.py:53: RuntimeWarning: invalid value encountered in double_scalars
+  f1scores=[2*(precision[i]*recall[i])/(precision[i]+recall[i]) for i in range(len(thresholds))]
+
+real	0m12.624s
+user	0m9.140s
+sys	0m2.001s
+
+real	0m13.482s
+user	0m10.026s
+sys	0m2.002s
